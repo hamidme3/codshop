@@ -8,24 +8,29 @@ import {
   TrendingUp, Truck, CreditCard, ExternalLink, 
   Clock, Store, Menu, X, Users, Filter, Wallet 
 } from 'lucide-react';
+import LanguageToggle from '@/components/LanguageToggle';
+import { getTranslation, Language } from '@/lib/i18n';
 
 function AdminNav({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState<Language>('en');
+
+  const t = getTranslation(currentLang);
 
   const navItems = [
-    { label: 'Vue d\'Ensemble', href: `/admin?store=${storeSlug}`, icon: LayoutDashboard, exact: true },
-    { label: 'Commandes COD', href: `/admin/orders?store=${storeSlug}`, icon: ShoppingBag },
-    { label: 'Produits & Stocks', href: `/admin/products?store=${storeSlug}`, icon: Package },
-    { label: 'Page Builder Visuel', href: `/admin/builder?store=${storeSlug}`, icon: Palette },
-    { label: 'Analytiques & KPIs', href: `/admin/analytics?store=${storeSlug}`, icon: TrendingUp },
-    { label: 'Entonnoir (Funnel)', href: `/admin/funnel?store=${storeSlug}`, icon: Filter },
-    { label: 'CRM Clients', href: `/admin/customers?store=${storeSlug}`, icon: Users },
-    { label: 'Moyens de Paiement', href: `/admin/payments?store=${storeSlug}`, icon: Wallet },
-    { label: 'Transporteurs (Ozon)', href: `/admin/logistics?store=${storeSlug}`, icon: Truck },
-    { label: 'Abonnement (14j)', href: `/admin/billing?store=${storeSlug}`, icon: CreditCard },
+    { label: t.nav.overview, href: `/admin?store=${storeSlug}`, icon: LayoutDashboard, exact: true },
+    { label: t.nav.orders, href: `/admin/orders?store=${storeSlug}`, icon: ShoppingBag },
+    { label: t.nav.products, href: `/admin/products?store=${storeSlug}`, icon: Package },
+    { label: t.nav.builder, href: `/admin/builder?store=${storeSlug}`, icon: Palette },
+    { label: t.nav.analytics, href: `/admin/analytics?store=${storeSlug}`, icon: TrendingUp },
+    { label: t.nav.funnel, href: `/admin/funnel?store=${storeSlug}`, icon: Filter },
+    { label: t.nav.customers, href: `/admin/customers?store=${storeSlug}`, icon: Users },
+    { label: t.nav.payments, href: `/admin/payments?store=${storeSlug}`, icon: Wallet },
+    { label: t.nav.logistics, href: `/admin/logistics?store=${storeSlug}`, icon: Truck },
+    { label: t.nav.billing, href: `/admin/billing?store=${storeSlug}`, icon: CreditCard },
   ];
 
   const isBuilder = pathname.startsWith('/admin/builder');
@@ -52,22 +57,29 @@ function AdminNav({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Store Profile Card */}
-        <div className="p-4 border-b border-slate-800/80 bg-slate-950/40">
-          <div className="flex items-center justify-between text-xs mb-1">
-            <span className="text-slate-400 font-medium">Boutique active :</span>
+        <div className="p-4 border-b border-slate-800/80 bg-slate-950/40 space-y-2.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-slate-400 font-medium">{t.common.activeStore}</span>
             <a
               href={`/?store=${storeSlug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-amber-400 hover:underline flex items-center gap-1 text-[11px]"
             >
-              Voir en direct <ExternalLink className="w-3 h-3" />
+              {t.common.liveStorefront} <ExternalLink className="w-3 h-3" />
             </a>
           </div>
           <div className="font-bold text-white text-sm truncate">{storeSlug}.codshop.site</div>
-          <div className="mt-2 flex items-center gap-1.5 text-[11px] text-amber-400">
-            <Clock className="w-3.5 h-3.5 shrink-0" />
-            <span>Essai gratuit : <strong>14 jours</strong></span>
+          
+          <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center gap-1 text-[10px] text-amber-400">
+              <Clock className="w-3 h-3 shrink-0" />
+              <span>{t.common.trialRemaining}</span>
+            </div>
+          </div>
+
+          <div className="pt-1">
+            <LanguageToggle currentLang={currentLang} onLanguageChange={setCurrentLang} />
           </div>
         </div>
 
@@ -98,8 +110,8 @@ function AdminNav({ children }: { children: React.ReactNode }) {
 
         {/* Bottom User / Support Footer */}
         <div className="p-4 border-t border-slate-800 text-xs text-slate-400 flex items-center justify-between">
-          <span>Support WhatsApp 24/7</span>
-          <span className="text-emerald-400 font-bold">En Ligne</span>
+          <span>{t.common.supportOnline}</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
         </div>
       </aside>
 
@@ -113,12 +125,15 @@ function AdminNav({ children }: { children: React.ReactNode }) {
             </div>
             <span>{storeSlug}</span>
           </Link>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-slate-400 hover:text-white"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <LanguageToggle currentLang={currentLang} onLanguageChange={setCurrentLang} />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-slate-400 hover:text-white"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </header>
 
         {/* Mobile Dropdown Menu */}
