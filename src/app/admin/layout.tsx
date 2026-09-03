@@ -6,7 +6,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { 
   LayoutDashboard, ShoppingBag, Package, Palette, 
   TrendingUp, Truck, CreditCard, ExternalLink, 
-  Clock, Store, Menu, X 
+  Clock, Store, Menu, X, Users, Filter, Wallet 
 } from 'lucide-react';
 
 function AdminNav({ children }: { children: React.ReactNode }) {
@@ -21,6 +21,9 @@ function AdminNav({ children }: { children: React.ReactNode }) {
     { label: 'Produits & Stocks', href: `/admin/products?store=${storeSlug}`, icon: Package },
     { label: 'Page Builder Visuel', href: `/admin/builder?store=${storeSlug}`, icon: Palette },
     { label: 'Analytiques & KPIs', href: `/admin/analytics?store=${storeSlug}`, icon: TrendingUp },
+    { label: 'Entonnoir (Funnel)', href: `/admin/funnel?store=${storeSlug}`, icon: Filter },
+    { label: 'CRM Clients', href: `/admin/customers?store=${storeSlug}`, icon: Users },
+    { label: 'Moyens de Paiement', href: `/admin/payments?store=${storeSlug}`, icon: Wallet },
     { label: 'Transporteurs (Ozon)', href: `/admin/logistics?store=${storeSlug}`, icon: Truck },
     { label: 'Abonnement (14j)', href: `/admin/billing?store=${storeSlug}`, icon: CreditCard },
   ];

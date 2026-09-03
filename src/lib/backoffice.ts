@@ -315,3 +315,200 @@ export function getAnalytics(storeSlug?: string) {
     ],
   };
 }
+
+// ── Customer CRM Model ─────────────────────────────────────────
+export interface Customer {
+  id: string;
+  storeSlug: string;
+  name: string;
+  phone: string;
+  email: string;
+  city: string;
+  totalOrders: number;
+  totalSpend: number;
+  averageBasket: number;
+  lastOrderDate: string;
+  status: 'active' | 'new' | 'returning';
+}
+
+let CUSTOMERS: Customer[] = [
+  {
+    id: 'cust_1',
+    storeSlug: 'ottavio',
+    name: 'Berrada Yasmine',
+    phone: '0612345678',
+    email: 'yasmine.berrada@gmail.com',
+    city: 'Casablanca',
+    totalOrders: 3,
+    totalSpend: 1047,
+    averageBasket: 349,
+    lastOrderDate: 'Aujourd\'hui',
+    status: 'returning',
+  },
+  {
+    id: 'cust_2',
+    storeSlug: 'ottavio',
+    name: 'Karim Bennani',
+    phone: '0661234567',
+    email: 'k.bennani@outlook.com',
+    city: 'Casablanca',
+    totalOrders: 2,
+    totalSpend: 698,
+    averageBasket: 349,
+    lastOrderDate: 'Hier',
+    status: 'active',
+  },
+  {
+    id: 'cust_3',
+    storeSlug: 'ottavio',
+    name: 'Fatima Ezzahra Kadiri',
+    phone: '0678901234',
+    email: 'fe.kadiri@gmail.com',
+    city: 'Rabat',
+    totalOrders: 1,
+    totalSpend: 299,
+    averageBasket: 299,
+    lastOrderDate: 'Il y a 3 jours',
+    status: 'new',
+  },
+  {
+    id: 'cust_4',
+    storeSlug: 'ottavio',
+    name: 'Yassine Mansouri',
+    phone: '0665432198',
+    email: 'yassine.m@gmail.com',
+    city: 'Marrakech',
+    totalOrders: 4,
+    totalSpend: 1396,
+    averageBasket: 349,
+    lastOrderDate: 'Il y a 5 jours',
+    status: 'returning',
+  },
+  {
+    id: 'cust_5',
+    storeSlug: 'ottavio',
+    name: 'Nadia Cherkaoui',
+    phone: '0612348765',
+    email: 'nadia.cherkaoui@yahoo.fr',
+    city: 'Tanger',
+    totalOrders: 1,
+    totalSpend: 360,
+    averageBasket: 360,
+    lastOrderDate: 'Il y a 1 semaine',
+    status: 'new',
+  },
+  {
+    id: 'cust_6',
+    storeSlug: 'ottavio',
+    name: 'Hicham Tahiri',
+    phone: '0655443322',
+    email: 'hicham.tahiri@gmail.com',
+    city: 'Casablanca',
+    totalOrders: 2,
+    totalSpend: 718,
+    averageBasket: 359,
+    lastOrderDate: 'Il y a 2 semaines',
+    status: 'active',
+  },
+];
+
+export function getCustomers(storeSlug?: string): Customer[] {
+  if (storeSlug) {
+    return CUSTOMERS.filter((c) => c.storeSlug === storeSlug);
+  }
+  return CUSTOMERS;
+}
+
+// ── Funnel / Store Journey Model ──────────────────────────────
+export interface FunnelStep {
+  name: string;
+  visitors: number;
+  percentage: number;
+  dropoff: number;
+}
+
+export function getFunnelData(storeSlug?: string) {
+  return {
+    totalVisitors: 2840,
+    conversionRate: 14.2,
+    steps: [
+      { name: '1. Vues Produits (Landing)', visitors: 2840, percentage: 100, dropoff: 0 },
+      { name: '2. Clic Commander (Formulaire COD)', visitors: 2045, percentage: 72.0, dropoff: 28.0 },
+      { name: '3. Saisie Téléphone & Ville', visitors: 1192, percentage: 42.0, dropoff: 58.0 },
+      { name: '4. Commandes Confirmées (Succès)', visitors: 403, percentage: 14.2, dropoff: 85.8 },
+    ],
+    diagnostics: [
+      {
+        type: 'success',
+        title: 'Taux de passage Produit -> Formulaire excellent (72%)',
+        desc: 'Votre offre et votre bouton d\'appel à l\'action fonctionnent très bien sur mobile.',
+      },
+      {
+        type: 'warning',
+        title: 'Perte de 28% à l\'étape formulaire',
+        desc: 'Assurez-vous que le montant de livraison pour Casablanca (20 DH) est clairement affiché dès le début.',
+      },
+      {
+        type: 'tip',
+        title: 'Accélérez avec WhatsApp 1-Click',
+        desc: '18% des visiteurs qui abandonnent le formulaire finalisent leur commande via le bouton flottant WhatsApp.',
+      },
+    ],
+  };
+}
+
+// ── Multi-Payment Gateway Model ───────────────────────────────
+export interface PaymentGateway {
+  id: string;
+  name: string;
+  type: 'cod' | 'virement' | 'card' | 'wallet';
+  active: boolean;
+  description: string;
+  feeInfo: string;
+}
+
+let PAYMENT_GATEWAYS: PaymentGateway[] = [
+  {
+    id: 'gw_cod',
+    name: 'Paiement à la Livraison (Cash on Delivery)',
+    type: 'cod',
+    active: true,
+    description: 'Le client paye en dirhams (MAD) au livreur lors de la réception du colis.',
+    feeInfo: '0% de frais de passerelle',
+  },
+  {
+    id: 'gw_virement',
+    name: 'Virement Bancaire / Wafacash / Cash Plus',
+    type: 'virement',
+    active: true,
+    description: 'Affichage de votre RIB bancaire marocain (Attijariwafa, CIH...) ou compte Cash Plus.',
+    feeInfo: '0% de commission',
+  },
+  {
+    id: 'gw_stripe',
+    name: 'Carte Bancaire Marocaine / CMI / Stripe',
+    type: 'card',
+    active: false,
+    description: 'Paiement en ligne sécurisé par carte bancaire nationale et internationale.',
+    feeInfo: '1.4% + 2 DH par transaction',
+  },
+  {
+    id: 'gw_paypal',
+    name: 'PayPal Express & Portefeuilles Électroniques',
+    type: 'wallet',
+    active: false,
+    description: 'Idéal pour les clients MRE (Marocains résidant à l\'étranger) ou ventes internationales.',
+    feeInfo: '3.4% + frais PayPal',
+  },
+];
+
+export function getPaymentGateways(): PaymentGateway[] {
+  return PAYMENT_GATEWAYS;
+}
+
+export function togglePaymentGateway(id: string): boolean {
+  const gw = PAYMENT_GATEWAYS.find((g) => g.id === id);
+  if (!gw) return false;
+  gw.active = !gw.active;
+  return true;
+}
