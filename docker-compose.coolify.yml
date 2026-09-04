@@ -1,16 +1,37 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: codshop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-codshop_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-codshop_secret_password}
+      POSTGRES_DB: ${POSTGRES_DB:-codshop_db}
+    volumes:
+      - codshop_pgdata:/var/lib/postgresql/data
+    networks:
+      - coolify
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U codshop_user -d codshop_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   codshop:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: codshop-app
     restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@codshop-postgres:5432/codshop}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://codshop_user:codshop_secret_password@codshop-postgres:5432/codshop_db}
       - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://codshop.vipone.site}
       - NEXT_PUBLIC_WILDCARD_DOMAIN=${NEXT_PUBLIC_WILDCARD_DOMAIN:-codshop.vipone.site}
     networks:
@@ -29,6 +50,9 @@ services:
       - "traefik.http.routers.codshop-app-https.tls=true"
       - "traefik.http.routers.codshop-app-https.tls.certresolver=letsencrypt"
       - "traefik.http.services.codshop-app.loadbalancer.server.port=3000"
+
+volumes:
+  codshop_pgdata:
 
 networks:
   coolify:
