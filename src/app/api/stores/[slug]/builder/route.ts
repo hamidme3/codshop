@@ -1,27 +1,28 @@
 import { NextResponse } from 'next/server';
-import { getStoreBySlug, updateStoreSections } from '@/lib/stores';
+import { getStoreLayoutBySlug, saveStoreLayout } from '@/lib/db-repository';
 
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  const { slug } = await params;
-  const store = getStoreBySlug(slug);
+  try {
+    const { slug } = await params;
+    const layoutData = await getStoreLayoutBySlug(slug);
 
-  if (!store) {
-    return NextResponse.json({ error: 'Boutique introuvable' }, { status: 404 });
+    return NextResponse.json({
+      store: {
+        name: layoutData.storeName || slug.toUpperCase(),
+        slug,
+        themeId: layoutData.themeId,
+        themeConfig: layoutData.themeConfig,
+        sections: layoutData.sections,
+        updatedAt: layoutData.updatedAt,
+      },
+    });
+  } catch (error: any) {
+    console.error('[Builder API] GET error:', error);
+    return NextResponse.json({ error: 'Erreur lors du chargement de la boutique' }, { status: 500 });
   }
-
-  return NextResponse.json({
-    store: {
-      name: store.name,
-      slug: store.slug,
-      themeId: store.themeId,
-      plan: store.plan,
-      trialEndsAt: store.trialEndsAt,
-      sections: store.pages[0]?.sections || [],
-    },
-  });
 }
 
 export async function POST(
@@ -31,22 +32,26 @@ export async function POST(
   try {
     const { slug } = await params;
     const body = await req.json();
-    const { sections } = body;
+    const { sections, themeId, themeConfig } = body;
 
-    if (!Array.isArray(sections)) {
-      return NextResponse.json({ error: 'Sections invalides' }, { status: 400 });
+    if (sections !== undefined && !Array.isArray(sections)) {
+      return NextResponse.json({ error: 'Format de sections invalide' }, { status: 400 });
     }
 
-    const updated = updateStoreSections(slug, sections);
-    if (!updated) {
-      return NextResponse.json({ error: 'Boutique introuvable' }, { status: 404 });
-    }
+    const result = await saveStoreLayout(slug, {
+      sections,
+      themeId,
+      themeConfig,
+    });
 
     return NextResponse.json({
       success: true,
-      message: 'Mise en page publiée avec succès !',
+      message: 'Mise en page et thème publiés avec succès !',
+      updatedAt: result.updatedAt,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: 'Erreur lors de la sauvegarde' }, { status: 500 });
+    console.error('[Builder API] POST error:', error);
+    return NextResponse.json({ error: 'Erreur lors de la sauvegarde du layout' }, { status: 500 });
   }
 }
+

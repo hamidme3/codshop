@@ -8,6 +8,11 @@ import {
   updateOrderStatus as updateMockOrderStatus,
   Order, Product, Customer 
 } from './backoffice';
+import { 
+  getStoreBySlug as getMockStoreBySlug, 
+  updateStoreSections as updateMockStoreSections, 
+  SectionInstance 
+} from './stores';
 
 // ── Store Repository ──────────────────────────────────────────
 export async function getStoreBySlug(slug: string) {
@@ -363,3 +368,177 @@ export async function createStoreUser(data: {
     throw err;
   }
 }
+
+// ── Page Layout & Theme Customization Repository ──────────────
+export interface ThemeTokens {
+  primaryColor?: string;
+  accentColor?: string;
+  bgPage?: string;
+  cardBg?: string;
+  border?: string;
+  textPrimary?: string;
+  textSecondary?: string;
+  fontFamily?: 'serif' | 'sans' | 'mono';
+  buttonRadius?: 'sharp' | 'subtle' | 'rounded' | 'pill';
+  announcementText?: string;
+  showAnnouncement?: boolean;
+  announcementBg?: string;
+}
+
+export interface StoreLayoutData {
+  storeName?: string;
+  themeId: string;
+  themeConfig: ThemeTokens;
+  sections: SectionInstance[];
+  updatedAt?: Date;
+}
+
+export async function getStoreLayoutBySlug(storeSlug: string): Promise<StoreLayoutData> {
+  const db = getDb();
+  const mockStore = getMockStoreBySlug(storeSlug);
+  const defaultSections: SectionInstance[] = mockStore?.pages?.[0]?.sections || [];
+  const defaultThemeId: string = mockStore?.themeId || 'luxury';
+
+  const defaultResult: StoreLayoutData = {
+    storeName: mockStore?.name || storeSlug.toUpperCase(),
+    themeId: defaultThemeId,
+    themeConfig: {
+      primaryColor: defaultThemeId === 'beauty' ? '#881337' : defaultThemeId === 'tech' ? '#18181b' : '#090d16',
+      accentColor: defaultThemeId === 'beauty' ? '#f43f5e' : defaultThemeId === 'tech' ? '#2563eb' : '#c59b27',
+      bgPage: defaultThemeId === 'beauty' ? '#fff5f7' : defaultThemeId === 'tech' ? '#f4f4f5' : '#faf9f6',
+      buttonRadius: defaultThemeId === 'beauty' ? 'pill' : defaultThemeId === 'tech' ? 'rounded' : 'sharp',
+      fontFamily: defaultThemeId === 'luxury' ? 'serif' : 'sans',
+      showAnnouncement: true,
+      announcementText: 'Livraison Rapide Gratuite dès 400 DH • Paiement Cash à la Livraison après vérification du colis',
+    },
+    sections: defaultSections,
+  };
+
+  if (!db) {
+    return defaultResult;
+  }
+
+  try {
+    const store = await db.query.stores.findFirst({
+      where: eq(schema.stores.slug, storeSlug),
+    });
+
+    if (!store) {
+      return defaultResult;
+    }
+
+    const layout = await db.query.pageLayouts.findFirst({
+      where: eq(schema.pageLayouts.storeId, store.id),
+    });
+
+    if (!layout) {
+      // Seed initial layout into Postgres
+      try {
+        await db.insert(schema.pageLayouts).values({
+          storeId: store.id,
+          sections: {
+            themeId: defaultResult.themeId,
+            themeConfig: defaultResult.themeConfig,
+            sections: defaultResult.sections,
+          },
+        });
+      } catch (seedErr) {
+        console.warn('[DbRepo] Failed to seed layout:', seedErr);
+      }
+      return defaultResult;
+    }
+
+    const raw = layout.sections as any;
+    if (Array.isArray(raw)) {
+      return {
+        storeName: store.name,
+        themeId: defaultResult.themeId,
+        themeConfig: defaultResult.themeConfig,
+        sections: raw,
+        updatedAt: layout.updatedAt,
+      };
+    }
+
+    return {
+      storeName: store.name,
+      themeId: raw?.themeId || defaultResult.themeId,
+      themeConfig: {
+        ...defaultResult.themeConfig,
+        ...(raw?.themeConfig || {}),
+      },
+      sections: Array.isArray(raw?.sections) ? raw.sections : defaultResult.sections,
+      updatedAt: layout.updatedAt,
+    };
+  } catch (err) {
+    console.error('[DbRepo] Error fetching store layout:', err);
+    return defaultResult;
+  }
+}
+
+export async function saveStoreLayout(
+  storeSlug: string,
+  data: {
+    sections?: SectionInstance[];
+    themeId?: string;
+    themeConfig?: ThemeTokens;
+  }
+): Promise<{ success: boolean; updatedAt: Date }> {
+  const db = getDb();
+
+  // If sections are provided, sync with in-memory store for instant cache
+  if (data.sections) {
+    updateMockStoreSections(storeSlug, data.sections);
+  }
+
+  if (!db) {
+    return { success: true, updatedAt: new Date() };
+  }
+
+  try {
+    const store = await db.query.stores.findFirst({
+      where: eq(schema.stores.slug, storeSlug),
+    });
+
+    if (!store) {
+      return { success: true, updatedAt: new Date() };
+    }
+
+    const existingLayout = await db.query.pageLayouts.findFirst({
+      where: eq(schema.pageLayouts.storeId, store.id),
+    });
+
+    const now = new Date();
+    const existingRaw = (existingLayout?.sections as any) || {};
+
+    const payloadToSave = {
+      themeId: data.themeId !== undefined ? data.themeId : (existingRaw.themeId || 'luxury'),
+      themeConfig: {
+        ...(existingRaw.themeConfig || {}),
+        ...(data.themeConfig || {}),
+      },
+      sections: data.sections !== undefined ? data.sections : (existingRaw.sections || []),
+    };
+
+    if (existingLayout) {
+      await db
+        .update(schema.pageLayouts)
+        .set({
+          sections: payloadToSave,
+          updatedAt: now,
+        })
+        .where(eq(schema.pageLayouts.id, existingLayout.id));
+    } else {
+      await db.insert(schema.pageLayouts).values({
+        storeId: store.id,
+        sections: payloadToSave,
+        updatedAt: now,
+      });
+    }
+
+    return { success: true, updatedAt: now };
+  } catch (err) {
+    console.error('[DbRepo] Error saving store layout:', err);
+    throw err;
+  }
+}
+

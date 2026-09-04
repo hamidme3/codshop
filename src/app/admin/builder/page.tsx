@@ -6,9 +6,90 @@ import Link from 'next/link';
 import { 
   Smartphone, Monitor, Save, ExternalLink, Plus, 
   Trash2, Eye, EyeOff, ChevronUp, ChevronDown, 
-  Sparkles, Clock, Check, Layers, Sliders, ArrowLeft
+  Sparkles, Clock, Check, Layers, Sliders, ArrowLeft,
+  Palette, Video, MessageCircle, HelpCircle, ShieldCheck,
+  Tag, Flame, Star, ShoppingBag
 } from 'lucide-react';
 import { DynamicSectionRenderer } from '@/components/builder/Sections';
+
+interface ThemeConfigState {
+  primaryColor: string;
+  accentColor: string;
+  bgPage: string;
+  buttonRadius: 'sharp' | 'subtle' | 'rounded' | 'pill';
+  fontFamily: 'serif' | 'sans' | 'mono';
+  announcementText: string;
+  showAnnouncement: boolean;
+  announcementBg: string;
+}
+
+const THEME_PRESETS: Record<string, {
+  name: string;
+  description: string;
+  badge: string;
+  config: ThemeConfigState;
+}> = {
+  luxury: {
+    name: 'Luxe & Artisanal',
+    description: 'Maroquinerie, souliers, caftans & artisanat d’exception.',
+    badge: '👑 Maroc Prestige',
+    config: {
+      primaryColor: '#090d16',
+      accentColor: '#c59b27',
+      bgPage: '#090d16',
+      buttonRadius: 'sharp',
+      fontFamily: 'serif',
+      announcementText: 'Livraison Rapide Gratuite dès 400 DH • Paiement Cash à la Livraison après vérification du colis',
+      showAnnouncement: true,
+      announcementBg: '#c59b27',
+    },
+  },
+  beauty: {
+    name: 'Beauté & Soins',
+    description: 'Argan bio, sérums figue de barbarie & cosmétique naturelle.',
+    badge: '🌸 Bio & Botanique',
+    config: {
+      primaryColor: '#881337',
+      accentColor: '#f43f5e',
+      bgPage: '#1c0911',
+      buttonRadius: 'pill',
+      fontFamily: 'sans',
+      announcementText: 'Offre Spéciale Beauté : Pack Duo Argan Pur à prix réduit aujourd\'hui seulement !',
+      showAnnouncement: true,
+      announcementBg: '#f43f5e',
+    },
+  },
+  tech: {
+    name: 'Tech & Innovations',
+    description: 'Accessoires connectés, gadgets & électronique grand public.',
+    badge: '⚡ High-Tech COD',
+    config: {
+      primaryColor: '#18181b',
+      accentColor: '#2563eb',
+      bgPage: '#09090b',
+      buttonRadius: 'rounded',
+      fontFamily: 'sans',
+      announcementText: 'Vente Flash High-Tech : Stock Limité • Expédition en 24h chrono partout au Maroc',
+      showAnnouncement: true,
+      announcementBg: '#2563eb',
+    },
+  },
+  minimal: {
+    name: 'YouCan Minimalist',
+    description: 'Design ultra-épuré axé 100% sur la conversion du panier COD.',
+    badge: '🚀 Max Conversion',
+    config: {
+      primaryColor: '#000000',
+      accentColor: '#10b981',
+      bgPage: '#020617',
+      buttonRadius: 'subtle',
+      fontFamily: 'sans',
+      announcementText: 'Paiement à la livraison après vérification • Aucun paiement par carte requis',
+      showAnnouncement: true,
+      announcementBg: '#10b981',
+    },
+  },
+};
 
 function BuilderContent() {
   const searchParams = useSearchParams();
@@ -20,8 +101,12 @@ function BuilderContent() {
   const [viewport, setViewport] = useState<'mobile' | 'desktop'>('mobile');
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
-  const [activeTab, setActiveTab] = useState<'sections' | 'settings'>('sections');
+  const [activeTab, setActiveTab] = useState<'sections' | 'settings' | 'theme'>('sections');
   const [showAddModal, setShowAddModal] = useState(false);
+
+  // Theme Customizer State
+  const [themeId, setThemeId] = useState<string>('luxury');
+  const [themeConfig, setThemeConfig] = useState<ThemeConfigState>(THEME_PRESETS.luxury.config);
 
   useEffect(() => {
     async function loadStore() {
@@ -33,6 +118,15 @@ function BuilderContent() {
           setSections(data.store.sections || []);
           if (data.store.sections?.length > 0) {
             setSelectedSectionId(data.store.sections[0].id);
+          }
+          if (data.store.themeId) {
+            setThemeId(data.store.themeId);
+          }
+          if (data.store.themeConfig) {
+            setThemeConfig((prev) => ({
+              ...prev,
+              ...data.store.themeConfig,
+            }));
           }
         }
       } catch (err) {
@@ -63,7 +157,7 @@ function BuilderContent() {
   };
 
   const deleteSection = (id: string) => {
-    if (sections.length <= 1) return alert('Votre page doit contenir au moins une section.');
+    if (sections.length <= 1) return alert('Votre boutique doit contenir au moins une section.');
     setSections(sections.filter((s) => s.id !== id));
     if (selectedSectionId === id) {
       setSelectedSectionId(sections[0]?.id || null);
@@ -85,36 +179,80 @@ function BuilderContent() {
     );
   };
 
+  const applyPreset = (id: string) => {
+    const preset = THEME_PRESETS[id];
+    if (!preset) return;
+    setThemeId(id);
+    setThemeConfig(preset.config);
+  };
+
   const addSection = (type: string) => {
     const id = `sec_${Date.now()}`;
     let newSec: any = { id, type, settings: {} };
 
-    if (type === 'hero_banner') {
+    if (type === 'announcement_bar') {
+      newSec.settings = {
+        text: 'Livraison Rapide Gratuite dès 400 DH • Paiement Cash à la Livraison',
+        bgColor: themeConfig.accentColor,
+      };
+    } else if (type === 'hero_banner') {
       newSec.settings = {
         headline: 'Nouvelle Offre Exceptionnelle',
-        subheadline: 'Profitez de notre remise exclusive aujourd\'hui seulement.',
+        subheadline: 'Profitez de notre remise exclusive aujourd\'hui avec paiement à la livraison.',
         ctaText: 'Commander Maintenant',
-        badgeText: 'Nouveauté',
+        badgeText: 'Offre Spéciale',
+      };
+    } else if (type === 'features_grid') {
+      newSec.settings = {
+        badges: [
+          { title: 'Paiement à la Livraison', subtitle: 'Payez en espèces après inspection' },
+          { title: 'Ouverture du Colis Garantie', subtitle: 'Vérifiez le produit avant de régler' },
+          { title: 'Livraison Express 24/48h', subtitle: 'Partout au Maroc' },
+          { title: 'Échange Gratuit 7 Jours', subtitle: 'Support WhatsApp réactif 7j/7' },
+        ],
       };
     } else if (type === 'urgency_timer') {
       newSec.settings = {
         title: 'Vente Flash Limitée',
-        countdownHours: 3,
-        stockRemaining: 9,
+        stockRemaining: 12,
+        countdownHours: 4,
       };
     } else if (type === 'cod_checkout') {
       newSec.settings = {
-        productTitle: 'Article Vedette',
-        price: 299,
+        productTitle: 'Article Vedette — Édition Spéciale',
+        price: 349,
+        comparePrice: 590,
         packDuoDiscount: 100,
         packTrioDiscount: 200,
+      };
+    } else if (type === 'video_showcase') {
+      newSec.settings = {
+        title: 'Découvrez le Produit en Action',
+        subtitle: 'Regardez la démonstration réelle avant de commander.',
+        badgeText: 'Démonstration Vidéo',
+      };
+    } else if (type === 'testimonials_carousel') {
+      newSec.settings = {
+        title: 'Ce Que Disent Nos Clients Partout au Maroc',
+        reviews: [
+          { name: 'Fatima Zahra M.', city: 'Casablanca (Maârif)', rating: 5, comment: 'Qualité au top, livrée en 24h avec ouverture du colis avant de payer !' },
+          { name: 'Yassine B.', city: 'Rabat (Agdal)', rating: 5, comment: 'Livreur ponctuel, produit conforme à la photo.' },
+          { name: 'Mehdi K.', city: 'Marrakech (Guéliz)', rating: 5, comment: 'Super rapport qualité-prix, je recommande vivement.' },
+        ],
       };
     } else if (type === 'faq_accordion') {
       newSec.settings = {
         faqs: [
-          { q: 'Comment payer ?', a: 'En espèces au livreur à réception.' },
-          { q: 'Délais de livraison ?', a: '24h à 48h partout au Maroc.' },
+          { q: 'Puis-je ouvrir et vérifier le colis avant de payer ?', a: 'Oui, vous ouvrez la boîte et vérifiez avant de payer le livreur.' },
+          { q: 'Comment s\'effectue le paiement ?', a: 'En dirhams (espèces) directement au livreur à votre porte.' },
+          { q: 'Quels sont les délais de livraison ?', a: '24h à Casablanca et Rabat, 24h à 48h dans les autres villes.' },
         ],
+      };
+    } else if (type === 'whatsapp_floating_bar') {
+      newSec.settings = {
+        phone: '+212661000000',
+        message: 'Salam, bghit nsewel 3la had l\'article w ncommander',
+        buttonText: 'Commander via WhatsApp',
       };
     }
 
@@ -130,14 +268,20 @@ function BuilderContent() {
       const res = await fetch(`/api/stores/${storeSlug}/builder`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sections }),
+        body: JSON.stringify({ 
+          sections,
+          themeId,
+          themeConfig,
+        }),
       });
       if (res.ok) {
         setSavedSuccess(true);
         setTimeout(() => setSavedSuccess(false), 3000);
+      } else {
+        alert('Erreur lors de la sauvegarde');
       }
     } catch (err) {
-      alert('Erreur lors de la publication');
+      alert('Erreur réseau lors de la publication');
     } finally {
       setSaving(false);
     }
@@ -149,9 +293,9 @@ function BuilderContent() {
       <header className="h-16 bg-slate-900 border-b border-slate-800 px-4 flex items-center justify-between z-20 shrink-0">
         <div className="flex items-center gap-3">
           <Link
-            href="/register-store"
-            className="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
-            title="Retour"
+            href={`/admin?store=${storeSlug}`}
+            className="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+            title="Retour au tableau de bord"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
@@ -160,23 +304,8 @@ function BuilderContent() {
               <span className="font-extrabold text-white text-sm sm:text-base">
                 {storeData?.name || storeSlug}
               </span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                {storeSlug}.codshop.vipone.site
-              </span>
             </div>
           </div>
-        </div>
-
-        {/* 14-Day Trial Banner */}
-        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-950 border border-amber-500/30 text-xs text-amber-300">
-          <Clock className="w-4 h-4 text-amber-400 animate-pulse" />
-          <span>Essai Gratuit : <strong>14 jours restants</strong></span>
-          <Link
-            href={`/admin/billing?store=${storeSlug}`}
-            className="ml-2 text-[11px] bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-2.5 py-0.5 rounded transition-colors"
-          >
-            Choisir mon plan
-          </Link>
         </div>
 
         {/* Viewport Switcher */}
@@ -189,7 +318,7 @@ function BuilderContent() {
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Smartphone className="w-3.5 h-3.5" /> Mobile
+            <Smartphone className="w-3.5 h-3.5" /> Mobile (375px)
           </button>
           <button
             onClick={() => setViewport('desktop')}
@@ -209,18 +338,18 @@ function BuilderContent() {
             href={`/?store=${storeSlug}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition-colors"
+            className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition-colors"
           >
-            <ExternalLink className="w-3.5 h-3.5" /> Voir la boutique
+            <ExternalLink className="w-3.5 h-3.5" /> Voir en direct
           </a>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs shadow-lg shadow-amber-500/20 transition-all active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs shadow-lg shadow-amber-500/20 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             {savedSuccess ? (
               <>
-                <Check className="w-4 h-4 text-emerald-950" /> Publié !
+                <Check className="w-4 h-4 text-emerald-950" /> Publié dans PostgreSQL !
               </>
             ) : (
               <>
@@ -233,37 +362,48 @@ function BuilderContent() {
 
       {/* Main Workspace */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar: Controls & Inspector */}
+        {/* Left Sidebar: Controls, Inspector, & Theme Customizer */}
         <aside aria-label="Page Builder Controls" className="w-80 sm:w-96 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 z-10">
-          {/* Sub-Tabs */}
+          {/* Sub-Tabs: Sections | Bloc | Thème & Design */}
           <div className="flex border-b border-slate-800 bg-slate-950/50">
             <button
               onClick={() => setActiveTab('sections')}
-              className={`flex-1 py-3 text-xs font-bold flex items-center justify-center gap-2 border-b-2 transition-colors ${
+              className={`flex-1 py-3 text-xs font-bold flex items-center justify-center gap-1.5 border-b-2 transition-colors ${
                 activeTab === 'sections'
                   ? 'border-amber-400 text-amber-400 bg-slate-900'
                   : 'border-transparent text-slate-400 hover:text-white'
               }`}
             >
-              <Layers className="w-4 h-4" /> Sections ({sections.length})
+              <Layers className="w-3.5 h-3.5" /> Blocs ({sections.length})
             </button>
             <button
               onClick={() => setActiveTab('settings')}
-              className={`flex-1 py-3 text-xs font-bold flex items-center justify-center gap-2 border-b-2 transition-colors ${
+              className={`flex-1 py-3 text-xs font-bold flex items-center justify-center gap-1.5 border-b-2 transition-colors ${
                 activeTab === 'settings'
                   ? 'border-amber-400 text-amber-400 bg-slate-900'
                   : 'border-transparent text-slate-400 hover:text-white'
               }`}
             >
-              <Sliders className="w-4 h-4" /> Modifier le bloc
+              <Sliders className="w-3.5 h-3.5" /> Réglages
+            </button>
+            <button
+              onClick={() => setActiveTab('theme')}
+              className={`flex-1 py-3 text-xs font-bold flex items-center justify-center gap-1.5 border-b-2 transition-colors ${
+                activeTab === 'theme'
+                  ? 'border-amber-400 text-amber-400 bg-slate-900'
+                  : 'border-transparent text-slate-400 hover:text-white'
+              }`}
+            >
+              <Palette className="w-3.5 h-3.5" /> Thème & Design
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {activeTab === 'sections' ? (
+            {/* 1. SECTIONS TAB */}
+            {activeTab === 'sections' && (
               <>
                 <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
-                  <span>Ordre des blocs (Glisser / Déplacer)</span>
+                  <span>Ordre d&apos;affichage des blocs</span>
                   <button
                     onClick={() => setShowAddModal(true)}
                     className="flex items-center gap-1 text-amber-400 font-bold hover:underline"
@@ -291,11 +431,12 @@ function BuilderContent() {
                           }}
                           className="flex-1 text-left"
                         >
-                          <div className="text-xs font-extrabold capitalize">
-                            {sec.type.replace('_', ' ')}
+                          <div className="text-xs font-extrabold capitalize flex items-center gap-1.5">
+                            <span>{sec.type.replace(/_/g, ' ')}</span>
+                            {sec.hidden && <span className="text-[9px] text-rose-400 font-normal">(Masqué)</span>}
                           </div>
-                          <div className="text-[10px] text-slate-400 truncate max-w-[160px]">
-                            {sec.settings.headline || sec.settings.title || sec.settings.productTitle || 'Bloc configuré'}
+                          <div className="text-[10px] text-slate-400 truncate max-w-[170px]">
+                            {sec.settings.headline || sec.settings.title || sec.settings.productTitle || sec.settings.text || 'Bloc configuré'}
                           </div>
                         </button>
 
@@ -338,24 +479,68 @@ function BuilderContent() {
 
                 <button
                   onClick={() => setShowAddModal(true)}
-                  className="w-full py-3 rounded-xl border border-dashed border-slate-700 hover:border-amber-400 text-slate-400 hover:text-amber-400 text-xs font-bold flex items-center justify-center gap-2 transition-colors mt-4"
+                  className="w-full py-3 rounded-xl border border-dashed border-slate-700 hover:border-amber-400 text-slate-400 hover:text-amber-400 text-xs font-bold flex items-center justify-center gap-2 transition-colors mt-4 cursor-pointer"
                 >
-                  <Plus className="w-4 h-4" /> Ajouter un bloc de conversion
+                  <Plus className="w-4 h-4" /> Ajouter un bloc de conversion marocain
                 </button>
               </>
-            ) : (
-              /* Settings Tab */
+            )}
+
+            {/* 2. SETTINGS (INSPECTOR) TAB */}
+            {activeTab === 'settings' && (
               <div className="space-y-4">
                 {selectedSection ? (
                   <>
                     <div className="pb-2 border-b border-slate-800">
-                      <div className="text-xs font-mono uppercase text-amber-400">Modifier :</div>
-                      <div className="text-sm font-bold text-white capitalize">{selectedSection.type.replace('_', ' ')}</div>
+                      <div className="text-[10px] font-mono uppercase text-amber-400">Modifier le bloc sélectionné :</div>
+                      <div className="text-sm font-bold text-white capitalize">{selectedSection.type.replace(/_/g, ' ')}</div>
                     </div>
 
-                    {/* Dynamic Fields by Type */}
+                    {/* Announcement Bar Settings */}
+                    {selectedSection.type === 'announcement_bar' && (
+                      <div className="space-y-3 text-xs">
+                        <div>
+                          <label className="block text-slate-400 mb-1">Texte d&apos;accroche :</label>
+                          <input
+                            type="text"
+                            value={selectedSection.settings.text || ''}
+                            onChange={(e) => updateSetting('text', e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-slate-400 mb-1">Couleur d&apos;arrière-plan :</label>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={selectedSection.settings.bgColor || themeConfig.accentColor}
+                              onChange={(e) => updateSetting('bgColor', e.target.value)}
+                              className="w-8 h-8 rounded-lg border border-slate-800 cursor-pointer bg-transparent"
+                            />
+                            <input
+                              type="text"
+                              value={selectedSection.settings.bgColor || themeConfig.accentColor}
+                              onChange={(e) => updateSetting('bgColor', e.target.value)}
+                              className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-2 font-mono text-white text-xs"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Hero Banner Settings */}
                     {selectedSection.type === 'hero_banner' && (
                       <div className="space-y-3 text-xs">
+                        <div>
+                          <label className="block text-slate-400 mb-1">Badge Supérieur :</label>
+                          <input
+                            type="text"
+                            value={selectedSection.settings.badgeText || ''}
+                            onChange={(e) => updateSetting('badgeText', e.target.value)}
+                            placeholder="Ex: Édition Limitée"
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white"
+                          />
+                        </div>
                         <div>
                           <label className="block text-slate-400 mb-1">Titre Principal :</label>
                           <input
@@ -366,7 +551,7 @@ function BuilderContent() {
                           />
                         </div>
                         <div>
-                          <label className="block text-slate-400 mb-1">Sous-titre :</label>
+                          <label className="block text-slate-400 mb-1">Sous-titre Persuasif :</label>
                           <textarea
                             rows={3}
                             value={selectedSection.settings.subheadline || ''}
@@ -374,27 +559,10 @@ function BuilderContent() {
                             className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white"
                           />
                         </div>
-                        <div>
-                          <label className="block text-slate-400 mb-1">Texte du Bouton CTA :</label>
-                          <input
-                            type="text"
-                            value={selectedSection.settings.ctaText || ''}
-                            onChange={(e) => updateSetting('ctaText', e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-slate-400 mb-1">Image d&apos;arrière-plan (URL) :</label>
-                          <input
-                            type="text"
-                            value={selectedSection.settings.bgImage || ''}
-                            onChange={(e) => updateSetting('bgImage', e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono text-[11px]"
-                          />
-                        </div>
                       </div>
                     )}
 
+                    {/* Urgency Timer Settings */}
                     {selectedSection.type === 'urgency_timer' && (
                       <div className="space-y-3 text-xs">
                         <div>
@@ -406,22 +574,14 @@ function BuilderContent() {
                             className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white"
                           />
                         </div>
-                        <div>
-                          <label className="block text-slate-400 mb-1">Stock restant affiché :</label>
-                          <input
-                            type="number"
-                            value={selectedSection.settings.stockRemaining || 14}
-                            onChange={(e) => updateSetting('stockRemaining', Number(e.target.value))}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white"
-                          />
-                        </div>
                       </div>
                     )}
 
+                    {/* COD Checkout Settings */}
                     {selectedSection.type === 'cod_checkout' && (
                       <div className="space-y-3 text-xs">
                         <div>
-                          <label className="block text-slate-400 mb-1">Nom du Produit :</label>
+                          <label className="block text-slate-400 mb-1">Nom de l&apos;article :</label>
                           <input
                             type="text"
                             value={selectedSection.settings.productTitle || ''}
@@ -440,6 +600,17 @@ function BuilderContent() {
                             />
                           </div>
                           <div>
+                            <label className="block text-slate-400 mb-1">Prix Barré (DH) :</label>
+                            <input
+                              type="number"
+                              value={selectedSection.settings.comparePrice || 590}
+                              onChange={(e) => updateSetting('comparePrice', Number(e.target.value))}
+                              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white"
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
                             <label className="block text-slate-400 mb-1">Remise Pack Duo (DH) :</label>
                             <input
                               type="number"
@@ -448,22 +619,254 @@ function BuilderContent() {
                               className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white"
                             />
                           </div>
+                          <div>
+                            <label className="block text-slate-400 mb-1">Remise Pack Trio (DH) :</label>
+                            <input
+                              type="number"
+                              value={selectedSection.settings.packTrioDiscount || 200}
+                              onChange={(e) => updateSetting('packTrioDiscount', Number(e.target.value))}
+                              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Video Showcase Settings */}
+                    {selectedSection.type === 'video_showcase' && (
+                      <div className="space-y-3 text-xs">
+                        <div>
+                          <label className="block text-slate-400 mb-1">Titre de la vidéo :</label>
+                          <input
+                            type="text"
+                            value={selectedSection.settings.title || ''}
+                            onChange={(e) => updateSetting('title', e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-slate-400 mb-1">Sous-titre :</label>
+                          <input
+                            type="text"
+                            value={selectedSection.settings.subtitle || ''}
+                            onChange={(e) => updateSetting('subtitle', e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-slate-400 mb-1">Image miniature (URL) :</label>
+                          <input
+                            type="text"
+                            value={selectedSection.settings.thumbnailUrl || ''}
+                            onChange={(e) => updateSetting('thumbnailUrl', e.target.value)}
+                            placeholder="https://..."
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono text-[11px]"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* WhatsApp Button Settings */}
+                    {selectedSection.type === 'whatsapp_floating_bar' && (
+                      <div className="space-y-3 text-xs">
+                        <div>
+                          <label className="block text-slate-400 mb-1">Numéro WhatsApp Maroc :</label>
+                          <input
+                            type="text"
+                            value={selectedSection.settings.phone || '+212661000000'}
+                            onChange={(e) => updateSetting('phone', e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-slate-400 mb-1">Message Pré-rempli :</label>
+                          <textarea
+                            rows={3}
+                            value={selectedSection.settings.message || ''}
+                            onChange={(e) => updateSetting('message', e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-slate-400 mb-1">Texte du Bouton :</label>
+                          <input
+                            type="text"
+                            value={selectedSection.settings.buttonText || 'Commander sur WhatsApp'}
+                            onChange={(e) => updateSetting('buttonText', e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white"
+                          />
                         </div>
                       </div>
                     )}
                   </>
                 ) : (
                   <div className="text-center py-8 text-xs text-slate-500">
-                    Sélectionnez une section dans l&apos;onglet de gauche pour la modifier.
+                    Sélectionnez un bloc dans l&apos;onglet &quot;Blocs&quot; pour modifier ses réglages.
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* 3. THEME & DESIGN CUSTOMIZER TAB */}
+            {activeTab === 'theme' && (
+              <div className="space-y-5 text-xs">
+                {/* Preset Themes */}
+                <div className="space-y-2">
+                  <label className="block text-slate-300 font-bold uppercase tracking-wider text-[11px]">
+                    1. Modèles de Thèmes Pré-conçus :
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.entries(THEME_PRESETS).map(([key, preset]) => {
+                      const isActive = themeId === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => applyPreset(key)}
+                          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                            isActive
+                              ? 'border-amber-500 bg-amber-500/10 ring-1 ring-amber-500 text-white'
+                              : 'border-slate-800 bg-slate-950/60 text-slate-300 hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="text-[10px] font-bold text-amber-400">{preset.badge}</div>
+                          <div className="font-extrabold text-white text-xs mt-0.5">{preset.name}</div>
+                          <div className="text-[10px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                            {preset.description}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Color Customization */}
+                <div className="space-y-3 pt-3 border-t border-slate-800">
+                  <label className="block text-slate-300 font-bold uppercase tracking-wider text-[11px]">
+                    2. Palette de Couleurs de la Marque :
+                  </label>
+
+                  {/* Primary Color */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-bold text-white">Couleur Principale :</div>
+                      <div className="text-[10px] text-slate-400">Fond de page et structure</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={themeConfig.primaryColor}
+                        onChange={(e) => setThemeConfig({ ...themeConfig, primaryColor: e.target.value })}
+                        className="w-7 h-7 rounded-lg border border-slate-700 cursor-pointer bg-transparent"
+                      />
+                      <span className="font-mono text-[11px] text-slate-300 uppercase">{themeConfig.primaryColor}</span>
+                    </div>
+                  </div>
+
+                  {/* Accent / CTA Color */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-bold text-white">Couleur Accent (CTA) :</div>
+                      <div className="text-[10px] text-slate-400">Boutons d&apos;action &amp; prix COD</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={themeConfig.accentColor}
+                        onChange={(e) => setThemeConfig({ ...themeConfig, accentColor: e.target.value })}
+                        className="w-7 h-7 rounded-lg border border-slate-700 cursor-pointer bg-transparent"
+                      />
+                      <span className="font-mono text-[11px] text-slate-300 uppercase">{themeConfig.accentColor}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Button Radius */}
+                <div className="space-y-2 pt-3 border-t border-slate-800">
+                  <label className="block text-slate-300 font-bold uppercase tracking-wider text-[11px]">
+                    3. Forme des Boutons &amp; Cartes :
+                  </label>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[
+                      { id: 'sharp', label: 'Carré' },
+                      { id: 'subtle', label: 'Léger (8px)' },
+                      { id: 'rounded', label: 'Arrondi (16px)' },
+                      { id: 'pill', label: 'Pilule' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setThemeConfig({ ...themeConfig, buttonRadius: opt.id as any })}
+                        className={`py-2 px-1 text-[11px] font-bold rounded-xl border text-center transition-colors cursor-pointer ${
+                          themeConfig.buttonRadius === opt.id
+                            ? 'border-amber-500 bg-amber-500/20 text-amber-300'
+                            : 'border-slate-800 bg-slate-950 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Typography */}
+                <div className="space-y-2 pt-3 border-t border-slate-800">
+                  <label className="block text-slate-300 font-bold uppercase tracking-wider text-[11px]">
+                    4. Style Typographique :
+                  </label>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[
+                      { id: 'serif', label: 'Serif Prestige' },
+                      { id: 'sans', label: 'Sans Moderne' },
+                      { id: 'mono', label: 'Mono Tech' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setThemeConfig({ ...themeConfig, fontFamily: opt.id as any })}
+                        className={`py-2 px-1 text-[11px] font-bold rounded-xl border text-center transition-colors cursor-pointer ${
+                          themeConfig.fontFamily === opt.id
+                            ? 'border-amber-500 bg-amber-500/20 text-amber-300'
+                            : 'border-slate-800 bg-slate-950 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Top Announcement Bar */}
+                <div className="space-y-2 pt-3 border-t border-slate-800">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-white">Barre d&apos;Annonce Supérieure</span>
+                    <button
+                      type="button"
+                      onClick={() => setThemeConfig({ ...themeConfig, showAnnouncement: !themeConfig.showAnnouncement })}
+                      className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors ${
+                        themeConfig.showAnnouncement ? 'bg-amber-500 justify-end' : 'bg-slate-800 justify-start'
+                      }`}
+                    >
+                      <span className="bg-slate-950 w-4 h-4 rounded-full shadow-md" />
+                    </button>
+                  </div>
+                  {themeConfig.showAnnouncement && (
+                    <input
+                      type="text"
+                      value={themeConfig.announcementText}
+                      onChange={(e) => setThemeConfig({ ...themeConfig, announcementText: e.target.value })}
+                      placeholder="Texte de l'annonce promotionnelle"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white text-xs mt-1"
+                    />
+                  )}
+                </div>
               </div>
             )}
           </div>
         </aside>
 
         {/* Center Canvas: Live Interactive Preview */}
-        <main className="flex-1 bg-slate-950/80 p-4 sm:p-8 overflow-y-auto flex items-start justify-center">
+        <main className="flex-1 bg-slate-950/90 p-4 sm:p-8 overflow-y-auto flex items-start justify-center">
           <div
             className={`transition-all duration-300 shadow-2xl overflow-hidden bg-slate-950 border border-slate-800 ${
               viewport === 'mobile'
@@ -476,7 +879,18 @@ function BuilderContent() {
               <div className="h-6 bg-slate-900 flex items-center justify-between px-6 text-[10px] text-slate-400 border-b border-slate-800 select-none">
                 <span>9:41</span>
                 <div className="w-16 h-3 bg-slate-950 rounded-full" />
-                <span>4G 100%</span>
+                <span>4G 🇲🇦 100%</span>
+              </div>
+            )}
+
+            {/* Top Announcement Bar if enabled */}
+            {themeConfig.showAnnouncement && (
+              <div 
+                className="py-2 px-3 text-center text-[11px] font-black text-slate-950 transition-colors flex items-center justify-center gap-1.5 select-none"
+                style={{ backgroundColor: themeConfig.accentColor }}
+              >
+                <span>🇲🇦</span>
+                <span>{themeConfig.announcementText}</span>
               </div>
             )}
 
@@ -493,7 +907,7 @@ function BuilderContent() {
                     sec.id === selectedSectionId ? 'ring-2 ring-amber-500 ring-offset-2 ring-offset-slate-950' : ''
                   }`}
                 >
-                  <DynamicSectionRenderer section={sec} />
+                  <DynamicSectionRenderer section={sec} themeConfig={themeConfig} />
                 </div>
               ))}
             </div>
@@ -501,46 +915,121 @@ function BuilderContent() {
         </main>
       </div>
 
-      {/* Add Section Modal */}
+      {/* Add Section Modal with All 9 Conversion Blocks */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-lg w-full space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-white">Ajouter un bloc de conversion</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white">✕</button>
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-2xl w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+              <div>
+                <h3 className="text-base font-extrabold text-white">Ajouter un bloc de conversion marocain</h3>
+                <p className="text-xs text-slate-400">Sélectionnez le composant à intégrer à votre page de vente.</p>
+              </div>
+              <button 
+                onClick={() => setShowAddModal(false)} 
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center font-bold"
+              >
+                ✕
+              </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[65vh] overflow-y-auto pr-1">
               <button
                 onClick={() => addSection('hero_banner')}
-                className="p-4 rounded-xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors"
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
               >
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <Sparkles className="w-4 h-4" />
+                </div>
                 <div className="font-bold text-white text-xs">Hero Banner</div>
-                <div className="text-[10px] text-slate-400 mt-1">Titre, image et appel à l&apos;action</div>
+                <div className="text-[10px] text-slate-400 mt-1">Titre captivant, offre &amp; appel à l&apos;action</div>
               </button>
 
               <button
                 onClick={() => addSection('cod_checkout')}
-                className="p-4 rounded-xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors"
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
               >
-                <div className="font-bold text-white text-xs">Formulaire COD</div>
-                <div className="text-[10px] text-slate-400 mt-1">1-page checkout + packs promo</div>
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <ShoppingBag className="w-4 h-4" />
+                </div>
+                <div className="font-bold text-white text-xs">Formulaire COD 1-Page</div>
+                <div className="text-[10px] text-slate-400 mt-1">Packs Duo/Trio + Sélecteur de villes</div>
               </button>
 
               <button
                 onClick={() => addSection('urgency_timer')}
-                className="p-4 rounded-xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors"
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
               >
-                <div className="font-bold text-white text-xs">Compte à Rebours</div>
-                <div className="text-[10px] text-slate-400 mt-1">Urgence et stock limité</div>
+                <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <Flame className="w-4 h-4" />
+                </div>
+                <div className="font-bold text-white text-xs">Urgence &amp; Stock Flash</div>
+                <div className="text-[10px] text-slate-400 mt-1">Compte à rebours animé et stock limité</div>
+              </button>
+
+              <button
+                onClick={() => addSection('features_grid')}
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div className="font-bold text-white text-xs">Piliers Réassurance</div>
+                <div className="text-[10px] text-slate-400 mt-1">Paiement à réception &amp; colis vérifiable</div>
+              </button>
+
+              <button
+                onClick={() => addSection('video_showcase')}
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <Video className="w-4 h-4" />
+                </div>
+                <div className="font-bold text-white text-xs">Démonstration Vidéo</div>
+                <div className="text-[10px] text-slate-400 mt-1">Multipliez vos conversions par 3</div>
+              </button>
+
+              <button
+                onClick={() => addSection('testimonials_carousel')}
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <Star className="w-4 h-4" />
+                </div>
+                <div className="font-bold text-white text-xs">Avis Clients Marocains</div>
+                <div className="text-[10px] text-slate-400 mt-1">Badges villes : Casablanca, Rabat, Marrakech</div>
               </button>
 
               <button
                 onClick={() => addSection('faq_accordion')}
-                className="p-4 rounded-xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors"
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
               >
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <HelpCircle className="w-4 h-4" />
+                </div>
                 <div className="font-bold text-white text-xs">FAQ Accordéon</div>
-                <div className="text-[10px] text-slate-400 mt-1">Questions fréquentes clients</div>
+                <div className="text-[10px] text-slate-400 mt-1">Questions fréquentes &amp; conditions COD</div>
+              </button>
+
+              <button
+                onClick={() => addSection('whatsapp_floating_bar')}
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <MessageCircle className="w-4 h-4" />
+                </div>
+                <div className="font-bold text-white text-xs">Bouton Flottant WhatsApp</div>
+                <div className="text-[10px] text-slate-400 mt-1">Commande WhatsApp directe avec message pré-rempli</div>
+              </button>
+
+              <button
+                onClick={() => addSection('announcement_bar')}
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <Tag className="w-4 h-4" />
+                </div>
+                <div className="font-bold text-white text-xs">Bandeau Promo</div>
+                <div className="text-[10px] text-slate-400 mt-1">Notification supérieure d&apos;urgence</div>
               </button>
             </div>
           </div>
