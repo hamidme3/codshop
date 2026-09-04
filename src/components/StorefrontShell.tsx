@@ -8,7 +8,7 @@ import { Footer } from '@/components/Footer';
 
 export function StorefrontShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '';
-  const isBackoffice = pathname.startsWith('/admin') || pathname.startsWith('/register-store');
+  const isBackoffice = pathname.startsWith('/admin') || pathname.startsWith('/register-store') || pathname.startsWith('/sso');
 
   if (isBackoffice) {
     return <>{children}</>;
