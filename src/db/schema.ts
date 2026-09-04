@@ -130,14 +130,43 @@ export const pageLayouts = pgTable(
   ]
 );
 
+// ── Users (Merchant Owners & Admin Staff) ──────────────────────
+export const users = pgTable(
+  'users',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    storeId: uuid('store_id')
+      .references(() => stores.id, { onDelete: 'cascade' })
+      .notNull(),
+    email: text('email').notNull().unique(),
+    name: text('name').notNull(),
+    passwordHash: text('password_hash').notNull(),
+    role: text('role').default('owner').notNull(), // 'owner' | 'admin' | 'agent'
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('user_email_idx').on(table.email),
+    index('user_store_idx').on(table.storeId),
+  ]
+);
+
 // ── Relations ──────────────────────────────────────────────────
 export const storesRelations = relations(stores, ({ many, one }) => ({
+  users: many(users),
   products: many(products),
   orders: many(orders),
   customers: many(customers),
   layout: one(pageLayouts, {
     fields: [stores.id],
     references: [pageLayouts.storeId],
+  }),
+}));
+
+export const usersRelations = relations(users, ({ one }) => ({
+  store: one(stores, {
+    fields: [users.storeId],
+    references: [stores.id],
   }),
 }));
 

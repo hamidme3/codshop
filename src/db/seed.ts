@@ -39,6 +39,27 @@ export async function seedDatabase() {
     console.log(`[Seed] Store already exists: ${existingStore.name}`);
   }
 
+  // 1b. Seed Admin User for Ottavio
+  const existingUser = await db.query.users.findFirst({
+    where: eq(schema.users.email, 'admin@ottavio.ma'),
+  });
+
+  if (!existingUser) {
+    const { hashPassword } = await import('@/lib/auth');
+    const passwordHash = await hashPassword('admin123456');
+
+    await db.insert(schema.users).values({
+      storeId,
+      email: 'admin@ottavio.ma',
+      name: 'Abdelhamid (Ottavio Owner)',
+      passwordHash,
+      role: 'owner',
+    });
+    console.log('[Seed] Created default merchant admin: admin@ottavio.ma / admin123456');
+  } else {
+    console.log('[Seed] Admin user already exists: admin@ottavio.ma');
+  }
+
   // 2. Seed Products
   const existingProducts = await db.query.products.findMany({
     where: eq(schema.products.storeId, storeId),

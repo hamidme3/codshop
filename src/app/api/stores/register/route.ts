@@ -33,29 +33,72 @@ export async function POST(req: Request) {
       themeId: themeId || 'luxury',
     });
 
-    // Also persist store to PostgreSQL DB repository
+    // Also persist store & create owner user in PostgreSQL DB repository
+    let dbUser: any = null;
+    let sessionToken: string | null = null;
+
     try {
-      const { createStore: createDbStore } = await import('@/lib/db-repository');
-      await createDbStore({
+      const { createStore: createDbStore, createStoreUser } = await import('@/lib/db-repository');
+      const { hashPassword, signSessionToken } = await import('@/lib/auth');
+
+      const userEmail = body.email?.toLowerCase().trim() || `${requestedSlug}@codshop.vipone.site`;
+      const plainPassword = body.password || 'admin123456';
+      const passwordHash = await hashPassword(plainPassword);
+
+      const dbStore = await createDbStore({
         name,
         slug: requestedSlug,
-        email: `${requestedSlug}@codshop.vipone.site`,
+        email: userEmail,
         phone: whatsapp,
         planTier: 'starter',
       });
+
+      if (dbStore && dbStore.id) {
+        dbUser = await createStoreUser({
+          storeId: dbStore.id,
+          email: userEmail,
+          name: name,
+          passwordHash,
+          role: 'owner',
+        });
+
+        sessionToken = await signSessionToken({
+          userId: dbUser.id,
+          email: dbUser.email,
+          name: dbUser.name,
+          storeId: dbStore.id,
+          storeSlug: requestedSlug,
+          role: 'owner',
+        });
+      }
     } catch (dbErr) {
-      console.warn('[Store DB Notice] DB persist fallback:', dbErr);
+      console.warn('[Store DB Notice] DB persist/user creation fallback:', dbErr);
     }
 
     console.log(`[Store Provisioned] ${newStore.name} (${newStore.slug}) - 14 Days Free Trial Active`);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       store: newStore,
       message: 'Boutique créée avec succès ! Votre essai gratuit de 14 jours a commencé.',
       previewUrl: `/?store=${newStore.slug}`,
       adminUrl: `/admin/builder?store=${newStore.slug}`,
     });
+
+    if (sessionToken) {
+      const { SESSION_COOKIE_NAME } = await import('@/lib/auth');
+      response.cookies.set({
+        name: SESSION_COOKIE_NAME,
+        value: sessionToken,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60,
+      });
+    }
+
+    return response;
   } catch (error: any) {
     console.error('[Store Registration Error]:', error);
     return NextResponse.json(

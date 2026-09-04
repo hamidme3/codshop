@@ -303,3 +303,63 @@ async function syncCustomerFromOrder(
     console.warn('[DbRepo] Error syncing customer:', err);
   }
 }
+
+// ── User Authentication Repository ────────────────────────────
+export async function findUserByEmail(email: string) {
+  const db = getDb();
+  const normalizedEmail = email.toLowerCase().trim();
+
+  if (!db) {
+    // Fallback for when DB connection isn't configured
+    return null;
+  }
+
+  try {
+    const user = await db.query.users.findFirst({
+      where: eq(schema.users.email, normalizedEmail),
+      with: {
+        store: true,
+      },
+    });
+    return user || null;
+  } catch (err) {
+    console.error('[DbRepo] Error fetching user by email:', err);
+    return null;
+  }
+}
+
+export async function createStoreUser(data: {
+  storeId: string;
+  email: string;
+  name: string;
+  passwordHash: string;
+  role?: string;
+}) {
+  const db = getDb();
+  if (!db) {
+    return {
+      id: `user_${Date.now()}`,
+      storeId: data.storeId,
+      email: data.email.toLowerCase().trim(),
+      name: data.name,
+      passwordHash: data.passwordHash,
+      role: data.role || 'owner',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+  }
+
+  try {
+    const [newUser] = await db.insert(schema.users).values({
+      storeId: data.storeId,
+      email: data.email.toLowerCase().trim(),
+      name: data.name,
+      passwordHash: data.passwordHash,
+      role: data.role || 'owner',
+    }).returning();
+    return newUser;
+  } catch (err) {
+    console.error('[DbRepo] Error creating store user:', err);
+    throw err;
+  }
+}

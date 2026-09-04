@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { 
   LayoutDashboard, ShoppingBag, Package, Palette, 
   TrendingUp, Truck, CreditCard, ExternalLink, 
-  Clock, Store, Menu, X, Users, Filter, Wallet 
+  Clock, Store, Menu, X, Users, Filter, Wallet, LogOut 
 } from 'lucide-react';
 import LanguageToggle from '@/components/LanguageToggle';
 import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
@@ -16,7 +16,26 @@ function AdminNav({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ name: string; email: string } | null>(null);
   const { language, setLanguage, t, isRTL } = useLanguage();
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          setCurrentUser(data.user);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {}
+    window.location.href = '/admin/login';
+  };
 
   const navItems = [
     { label: t.nav.overview, href: `/admin?store=${storeSlug}`, icon: LayoutDashboard, exact: true },
@@ -106,10 +125,29 @@ function AdminNav({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* Bottom User / Support Footer */}
-        <div className="p-4 border-t border-slate-800 text-xs text-slate-400 flex items-center justify-between">
-          <span>{t.common.supportOnline}</span>
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        {/* Bottom User Profile & Logout */}
+        <div className="p-3 border-t border-slate-800 space-y-2">
+          <div className="flex items-center justify-between px-2 text-xs">
+            <div className="truncate pr-2">
+              <p className="font-bold text-white text-xs truncate">
+                {currentUser?.name || 'Marchand COD'}
+              </p>
+              <p className="text-[10px] text-slate-400 font-mono truncate">
+                {currentUser?.email || 'admin@ottavio.ma'}
+              </p>
+            </div>
+            <button
+              onClick={handleLogout}
+              title={t.auth?.logout || 'Déconnexion'}
+              className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors shrink-0"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="px-2 pt-1 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500">
+            <span>{t.common.supportOnline}</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          </div>
         </div>
       </aside>
 
@@ -148,6 +186,16 @@ function AdminNav({ children }: { children: React.ReactNode }) {
                 <span>{item.label}</span>
               </Link>
             ))}
+            <div className="pt-2 border-t border-slate-800 flex items-center justify-between px-3">
+              <span className="text-xs text-slate-400 truncate">{currentUser?.email || 'admin@ottavio.ma'}</span>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 text-xs text-rose-400 font-bold py-1 px-2 rounded-lg hover:bg-rose-500/10"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>{t.auth?.logout || 'Déconnexion'}</span>
+              </button>
+            </div>
           </div>
         )}
 

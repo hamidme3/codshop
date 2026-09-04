@@ -157,6 +157,20 @@ export interface Translations {
     subscribe: string;
     includedFeatures: string;
   };
+  auth: {
+    loginTitle: string;
+    loginSubtitle: string;
+    emailLabel: string;
+    passwordLabel: string;
+    loginButton: string;
+    demoButton: string;
+    demoHint: string;
+    noAccount: string;
+    registerStore: string;
+    invalidCredentials: string;
+    loggingIn: string;
+    logout: string;
+  };
 }
 
 export const DICTIONARY: Record<Language, Translations> = {
@@ -317,6 +331,20 @@ export const DICTIONARY: Record<Language, Translations> = {
       subscribe: 'Select Plan',
       includedFeatures: 'What is included:',
     },
+    auth: {
+      loginTitle: 'Merchant Admin Login',
+      loginSubtitle: 'Sign in to manage your Moroccan COD e-commerce store.',
+      emailLabel: 'Email Address',
+      passwordLabel: 'Password',
+      loginButton: 'Sign In to Dashboard',
+      demoButton: '⚡ Fill Demo Account',
+      demoHint: 'Demo store (Ottavio): admin@ottavio.ma / admin123456',
+      noAccount: "Don't have a store yet?",
+      registerStore: 'Create a Store in 2 Minutes',
+      invalidCredentials: 'Invalid email or password. Please try again.',
+      loggingIn: 'Authenticating...',
+      logout: 'Sign Out',
+    },
   },
   fr: {
     dir: 'ltr',
@@ -475,6 +503,20 @@ export const DICTIONARY: Record<Language, Translations> = {
       subscribe: 'Choisir ce Forfait',
       includedFeatures: 'Fonctionnalités incluses :',
     },
+    auth: {
+      loginTitle: 'Connexion Espace Marchand',
+      loginSubtitle: 'Connectez-vous pour piloter votre boutique e-commerce COD.',
+      emailLabel: 'Adresse Email',
+      passwordLabel: 'Mot de passe',
+      loginButton: 'Accéder au Tableau de Bord',
+      demoButton: '⚡ Remplir Compte Démo',
+      demoHint: 'Boutique démo (Ottavio) : admin@ottavio.ma / admin123456',
+      noAccount: "Vous n'avez pas encore de boutique ?",
+      registerStore: 'Créer ma Boutique en 2 Minutes',
+      invalidCredentials: 'Email ou mot de passe incorrect. Veuillez réessayer.',
+      loggingIn: 'Connexion en cours...',
+      logout: 'Déconnexion',
+    },
   },
   ar: {
     dir: 'rtl',
@@ -632,6 +674,20 @@ export const DICTIONARY: Record<Language, Translations> = {
       scalePlan: 'باقة التوسع (Scale)',
       subscribe: 'اختيار هذه الباقة',
       includedFeatures: 'الميزات المضمنة في الباقة :',
+    },
+    auth: {
+      loginTitle: 'تسجيل دخول لوحة التحكم',
+      loginSubtitle: 'سجل الدخول لإدارة متجرك الإلكتروني والدفع عند الاستلام.',
+      emailLabel: 'البريد الإلكتروني',
+      passwordLabel: 'كلمة المرور',
+      loginButton: 'الدخول إلى لوحة التحكم',
+      demoButton: '⚡ تعبئة الحساب التجريبي',
+      demoHint: 'متجر تجريبي (أوتافيو): admin@ottavio.ma / admin123456',
+      noAccount: 'ليس لديك متجر بعد؟',
+      registerStore: 'أنشئ متجرك في دقيقتين',
+      invalidCredentials: 'البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى المحاولة ثانية.',
+      loggingIn: 'جارٍ تسجيل الدخول...',
+      logout: 'تسجيل الخروج',
     },
   },
 };

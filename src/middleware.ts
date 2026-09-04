@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const hostname = request.headers.get('host') || 'codshop.vipone.site';
 
@@ -19,6 +19,56 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Clone headers to pass tenant and auth information downstream
+  const requestHeaders = new Headers(request.headers);
+
+  // Admin Route Protection
+  if (url.pathname.startsWith('/admin')) {
+    const sessionCookie = request.cookies.get('codshop_session')?.value;
+    let isValidSession = false;
+    let sessionUser: any = null;
+
+    if (sessionCookie) {
+      try {
+        const { jwtVerify } = await import('jose');
+        const secret = new TextEncoder().encode(
+          process.env.JWT_SECRET || 'codshop_super_secret_jwt_key_2026_morocco_saas_platform_key'
+        );
+        const { payload } = await jwtVerify(sessionCookie, secret);
+        isValidSession = true;
+        sessionUser = payload;
+      } catch {
+        isValidSession = false;
+      }
+    }
+
+    if (url.pathname === '/admin/login') {
+      // If already logged in, redirect directly to admin overview
+      if (isValidSession) {
+        const targetStore = sessionUser?.storeSlug || 'ottavio';
+        const redirectRes = NextResponse.redirect(new URL(`/admin?store=${targetStore}`, request.url));
+        redirectRes.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+        return redirectRes;
+      }
+    } else {
+      // Protected admin routes: redirect unauthenticated users to login
+      if (!isValidSession) {
+        const returnUrl = encodeURIComponent(url.pathname + url.search);
+        const loginUrl = new URL(`/admin/login?returnUrl=${returnUrl}`, request.url);
+        const redirectRes = NextResponse.redirect(loginUrl);
+        redirectRes.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+        return redirectRes;
+      }
+
+      // Valid session: attach authenticated user context to headers
+      if (sessionUser) {
+        requestHeaders.set('x-user-id', String(sessionUser.userId || ''));
+        requestHeaders.set('x-user-email', String(sessionUser.email || ''));
+        requestHeaders.set('x-user-store-slug', String(sessionUser.storeSlug || ''));
+      }
+    }
+  }
+
   // Detect Subdomain
   let subdomain: string | null = null;
 
@@ -28,8 +78,7 @@ export function middleware(request: NextRequest) {
     subdomain = currentHost.replace('.localhost', '');
   }
 
-  // Clone headers to pass tenant information downstream
-  const requestHeaders = new Headers(request.headers);
+  // Enrich headers if subdomain present
 
   if (subdomain) {
     requestHeaders.set('x-store-slug', subdomain);
