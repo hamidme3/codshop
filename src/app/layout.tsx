@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
-import { ThemeSelectorBar } from "@/components/ThemeSelectorBar";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+import { StorefrontShell } from "@/components/StorefrontShell";
 
 export const metadata: Metadata = {
   title: "CODShop — Moroccan COD E-Commerce Platform",
@@ -30,12 +28,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body>
+      <body className="bg-slate-950 text-slate-100 antialiased">
         <ThemeProvider>
-          <ThemeSelectorBar />
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
+          <StorefrontShell>{children}</StorefrontShell>
         </ThemeProvider>
       </body>
     </html>
