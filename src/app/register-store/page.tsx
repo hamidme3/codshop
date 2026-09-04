@@ -103,7 +103,7 @@ export default function RegisterStorePage() {
               <div className="flex items-center gap-2 text-xs text-slate-400 pl-1">
                 <span>Lien de votre boutique :</span>
                 <code className="text-amber-400 bg-slate-950 px-2.5 py-1 rounded border border-slate-800 font-mono">
-                  https://{generatedSlug}.codshop.site
+                  https://{generatedSlug}.codshop.vipone.site
                 </code>
               </div>
             </div>

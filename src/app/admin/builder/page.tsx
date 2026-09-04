@@ -161,7 +161,7 @@ function BuilderContent() {
                 {storeData?.name || storeSlug}
               </span>
               <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                {storeSlug}.codshop.site
+                {storeSlug}.codshop.vipone.site
               </span>
             </div>
           </div>

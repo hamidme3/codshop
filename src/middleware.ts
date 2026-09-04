@@ -3,11 +3,11 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
-  const hostname = request.headers.get('host') || 'codshop.site';
+  const hostname = request.headers.get('host') || 'codshop.vipone.site';
 
   // Extract clean domain (strip port if present)
   const currentHost = hostname.split(':')[0].toLowerCase();
-  const rootDomain = process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.site';
+  const rootDomain = process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site';
 
   // Paths that should bypass subdomain rewriting
   const isApi = url.pathname.startsWith('/api');
@@ -35,7 +35,7 @@ export function middleware(request: NextRequest) {
     requestHeaders.set('x-store-slug', subdomain);
     requestHeaders.set('x-tenant-type', 'subdomain');
 
-    // If accessing root "/" under a merchant subdomain (e.g. boutique.codshop.site),
+    // If accessing root "/" under a merchant subdomain (e.g. boutique.codshop.vipone.site),
     // inject the store parameter so the storefront renders their products and 1-step COD form
     if (url.pathname === '/') {
       url.searchParams.set('store', subdomain);
@@ -43,16 +43,19 @@ export function middleware(request: NextRequest) {
         request: { headers: requestHeaders },
       });
       response.headers.set('x-store-slug', subdomain);
+      response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
       return response;
     }
   }
 
   // Return standard response with enriched headers
-  return NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   });
+  response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+  return response;
 }
 
 export const config = {

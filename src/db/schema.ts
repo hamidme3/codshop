@@ -6,7 +6,7 @@ export const stores = pgTable(
   'stores',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    slug: text('slug').notNull().unique(), // e.g. "ottavio" -> ottavio.codshop.site
+    slug: text('slug').notNull().unique(), // e.g. "ottavio" -> ottavio.codshop.vipone.site
     name: text('name').notNull(),
     email: text('email').notNull(),
     phone: text('phone').notNull(),

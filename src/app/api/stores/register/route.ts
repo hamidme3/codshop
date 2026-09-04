@@ -39,7 +39,7 @@ export async function POST(req: Request) {
       await createDbStore({
         name,
         slug: requestedSlug,
-        email: `${requestedSlug}@codshop.site`,
+        email: `${requestedSlug}@codshop.vipone.site`,
         phone: whatsapp,
         planTier: 'starter',
       });

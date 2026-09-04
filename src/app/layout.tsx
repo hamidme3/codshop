@@ -6,8 +6,21 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "CODShop — Boutique E-Commerce Maroc & Paiement à la Livraison",
-  description: "Plateforme e-commerce nouvelle génération pensée pour le marché marocain. Produits certifiés, livraison express 24h/48h et paiement en espèces à la livraison.",
+  title: "CODShop — Moroccan COD E-Commerce Platform",
+  description: "Next-generation Moroccan e-commerce and Cash-On-Delivery SaaS platform.",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'none',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({

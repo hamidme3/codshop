@@ -35,7 +35,7 @@ services:
       - PORT=3000
       - DATABASE_URL=postgresql://codshop_user:codshop_secret_password@db:5432/codshop_db
       - NEXT_PUBLIC_APP_URL=http://localhost:3006
-      - NEXT_PUBLIC_WILDCARD_DOMAIN=codshop.site
+      - NEXT_PUBLIC_WILDCARD_DOMAIN=codshop.vipone.site
 
 volumes:
   codshop_pgdata:

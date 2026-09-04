@@ -67,7 +67,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
               {t.common.liveStorefront} <ExternalLink className="w-3 h-3" />
             </a>
           </div>
-          <div className="font-bold text-white text-sm truncate">{storeSlug}.codshop.site</div>
+          <div className="font-bold text-white text-sm truncate">{storeSlug}.codshop.vipone.site</div>
           
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-1 text-[10px] text-amber-400">

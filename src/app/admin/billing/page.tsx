@@ -32,7 +32,7 @@ function BillingContent() {
             <ArrowLeft className="w-4 h-4" /> Retour au Page Builder ({storeSlug})
           </Link>
           <div className="text-xs font-mono text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/30">
-            Boutique : {storeSlug}.codshop.site
+            Boutique : {storeSlug}.codshop.vipone.site
           </div>
         </div>
 

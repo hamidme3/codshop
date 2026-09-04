@@ -11,15 +11,16 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@codshop-postgres:5432/codshop}
-      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://codshop.site}
-      - NEXT_PUBLIC_WILDCARD_DOMAIN=${NEXT_PUBLIC_WILDCARD_DOMAIN:-codshop.site}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://codshop.vipone.site}
+      - NEXT_PUBLIC_WILDCARD_DOMAIN=${NEXT_PUBLIC_WILDCARD_DOMAIN:-codshop.vipone.site}
     networks:
       - coolify
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=coolify"
-      # Wildcard Subdomain & Root Domain Router
-      - "traefik.http.routers.codshop-app.rule=Host(`codshop.site`) || Host(`www.codshop.site`) || HostRegexp(`{subdomain:[a-z0-9-]+}.codshop.site`)"
+      # Platform router for codshop.vipone.site and merchant stores (*.codshop.vipone.site)
+      - "traefik.http.routers.codshop-app.rule=Host(`codshop.vipone.site`) || HostRegexp(`{subdomain:[a-z0-9-]+}.codshop.vipone.site`)"
+      - "traefik.http.routers.codshop-app.priority=10"
       - "traefik.http.routers.codshop-app.entrypoints=websecure"
       - "traefik.http.routers.codshop-app.tls=true"
       - "traefik.http.routers.codshop-app.tls.certresolver=letsencrypt"
