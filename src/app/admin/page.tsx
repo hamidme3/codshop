@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { getOrders, getAnalytics } from '@/lib/backoffice';
 import { useLanguage } from '@/contexts/LanguageContext';
+import MilestoneWidget from '@/components/admin/MilestoneWidget';
 
 function OverviewContent() {
   const searchParams = useSearchParams();
@@ -48,6 +49,9 @@ function OverviewContent() {
           </Link>
         </div>
       </div>
+
+      {/* 5-Tier Gamification Milestones Progress Widget ($1K to $10M) */}
+      <MilestoneWidget />
 
       {/* 4 High-Impact KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

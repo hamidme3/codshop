@@ -151,15 +151,205 @@ export const users = pgTable(
   ]
 );
 
+// ── Accounts (Master Merchant Accounts decoupled from single store) ──
+export const accounts = pgTable(
+  'accounts',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    email: text('email').notNull().unique(),
+    passwordHash: text('password_hash'),
+    firstName: text('first_name').notNull(),
+    lastName: text('last_name').notNull(),
+    phone: text('phone'),
+    phoneVerifiedAt: timestamp('phone_verified_at'),
+    emailVerifiedAt: timestamp('email_verified_at'),
+    preferredLocale: text('preferred_locale').default('fr').notNull(), // 'fr' | 'ar' | 'en'
+    countryCode: text('country_code').default('MA').notNull(),
+    avatarUrl: text('avatar_url'),
+    is2faEnabled: text('is_2fa_enabled').default('false').notNull(),
+    twoFactorSecret: text('two_factor_secret'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('account_email_idx').on(table.email),
+  ]
+);
+
+// ── Store Memberships (Multi-Tenancy & Roles) ──────────────────
+export const storeMemberships = pgTable(
+  'store_memberships',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    accountId: uuid('account_id')
+      .references(() => accounts.id, { onDelete: 'cascade' })
+      .notNull(),
+    storeId: uuid('store_id')
+      .references(() => stores.id, { onDelete: 'cascade' })
+      .notNull(),
+    role: text('role').default('owner').notNull(), // 'owner' | 'admin' | 'agent'
+    isOwner: text('is_owner').default('true').notNull(), // 'true' | 'false'
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('membership_account_idx').on(table.accountId),
+    index('membership_store_idx').on(table.storeId),
+  ]
+);
+
+// ── User Sessions (Login Activity & Auditor) ───────────────────
+export const userSessions = pgTable(
+  'user_sessions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    accountId: uuid('account_id')
+      .references(() => accounts.id, { onDelete: 'cascade' })
+      .notNull(),
+    sessionToken: text('session_token').notNull().unique(),
+    ipAddress: text('ip_address').notNull(),
+    userAgent: text('user_agent').notNull(),
+    browser: text('browser'),
+    os: text('os'),
+    city: text('city').default('Casablanca'),
+    country: text('country').default('Morocco'),
+    lastActiveAt: timestamp('last_active_at').defaultNow().notNull(),
+    expiresAt: timestamp('expires_at').notNull(),
+    isRevoked: text('is_revoked').default('false').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('session_token_idx').on(table.sessionToken),
+    index('session_account_idx').on(table.accountId),
+  ]
+);
+
+// ── KYC & Legal Entity Compliance ──────────────────────────────
+export const kycVerifications = pgTable(
+  'kyc_verifications',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    accountId: uuid('account_id')
+      .references(() => accounts.id, { onDelete: 'cascade' })
+      .notNull(),
+    entityType: text('entity_type').notNull(), // 'auto_entrepreneur' | 'sarl' | 'individual'
+    status: text('status').default('draft').notNull(), // 'draft' | 'pending' | 'verified' | 'rejected'
+    companyName: text('company_name'),
+    iceNumber: text('ice_number'),
+    taxId: text('tax_id'),
+    rcNumber: text('rc_number'),
+    rcCity: text('rc_city'),
+    cinNumber: text('cin_number'),
+    bankRib: text('bank_rib'),
+    bankName: text('bank_name'),
+    documentUrls: jsonb('document_urls').$type<Record<string, string>>().default({}).notNull(),
+    rejectionReason: text('rejection_reason'),
+    verifiedAt: timestamp('verified_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('kyc_account_idx').on(table.accountId),
+  ]
+);
+
+// ── Support Tickets & Communication Desk ───────────────────────
+export const supportTickets = pgTable(
+  'support_tickets',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    accountId: uuid('account_id')
+      .references(() => accounts.id, { onDelete: 'cascade' })
+      .notNull(),
+    storeId: uuid('store_id').references(() => stores.id, { onDelete: 'set null' }),
+    ticketNumber: text('ticket_number').notNull().unique(), // e.g. "TCK-8491"
+    subject: text('subject').notNull(),
+    department: text('department').notNull(), // 'billing' | 'cod_orders' | 'theme_builder' | 'technical'
+    priority: text('priority').default('normal').notNull(), // 'low' | 'normal' | 'urgent'
+    status: text('status').default('open').notNull(), // 'open' | 'in_progress' | 'waiting_merchant' | 'closed'
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('ticket_number_idx').on(table.ticketNumber),
+    index('ticket_account_idx').on(table.accountId),
+  ]
+);
+
+export const ticketMessages = pgTable(
+  'ticket_messages',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    ticketId: uuid('ticket_id')
+      .references(() => supportTickets.id, { onDelete: 'cascade' })
+      .notNull(),
+    senderType: text('sender_type').notNull(), // 'merchant' | 'support_staff' | 'system'
+    senderId: uuid('sender_id'),
+    message: text('message').notNull(),
+    attachments: jsonb('attachments').$type<{ url: string; filename: string; size: number }[]>().default([]).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('ticket_msg_idx').on(table.ticketId),
+  ]
+);
+
+// ── Ad Integrations & Pixels ───────────────────────────────────
+export const adIntegrations = pgTable(
+  'ad_integrations',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    storeId: uuid('store_id')
+      .references(() => stores.id, { onDelete: 'cascade' })
+      .notNull()
+      .unique(),
+    metaPixelId: text('meta_pixel_id'),
+    metaAccessToken: text('meta_access_token'),
+    tiktokPixelId: text('tiktok_pixel_id'),
+    tiktokAccessToken: text('tiktok_access_token'),
+    snapchatPixelId: text('snapchat_pixel_id'),
+    googleAnalyticsId: text('google_analytics_id'),
+    googleMerchantCenterId: text('google_merchant_center_id'),
+    pinterestPartnerId: text('pinterest_partner_id'),
+    pinterestCreditClaimed: text('pinterest_credit_claimed').default('false').notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('ad_store_idx').on(table.storeId),
+  ]
+);
+
 // ── Relations ──────────────────────────────────────────────────
 export const storesRelations = relations(stores, ({ many, one }) => ({
   users: many(users),
+  memberships: many(storeMemberships),
   products: many(products),
   orders: many(orders),
   customers: many(customers),
   layout: one(pageLayouts, {
     fields: [stores.id],
     references: [pageLayouts.storeId],
+  }),
+  adIntegration: one(adIntegrations, {
+    fields: [stores.id],
+    references: [adIntegrations.storeId],
+  }),
+}));
+
+export const accountsRelations = relations(accounts, ({ many }) => ({
+  memberships: many(storeMemberships),
+  sessions: many(userSessions),
+  tickets: many(supportTickets),
+  kyc: many(kycVerifications),
+}));
+
+export const storeMembershipsRelations = relations(storeMemberships, ({ one }) => ({
+  account: one(accounts, {
+    fields: [storeMemberships.accountId],
+    references: [accounts.id],
+  }),
+  store: one(stores, {
+    fields: [storeMemberships.storeId],
+    references: [stores.id],
   }),
 }));
 

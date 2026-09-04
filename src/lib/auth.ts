@@ -15,6 +15,9 @@ export interface AuthSession {
   storeId: string;
   storeSlug: string;
   role: string;
+  accountId?: string;
+  activeStoreId?: string;
+  activeStoreSlug?: string;
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -52,3 +55,16 @@ export async function getSession(): Promise<AuthSession | null> {
     return null;
   }
 }
+
+export function setSessionCookie(response: { cookies: { set: Function } }, token: string) {
+  response.cookies.set({
+    name: SESSION_COOKIE_NAME,
+    value: token,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  });
+}
+

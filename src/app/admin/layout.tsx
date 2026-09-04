@@ -6,9 +6,10 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { 
   LayoutDashboard, ShoppingBag, Package, Palette, 
   TrendingUp, Truck, CreditCard, ExternalLink, 
-  Clock, Store, Menu, X, Users, Filter, Wallet, LogOut 
+  Clock, Store, Menu, X, Users, Filter, Wallet, LogOut, Shield 
 } from 'lucide-react';
 import LanguageToggle from '@/components/LanguageToggle';
+import StoreSwitcher from '@/components/admin/StoreSwitcher';
 import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
 
 function AdminNav({ children }: { children: React.ReactNode }) {
@@ -47,6 +48,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
     { label: t.nav.customers, href: `/admin/customers?store=${storeSlug}`, icon: Users },
     { label: t.nav.payments, href: `/admin/payments?store=${storeSlug}`, icon: Wallet },
     { label: t.nav.logistics, href: `/admin/logistics?store=${storeSlug}`, icon: Truck },
+    { label: 'Sécurité & Accès', href: `/admin/security?store=${storeSlug}`, icon: Shield },
     { label: t.nav.billing, href: `/admin/billing?store=${storeSlug}`, icon: CreditCard },
   ];
 
@@ -73,7 +75,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
           </span>
         </div>
 
-        {/* Store Profile Card */}
+        {/* Store Profile & Switcher Card */}
         <div className="p-4 border-b border-slate-800/80 bg-slate-950/40 space-y-2.5">
           <div className="flex items-center justify-between text-xs">
             <span className="text-slate-400 font-medium">{t.common.activeStore}</span>
@@ -86,7 +88,8 @@ function AdminNav({ children }: { children: React.ReactNode }) {
               {t.common.liveStorefront} <ExternalLink className="w-3 h-3" />
             </a>
           </div>
-          <div className="font-bold text-white text-sm truncate">{storeSlug}.codshop.vipone.site</div>
+
+          <StoreSwitcher currentSlug={storeSlug} />
           
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-1 text-[10px] text-amber-400">

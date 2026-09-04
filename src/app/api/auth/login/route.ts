@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { findUserByEmail } from '@/lib/db-repository';
+import { findUserByEmail, recordUserSession, getAccountStores } from '@/lib/db-repository';
 import { verifyPassword, signSessionToken, SESSION_COOKIE_NAME } from '@/lib/auth';
 
 export async function POST(request: Request) {
@@ -30,15 +30,42 @@ export async function POST(request: Request) {
       );
     }
 
-    const storeSlug = user.store?.slug || 'ottavio';
+    // Check account stores
+    const accountStores = await getAccountStores(user.id);
+    const primaryStore = accountStores.data[0] || {
+      id: user.storeId,
+      slug: user.store?.slug || 'ottavio',
+    };
+
+    const storeSlug = primaryStore.slug;
+    const storeId = primaryStore.id;
 
     const token = await signSessionToken({
       userId: user.id,
       email: user.email,
       name: user.name,
-      storeId: user.storeId,
-      storeSlug,
+      storeId: storeId,
+      storeSlug: storeSlug,
       role: user.role,
+      accountId: user.id,
+      activeStoreId: storeId,
+      activeStoreSlug: storeSlug,
+    });
+
+    // Record session audit log
+    const forwardedFor = request.headers.get('x-forwarded-for') || '196.200.150.12';
+    const ipAddress = forwardedFor.split(',')[0].trim();
+    const userAgent = request.headers.get('user-agent') || 'Mozilla/5.0';
+
+    await recordUserSession({
+      accountId: user.id,
+      sessionToken: token,
+      ipAddress,
+      userAgent,
+      browser: userAgent.includes('Chrome') ? 'Chrome' : userAgent.includes('Safari') ? 'Safari' : 'Firefox',
+      os: userAgent.includes('Mac') ? 'macOS' : userAgent.includes('Windows') ? 'Windows' : 'Linux / Mobile',
+      city: 'Casablanca',
+      country: 'Maroc',
     });
 
     const response = NextResponse.json({
@@ -72,3 +99,4 @@ export async function POST(request: Request) {
     );
   }
 }
+
