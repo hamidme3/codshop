@@ -41,14 +41,13 @@ services:
       - "traefik.docker.network=coolify"
       # HTTP Router
       - "traefik.http.routers.codshop-app-http.entrypoints=http"
-      - "traefik.http.routers.codshop-app-http.rule=Host(`codshop.vipone.site`) || HostRegexp(`{subdomain:[a-z0-9-]+}.codshop.vipone.site`)"
+      - "traefik.http.routers.codshop-app-http.rule=Host(`codshop.vipone.site`) || HostRegexp(`[a-z0-9-]+\\.codshop\\.vipone\\.site`)"
       - "traefik.http.routers.codshop-app-http.priority=10"
       # HTTPS Router
       - "traefik.http.routers.codshop-app-https.entrypoints=https"
-      - "traefik.http.routers.codshop-app-https.rule=Host(`codshop.vipone.site`) || HostRegexp(`{subdomain:[a-z0-9-]+}.codshop.vipone.site`)"
+      - "traefik.http.routers.codshop-app-https.rule=Host(`codshop.vipone.site`) || HostRegexp(`[a-z0-9-]+\\.codshop\\.vipone\\.site`)"
       - "traefik.http.routers.codshop-app-https.priority=10"
       - "traefik.http.routers.codshop-app-https.tls=true"
-      - "traefik.http.routers.codshop-app-https.tls.certresolver=letsencrypt"
       - "traefik.http.services.codshop-app.loadbalancer.server.port=3000"
 
 volumes:
