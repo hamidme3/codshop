@@ -380,3 +380,37 @@ export const customersRelations = relations(customers, ({ one }) => ({
     references: [stores.id],
   }),
 }));
+
+export const supportTicketsRelations = relations(supportTickets, ({ one, many }) => ({
+  account: one(accounts, {
+    fields: [supportTickets.accountId],
+    references: [accounts.id],
+  }),
+  store: one(stores, {
+    fields: [supportTickets.storeId],
+    references: [stores.id],
+  }),
+  messages: many(ticketMessages),
+}));
+
+export const ticketMessagesRelations = relations(ticketMessages, ({ one }) => ({
+  ticket: one(supportTickets, {
+    fields: [ticketMessages.ticketId],
+    references: [supportTickets.id],
+  }),
+}));
+
+export const adIntegrationsRelations = relations(adIntegrations, ({ one }) => ({
+  store: one(stores, {
+    fields: [adIntegrations.storeId],
+    references: [stores.id],
+  }),
+}));
+
+export const kycVerificationsRelations = relations(kycVerifications, ({ one }) => ({
+  account: one(accounts, {
+    fields: [kycVerifications.accountId],
+    references: [accounts.id],
+  }),
+}));
+

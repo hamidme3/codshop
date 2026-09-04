@@ -6,7 +6,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { 
   LayoutDashboard, ShoppingBag, Package, Palette, 
   TrendingUp, Truck, CreditCard, ExternalLink, 
-  Clock, Store, Menu, X, Users, Filter, Wallet, LogOut, Shield, UserCheck, Zap 
+  Clock, Store, Menu, X, Users, Filter, Wallet, LogOut, Shield, UserCheck, Zap, LifeBuoy 
 } from 'lucide-react';
 import LanguageToggle from '@/components/LanguageToggle';
 import StoreSwitcher from '@/components/admin/StoreSwitcher';
@@ -51,6 +51,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
     { label: 'Identité & KYC', href: `/admin/identity?store=${storeSlug}`, icon: UserCheck },
     { label: 'Pixels & Publicités', href: `/admin/ads?store=${storeSlug}`, icon: Zap },
     { label: 'Sécurité & Accès', href: `/admin/security?store=${storeSlug}`, icon: Shield },
+    { label: 'Support & Concierge', href: `/admin/support?store=${storeSlug}`, icon: LifeBuoy },
     { label: t.nav.billing, href: `/admin/billing?store=${storeSlug}`, icon: CreditCard },
   ];
 

@@ -1,5 +1,5 @@
 import { getDb, schema } from '@/db';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, asc, and } from 'drizzle-orm';
 import { 
   getOrders as getMockOrders, 
   getProducts as getMockProducts, 
@@ -877,4 +877,220 @@ export async function invalidateSession(sessionId: string, accountId: string) {
     return false;
   }
 }
+
+// ── Support Tickets & Communication Desk ───────────────────────
+export async function createSupportTicket(data: {
+  accountId: string;
+  storeId?: string;
+  subject: string;
+  department: string;
+  priority?: string;
+  message: string;
+  attachments?: any[];
+}) {
+  const db = getDb();
+  const ticketNumber = `TCK-${Math.floor(100000 + Math.random() * 900000)}`;
+
+  if (!db) {
+    return {
+      id: `ticket_${Date.now()}`,
+      ticketNumber,
+      accountId: data.accountId,
+      storeId: data.storeId || null,
+      subject: data.subject,
+      department: data.department,
+      priority: data.priority || 'normal',
+      status: 'open',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      messages: [
+        {
+          id: `msg_${Date.now()}`,
+          senderType: 'merchant',
+          message: data.message,
+          attachments: data.attachments || [],
+          createdAt: new Date(),
+        },
+      ],
+    };
+  }
+
+  try {
+    const [newTicket] = await db
+      .insert(schema.supportTickets)
+      .values({
+        accountId: data.accountId,
+        storeId: data.storeId || null,
+        ticketNumber,
+        subject: data.subject,
+        department: data.department,
+        priority: data.priority || 'normal',
+        status: 'open',
+      })
+      .returning();
+
+    // Add initial merchant message
+    const [initialMessage] = await db
+      .insert(schema.ticketMessages)
+      .values({
+        ticketId: newTicket.id,
+        senderType: 'merchant',
+        senderId: data.accountId,
+        message: data.message,
+        attachments: data.attachments || [],
+      })
+      .returning();
+
+    // Add automated welcome acknowledgement from Moroccan Support Concierge
+    const [welcomeMessage] = await db
+      .insert(schema.ticketMessages)
+      .values({
+        ticketId: newTicket.id,
+        senderType: 'support_staff',
+        message:
+          'Bonjour ! Notre équipe de support CODShop Maroc a bien reçu votre demande. Un spécialiste de Casablanca prend en charge votre dossier. Vous recevrez une notification d’ici 15 minutes.',
+        attachments: [],
+      })
+      .returning();
+
+    return {
+      ...newTicket,
+      messages: [initialMessage, welcomeMessage],
+    };
+  } catch (err) {
+    console.error('[DbRepo] Error creating support ticket:', err);
+    throw err;
+  }
+}
+
+export async function getSupportTickets(accountId: string) {
+  const db = getDb();
+  if (!db) return [];
+
+  try {
+    const tickets = await db.query.supportTickets.findMany({
+      where: eq(schema.supportTickets.accountId, accountId),
+      orderBy: [desc(schema.supportTickets.updatedAt)],
+      with: {
+        messages: {
+          orderBy: [desc(schema.ticketMessages.createdAt)],
+          limit: 1,
+        },
+      },
+    });
+
+    return tickets.map((t) => ({
+      id: t.id,
+      ticketNumber: t.ticketNumber,
+      subject: t.subject,
+      department: t.department,
+      priority: t.priority,
+      status: t.status,
+      createdAt: t.createdAt,
+      updatedAt: t.updatedAt,
+      latestMessage: t.messages?.[0]?.message || '',
+      messageCount: t.messages?.length || 0,
+    }));
+  } catch (err) {
+    console.error('[DbRepo] Error fetching support tickets:', err);
+    return [];
+  }
+}
+
+export async function getSupportTicketById(ticketId: string, accountId: string) {
+  const db = getDb();
+  if (!db) return null;
+
+  try {
+    const ticket = await db.query.supportTickets.findFirst({
+      where: and(
+        eq(schema.supportTickets.id, ticketId),
+        eq(schema.supportTickets.accountId, accountId)
+      ),
+      with: {
+        messages: {
+          orderBy: [asc(schema.ticketMessages.createdAt)],
+        },
+      },
+    });
+
+    return ticket || null;
+  } catch (err) {
+    console.error('[DbRepo] Error fetching support ticket details:', err);
+    return null;
+  }
+}
+
+export async function addTicketMessage(data: {
+  ticketId: string;
+  senderType: 'merchant' | 'support_staff';
+  senderId?: string;
+  message: string;
+  attachments?: any[];
+}) {
+  const db = getDb();
+  if (!db) {
+    return {
+      id: `msg_${Date.now()}`,
+      ticketId: data.ticketId,
+      senderType: data.senderType,
+      message: data.message,
+      attachments: data.attachments || [],
+      createdAt: new Date(),
+    };
+  }
+
+  try {
+    const [msg] = await db
+      .insert(schema.ticketMessages)
+      .values({
+        ticketId: data.ticketId,
+        senderType: data.senderType,
+        senderId: data.senderId || null,
+        message: data.message,
+        attachments: data.attachments || [],
+      })
+      .returning();
+
+    // Update ticket timestamp and reopen if closed
+    await db
+      .update(schema.supportTickets)
+      .set({
+        status: data.senderType === 'merchant' ? 'open' : 'waiting_merchant',
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.supportTickets.id, data.ticketId));
+
+    return msg;
+  } catch (err) {
+    console.error('[DbRepo] Error adding ticket message:', err);
+    throw err;
+  }
+}
+
+export async function closeSupportTicket(ticketId: string, accountId: string) {
+  const db = getDb();
+  if (!db) return true;
+
+  try {
+    await db
+      .update(schema.supportTickets)
+      .set({
+        status: 'closed',
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(schema.supportTickets.id, ticketId),
+          eq(schema.supportTickets.accountId, accountId)
+        )
+      );
+
+    return true;
+  } catch (err) {
+    console.error('[DbRepo] Error closing support ticket:', err);
+    return false;
+  }
+}
+
 
