@@ -1,9 +1,34 @@
 import { NextResponse } from 'next/server';
+import { createOrder } from '@/lib/db-repository';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const orderId = `CMD-${Math.floor(100000 + Math.random() * 900000)}`;
+    const storeSlug = body.storeSlug || body.store || 'ottavio';
+
+    // Persist order in database
+    const savedOrder = await createOrder({
+      storeSlug,
+      customerName: body.customer?.fullName || 'Client Anonyme',
+      phone: body.customer?.phone || '',
+      city: body.customer?.city || 'Casablanca',
+      address: body.customer?.address || 'Adresse standard',
+      items: [
+        {
+          id: '1',
+          title: body.product?.title || 'Produit',
+          quantity: Number(body.quantity) || 1,
+          price: Number(body.unitPrice) || Number(body.total) || 299,
+          variant: body.variant || 'Standard',
+        },
+      ],
+      subtotal: Number(body.total) - 20,
+      shippingFee: 20,
+      total: Number(body.total) || 299,
+      courier: 'ozon',
+    });
+
+    const orderId = savedOrder.orderNumber;
 
     console.log(`[CODShop Order Created] ID: ${orderId}`, {
       customer: body.customer?.fullName,

@@ -7,10 +7,12 @@ import {
   CheckCircle2, XCircle, Clock, Filter, Printer, ExternalLink 
 } from 'lucide-react';
 import { getOrders, updateOrderStatus, Order, OrderStatus } from '@/lib/backoffice';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 function OrdersContent() {
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
+  const { t } = useLanguage();
 
   const [orders, setOrders] = useState<Order[]>(getOrders(storeSlug));
   const [activeFilter, setActiveFilter] = useState<string>('all');
@@ -55,19 +57,19 @@ function OrdersContent() {
   const getStatusBadge = (status: OrderStatus) => {
     switch (status) {
       case 'new':
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">Nouvelle</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">{t.orders.tabs.new}</span>;
       case 'to_confirm':
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/30">À Confirmer</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/30">{t.orders.tabs.toConfirm}</span>;
       case 'confirmed':
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">Confirmée</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">{t.orders.tabs.confirmed}</span>;
       case 'shipping':
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">En Livraison</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">{t.orders.tabs.shipping}</span>;
       case 'delivered':
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Livrée & Encaissée</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">{t.orders.tabs.delivered}</span>;
       case 'returned':
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">Retournée</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">{t.orders.tabs.returned}</span>;
       default:
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400">Annulée</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400">Canceled</span>;
     }
   };
 
@@ -77,28 +79,28 @@ function OrdersContent() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-3">
-            <ShoppingBag className="w-8 h-8 text-amber-400" /> Gestion des Commandes COD
+            <ShoppingBag className="w-8 h-8 text-amber-400" /> {t.orders.title}
           </h1>
           <p className="text-slate-400 text-xs sm:text-sm mt-1">
-            Pipeline d&apos;appel, confirmation WhatsApp et expédition Ozon Express & SendIt.
+            {t.orders.subtitle}
           </p>
         </div>
 
         <div className="text-xs font-mono text-slate-400 bg-slate-900 px-3 py-2 rounded-xl border border-slate-800">
-          Total : <strong>{orders.length} commandes</strong> ({orders.filter(o => o.status === 'delivered').length} livrées)
+          Total : <strong>{orders.length}</strong> ({orders.filter(o => o.status === 'delivered').length} {t.orders.tabs.delivered})
         </div>
       </div>
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800 text-xs">
         {[
-          { id: 'all', label: 'Toutes les commandes' },
-          { id: 'new', label: 'Nouvelles (Urgent)' },
-          { id: 'to_confirm', label: 'À Confirmer' },
-          { id: 'confirmed', label: 'Confirmées (À expédier)' },
-          { id: 'shipping', label: 'En Livraison' },
-          { id: 'delivered', label: 'Livrées & Encaissées' },
-          { id: 'returned', label: 'Retours' },
+          { id: 'all', label: t.orders.tabs.all },
+          { id: 'new', label: t.orders.tabs.new },
+          { id: 'to_confirm', label: t.orders.tabs.toConfirm },
+          { id: 'confirmed', label: t.orders.tabs.confirmed },
+          { id: 'shipping', label: t.orders.tabs.shipping },
+          { id: 'delivered', label: t.orders.tabs.delivered },
+          { id: 'returned', label: t.orders.tabs.returned },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -122,13 +124,13 @@ function OrdersContent() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher par nom, téléphone (06...), ville ou N° CMD..."
+            placeholder={`${t.common.search} (06...), ville, N°...`}
             className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
           />
         </div>
 
         <div className="text-xs text-slate-400">
-          Affichage de <strong>{filteredOrders.length}</strong> commande(s)
+          <strong>{filteredOrders.length}</strong> {t.orders.table.order}(s)
         </div>
       </div>
 
@@ -138,13 +140,13 @@ function OrdersContent() {
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-slate-800 text-slate-400 bg-slate-950/50 font-semibold">
-                <th className="py-3.5 px-4">N° Commande</th>
-                <th className="py-3.5 px-4">Client & Contact</th>
-                <th className="py-3.5 px-4">Ville</th>
-                <th className="py-3.5 px-4">Produits</th>
-                <th className="py-3.5 px-4">Total COD</th>
-                <th className="py-3.5 px-4">Statut</th>
-                <th className="py-3.5 px-4 text-center">Actions Rapides</th>
+                <th className="py-3.5 px-4">{t.orders.table.order}</th>
+                <th className="py-3.5 px-4">{t.orders.table.client}</th>
+                <th className="py-3.5 px-4">{t.dashboard.city}</th>
+                <th className="py-3.5 px-4">{t.orders.table.items}</th>
+                <th className="py-3.5 px-4">{t.orders.table.amount}</th>
+                <th className="py-3.5 px-4">{t.orders.table.status}</th>
+                <th className="py-3.5 px-4 text-center">{t.orders.table.actions}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">

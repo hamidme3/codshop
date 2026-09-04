@@ -9,16 +9,14 @@ import {
   Clock, Store, Menu, X, Users, Filter, Wallet 
 } from 'lucide-react';
 import LanguageToggle from '@/components/LanguageToggle';
-import { getTranslation, Language } from '@/lib/i18n';
+import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
 
 function AdminNav({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState<Language>('en');
-
-  const t = getTranslation(currentLang);
+  const { language, setLanguage, t, isRTL } = useLanguage();
 
   const navItems = [
     { label: t.nav.overview, href: `/admin?store=${storeSlug}`, icon: LayoutDashboard, exact: true },
@@ -79,7 +77,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="pt-1">
-            <LanguageToggle currentLang={currentLang} onLanguageChange={setCurrentLang} />
+            <LanguageToggle />
           </div>
         </div>
 
@@ -126,7 +124,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
             <span>{storeSlug}</span>
           </Link>
           <div className="flex items-center gap-2">
-            <LanguageToggle currentLang={currentLang} onLanguageChange={setCurrentLang} />
+            <LanguageToggle />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-slate-400 hover:text-white"
@@ -164,8 +162,10 @@ function AdminNav({ children }: { children: React.ReactNode }) {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">Chargement Admin...</div>}>
-      <AdminNav>{children}</AdminNav>
+    <Suspense fallback={<div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">Loading Admin...</div>}>
+      <LanguageProvider>
+        <AdminNav>{children}</AdminNav>
+      </LanguageProvider>
     </Suspense>
   );
 }

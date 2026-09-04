@@ -33,6 +33,20 @@ export async function POST(req: Request) {
       themeId: themeId || 'luxury',
     });
 
+    // Also persist store to PostgreSQL DB repository
+    try {
+      const { createStore: createDbStore } = await import('@/lib/db-repository');
+      await createDbStore({
+        name,
+        slug: requestedSlug,
+        email: `${requestedSlug}@codshop.site`,
+        phone: whatsapp,
+        planTier: 'starter',
+      });
+    } catch (dbErr) {
+      console.warn('[Store DB Notice] DB persist fallback:', dbErr);
+    }
+
     console.log(`[Store Provisioned] ${newStore.name} (${newStore.slug}) - 14 Days Free Trial Active`);
 
     return NextResponse.json({

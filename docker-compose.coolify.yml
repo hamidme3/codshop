@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  codshop:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: codshop-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@codshop-postgres:5432/codshop}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://codshop.site}
+      - NEXT_PUBLIC_WILDCARD_DOMAIN=${NEXT_PUBLIC_WILDCARD_DOMAIN:-codshop.site}
+    networks:
+      - coolify
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=coolify"
+      # Wildcard Subdomain & Root Domain Router
+      - "traefik.http.routers.codshop-app.rule=Host(`codshop.site`) || Host(`www.codshop.site`) || HostRegexp(`{subdomain:[a-z0-9-]+}.codshop.site`)"
+      - "traefik.http.routers.codshop-app.entrypoints=websecure"
+      - "traefik.http.routers.codshop-app.tls=true"
+      - "traefik.http.routers.codshop-app.tls.certresolver=letsencrypt"
+      - "traefik.http.services.codshop-app.loadbalancer.server.port=3000"
+
+networks:
+  coolify:
+    external: true
