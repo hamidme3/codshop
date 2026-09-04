@@ -18,12 +18,16 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=coolify"
-      # Platform router for codshop.vipone.site and merchant stores (*.codshop.vipone.site)
-      - "traefik.http.routers.codshop-app.rule=Host(`codshop.vipone.site`) || HostRegexp(`{subdomain:[a-z0-9-]+}.codshop.vipone.site`)"
-      - "traefik.http.routers.codshop-app.priority=10"
-      - "traefik.http.routers.codshop-app.entrypoints=websecure"
-      - "traefik.http.routers.codshop-app.tls=true"
-      - "traefik.http.routers.codshop-app.tls.certresolver=letsencrypt"
+      # HTTP Router
+      - "traefik.http.routers.codshop-app-http.entrypoints=http"
+      - "traefik.http.routers.codshop-app-http.rule=Host(`codshop.vipone.site`) || HostRegexp(`{subdomain:[a-z0-9-]+}.codshop.vipone.site`)"
+      - "traefik.http.routers.codshop-app-http.priority=10"
+      # HTTPS Router
+      - "traefik.http.routers.codshop-app-https.entrypoints=https"
+      - "traefik.http.routers.codshop-app-https.rule=Host(`codshop.vipone.site`) || HostRegexp(`{subdomain:[a-z0-9-]+}.codshop.vipone.site`)"
+      - "traefik.http.routers.codshop-app-https.priority=10"
+      - "traefik.http.routers.codshop-app-https.tls=true"
+      - "traefik.http.routers.codshop-app-https.tls.certresolver=letsencrypt"
       - "traefik.http.services.codshop-app.loadbalancer.server.port=3000"
 
 networks:
