@@ -181,6 +181,18 @@ function LoginContent() {
                 </>
               )}
             </button>
+
+            {/* Alternative SMS Login */}
+            <div className="pt-2">
+              <Link
+                href="/sso/auth/phone-number"
+                className="w-full py-3 px-4 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-2"
+              >
+                <span>🇲🇦</span>
+                <span className="text-amber-400 font-bold">Connexion Express par SMS</span>
+                <span className="text-[10px] text-slate-500 font-normal">(Sans mot de passe)</span>
+              </Link>
+            </div>
           </form>
 
           {/* Registration Link */}
