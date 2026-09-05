@@ -6,7 +6,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { 
   LayoutDashboard, ShoppingBag, Package, Palette, 
   TrendingUp, Truck, CreditCard, ExternalLink, 
-  Clock, Store, Menu, X, Users, Filter, Wallet, LogOut, Shield, UserCheck, Zap, LifeBuoy 
+  Clock, Store, Menu, X, Users, Filter, Wallet, LogOut, Shield, UserCheck, Zap, LifeBuoy, UserCog, Layers 
 } from 'lucide-react';
 import LanguageToggle from '@/components/LanguageToggle';
 import StoreSwitcher from '@/components/admin/StoreSwitcher';
@@ -42,7 +42,8 @@ function AdminNav({ children }: { children: React.ReactNode }) {
     { label: t.nav.overview, href: `/admin?store=${storeSlug}`, icon: LayoutDashboard, exact: true },
     { label: t.nav.orders, href: `/admin/orders?store=${storeSlug}`, icon: ShoppingBag },
     { label: t.nav.products, href: `/admin/products?store=${storeSlug}`, icon: Package },
-    { label: t.nav.builder, href: `/admin/builder?store=${storeSlug}`, icon: Palette },
+    { label: t.nav.themes, href: `/admin/themes?store=${storeSlug}`, icon: Palette },
+    { label: t.nav.builder, href: `/admin/builder?store=${storeSlug}`, icon: Layers },
     { label: t.nav.analytics, href: `/admin/analytics?store=${storeSlug}`, icon: TrendingUp },
     { label: t.nav.funnel, href: `/admin/funnel?store=${storeSlug}`, icon: Filter },
     { label: t.nav.customers, href: `/admin/customers?store=${storeSlug}`, icon: Users },
@@ -51,6 +52,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
     { label: 'Identité & KYC', href: `/admin/identity?store=${storeSlug}`, icon: UserCheck },
     { label: 'Pixels & Publicités', href: `/admin/ads?store=${storeSlug}`, icon: Zap },
     { label: 'Sécurité & Accès', href: `/admin/security?store=${storeSlug}`, icon: Shield },
+    { label: 'Mon Compte Marchand', href: `/admin/account?store=${storeSlug}`, icon: UserCog },
     { label: 'Support & Concierge', href: `/admin/support?store=${storeSlug}`, icon: LifeBuoy },
     { label: t.nav.billing, href: `/admin/billing?store=${storeSlug}`, icon: CreditCard },
   ];

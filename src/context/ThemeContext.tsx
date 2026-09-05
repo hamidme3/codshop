@@ -19,7 +19,30 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<'fr' | 'ar'>('fr');
 
   useEffect(() => {
-    // Read from localStorage if set
+    // 1. Check URL query param ?theme= first
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const urlTheme = params.get('theme') as ThemeId;
+      if (urlTheme && THEMES[urlTheme]) {
+        setThemeIdState(urlTheme);
+        return;
+      }
+
+      // 2. If ?store= is present, fetch that store's active theme
+      const storeSlug = params.get('store');
+      if (storeSlug) {
+        fetch(`/api/stores/${storeSlug}/theme`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.activeThemeId && THEMES[data.activeThemeId as ThemeId]) {
+              setThemeIdState(data.activeThemeId as ThemeId);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+
+    // 3. Fallback to localStorage if set
     const savedTheme = localStorage.getItem('codshop_theme') as ThemeId;
     if (savedTheme && THEMES[savedTheme]) {
       setThemeIdState(savedTheme);

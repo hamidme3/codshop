@@ -1,5 +1,5 @@
 import { getDb, schema } from '@/db';
-import { eq, desc, asc, and } from 'drizzle-orm';
+import { eq, desc, asc, and, ne } from 'drizzle-orm';
 import { 
   getOrders as getMockOrders, 
   getProducts as getMockProducts, 
@@ -263,6 +263,27 @@ export async function createOrder(data: {
   } catch (err) {
     console.error('[DbRepo] Error creating order in DB:', err);
     throw err;
+  }
+}
+
+export async function getOrderByNumber(orderNumberOrId: string) {
+  const db = getDb();
+  if (!db) {
+    return null;
+  }
+  try {
+    let order = await db.query.orders.findFirst({
+      where: eq(schema.orders.orderNumber, orderNumberOrId),
+    });
+    if (!order && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderNumberOrId)) {
+      order = await db.query.orders.findFirst({
+        where: eq(schema.orders.id, orderNumberOrId),
+      });
+    }
+    return order || null;
+  } catch (err) {
+    console.error('[DbRepo] Error fetching order by number or ID:', err);
+    return null;
   }
 }
 
@@ -876,6 +897,34 @@ export async function invalidateSession(sessionId: string, accountId: string) {
     return true;
   } catch (err) {
     console.error('[DbRepo] Error invalidating session:', err);
+    return false;
+  }
+}
+
+export async function revokeOtherSessions(accountId: string, currentSessionId?: string) {
+  const db = getDb();
+  if (!db) return true;
+
+  try {
+    if (currentSessionId) {
+      await db
+        .update(schema.userSessions)
+        .set({ isRevoked: 'true' })
+        .where(
+          and(
+            eq(schema.userSessions.accountId, accountId),
+            ne(schema.userSessions.id, currentSessionId)
+          )
+        );
+    } else {
+      await db
+        .update(schema.userSessions)
+        .set({ isRevoked: 'true' })
+        .where(eq(schema.userSessions.accountId, accountId));
+    }
+    return true;
+  } catch (err) {
+    console.error('[DbRepo] Error revoking other sessions:', err);
     return false;
   }
 }

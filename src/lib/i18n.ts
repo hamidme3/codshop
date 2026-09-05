@@ -6,6 +6,7 @@ export interface Translations {
     overview: string;
     orders: string;
     products: string;
+    themes: string;
     builder: string;
     analytics: string;
     funnel: string;
@@ -180,6 +181,7 @@ export const DICTIONARY: Record<Language, Translations> = {
       overview: 'Overview',
       orders: 'COD Orders',
       products: 'Products & Stock',
+      themes: 'Themes & Design (25)',
       builder: 'Visual Page Builder',
       analytics: 'Analytics & KPIs',
       funnel: 'Sales Funnel',
@@ -352,6 +354,7 @@ export const DICTIONARY: Record<Language, Translations> = {
       overview: 'Vue d\'Ensemble',
       orders: 'Commandes COD',
       products: 'Produits & Stocks',
+      themes: 'Galerie de Thèmes (25)',
       builder: 'Page Builder Visuel',
       analytics: 'Analytiques & KPIs',
       funnel: 'Entonnoir (Funnel)',
@@ -524,6 +527,7 @@ export const DICTIONARY: Record<Language, Translations> = {
       overview: 'نظرة عامة',
       orders: 'طلبيات الدفع عند الاستلام',
       products: 'المنتجات والمخزون',
+      themes: 'معرض القوالب (25)',
       builder: 'مُصمم الصفحات المرئي',
       analytics: 'الإحصائيات والأرباح',
       funnel: 'مسار التحويل والمبيعات',

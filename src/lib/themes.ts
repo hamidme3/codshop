@@ -25,12 +25,14 @@ export type ThemeId =
   | 'cyberpunk'
   | 'velocity_cod';
 
+export type ThemeCategory = 'luxury' | 'fashion' | 'beauty' | 'tech' | 'home' | 'food' | 'general' | 'sports' | 'kids' | 'auto';
+
 export interface ThemeConfig {
   id: ThemeId;
   name: string;
   tagline: string;
   badge: string;
-  category: 'luxury' | 'fashion' | 'beauty' | 'tech' | 'home' | 'food' | 'general' | 'sports' | 'kids' | 'auto';
+  category: ThemeCategory;
   sourceInspiration: string;
   colors: {
     primary: string;

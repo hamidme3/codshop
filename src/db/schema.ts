@@ -168,6 +168,7 @@ export const accounts = pgTable(
     avatarUrl: text('avatar_url'),
     is2faEnabled: text('is_2fa_enabled').default('false').notNull(),
     twoFactorSecret: text('two_factor_secret'),
+    address: jsonb('address').$type<{ firstLine?: string; city?: string; postalCode?: string; country?: string }>().default({}).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },

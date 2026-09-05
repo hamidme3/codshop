@@ -1,0 +1,403 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { 
+  User, Mail, Phone, MapPin, Lock, Save, CheckCircle2, 
+  AlertCircle, Shield, KeyRound, ExternalLink, Globe
+} from 'lucide-react';
+
+export default function AccountProfilePage() {
+  const [loading, setLoading] = useState(true);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingAddress, setSavingAddress] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Profile Form States
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [preferredLocale, setPreferredLocale] = useState('fr');
+
+  // Address Form States
+  const [firstLine, setFirstLine] = useState('');
+  const [city, setCity] = useState('Casablanca');
+  const [postalCode, setPostalCode] = useState('20000');
+  const [country, setCountry] = useState('MA');
+
+  // Password Form States
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  useEffect(() => {
+    fetch('/api/sso/info')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user) {
+          setFirstName(data.user.first_name || '');
+          setLastName(data.user.last_name || '');
+          setEmail(data.user.email || '');
+          setPhone(data.user.phone || '');
+          setPreferredLocale(data.user.preferred_locale || 'fr');
+          if (data.user.address) {
+            setFirstLine(data.user.address.firstLine || '');
+            setCity(data.user.address.city || 'Casablanca');
+            setPostalCode(data.user.address.postalCode || '20000');
+            setCountry(data.user.address.country || 'MA');
+          }
+        }
+      })
+      .catch((err) => console.error('[Account] Load error:', err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingProfile(true);
+    setFeedback(null);
+    try {
+      const res = await fetch('/api/account/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, phone, preferredLocale }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur lors de la mise à jour');
+      setFeedback({ type: 'success', message: 'Profil personnel mis à jour avec succès.' });
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message });
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handleSaveAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingAddress(true);
+    setFeedback(null);
+    try {
+      const res = await fetch('/api/account/update-address', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstLine, city, postalCode, country }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur lors de la mise à jour');
+      setFeedback({ type: 'success', message: 'Adresse fiscale mise à jour avec succès.' });
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message });
+    } finally {
+      setSavingAddress(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFeedback(null);
+    if (newPassword !== confirmPassword) {
+      setFeedback({ type: 'error', message: 'Les nouveaux mots de passe ne correspondent pas.' });
+      return;
+    }
+    if (newPassword.length < 6) {
+      setFeedback({ type: 'error', message: 'Le mot de passe doit comporter au moins 6 caractères.' });
+      return;
+    }
+
+    setUpdatingPassword(true);
+    try {
+      const res = await fetch('/api/security/update-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur de mot de passe');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setFeedback({ type: 'success', message: 'Mot de passe modifié avec succès !' });
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message });
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="py-24 text-center text-slate-400">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent mb-3" />
+        <p className="text-sm">Chargement de votre compte...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8 max-w-5xl mx-auto pb-16">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <User className="w-5 h-5" />
+            </span>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Paramètres du Compte Marchand</h1>
+          </div>
+          <p className="text-sm text-slate-400">
+            Gérez vos informations personnelles, adresse de facturation et sécurité d’accès.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/security"
+            className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition"
+          >
+            <Shield className="w-3.5 h-3.5 text-blue-400" />
+            Sécurité &amp; 2FA
+          </Link>
+          <Link
+            href="/admin/identity"
+            className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition"
+          >
+            <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
+            Conformité KYC
+          </Link>
+        </div>
+      </div>
+
+      {feedback && (
+        <div
+          className={`p-4 rounded-xl text-xs flex items-center gap-2.5 border animate-in fade-in duration-150 ${
+            feedback.type === 'success'
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
+              : 'bg-rose-500/10 border-rose-500/20 text-rose-300'
+          }`}
+        >
+          {feedback.type === 'success' ? (
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+          ) : (
+            <AlertCircle className="w-4 h-4 shrink-0" />
+          )}
+          <span>{feedback.message}</span>
+        </div>
+      )}
+
+      {/* Grid: Profile & Address */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Personal Details */}
+        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-6 space-y-4">
+          <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+            <User className="w-4 h-4 text-amber-400" />
+            <h3 className="text-sm font-bold text-white">Informations Personnelles</h3>
+          </div>
+
+          <form onSubmit={handleSaveProfile} className="space-y-3.5">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Prénom</label>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Nom</label>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Email</label>
+              <div className="relative">
+                <Mail className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="email"
+                  disabled
+                  value={email}
+                  className="w-full pl-8 pr-3 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-xs text-slate-400 cursor-not-allowed"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Numéro de Téléphone (WhatsApp)</label>
+              <div className="relative">
+                <Phone className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="tel"
+                  placeholder="+212 6 XX XX XX XX"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full pl-8 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Langue de l’Interface</label>
+              <div className="relative">
+                <Globe className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <select
+                  value={preferredLocale}
+                  onChange={(e) => setPreferredLocale(e.target.value)}
+                  className="w-full pl-8 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="fr">Français</option>
+                  <option value="ar">العربية (RTL)</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={savingProfile}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-lg text-xs font-semibold transition"
+              >
+                <Save className="w-3.5 h-3.5" />
+                {savingProfile ? 'Enregistrement...' : 'Enregistrer les modifications'}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Company & Billing Address */}
+        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-6 space-y-4">
+          <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+            <MapPin className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-sm font-bold text-white">Adresse Fiscale de Facturation</h3>
+          </div>
+
+          <form onSubmit={handleSaveAddress} className="space-y-3.5">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Adresse (Rue / N° / Immeuble)</label>
+              <input
+                type="text"
+                placeholder="Ex: 45 Boulevard d'Anfa, Étage 3"
+                value={firstLine}
+                onChange={(e) => setFirstLine(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Ville</label>
+                <input
+                  type="text"
+                  placeholder="Casablanca"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Code Postal</label>
+                <input
+                  type="text"
+                  placeholder="20000"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Pays</label>
+              <select
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+              >
+                <option value="MA">Maroc (MA)</option>
+                <option value="FR">France (FR)</option>
+                <option value="ES">Espagne (ES)</option>
+                <option value="AE">Émirats Arabes Unis (AE)</option>
+              </select>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={savingAddress}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold transition border border-slate-700"
+              >
+                <Save className="w-3.5 h-3.5" />
+                {savingAddress ? 'Enregistrement...' : 'Mettre à jour l’adresse'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* Change Password Card */}
+      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-6 space-y-4">
+        <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+          <Lock className="w-4 h-4 text-blue-400" />
+          <h3 className="text-sm font-bold text-white">Changer le Mot de Passe</h3>
+        </div>
+
+        <form onSubmit={handleUpdatePassword} className="space-y-4 max-w-xl">
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">Mot de passe actuel</label>
+            <input
+              type="password"
+              required
+              placeholder="••••••••"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Nouveau mot de passe</label>
+              <input
+                type="password"
+                required
+                placeholder="Au moins 6 caractères"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Confirmer le nouveau mot de passe</label>
+              <input
+                type="password"
+                required
+                placeholder="Retapez le mot de passe"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={updatingPassword}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-lg text-xs font-semibold transition"
+          >
+            <KeyRound className="w-3.5 h-3.5" />
+            {updatingPassword ? 'Modification...' : 'Modifier mon mot de passe'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
