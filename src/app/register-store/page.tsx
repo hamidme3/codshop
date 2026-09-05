@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sparkles, CheckCircle2, ShieldCheck, ArrowRight, Store, Phone, Zap, Clock } from 'lucide-react';
+import { ThemeId } from '@/lib/themes';
 
 export default function RegisterStorePage() {
   const router = useRouter();
@@ -10,7 +11,7 @@ export default function RegisterStorePage() {
   const [whatsapp, setWhatsapp] = useState('');
   const [city, setCity] = useState('Casablanca');
   const [niche, setNiche] = useState<'fashion' | 'beauty' | 'tech' | 'general'>('fashion');
-  const [themeId, setThemeId] = useState<'luxury' | 'beauty' | 'tech'>('luxury');
+  const [themeId, setThemeId] = useState<ThemeId>('luxury');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 

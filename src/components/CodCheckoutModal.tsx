@@ -365,7 +365,8 @@ Merci de me confirmer la livraison !`;
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className={`w-full py-3.5 px-4 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:opacity-90 ${theme.styleTokens.buttonRadius}`}
+              style={{ backgroundColor: theme.colors.primary }}
             >
               {loading ? (
                 <>

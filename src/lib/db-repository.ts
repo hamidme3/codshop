@@ -13,6 +13,7 @@ import {
   updateStoreSections as updateMockStoreSections, 
   SectionInstance 
 } from './stores';
+import { getThemeById } from './themes';
 
 // ── Store Repository ──────────────────────────────────────────
 export async function getStoreBySlug(slug: string) {
@@ -399,17 +400,18 @@ export async function getStoreLayoutBySlug(storeSlug: string): Promise<StoreLayo
   const defaultSections: SectionInstance[] = mockStore?.pages?.[0]?.sections || [];
   const defaultThemeId: string = mockStore?.themeId || 'luxury';
 
+  const selectedTheme = getThemeById(defaultThemeId);
   const defaultResult: StoreLayoutData = {
     storeName: mockStore?.name || storeSlug.toUpperCase(),
     themeId: defaultThemeId,
     themeConfig: {
-      primaryColor: defaultThemeId === 'beauty' ? '#881337' : defaultThemeId === 'tech' ? '#18181b' : '#090d16',
-      accentColor: defaultThemeId === 'beauty' ? '#f43f5e' : defaultThemeId === 'tech' ? '#2563eb' : '#c59b27',
-      bgPage: defaultThemeId === 'beauty' ? '#fff5f7' : defaultThemeId === 'tech' ? '#f4f4f5' : '#faf9f6',
-      buttonRadius: defaultThemeId === 'beauty' ? 'pill' : defaultThemeId === 'tech' ? 'rounded' : 'sharp',
-      fontFamily: defaultThemeId === 'luxury' ? 'serif' : 'sans',
+      primaryColor: selectedTheme.colors.primary,
+      accentColor: selectedTheme.colors.accent,
+      bgPage: selectedTheme.colors.bgPage,
+      buttonRadius: (selectedTheme.styleTokens.buttonRadius === 'rounded-full' ? 'pill' : selectedTheme.styleTokens.buttonRadius === 'rounded-none' ? 'sharp' : 'rounded') as any,
+      fontFamily: (selectedTheme.typography.fontFamily === 'serif' ? 'serif' : selectedTheme.typography.fontFamily === 'monospace' ? 'mono' : 'sans') as any,
       showAnnouncement: true,
-      announcementText: 'Livraison Rapide Gratuite dès 400 DH • Paiement Cash à la Livraison après vérification du colis',
+      announcementText: selectedTheme.announcementText,
     },
     sections: defaultSections,
   };

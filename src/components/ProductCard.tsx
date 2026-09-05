@@ -18,10 +18,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <>
       <div
-        className="group relative flex flex-col justify-between overflow-hidden bg-white border border-zinc-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-        style={{
-          borderRadius: theme.id === 'luxury' ? '8px' : theme.id === 'beauty' ? '20px' : '12px',
-        }}
+        className={`group relative flex flex-col justify-between overflow-hidden bg-white border border-zinc-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${theme.styleTokens.cardRadius}`}
       >
         {/* Top Badges */}
         <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
@@ -90,9 +87,9 @@ export function ProductCard({ product }: { product: Product }) {
             <button
               type="button"
               onClick={() => setShowModal(true)}
-              className="w-full py-2.5 px-3 bg-zinc-900 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+              className={`w-full py-2.5 px-3 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 ${theme.styleTokens.buttonRadius}`}
               style={{
-                borderRadius: theme.id === 'beauty' ? '9999px' : '8px',
+                backgroundColor: theme.colors.primary,
               }}
             >
               <ShoppingCart className="w-3.5 h-3.5" />

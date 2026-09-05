@@ -10,14 +10,13 @@ export function Navbar() {
   return (
     <header className="border-b border-zinc-200 bg-white/95 backdrop-blur sticky top-8 z-40">
       {/* Top Moroccan Promo Ticker */}
-      <div className="bg-zinc-900 text-white text-[11px] py-1.5 px-4 text-center font-medium">
+      <div 
+        className="text-white text-[11px] py-1.5 px-4 text-center font-medium shadow-xs"
+        style={{ backgroundColor: theme.announcementBg || theme.colors.primary }}
+      >
         <div className="max-w-7xl mx-auto flex items-center justify-center gap-2">
           <span>🇲🇦</span>
-          <span>
-            {lang === 'ar'
-              ? 'توصيل سريع مجاني للطلبات فوق 400 درهم • الدفع نقداً عند الاستلام مع إمكانية المعاينة قبل الأداء'
-              : 'Livraison Rapide Gratuite dès 400 DH • Paiement Cash à la Livraison après vérification de votre colis'}
-          </span>
+          <span>{theme.announcementText}</span>
         </div>
       </div>
 
@@ -28,14 +27,14 @@ export function Navbar() {
             className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-sm"
             style={{ backgroundColor: theme.colors.primary }}
           >
-            {theme.id === 'luxury' ? 'O' : theme.id === 'beauty' ? 'B' : 'T'}
+            {theme.name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <div className="font-black tracking-tight text-base sm:text-lg text-zinc-900 group-hover:text-emerald-700 transition">
-              {theme.id === 'luxury' ? 'OTTAVIO' : theme.id === 'beauty' ? 'BIO BOTANIQUE' : 'TECHNOVO'}
+            <div className="font-black tracking-tight text-base sm:text-lg text-zinc-900 group-hover:opacity-80 transition">
+              {theme.name.toUpperCase()}
             </div>
-            <div className="text-[10px] text-zinc-400 -mt-1 font-medium tracking-wide">
-              {theme.name}
+            <div className="text-[10px] text-zinc-400 -mt-1 font-medium tracking-wide truncate max-w-[200px] sm:max-w-xs">
+              {theme.tagline}
             </div>
           </div>
         </a>

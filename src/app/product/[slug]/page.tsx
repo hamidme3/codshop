@@ -164,7 +164,8 @@ export default function ProductDetailPage() {
             <button
               type="button"
               onClick={() => setShowCheckoutModal(true)}
-              className="w-full py-4 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-base rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className={`w-full py-4 px-6 text-white font-black text-base shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer hover:opacity-90 ${theme.styleTokens.buttonRadius}`}
+              style={{ backgroundColor: theme.colors.primary }}
             >
               <span>Acheter Maintenant — Paiement à la Livraison</span>
             </button>

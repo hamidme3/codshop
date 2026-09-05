@@ -255,5 +255,20 @@ export function getProductBySlug(slug: string): Product | undefined {
 }
 
 export function getProductsByTheme(theme: ThemeId): Product[] {
-  return MOCK_PRODUCTS.filter((p) => p.theme === theme);
+  const matching = MOCK_PRODUCTS.filter((p) => p.theme === theme);
+  if (matching.length > 0) return matching;
+
+  // Smart category fallback so all 25 themes have beautiful product cards
+  if (['luxury', 'jewelry', 'perfume', 'leather_craft', 'eyewear', 'woodmart'].includes(theme)) {
+    return MOCK_PRODUCTS.filter((p) => p.theme === 'luxury');
+  }
+  if (['beauty', 'botanica', 'babyjoy'].includes(theme)) {
+    return MOCK_PRODUCTS.filter((p) => p.theme === 'beauty');
+  }
+  if (['tech', 'cyberpunk', 'automotive', 'fitness'].includes(theme)) {
+    return MOCK_PRODUCTS.filter((p) => p.theme === 'tech');
+  }
+
+  return MOCK_PRODUCTS;
 }
+

@@ -27,25 +27,23 @@ export default function HomePage() {
               <span>{theme.badge}</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-zinc-900 leading-[1.15]">
-              {theme.id === 'luxury' && 'L’Élégance Pure, Façonnée à la Main.'}
-              {theme.id === 'beauty' && 'Révélez l’Éclat Naturel de Votre Peau.'}
-              {theme.id === 'tech' && 'La Technologie de Demain, au Meilleur Prix.'}
+            <h1 className={`text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-zinc-900 leading-[1.15] ${theme.typography.headingClass}`}>
+              {theme.heroHeadline}
             </h1>
 
             <p className="text-sm sm:text-base text-zinc-600 max-w-xl mx-auto lg:mx-0">
-              {theme.tagline}. Profitez d’une livraison express partout au Maroc avec vérification du colis et paiement à la réception.
+              {theme.heroSubheadline || theme.tagline}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start pt-2">
               <a
                 href="#catalog"
-                className="w-full sm:w-auto px-6 py-3.5 bg-zinc-900 hover:bg-emerald-700 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className={`w-full sm:w-auto px-6 py-3.5 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${theme.styleTokens.buttonRadius}`}
                 style={{
-                  borderRadius: theme.id === 'beauty' ? '9999px' : '10px',
+                  backgroundColor: theme.colors.primary,
                 }}
               >
-                <span>Découvrir le Catalogue</span>
+                <span>Commander Maintenant</span>
                 <ArrowRight className="w-4 h-4" />
               </a>
 
@@ -89,9 +87,17 @@ export default function HomePage() {
               className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center gap-3 shadow-xs"
             >
               <div className="w-9 h-9 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0 text-zinc-800 font-bold">
-                {theme.id === 'luxury' ? <Award className="w-5 h-5 text-amber-600" /> :
-                 theme.id === 'beauty' ? <Sparkles className="w-5 h-5 text-rose-600" /> :
-                 <Zap className="w-5 h-5 text-blue-600" />}
+                {pill.icon.toLowerCase().includes('truck') ? (
+                  <Truck className="w-5 h-5 text-emerald-600" />
+                ) : pill.icon.toLowerCase().includes('shield') ? (
+                  <ShieldCheck className="w-5 h-5 text-blue-600" />
+                ) : pill.icon.toLowerCase().includes('award') ? (
+                  <Award className="w-5 h-5 text-amber-600" />
+                ) : pill.icon.toLowerCase().includes('zap') || pill.icon.toLowerCase().includes('flame') ? (
+                  <Zap className="w-5 h-5 text-orange-600" />
+                ) : (
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                )}
               </div>
               <div>
                 <h4 className="font-bold text-xs text-zinc-900">{pill.title}</h4>

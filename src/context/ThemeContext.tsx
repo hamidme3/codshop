@@ -44,7 +44,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const theme = THEMES[themeId];
+  const theme = THEMES[themeId] || THEMES.luxury;
 
   const formatMAD = (amount: number) => {
     return lang === 'ar' ? `${amount.toLocaleString('fr-FR')} د.م.` : `${amount.toLocaleString('fr-FR')} DH`;
@@ -56,14 +56,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         style={{
           // Set dynamic CSS variables according to selected theme
           ['--theme-primary' as string]: theme.colors.primary,
+          ['--theme-primary-hover' as string]: theme.colors.primaryHover,
           ['--theme-accent' as string]: theme.colors.accent,
+          ['--theme-accent-hover' as string]: theme.colors.accentHover,
           ['--theme-bg-page' as string]: theme.colors.bgPage,
           ['--theme-card-bg' as string]: theme.colors.cardBg,
           ['--theme-border' as string]: theme.colors.border,
           ['--theme-text-primary' as string]: theme.colors.textPrimary,
           ['--theme-text-secondary' as string]: theme.colors.textSecondary,
+          ['--theme-badge-bg' as string]: theme.colors.badgeBg,
+          ['--theme-badge-text' as string]: theme.colors.badgeText,
+          ['--theme-announcement-bg' as string]: theme.announcementBg,
         }}
-        className="min-h-screen transition-colors duration-300"
+        className={`min-h-screen transition-colors duration-300 ${theme.typography.fontFamily === 'serif' ? 'font-serif' : theme.typography.fontFamily === 'monospace' ? 'font-mono' : 'font-sans'}`}
       >
         {children}
       </div>

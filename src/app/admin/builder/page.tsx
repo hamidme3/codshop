@@ -11,6 +11,7 @@ import {
   Tag, Flame, Star, ShoppingBag
 } from 'lucide-react';
 import { DynamicSectionRenderer } from '@/components/builder/Sections';
+import { THEMES, THEME_LIST, ThemeId } from '@/lib/themes';
 
 interface ThemeConfigState {
   primaryColor: string;
@@ -27,69 +28,31 @@ const THEME_PRESETS: Record<string, {
   name: string;
   description: string;
   badge: string;
+  category: string;
+  sourceInspiration: string;
   config: ThemeConfigState;
-}> = {
-  luxury: {
-    name: 'Luxe & Artisanal',
-    description: 'Maroquinerie, souliers, caftans & artisanat d’exception.',
-    badge: '👑 Maroc Prestige',
-    config: {
-      primaryColor: '#090d16',
-      accentColor: '#c59b27',
-      bgPage: '#090d16',
-      buttonRadius: 'sharp',
-      fontFamily: 'serif',
-      announcementText: 'Livraison Rapide Gratuite dès 400 DH • Paiement Cash à la Livraison après vérification du colis',
-      showAnnouncement: true,
-      announcementBg: '#c59b27',
+}> = Object.fromEntries(
+  THEME_LIST.map((t) => [
+    t.id,
+    {
+      name: t.name,
+      description: t.tagline,
+      badge: t.badge,
+      category: t.category,
+      sourceInspiration: t.sourceInspiration,
+      config: {
+        primaryColor: t.colors.primary,
+        accentColor: t.colors.accent,
+        bgPage: t.colors.bgPage,
+        buttonRadius: (t.styleTokens.buttonRadius === 'rounded-full' ? 'pill' : t.styleTokens.buttonRadius === 'rounded-none' ? 'sharp' : t.styleTokens.buttonRadius === 'rounded-xl' ? 'rounded' : 'subtle') as any,
+        fontFamily: (t.typography.fontFamily === 'serif' ? 'serif' : t.typography.fontFamily === 'monospace' ? 'mono' : 'sans') as any,
+        announcementText: t.announcementText,
+        showAnnouncement: true,
+        announcementBg: t.announcementBg,
+      },
     },
-  },
-  beauty: {
-    name: 'Beauté & Soins',
-    description: 'Argan bio, sérums figue de barbarie & cosmétique naturelle.',
-    badge: '🌸 Bio & Botanique',
-    config: {
-      primaryColor: '#881337',
-      accentColor: '#f43f5e',
-      bgPage: '#1c0911',
-      buttonRadius: 'pill',
-      fontFamily: 'sans',
-      announcementText: 'Offre Spéciale Beauté : Pack Duo Argan Pur à prix réduit aujourd\'hui seulement !',
-      showAnnouncement: true,
-      announcementBg: '#f43f5e',
-    },
-  },
-  tech: {
-    name: 'Tech & Innovations',
-    description: 'Accessoires connectés, gadgets & électronique grand public.',
-    badge: '⚡ High-Tech COD',
-    config: {
-      primaryColor: '#18181b',
-      accentColor: '#2563eb',
-      bgPage: '#09090b',
-      buttonRadius: 'rounded',
-      fontFamily: 'sans',
-      announcementText: 'Vente Flash High-Tech : Stock Limité • Expédition en 24h chrono partout au Maroc',
-      showAnnouncement: true,
-      announcementBg: '#2563eb',
-    },
-  },
-  minimal: {
-    name: 'YouCan Minimalist',
-    description: 'Design ultra-épuré axé 100% sur la conversion du panier COD.',
-    badge: '🚀 Max Conversion',
-    config: {
-      primaryColor: '#000000',
-      accentColor: '#10b981',
-      bgPage: '#020617',
-      buttonRadius: 'subtle',
-      fontFamily: 'sans',
-      announcementText: 'Paiement à la livraison après vérification • Aucun paiement par carte requis',
-      showAnnouncement: true,
-      announcementBg: '#10b981',
-    },
-  },
-};
+  ])
+);
 
 function BuilderContent() {
   const searchParams = useSearchParams();
@@ -107,6 +70,7 @@ function BuilderContent() {
   // Theme Customizer State
   const [themeId, setThemeId] = useState<string>('luxury');
   const [themeConfig, setThemeConfig] = useState<ThemeConfigState>(THEME_PRESETS.luxury.config);
+  const [themeCategory, setThemeCategory] = useState<string>('all');
 
   useEffect(() => {
     async function loadStore() {
@@ -711,32 +675,86 @@ function BuilderContent() {
             {activeTab === 'theme' && (
               <div className="space-y-5 text-xs">
                 {/* Preset Themes */}
-                <div className="space-y-2">
-                  <label className="block text-slate-300 font-bold uppercase tracking-wider text-[11px]">
-                    1. Modèles de Thèmes Pré-conçus :
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {Object.entries(THEME_PRESETS).map(([key, preset]) => {
-                      const isActive = themeId === key;
-                      return (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => applyPreset(key)}
-                          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                            isActive
-                              ? 'border-amber-500 bg-amber-500/10 ring-1 ring-amber-500 text-white'
-                              : 'border-slate-800 bg-slate-950/60 text-slate-300 hover:border-slate-700'
-                          }`}
-                        >
-                          <div className="text-[10px] font-bold text-amber-400">{preset.badge}</div>
-                          <div className="font-extrabold text-white text-xs mt-0.5">{preset.name}</div>
-                          <div className="text-[10px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                            {preset.description}
-                          </div>
-                        </button>
-                      );
-                    })}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-slate-300 font-bold uppercase tracking-wider text-[11px]">
+                      1. Catalogue des 25 Thèmes E-Commerce :
+                    </label>
+                    <span className="text-[10px] font-mono text-amber-400 font-semibold">
+                      {Object.keys(THEME_PRESETS).length} Thèmes Disponibles
+                    </span>
+                  </div>
+
+                  {/* Category Filter Chips */}
+                  <div className="flex items-center gap-1 overflow-x-auto pb-1 text-[10px]">
+                    {[
+                      { id: 'all', label: 'Tous (25)' },
+                      { id: 'luxury', label: 'Luxe' },
+                      { id: 'general', label: 'Top COD' },
+                      { id: 'tech', label: 'High-Tech' },
+                      { id: 'beauty', label: 'Beauté' },
+                      { id: 'fashion', label: 'Mode' },
+                      { id: 'home', label: 'Maison' },
+                      { id: 'food', label: 'Terroir' },
+                      { id: 'kids', label: 'Enfants' },
+                    ].map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setThemeCategory(cat.id)}
+                        className={`px-2 py-0.5 rounded-full whitespace-nowrap transition ${
+                          themeCategory === cat.id
+                            ? 'bg-amber-500 text-slate-950 font-bold'
+                            : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Themes Grid */}
+                  <div className="grid grid-cols-2 gap-2 max-h-[380px] overflow-y-auto pr-1">
+                    {Object.entries(THEME_PRESETS)
+                      .filter(([_, preset]) => themeCategory === 'all' || preset.category === themeCategory || (themeCategory === 'food' && preset.category === 'home'))
+                      .map(([key, preset]) => {
+                        const isActive = themeId === key;
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => applyPreset(key)}
+                            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                              isActive
+                                ? 'border-amber-500 bg-amber-500/10 ring-1 ring-amber-500 text-white'
+                                : 'border-slate-800 bg-slate-950/60 text-slate-300 hover:border-slate-700'
+                            }`}
+                          >
+                            <div>
+                              <div className="flex items-center justify-between gap-1 mb-1">
+                                <span className="text-[9px] font-bold text-amber-400 truncate">{preset.badge}</span>
+                                <span className="text-[8px] font-mono px-1 rounded bg-slate-800 text-slate-300 shrink-0">
+                                  {preset.sourceInspiration.split(' ')[0]}
+                                </span>
+                              </div>
+                              <div className="font-extrabold text-white text-xs truncate">{preset.name}</div>
+                              <div className="text-[10px] text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
+                                {preset.description}
+                              </div>
+                            </div>
+
+                            <div className="pt-2 mt-2 border-t border-slate-800/80 flex items-center justify-between text-[9px]">
+                              <div className="flex items-center gap-1">
+                                <span className="w-2 h-2 rounded-full border border-white/20" style={{ backgroundColor: preset.config.primaryColor }} />
+                                <span className="w-2 h-2 rounded-full border border-white/20" style={{ backgroundColor: preset.config.accentColor }} />
+                              </div>
+                              <span className={isActive ? 'text-emerald-400 font-bold' : 'text-slate-500'}>
+                                {isActive ? 'Sélectionné' : 'Appliquer'}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
                   </div>
                 </div>
 
