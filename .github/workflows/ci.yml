@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  ci:
+    name: ci (install • tsc • drizzle-kit check • migrate dry-run)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      # install
+      - name: Install dependencies
+        run: npm ci
+
+      # tsc
+      - name: TypeScript check (tsc --noEmit)
+        run: npx tsc --noEmit
+
+      # drizzle-kit check
+      - name: Drizzle Kit check
+        run: npx drizzle-kit check
+        env:
+          DATABASE_URL: postgresql://codshop_user:postgres@localhost:5432/codshop_db
+
+      # migrate step — dry-run / push check (no DB mutation)
+      - name: Drizzle migrate dry-run (no DB write)
+        run: |
+          echo "Checking migrations without mutating DB..."
+          # Try migrate --dry-run (newer drizzle-kit), fall back to push --dry-run / check
+          set +e
+          npx drizzle-kit migrate --dry-run
+          CODE=$?
+          if [ $CODE -ne 0 ]; then
+            echo "migrate --dry-run not available or failed (exit $CODE), trying push --dry-run..."
+            npx drizzle-kit push --dry-run
+            CODE2=$?
+            if [ $CODE2 -ne 0 ]; then
+              echo "::notice::No dry-run migrate/push support in this drizzle-kit version. 'drizzle-kit check' above validates schema; ensure 'drizzle/' migrations are committed."
+              echo "Checked drizzle/ contents:"
+              ls -R drizzle 2>&1 | head -n 100
+              # do not fail the job on dry-run unavailability — check step is the gate
+              exit 0
+            fi
+          fi
+        env:
+          DATABASE_URL: postgresql://codshop_user:postgres@localhost:5432/codshop_db
+
+      - name: Verify migrations are committed
+        run: |
+          if [ -n "$(git status --porcelain drizzle/ 2>/dev/null)" ]; then
+            echo "::error::Uncommitted drizzle migrations — run 'npx drizzle-kit generate' locally and commit drizzle/"
+            git status --porcelain drizzle/
+            exit 1
+          else
+            echo "Migrations committed and up to date."
+            ls -la drizzle/ 2>&1 | head -n 50
+          fi

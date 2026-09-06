@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "chrome": {
+      "command": "node",
+      "args": [
+        "/home/ubuntu/projects/codshop/scripts/chrome-mcp-server.js"
+      ],
+      "disabled": false,
+      "env": {
+        "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium-browser"
+      }
+    }
+  }
+}

@@ -1,13 +1,13 @@
 import { getDb, schema } from '@/db';
 import { eq, desc, asc, and, ne } from 'drizzle-orm';
-import { 
-  getOrders as getMockOrders, 
-  getProducts as getMockProducts, 
+import type { Order, Product, Customer } from './types';
+import {
+  getOrders as getMockOrders,
+  getProducts as getMockProducts,
   getCustomers as getMockCustomers,
   addProduct as addMockProduct,
   updateOrderStatus as updateMockOrderStatus,
-  Order, Product, Customer 
-} from './backoffice';
+} from './mocks';
 import { 
   getStoreBySlug as getMockStoreBySlug, 
   updateStoreSections as updateMockStoreSections, 

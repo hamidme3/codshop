@@ -21,11 +21,11 @@ export interface AuthSession {
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10);
+  return await bcrypt.hash(password, 10);
 }
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(password, hash);
+  return await bcrypt.compare(password, hash);
 }
 
 export async function signSessionToken(payload: AuthSession): Promise<string> {

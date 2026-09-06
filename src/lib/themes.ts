@@ -42,6 +42,8 @@ export interface ThemeConfig {
     bgPage: string;
     cardBg: string;
     border: string;
+    borderStrong: string;
+    shadowColor: string;
     textPrimary: string;
     textSecondary: string;
     badgeBg: string;
@@ -50,6 +52,14 @@ export interface ThemeConfig {
   typography: {
     fontFamily: string;
     headingClass: string;
+    scale: {
+      h1: string;
+      h2: string;
+      h3: string;
+      cardTitle: string;
+      caption: string;
+      label: string;
+    };
   };
   styleTokens: {
     buttonRadius: string;
@@ -58,6 +68,7 @@ export interface ThemeConfig {
   };
   announcementText: string;
   announcementBg: string;
+  announcementTextColor: string;
   heroHeadline: string;
   heroSubheadline: string;
   trustPills: Array<{ icon: string; title: string; subtitle: string }>;
@@ -80,6 +91,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#faf9f6',
       cardBg: '#ffffff',
       border: '#e2e8f0',
+      borderStrong: '#94a3b8',
+      shadowColor: 'rgba(15,23,42,0.06)',
       textPrimary: '#0f172a',
       textSecondary: '#64748b',
       badgeBg: '#fef3c7',
@@ -88,6 +101,14 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     typography: {
       fontFamily: 'serif',
       headingClass: 'font-serif tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-[-0.02em] font-serif text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight font-serif',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3] font-serif',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-none',
@@ -96,6 +117,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Livraison Rapide Gratuite dès 400 DH • Paiement Cash à la Livraison après vérification de votre colis',
     announcementBg: '#c59b27',
+    announcementTextColor: '#0f172a',
     heroHeadline: 'L’Élégance Pure, Façonnée à la Main.',
     heroSubheadline: 'Des créations nobles en cuir véritable façonnées par nos maîtres artisans à Fès. Vérifiez votre commande avant tout paiement.',
     trustPills: [
@@ -122,6 +144,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#fff5f7',
       cardBg: '#ffffff',
       border: '#fecdd3',
+      borderStrong: '#fda4af',
+      shadowColor: 'rgba(76,5,25,0.08)',
       textPrimary: '#4c0519',
       textSecondary: '#9f1239',
       badgeBg: '#ffe4e6',
@@ -129,7 +153,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'sans-serif',
-      headingClass: 'font-sans font-extrabold tracking-tight',
+      headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-full',
@@ -137,7 +169,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       badgeStyle: 'border border-rose-200 text-rose-800 bg-rose-50',
     },
     announcementText: 'Offre Beauté : Pack Duo Huile d’Argan & Figue de Barbarie à prix doux • Livraison offerte !',
-    announcementBg: '#f43f5e',
+    announcementBg: '#e11d48',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'Révélez l’Éclat Naturel de Votre Peau.',
     heroSubheadline: 'Cosmétiques purs pressés à froid au cœur du Souss. Formules certifiées sans parabènes ni sulfates.',
     trustPills: [
@@ -164,14 +197,24 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#f4f4f5',
       cardBg: '#ffffff',
       border: '#e4e4e7',
+      borderStrong: '#a1a1aa',
+      shadowColor: 'rgba(0,0,0,0.06)',
       textPrimary: '#09090b',
-      textSecondary: '#71717a',
+      textSecondary: '#52525b',
       badgeBg: '#dbeafe',
       badgeText: '#1e40af',
     },
     typography: {
       fontFamily: 'sans-serif',
-      headingClass: 'font-sans font-black tracking-tight',
+      headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-xl',
@@ -180,6 +223,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Vente Flash High-Tech : Stock Limité • Expédition en 24h chrono partout au Maroc',
     announcementBg: '#2563eb',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'La Technologie de Demain, au Meilleur Prix.',
     heroSubheadline: 'Gadgets haute performance, réduction active du bruit et autonomie prolongée garantis 1 an.',
     trustPills: [
@@ -206,6 +250,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#ffffff',
       cardBg: '#ffffff',
       border: '#e5e7eb',
+      borderStrong: '#a1a1aa',
+      shadowColor: 'rgba(0,0,0,0.06)',
       textPrimary: '#111827',
       textSecondary: '#4b5563',
       badgeBg: '#d1fae5',
@@ -214,6 +260,14 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     typography: {
       fontFamily: 'sans-serif',
       headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-md',
@@ -222,6 +276,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Paiement à la livraison après vérification • Aucun paiement par carte bancaire requis',
     announcementBg: '#10b981',
+    announcementTextColor: '#0f172a',
     heroHeadline: 'Commandez en 30 Secondes Chrono.',
     heroSubheadline: 'Navigation ultra-fluide, commande simplifiée sans création de compte et livraison directement chez vous.',
     trustPills: [
@@ -248,6 +303,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#fef2f2',
       cardBg: '#ffffff',
       border: '#fecaca',
+      borderStrong: '#fca5a5',
+      shadowColor: 'rgba(127,29,29,0.08)',
       textPrimary: '#7f1d1d',
       textSecondary: '#991b1b',
       badgeBg: '#fee2e2',
@@ -255,7 +312,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'sans-serif',
-      headingClass: 'font-sans font-black tracking-tighter uppercase',
+      headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-lg',
@@ -264,6 +329,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: '🔥 VENTE FLASH LIMITÉE : 1 ACHETÉ = 1 OFFERT • Fin de l’opération à minuit !',
     announcementBg: '#dc2626',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'Ne Manquez Pas la Promotion du Jour !',
     heroSubheadline: 'Plus que 9 exemplaires restants en entrepôt à Casablanca. Commandez maintenant et payez à la livraison.',
     trustPills: [
@@ -290,6 +356,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#f4f4f5',
       cardBg: '#ffffff',
       border: '#27272a',
+      borderStrong: '#52525b',
+      shadowColor: 'rgba(0,0,0,0.08)',
       textPrimary: '#09090b',
       textSecondary: '#52525b',
       badgeBg: '#ecfccb',
@@ -297,7 +365,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'sans-serif',
-      headingClass: 'font-sans font-black tracking-tighter uppercase',
+      headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-none',
@@ -306,6 +382,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'NOUVEAU DROP DISPONIBLE • Tailles limitées • Livraison en 24h sur Casablanca & Rabat',
     announcementBg: '#84cc16',
+    announcementTextColor: '#0f172a',
     heroHeadline: 'L’Allure Streetwear Revisitée.',
     heroSubheadline: 'Coupes oversize, tissus lourds 380 GSM et finitions premium. Portez la culture urbaine marocaine avec fierté.',
     trustPills: [
@@ -332,6 +409,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#fefce8',
       cardBg: '#ffffff',
       border: '#fed7aa',
+      borderStrong: '#fdba74',
+      shadowColor: 'rgba(67,20,7,0.08)',
       textPrimary: '#431407',
       textSecondary: '#78350f',
       badgeBg: '#ffedd5',
@@ -339,7 +418,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'serif',
-      headingClass: 'font-serif font-bold tracking-normal',
+      headingClass: 'font-serif tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-[-0.02em] font-serif text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight font-serif',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3] font-serif',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-xl',
@@ -348,6 +435,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Artisanat du Terroir : Tapis Beni Ouarain & Lanternes en Cuivre Ciselé • Livraison Meubles Spéciale',
     announcementBg: '#c2410c',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'Sublimez Votre Intérieur aux Couleurs du Maroc.',
     heroSubheadline: 'Créations authentiques en bois de cèdre noble, poteries d’Essaouira et tissages traditionnels.',
     trustPills: [
@@ -374,14 +462,24 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#ffffff',
       cardBg: '#ffffff',
       border: '#d1fae5',
+      borderStrong: '#6ee7b7',
+      shadowColor: 'rgba(6,78,59,0.08)',
       textPrimary: '#064e3b',
-      textSecondary: '#047857',
+      textSecondary: '#065f46',
       badgeBg: '#ecfdf5',
       badgeText: '#065f46',
     },
     typography: {
       fontFamily: 'sans-serif',
       headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-lg',
@@ -390,6 +488,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Livraison Gratuite 24h • Pas de carte bancaire, réglez en espèces en ouvrant le colis !',
     announcementBg: '#047857',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'L’Expérience d’Achat en Ligne la Plus Rapide du Maroc.',
     heroSubheadline: 'Un formulaire direct en 3 champs : Nom, Numéro et Ville. Votre commande est immédiatement expédiée par Ozon.',
     trustPills: [
@@ -416,6 +515,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#f8fafc',
       cardBg: '#ffffff',
       border: '#cbd5e1',
+      borderStrong: '#94a3b8',
+      shadowColor: 'rgba(15,23,42,0.06)',
       textPrimary: '#0f172a',
       textSecondary: '#475569',
       badgeBg: '#ffedd5',
@@ -423,7 +524,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'sans-serif',
-      headingClass: 'font-sans font-extrabold tracking-tight',
+      headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-md',
@@ -432,6 +541,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Promotions de la Semaine : Jusqu’à -60% sur l’équipement maison & cuisine • Stock limité !',
     announcementBg: '#1e3a8a',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'Tout pour la Famille et la Maison au Même Endroit.',
     heroSubheadline: 'Plus de 500 références disponibles immédiatement en stock. Livraison express dans les 12 régions du Maroc.',
     trustPills: [
@@ -458,6 +568,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#fdf4ff',
       cardBg: '#ffffff',
       border: '#f5d0fe',
+      borderStrong: '#e9d5ff',
+      shadowColor: 'rgba(59,7,100,0.08)',
       textPrimary: '#3b0764',
       textSecondary: '#701a75',
       badgeBg: '#fef08a',
@@ -465,7 +577,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'serif',
-      headingClass: 'font-serif tracking-wide',
+      headingClass: 'font-serif tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-[-0.02em] font-serif text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight font-serif',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3] font-serif',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-none',
@@ -474,6 +594,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Coffrets Cadeaux Parfum : Flacon d’essai 5ml offert avec chaque commande ce mois-ci',
     announcementBg: '#3b0764',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'L’Élixir des Souvenirs Éternels.',
     heroSubheadline: 'Notes envoûtantes d’ambre gris, bois de santal et roses de Kelaat M’Gouna. Sillage d’exception longue durée 24h.',
     trustPills: [
@@ -500,6 +621,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#f8fafc',
       cardBg: '#ffffff',
       border: '#e2e8f0',
+      borderStrong: '#94a3b8',
+      shadowColor: 'rgba(15,23,42,0.06)',
       textPrimary: '#0f172a',
       textSecondary: '#64748b',
       badgeBg: '#fef3c7',
@@ -507,7 +630,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'serif',
-      headingClass: 'font-serif tracking-widest uppercase',
+      headingClass: 'font-serif tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-[-0.02em] font-serif text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight font-serif',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3] font-serif',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-sm',
@@ -516,6 +647,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Certificat d’Authenticité Fourni • Emballage Luxueux Offert • Paiement Sécurisé à la Livraison',
     announcementBg: '#0f172a',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'L’Éclat Intemporel des Grandes Occasions.',
     heroSubheadline: 'Des parures somptueuses inspirées de l’héritage andalou et des montres de précision à mouvement automatique.',
     trustPills: [
@@ -542,14 +674,24 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#f0f9ff',
       cardBg: '#ffffff',
       border: '#bae6fd',
+      borderStrong: '#7dd3fc',
+      shadowColor: 'rgba(3,105,161,0.08)',
       textPrimary: '#0369a1',
-      textSecondary: '#0284c7',
+      textSecondary: '#0369a1',
       badgeBg: '#e0f2fe',
       badgeText: '#0369a1',
     },
     typography: {
       fontFamily: 'sans-serif',
-      headingClass: 'font-sans font-extrabold tracking-normal',
+      headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-full',
@@ -557,7 +699,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       badgeStyle: 'border-2 border-sky-300 text-sky-900 bg-sky-100 font-bold',
     },
     announcementText: 'Bienvenue Bébé : Pack Naissance Complet avec Livraison Rapide partout au Maroc !',
-    announcementBg: '#0284c7',
+    announcementBg: '#0369a1',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'La Plus Grande Douceur pour Votre Bébé.',
     heroSubheadline: 'Des matières respirantes, sans colorants chimiques toxiques, adaptées à la peau sensible des tout-petits.',
     trustPills: [
@@ -584,6 +727,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#fefce8',
       cardBg: '#ffffff',
       border: '#bbf7d0',
+      borderStrong: '#86efac',
+      shadowColor: 'rgba(20,83,45,0.08)',
       textPrimary: '#14532d',
       textSecondary: '#15803d',
       badgeBg: '#fef3c7',
@@ -591,7 +736,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'serif',
-      headingClass: 'font-serif font-black tracking-tight',
+      headingClass: 'font-serif tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-[-0.02em] font-serif text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight font-serif',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3] font-serif',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-xl',
@@ -600,6 +753,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Miel de Thym (Zâatra) & Safran de Taliouine : Récolte fraîche 2026 • Analyse laboratoire certifiée',
     announcementBg: '#14532d',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'Les Trésors Authentiques du Terroir Marocain.',
     heroSubheadline: 'Du producteur directement à votre table. Miels sauvages crus, Amlou traditionnel au miel d’oranger et huile d’olive pressée à froid.',
     trustPills: [
@@ -626,6 +780,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#18181b',
       cardBg: '#27272a',
       border: '#3f3f46',
+      borderStrong: '#52525b',
+      shadowColor: 'rgba(0,0,0,0.40)',
       textPrimary: '#fafafa',
       textSecondary: '#a1a1aa',
       badgeBg: '#ffedd5',
@@ -633,7 +789,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'sans-serif',
-      headingClass: 'font-sans font-black italic tracking-tighter uppercase',
+      headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-lg',
@@ -642,6 +806,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'TRANSFORMEZ VOTRE PHYSIQUE • Pack Salle à Domicile en promo • Livraison Express 24h',
     announcementBg: '#f97316',
+    announcementTextColor: '#0f172a',
     heroHeadline: 'Dépassez Vos Limites Chaque Jour.',
     heroSubheadline: 'Matériel de musculation haute résistance et accessoires conçus pour les athlètes exigeants au Maroc.',
     trustPills: [
@@ -668,6 +833,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#f1f5f9',
       cardBg: '#ffffff',
       border: '#cbd5e1',
+      borderStrong: '#94a3b8',
+      shadowColor: 'rgba(15,23,42,0.06)',
       textPrimary: '#0f172a',
       textSecondary: '#475569',
       badgeBg: '#fee2e2',
@@ -675,7 +842,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'sans-serif',
-      headingClass: 'font-sans font-extrabold tracking-tight uppercase',
+      headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-md',
@@ -684,6 +859,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Spécial Automobilistes : Caméras Dashcam & Ampoules LED Canbus garanties anti-erreur ODB',
     announcementBg: '#1e293b',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'Prenez Soin de Votre Véhicule Comme un Pro.',
     heroSubheadline: 'Accessoires électroniques, outillage de précision et produits d’entretien pour toutes marques de voitures au Maroc.',
     trustPills: [
@@ -710,6 +886,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#fafaf9',
       cardBg: '#ffffff',
       border: '#e7e5e4',
+      borderStrong: '#a8a29e',
+      shadowColor: 'rgba(28,25,23,0.06)',
       textPrimary: '#1c1917',
       textSecondary: '#57534e',
       badgeBg: '#fef3c7',
@@ -717,7 +895,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'sans-serif',
-      headingClass: 'font-sans font-black tracking-normal',
+      headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-full',
@@ -726,6 +912,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Étui Rigide & Microfibre de Nettoyage Offerts avec chaque paire • Livraison 24h',
     announcementBg: '#171717',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'Regardez le Monde avec Clarté et Style.',
     heroSubheadline: 'Montures ultra-légères en acétate et verres polarisés haute définition pour affronter le soleil marocain sans éblouissement.',
     trustPills: [
@@ -752,6 +939,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#f0fdf4',
       cardBg: '#ffffff',
       border: '#bbf7d0',
+      borderStrong: '#86efac',
+      shadowColor: 'rgba(6,78,59,0.08)',
       textPrimary: '#064e3b',
       textSecondary: '#047857',
       badgeBg: '#dcfce7',
@@ -760,6 +949,14 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     typography: {
       fontFamily: 'sans-serif',
       headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-2xl',
@@ -768,6 +965,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'La Sagesse des Plantes : Produits 100% purs sans additifs chimiques • Conseils naturopathie sur WhatsApp',
     announcementBg: '#064e3b',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'Retrouvez Votre Vitalité par la Nature.',
     heroSubheadline: 'Compléments alimentaires et poudres botaniques récoltées dans le respect des cycles biologiques naturels.',
     trustPills: [
@@ -794,6 +992,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#fffbeb',
       cardBg: '#ffffff',
       border: '#fde68a',
+      borderStrong: '#fcd34d',
+      shadowColor: 'rgba(56,34,15,0.08)',
       textPrimary: '#38220f',
       textSecondary: '#78350f',
       badgeBg: '#fef3c7',
@@ -801,7 +1001,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'serif',
-      headingClass: 'font-serif font-bold tracking-normal',
+      headingClass: 'font-serif tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-[-0.02em] font-serif text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight font-serif',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3] font-serif',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-xl',
@@ -810,6 +1018,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Le Goût Véritable du Café Frais : Torréfié chaque semaine à Casablanca • Pack Dégustation en promotion',
     announcementBg: '#38220f',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'L’Art de la Pause Café & du Thé à la Menthe.',
     heroSubheadline: 'Sélection rigoureuse des meilleurs crus d’Éthiopie et de Colombie et thés impériaux pour vos moments de partage.',
     trustPills: [
@@ -836,6 +1045,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#fafaf9',
       cardBg: '#ffffff',
       border: '#e7e5e4',
+      borderStrong: '#a8a29e',
+      shadowColor: 'rgba(67,20,7,0.06)',
       textPrimary: '#431407',
       textSecondary: '#78350f',
       badgeBg: '#fee2e2',
@@ -843,7 +1054,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'serif',
-      headingClass: 'font-serif tracking-wide',
+      headingClass: 'font-serif tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-[-0.02em] font-serif text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight font-serif',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3] font-serif',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-sm',
@@ -852,6 +1071,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Garantie Zéro Casse : Emballage renforcé double alvéole • Remboursement immédiat si bris',
     announcementBg: '#7c2d12',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'L’Élégance de la Terre Cuite à Votre Table.',
     heroSubheadline: 'Des décors peints à main levée à Safi et Fès. Chaque plat raconte une histoire séculaire d’argile et de feu.',
     trustPills: [
@@ -878,6 +1098,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#f0fdfa',
       cardBg: '#ffffff',
       border: '#99f6e4',
+      borderStrong: '#5eead4',
+      shadowColor: 'rgba(19,78,74,0.08)',
       textPrimary: '#134e4a',
       textSecondary: '#115e59',
       badgeBg: '#ffe4e6',
@@ -886,6 +1108,14 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     typography: {
       fontFamily: 'sans-serif',
       headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-full',
@@ -894,6 +1124,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Livraison Rapide Croquettes & Accessoires directement à votre porte partout au Maroc !',
     announcementBg: '#115e59',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'Le Meilleur Confort pour Votre Animal de Compagnie.',
     heroSubheadline: 'Fontaines d’eau filtrante, lits apaisants ultra-doux et jouets interactifs testés et approuvés par les vétérinaires.',
     trustPills: [
@@ -920,6 +1151,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#eef2ff',
       cardBg: '#ffffff',
       border: '#c7d2fe',
+      borderStrong: '#a5b4fc',
+      shadowColor: 'rgba(49,46,129,0.08)',
       textPrimary: '#312e81',
       textSecondary: '#4338ca',
       badgeBg: '#fef9c3',
@@ -927,7 +1160,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'sans-serif',
-      headingClass: 'font-sans font-extrabold tracking-normal',
+      headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-2xl',
@@ -936,6 +1177,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Tenues Traditionnelles Enfants pour les Fêtes & l’Aïd • Pack Frère & Sœur en promotion !',
     announcementBg: '#3730a3',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'Habillez Vos Petits avec Amour et Style.',
     heroSubheadline: 'Des collections colorées, confortables et faciles à entretenir pour accompagner chaque aventure de vos enfants.',
     trustPills: [
@@ -956,12 +1198,14 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     sourceInspiration: 'Heritage Leather (WooCommerce)',
     colors: {
       primary: '#451a03',
-      primaryHover: '#581c87',
+      primaryHover: '#7a2706',
       accent: '#b45309',
       accentHover: '#92400e',
       bgPage: '#fffbeb',
       cardBg: '#ffffff',
       border: '#fde68a',
+      borderStrong: '#fcd34d',
+      shadowColor: 'rgba(69,26,3,0.08)',
       textPrimary: '#451a03',
       textSecondary: '#78350f',
       badgeBg: '#fef3c7',
@@ -969,7 +1213,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'serif',
-      headingClass: 'font-serif font-bold tracking-tight',
+      headingClass: 'font-serif tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-[-0.02em] font-serif text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight font-serif',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3] font-serif',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-md',
@@ -978,6 +1230,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Cuir Tanné Naturellement sans Chrome • Patine Exceptionnelle avec le Temps • Envoi Express',
     announcementBg: '#451a03',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'Le Charme Inégalé du Cuir Pleine Fleur Marocain.',
     heroSubheadline: 'Sacs besace, cartables et sacs week-end cousus à la main au fil poissé pour durer toute une vie.',
     trustPills: [
@@ -1004,6 +1257,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#f8fafc',
       cardBg: '#ffffff',
       border: '#e2e8f0',
+      borderStrong: '#94a3b8',
+      shadowColor: 'rgba(15,23,42,0.06)',
       textPrimary: '#0f172a',
       textSecondary: '#475569',
       badgeBg: '#ffe4e6',
@@ -1011,7 +1266,15 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     typography: {
       fontFamily: 'sans-serif',
-      headingClass: 'font-sans font-extrabold tracking-tight',
+      headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-lg',
@@ -1020,6 +1283,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     },
     announcementText: 'Cuisinez Sainement : Friteuse sans huile Air Fryer XXL à prix choc • Livre de recettes marocaines offert',
     announcementBg: '#e11d48',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'Préparez les Meilleurs Plats Marocains en un Éclair.',
     heroSubheadline: 'Des appareils électroménagers puissants et robustes pour réussir tajines, pâtisseries et jus frais en toute simplicité.',
     trustPills: [
@@ -1046,6 +1310,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#09090b',
       cardBg: '#18181b',
       border: '#27272a',
+      borderStrong: '#52525b',
+      shadowColor: 'rgba(0,0,0,0.40)',
       textPrimary: '#fafafa',
       textSecondary: '#a1a1aa',
       badgeBg: '#3b0764',
@@ -1054,6 +1320,14 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     typography: {
       fontFamily: 'monospace',
       headingClass: 'font-mono font-black tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-[0.04em] font-mono text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-[0.04em] font-mono',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3] font-mono',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2 font-mono',
+        caption: 'text-[11px] leading-[1.4] tracking-widest font-mono',
+        label: 'text-[10px] font-bold uppercase tracking-[0.14em] font-mono',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-none',
@@ -1061,7 +1335,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       badgeStyle: 'border border-purple-500 text-purple-300 bg-purple-950 font-mono text-xs',
     },
     announcementText: 'LEVEL UP YOUR SETUP : Nouveaux Claviers Mécaniques Swappables • Livraison 24h au Maroc',
-    announcementBg: '#8b5cf6',
+    announcementBg: '#7c3aed',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'L’Arsenal Ultime pour Dominer Vos Parties.',
     heroSubheadline: 'Périphériques e-sport de haute précision, temps de réponse 1ms et éclairage néon immersif pour votre setup de streaming.',
     trustPills: [
@@ -1088,14 +1363,24 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       bgPage: '#f8fafc',
       cardBg: '#ffffff',
       border: '#a7f3d0',
+      borderStrong: '#6ee7b7',
+      shadowColor: 'rgba(6,78,59,0.08)',
       textPrimary: '#064e3b',
-      textSecondary: '#047857',
+      textSecondary: '#065f46',
       badgeBg: '#d1fae5',
       badgeText: '#065f46',
     },
     typography: {
       fontFamily: 'sans-serif',
-      headingClass: 'font-sans font-black tracking-tight',
+      headingClass: 'font-sans font-bold tracking-tight',
+      scale: {
+        h1: 'text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-black leading-[1.1] tracking-tight text-wrap-balance',
+        h2: 'text-[clamp(1.25rem,2.5vw+0.5rem,1.875rem)] font-bold leading-[1.2] tracking-tight',
+        h3: 'text-[clamp(1rem,1.5vw+0.5rem,1.25rem)] font-semibold leading-[1.3]',
+        cardTitle: 'text-[clamp(0.8125rem,1vw+0.5rem,0.875rem)] font-bold leading-[1.4] line-clamp-2',
+        caption: 'text-[11px] leading-[1.4] tracking-wide',
+        label: 'text-[10px] font-semibold uppercase tracking-widest',
+      },
     },
     styleTokens: {
       buttonRadius: 'rounded-xl',
@@ -1103,7 +1388,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
       badgeStyle: 'border-2 border-emerald-500 text-emerald-950 bg-emerald-100 font-black',
     },
     announcementText: '🇲🇦 N°1 du Cash on Delivery au Maroc • Livraison Gratuite dès 350 DH • Paiement après inspection du colis',
-    announcementBg: '#059669',
+    announcementBg: '#047857',
+    announcementTextColor: '#ffffff',
     heroHeadline: 'La Confiance Absolue du Paiement à la Livraison.',
     heroSubheadline: 'Ne payez rien à l’avance. Vous commandez en un clic, notre coursier vous livre à domicile, vous inspectez le colis puis vous réglez en espèces.',
     trustPills: [
@@ -1124,4 +1410,41 @@ export function getThemeById(id: string): ThemeConfig {
 export function getThemesByCategory(category: string): ThemeConfig[] {
   if (category === 'all') return THEME_LIST;
   return THEME_LIST.filter((t) => t.category === category);
+}
+
+// --- WCAG contrast helpers ---
+
+export function getContrastText(bg: string): string {
+  const hex = bg.replace('#', '');
+  const r = parseInt(hex.slice(0, 2), 16) / 255;
+  const g = parseInt(hex.slice(2, 4), 16) / 255;
+  const b = parseInt(hex.slice(4, 6), 16) / 255;
+  const toLinear = (c: number) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+  const L = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+  const contrastWhite = 1.05 / (L + 0.05);
+  const contrastBlack = (L + 0.05) / 0.05;
+  return contrastWhite >= contrastBlack ? '#ffffff' : '#0f172a';
+}
+
+export function getAnnouncementTextColor(bg: string): string {
+  return getContrastText(bg);
+}
+
+export function validateThemeContrast(theme: ThemeConfig): { announcement: boolean; textSecondary: boolean; badge: boolean } {
+  const hexToLum = (hex: string) => {
+    const h = hex.replace('#','');
+    const r = parseInt(h.slice(0,2),16)/255, g=parseInt(h.slice(2,4),16)/255, b=parseInt(h.slice(4,6),16)/255;
+    const toL=(c:number)=>c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4);
+    return 0.2126*toL(r)+0.7152*toL(g)+0.0722*toL(b);
+  };
+  const contrast = (a:string,b:string)=>{
+    const La=hexToLum(a), Lb=hexToLum(b);
+    const l1=Math.max(La,Lb), l2=Math.min(La,Lb);
+    return (l1+0.05)/(l2+0.05);
+  };
+  return {
+    announcement: contrast(theme.announcementTextColor, theme.announcementBg) >= 4.5,
+    textSecondary: contrast(theme.colors.textSecondary, theme.colors.cardBg) >= 4.5 && contrast(theme.colors.textSecondary, theme.colors.bgPage) >= 4.5,
+    badge: contrast(theme.colors.badgeText, theme.colors.badgeBg) >= 4.5,
+  };
 }

@@ -16,9 +16,12 @@ export function StorefrontShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <ThemeSelectorBar />
-      <Navbar />
-      <main>{children}</main>
+      {/* Single sticky container for demo bar + navbar — prevents top-8 overlap */}
+      <div className="sticky top-0 z-40">
+        <ThemeSelectorBar />
+        <Navbar />
+      </div>
+      <main className="min-w-0">{children}</main>
       <Footer />
     </>
   );
