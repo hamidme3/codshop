@@ -1,10 +1,70 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// Valid Moroccan cities for geo whitelisting (covers >70% e-commerce volume)
+const VALID_MOROCCAN_CITIES = new Set([
+  'Casablanca', 'Rabat', 'Marrakech', 'Tanger', 'Fès', 'Agadir',
+  'Meknes', 'Oujda', 'Kenitra', 'Tétouan', 'Safi', 'El Jadida',
+  'Béni Mellal', 'Nador', 'Settat', 'Larache', 'Khouribga', 'Guelmim'
+]);
+
+function normalizeCity(city: string | null): string | null {
+  if (!city) return null;
+  const trimmed = city.trim();
+  if (VALID_MOROCCAN_CITIES.has(trimmed)) return trimmed;
+  return null;
+}
+
+function getCityFromHeaders(request: NextRequest): string | null {
+  // Priority: Cloudflare > Vercel > standard proxy headers
+  const cfCity = request.headers.get('cf-ipcity');
+  const vercelCity = request.headers.get('x-vercel-ip-city');
+  const standardCity = request.headers.get('x-forwarded-city');
+  const country = request.headers.get('cf-ipcountry') || request.headers.get('x-vercel-ip-country');
+  
+  // Only accept city if country is MA (Morocco) or unknown (local dev)
+  if (country && country !== 'MA' && country !== 'unknown') {
+    return null; // Foreign IP — don't trust city
+  }
+  
+  const rawCity = cfCity || vercelCity || standardCity;
+  return normalizeCity(rawCity);
+}
+
+function getAbVariantCookie(request: NextRequest): 'control' | 'waybill' {
+  const existing = request.cookies.get('cod_ab_variant')?.value;
+  if (existing === 'control' || existing === 'waybill') return existing;
+  
+  // Deterministic 50/50 bucket based on session/user identifier
+  const sessionId = request.cookies.get('codshop_session')?.value || 
+                    request.headers.get('x-forwarded-for') || 
+                    'anonymous';
+  const hash = Array.from(sessionId).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return hash % 2 === 0 ? 'control' : 'waybill';
+}
+
+function setAbVariantCookie(response: NextResponse, variant: 'control' | 'waybill') {
+  response.cookies.set({
+    name: 'cod_ab_variant',
+    value: variant,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  });
+}
+
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const hostname = request.headers.get('host') || 'codshop.vipone.site';
-
+  
+  // --- Testing overrides (dev/staging only) ---
+  const overrideCity = url.searchParams.get('geo_city') || request.headers.get('x-override-city');
+  const overrideVariant = url.searchParams.get('ab_variant');
+  if (overrideCity) url.searchParams.set('geo_city', overrideCity); // persist for client
+  if (overrideVariant) url.searchParams.set('ab_variant', overrideVariant);
+  
   // Extract clean domain (strip port if present)
   const currentHost = hostname.split(':')[0].toLowerCase();
   const rootDomain = process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site';
@@ -19,8 +79,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Clone headers to pass tenant and auth information downstream
+  // --- Geo + A/B Detection (before subdomain logic) ---
+  const detectedCity = overrideCity || getCityFromHeaders(request);
+  const abVariant = overrideVariant as 'control' | 'waybill' || getAbVariantCookie(request);
+  const finalCity = detectedCity || 'Casablanca'; // default hub
+  
+  // Clone headers to pass tenant, geo, and A/B information downstream
   const requestHeaders = new Headers(request.headers);
+  if (detectedCity) requestHeaders.set('x-geo-city', detectedCity);
+  requestHeaders.set('x-geo-city-final', finalCity);
+  requestHeaders.set('x-ab-variant', abVariant);
 
   // Admin Route Protection
   if (url.pathname.startsWith('/admin')) {
@@ -32,7 +100,7 @@ export async function middleware(request: NextRequest) {
       try {
         const { jwtVerify } = await import('jose');
         const secret = new TextEncoder().encode(
-          process.env.JWT_SECRET || 'codshop_super_secret_jwt_key_2026_morocco_saas_platform_key'
+          process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET not configured'); })()
         );
         const { payload } = await jwtVerify(sessionCookie, secret);
         isValidSession = true;
@@ -92,7 +160,10 @@ export async function middleware(request: NextRequest) {
         request: { headers: requestHeaders },
       });
       response.headers.set('x-store-slug', subdomain);
+      response.headers.set('x-geo-city-final', finalCity);
+      response.headers.set('x-ab-variant', abVariant);
       response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+      setAbVariantCookie(response, abVariant);
       return response;
     }
   }
@@ -104,6 +175,9 @@ export async function middleware(request: NextRequest) {
     },
   });
   response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+  response.headers.set('x-geo-city-final', finalCity);
+  response.headers.set('x-ab-variant', abVariant);
+  setAbVariantCookie(response, abVariant);
   return response;
 }
 

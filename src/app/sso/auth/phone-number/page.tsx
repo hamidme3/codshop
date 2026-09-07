@@ -21,7 +21,7 @@ export default function PhoneLoginPage() {
       const res = await fetch('/api/sso/auth/phone-number', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone: (phone || '').trim() }),
       });
 
       const data = await res.json();
@@ -53,7 +53,7 @@ export default function PhoneLoginPage() {
       const res = await fetch('/api/sso/auth/phone-number/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, code }),
+        body: JSON.stringify({ phone: (phone || '').trim(), code: (code || '').trim() }),
       });
 
       const data = await res.json();

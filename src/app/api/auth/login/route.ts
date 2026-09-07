@@ -40,6 +40,14 @@ export async function POST(request: Request) {
     const storeSlug = primaryStore.slug;
     const storeId = primaryStore.id;
 
+    // 2FA guard — if user has 2FA enabled, require verification (findings #8 — critical bypass fix)
+    if (user.is2faEnabled) {
+      return NextResponse.json(
+        { success: false, error: '2FA verification required.', requires2fa: true },
+        { status: 403 }
+      );
+    }
+
     const token = await signSessionToken({
       userId: user.id,
       email: user.email,

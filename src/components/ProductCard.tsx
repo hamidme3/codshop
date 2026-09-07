@@ -89,6 +89,16 @@ export function ProductCard({ product, priority = false }: { product: Product; p
               >
                 {product.title}
               </Link>
+              {/* Bilingual Darija/Arabic subtitle — stacked below French title */}
+              {product.titleAr && (
+                <bdi
+                  dir="rtl"
+                  className="block text-xs font-medium opacity-75 mt-0.5 line-clamp-1"
+                  style={{ color: 'var(--theme-text-secondary)' }}
+                >
+                  {product.titleAr}
+                </bdi>
+              )}
             </h3>
             <p className="text-xs line-clamp-2 mt-1 min-w-0" style={{ color: 'var(--theme-text-secondary)' }}>
               {product.tagline}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { 
@@ -8,7 +8,7 @@ import {
   ArrowUpRight, Palette, Plus, Phone, CheckCircle2, 
   Clock, Package 
 } from 'lucide-react';
-import { getOrders, getAnalytics } from '@/lib/backoffice';
+import { getOrders, getAnalytics, type Order } from '@/lib/backoffice';
 import { useLanguage } from '@/contexts/LanguageContext';
 import MilestoneWidget from '@/components/admin/MilestoneWidget';
 import LuckyWheelWidget from '@/components/admin/LuckyWheelWidget';
@@ -16,10 +16,14 @@ import LuckyWheelWidget from '@/components/admin/LuckyWheelWidget';
 function OverviewContent() {
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
+  // #13 — re-sync orders/analytics when storeSlug changes
+  const [orders, setOrders] = useState<Order[]>(() => getOrders(storeSlug));
+  const [analytics, setAnalytics] = useState(() => getAnalytics(storeSlug));
+  useEffect(() => {
+    setOrders(getOrders(storeSlug));
+    setAnalytics(getAnalytics(storeSlug));
+  }, [storeSlug]);
   const { t } = useLanguage();
-
-  const orders = getOrders(storeSlug);
-  const analytics = getAnalytics(storeSlug);
   const pendingOrders = orders.filter((o) => ['new', 'to_confirm'].includes(o.status));
 
   return (

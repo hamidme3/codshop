@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import { getProductBySlug } from '@/lib/mockProducts';
+import { getDeliveryDateEstimate } from '@/lib/moroccanCities';
+import { CountdownTimer } from '@/components/CountdownTimer';
 import { useTheme } from '@/context/ThemeContext';
 import { Star, ShieldCheck, Truck, RotateCcw, Check, Sparkles, MessageCircle } from 'lucide-react';
 import { CodCheckoutModal } from '@/components/CodCheckoutModal';
+import { CartWidget } from '@/components/CartWidget';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -17,7 +20,13 @@ export default function ProductDetailPage() {
   const [selectedVariant, setSelectedVariant] = useState(
     product?.variants?.options.find((o) => o.inStock)?.name || ''
   );
+  const [selectedQuantity, setSelectedQuantity] = useState(product?.quantityTiers[0]?.quantity || 1);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+
+  const deliveryEstimate = useMemo(
+    () => (product ? getDeliveryDateEstimate('Casablanca', product.price) : null),
+    [product]
+  );
 
   if (!product) {
     return (
@@ -31,19 +40,39 @@ export default function ProductDetailPage() {
     );
   }
 
-  const discountPercent = Math.round(
-    ((product.originalPrice - product.price) / product.originalPrice) * 100
-  );
+  const discountPercent = product?.originalPrice && product.originalPrice > 0 && product.price > 0
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 space-y-12">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs text-zinc-400">
-        <a href="/" className="hover:text-zinc-900 transition">Accueil</a>
-        <span>/</span>
-        <span className="text-zinc-600 font-medium capitalize">{product.theme}</span>
-        <span>/</span>
-        <span className="text-zinc-900 font-semibold truncate max-w-xs">{product.title}</span>
+      {/* YouCan-style promo banner — zero-JS, mobile-first */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white p-4 sm:p-6 shadow-xl">
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-1 min-w-0">
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-black tracking-wider backdrop-blur-sm border border-white/30">
+              🔥 OFFERTE SPÉCIALE
+            </div>
+            <h2 className="font-black text-xl sm:text-2xl tracking-tight leading-none">Livraison Gratuite & Paiement COD</h2>
+            <p className="text-xs sm:text-sm text-white/90 font-medium">Dépêchez-vous ! Commandes avant 16h expédiées aujourd'hui.</p>
+          </div>
+          <div className="text-right shrink-0 hidden sm:block">
+            <div className="font-mono text-2xl font-black text-white/90">24/48H</div>
+            <div className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Livraison</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Breadcrumb with cart widget */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs text-zinc-400 min-w-0">
+          <a href="/" className="hover:text-zinc-900 transition">Accueil</a>
+          <span>/</span>
+          <span className="text-zinc-600 font-medium capitalize">{product.theme}</span>
+          <span>/</span>
+          <span className="text-zinc-900 font-semibold truncate">{product.title}</span>
+        </div>
+        <CartWidget />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
@@ -51,8 +80,8 @@ export default function ProductDetailPage() {
         <div className="space-y-4">
           <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-zinc-100 border border-zinc-200 shadow-sm">
             <img
-              src={product.images[activeImage] || product.images[0]}
-              alt={product.title}
+              src={product?.images?.[activeImage] || product?.images?.[0] || 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=800&auto=format&fit=crop'}
+              alt={product?.title || 'Produit'}
               className="w-full h-full object-cover object-center"
             />
             <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -113,17 +142,28 @@ export default function ProductDetailPage() {
               <div className="text-xs text-zinc-500">Prix Spécial Promotionnel :</div>
               <div className="flex items-baseline gap-3 mt-0.5">
                 <span className="text-3xl font-black text-zinc-950">
-                  {formatMAD(product.price)}
+                  {formatMAD(product?.price ?? 0)}
                 </span>
                 <span className="text-sm line-through text-zinc-400 font-semibold">
-                  {formatMAD(product.originalPrice)}
+                  {formatMAD(product?.originalPrice ?? 0)}
                 </span>
               </div>
             </div>
             <div className="text-right">
               <span className="inline-block px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold">
-                Économisez {formatMAD(product.originalPrice - product.price)}
+                Économisez {formatMAD(Math.max(0, (product?.originalPrice ?? 0) - (product?.price ?? 0)))}
               </span>
+            </div>
+          </div>
+
+          {/* YouCan-inspired urgency signals: countdown + stock urgency + real-time visitor */}
+          <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 shadow-sm">
+            <CountdownTimer endTimeISO={new Date(Date.now() + 24 * 3600 * 1000).toISOString()} />
+            <div className="w-px h-5 bg-amber-200" />
+            <div className="flex items-center gap-2 text-[11px] font-bold text-amber-700">
+              <span>Seulement {product?.stockLeft ?? 0} en stock!</span>
+              <span>—</span>
+              <span>1 visiteur en temps réel</span>
             </div>
           </div>
 
@@ -159,6 +199,63 @@ export default function ProductDetailPage() {
             </div>
           )}
 
+          {/* Quantity Tiers / Special Packs */}
+          {product.quantityTiers.length > 1 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-zinc-900">
+                <span>Choisissez votre offre spéciale :</span>
+                <span className="text-[11px] text-emerald-700 font-semibold">Paiement à la livraison</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {product.quantityTiers.map((tier) => {
+                  const isSelected = selectedQuantity === tier.quantity;
+                  return (
+                    <button
+                      key={tier.quantity}
+                      type="button"
+                      onClick={() => setSelectedQuantity(tier.quantity)}
+                      className={`p-3 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
+                        isSelected
+                          ? 'border-emerald-600 bg-emerald-50/60 shadow-xs'
+                          : 'border-zinc-200 bg-white hover:border-zinc-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-xs font-bold text-zinc-900">{tier.label}</span>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />}
+                      </div>
+                      <div className="mt-2 flex items-baseline justify-between gap-1">
+                        <span className="font-black text-sm text-zinc-950">{formatMAD(tier.totalPrice)}</span>
+                        {tier.savingsBadge && (
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">
+                            {tier.savingsBadge}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Dynamic Moroccan Delivery Estimate Banner */}
+          {deliveryEstimate && (
+            <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 rounded-2xl flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                <Truck className="w-4 h-4 text-emerald-700" />
+              </div>
+              <div className="text-xs">
+                <div className="font-bold text-emerald-950">
+                  Livraison estimée : {deliveryEstimate.formattedEstimate}
+                </div>
+                <p className="text-[11px] text-emerald-800 mt-0.5">
+                  Délai {deliveryEstimate.sla} • Paiement 100% Cash à la Livraison (COD)
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* CTA Buttons */}
           <div className="space-y-2.5 pt-2">
             <button
@@ -172,11 +269,12 @@ export default function ProductDetailPage() {
 
             <a
               href={`https://wa.me/${product.whatsAppDirectNumber}?text=${encodeURIComponent(
-                `Salam, je souhaite commander : ${product.title} (${formatMAD(product.price)})`
+                `Salam, je souhaite commander : ${product?.title ?? 'ce produit'} (${formatMAD(product?.price ?? 0)})`
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-3 px-6 bg-white hover:bg-zinc-50 text-zinc-800 border-2 border-zinc-200 font-bold text-xs rounded-2xl transition flex items-center justify-center gap-2"
+              className="w-full py-4 px-6 bg-white hover:bg-zinc-50 text-zinc-800 border-2 border-zinc-200 font-black text-sm rounded-2xl transition flex items-center justify-center gap-2 shadow-sm min-h-[48px]"
+              aria-label="Commander via WhatsApp"
             >
               <MessageCircle className="w-4 h-4 text-emerald-600" />
               <span>Commander en 1 Clic via WhatsApp</span>
@@ -222,6 +320,7 @@ export default function ProductDetailPage() {
         product={product}
         isOpen={showCheckoutModal}
         onClose={() => setShowCheckoutModal(false)}
+        initialQuantity={selectedQuantity}
         initialVariant={selectedVariant}
       />
     </div>

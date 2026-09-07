@@ -15,7 +15,7 @@ export default async function OrderSuccessPage({
 
   const customerName = order?.customerName || resolvedSearchParams?.customer || resolvedSearchParams?.name || 'Client';
   const city = order?.city || resolvedSearchParams?.city || 'votre ville';
-  const total = order?.total ?? (resolvedSearchParams?.total ? Number(resolvedSearchParams.total) : null);
+  const total = (order?.total ?? (resolvedSearchParams?.total ? Number(resolvedSearchParams.total) || 0 : 0)) || 0;
   const items = (order?.items as { id?: string; title: string; quantity: number; price: number; variant?: string }[]) || [];
 
   return (

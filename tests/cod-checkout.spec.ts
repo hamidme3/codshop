@@ -46,8 +46,12 @@ test.describe('COD Checkout Flow', () => {
     const addressInput = page.getByPlaceholder(/Quartier Maârif/i);
     await addressInput.fill('Quartier Test, Rue 123, Casablanca');
 
-    // 4. Submit — "Confirmer la Commande"
-    const submitBtn = page.getByRole('button', { name: /Confirmer la Commande/i });
+    // 4. Submit — advance 2-step stepper if present, then click "Confirmer la Commande"
+    const continueBtn = page.getByRole('button', { name: /Continuer|Étape suivante/i }).first();
+    if (await continueBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await continueBtn.click();
+    }
+    const submitBtn = page.getByRole('button', { name: /Confirmer la Commande/i }).first();
     await expect(submitBtn).toBeEnabled();
     await submitBtn.click();
 

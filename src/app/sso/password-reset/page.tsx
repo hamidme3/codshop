@@ -36,7 +36,7 @@ function PasswordResetContent() {
       const res = await fetch('/api/sso/password-reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, email, password }),
+        body: JSON.stringify({ token: (token || '').trim(), email: (email || '').trim(), password: (password || '').trim() }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur de réinitialisation');

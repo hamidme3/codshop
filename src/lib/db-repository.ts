@@ -29,7 +29,7 @@ export async function getStoreBySlug(slug: string) {
     return store;
   } catch (err) {
     console.warn('[DbRepo] Failed to fetch store from DB, returning fallback:', err);
-    return { slug, name: slug.toUpperCase(), currency: 'MAD', planTier: 'pro' };
+    return { slug, name: slug.toUpperCase(), currency: 'MAD', planTier: 'pro', isWaybillEnabled: false };
   }
 }
 

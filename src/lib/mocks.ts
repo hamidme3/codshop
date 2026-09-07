@@ -306,14 +306,15 @@ export let PAYMENT_GATEWAYS: PaymentGateway[] = [
 
 // ── Mock data helpers ───────────────────────────────────────────
 
-export function getOrders(storeSlug?: string): Order[] {
-  if (storeSlug) {
-    return ORDERS.filter((o) => o.storeSlug === storeSlug);
-  }
-  return ORDERS;
+export function getOrders(storeSlug: string): Order[] {
+  if (!storeSlug) throw new Error('storeSlug is required');
+  return ORDERS.filter((o) => o.storeSlug === storeSlug);
 }
 
+export const VALID_STATUSES: Order['status'][] = ['new', 'to_confirm', 'confirmed', 'shipping', 'delivered', 'returned', 'canceled'] as const;
+
 export function updateOrderStatus(orderId: string, status: Order['status'], trackingNumber?: string): boolean {
+  if (!VALID_STATUSES.includes(status)) return false;
   const order = ORDERS.find((o) => o.id === orderId);
   if (!order) return false;
   order.status = status;
@@ -321,19 +322,19 @@ export function updateOrderStatus(orderId: string, status: Order['status'], trac
   return true;
 }
 
-export function getProducts(storeSlug?: string): Product[] {
-  if (storeSlug) {
-    return PRODUCTS.filter((p) => p.storeSlug === storeSlug);
-  }
-  return PRODUCTS;
+export function getProducts(storeSlug: string): Product[] {
+  if (!storeSlug) throw new Error('storeSlug is required');
+  return PRODUCTS.filter((p) => p.storeSlug === storeSlug);
 }
 
 export function addProduct(product: Omit<Product, 'id'>): Product {
+  if (!product.title?.trim() || (product.price ?? 0) < 0 || (product.stock ?? 0) < 0) throw new Error('Invalid product input');
   const newProd: Product = {
     ...product,
     id: `prod_${Date.now()}`,
   };
-  PRODUCTS.unshift(newProd);
+  PRODUCTS.push(newProd); // append instead of unshift — avoids unbounded growth pattern
+  if (PRODUCTS.length > 200) PRODUCTS.shift(); // cap total in-memory records
   return newProd;
 }
 
@@ -341,11 +342,9 @@ export function getCategories(): Category[] {
   return CATEGORIES;
 }
 
-export function getCustomers(storeSlug?: string): Customer[] {
-  if (storeSlug) {
-    return CUSTOMERS.filter((c) => c.storeSlug === storeSlug);
-  }
-  return CUSTOMERS;
+export function getCustomers(storeSlug: string): Customer[] {
+  if (!storeSlug) throw new Error('storeSlug is required');
+  return CUSTOMERS.filter((c) => c.storeSlug === storeSlug);
 }
 
 export function getPaymentGateways(): PaymentGateway[] {

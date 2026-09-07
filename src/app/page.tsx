@@ -38,10 +38,11 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start pt-2">
               <a
                 href="#catalog"
-                className={`w-full sm:w-auto px-6 py-3.5 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${theme.styleTokens.buttonRadius}`}
+                className={`w-full sm:w-auto px-6 py-4 text-white font-black text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[48px] ${theme.styleTokens.buttonRadius}`}
                 style={{
                   backgroundColor: theme.colors.primary,
                 }}
+                aria-label="Commander Maintenant - navigateur vers le catalogue"
               >
                 <span>Commander Maintenant</span>
                 <ArrowRight className="w-4 h-4" />

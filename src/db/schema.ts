@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, integer, timestamp, jsonb, index, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, timestamp, boolean, jsonb, index, uniqueIndex } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // ── Stores (Tenants) ───────────────────────────────────────────
@@ -14,6 +14,7 @@ export const stores = pgTable(
     customDomain: text('custom_domain'), // e.g. "boutique.ma"
     currency: text('currency').default('MAD').notNull(),
     planTier: text('plan_tier').default('starter').notNull(), // 'starter' | 'pro' | 'scale'
+    isWaybillEnabled: boolean('is_waybill_enabled').default(false).notNull(), // A/B: "Bon de Livraison" waybill skin
     trialEndsAt: timestamp('trial_ends_at').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),

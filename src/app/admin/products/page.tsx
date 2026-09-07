@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
   Package, Plus, Search, Tag, AlertTriangle, 
@@ -14,8 +14,16 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
 
-  const [products, setProducts] = useState<Product[]>(getProducts(storeSlug));
+  // #16 — re-sync when storeSlug changes
+  const [products, setProducts] = useState<Product[]>(() => getProducts(storeSlug));
   const [categories, setCategories] = useState(getCategories());
+  // #18 — refresh category counts when products change
+  useEffect(() => {
+    setProducts(getProducts(storeSlug));
+  }, [storeSlug]);
+  useEffect(() => {
+    setCategories(getCategories());
+  }, [products.length]);
   const [activeTab, setActiveTab] = useState<'products' | 'categories'>('products');
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -39,9 +47,9 @@ function ProductsContent() {
 
   const filteredProducts = products.filter((p) => {
     return (
-      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.sku.toLowerCase().includes(searchQuery.toLowerCase())
+      (p.title ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.category ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.sku ?? '').toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
 
@@ -94,7 +102,13 @@ function ProductsContent() {
 
     setProducts([newProd, ...products]);
     setShowAddModal(false);
+    // #17 — full form reset (was only resetting `title`)
     setTitle('');
+    setImageUrl('');
+    setPrice(299);
+    setComparePrice(450);
+    setCostPrice(90);
+    setStock(20);
     alert('Produit ajouté avec succès à votre catalogue !');
   };
 
@@ -187,16 +201,16 @@ function ProductsContent() {
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {filteredProducts.map((p) => {
-                    const margin = p.price - p.costPrice;
-                    const marginPercent = Math.round((margin / p.price) * 100);
+                    const margin = (p.price ?? 0) - (p.costPrice ?? 0);
+                    const marginPercent = (p.price ?? 0) > 0 ? Math.round((margin / (p.price ?? 1)) * 100) : 0;
                     const isLowStock = p.stock <= 5;
 
                     return (
                       <tr key={p.id} className="hover:bg-slate-800/40 transition-colors">
                         <td className="py-3.5 px-4 flex items-center gap-3">
                           <img
-                            src={p.images[0]}
-                            alt={p.title}
+                            src={p.images?.[0] ?? 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=800&auto=format&fit=crop'}
+                            alt={p.title ?? 'Produit'}
                             className="w-10 h-10 rounded-lg object-cover bg-slate-950 border border-slate-800 shrink-0"
                           />
                           <div>

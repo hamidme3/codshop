@@ -23,7 +23,8 @@ export {
 import { getOrders } from './mocks';
 
 // ── Analytics helper (derived from mock orders) ─────────────────
-export function getAnalytics(storeSlug?: string) {
+export function getAnalytics(storeSlug: string) {
+  if (!storeSlug) throw new Error('storeSlug is required');
   const storeOrders = getOrders(storeSlug);
   const totalOrders = storeOrders.length;
   const deliveredOrders = storeOrders.filter((o) => o.status === 'delivered');
@@ -31,15 +32,15 @@ export function getAnalytics(storeSlug?: string) {
   const confirmedOrders = storeOrders.filter((o) => ['confirmed', 'shipping', 'delivered'].includes(o.status));
   const shippingOrders = storeOrders.filter((o) => ['shipping', 'delivered', 'returned'].includes(o.status));
 
-  const totalRevenueDelivered = deliveredOrders.reduce((acc, curr) => acc + curr.total, 0);
-  const totalRevenuePotential = storeOrders.reduce((acc, curr) => acc + curr.total, 0);
+  const totalRevenueDelivered = deliveredOrders.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0);
+  const totalRevenuePotential = storeOrders.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0);
 
   const confirmationRate = totalOrders > 0 ? (confirmedOrders.length / totalOrders) * 100 : 0;
   const deliveryRate = shippingOrders.length > 0 ? (deliveredOrders.length / shippingOrders.length) * 100 : 0;
   const returnRate = shippingOrders.length > 0 ? (returnedOrders.length / shippingOrders.length) * 100 : 0;
 
   // Real Net Profit Calculation (Revenue Livré - Coût Marchandise - Coût Livraison)
-  const totalCostOfGoods = deliveredOrders.reduce((acc, curr) => acc + curr.subtotal * 0.32, 0); // ~32% cost
+  const totalCostOfGoods = deliveredOrders.reduce((acc, curr) => acc + (Number(curr.subtotal) || 0) * 0.32, 0); // ~32% cost
   const totalShippingPaid = deliveredOrders.length * 25 + returnedOrders.length * 15; // delivery fee + return return-fee
   const netProfit = Math.max(0, totalRevenueDelivered - totalCostOfGoods - totalShippingPaid);
 
@@ -51,19 +52,34 @@ export function getAnalytics(storeSlug?: string) {
     deliveryRate: Number(deliveryRate.toFixed(1)),
     returnRate: Number(returnRate.toFixed(1)),
     netProfit: Math.round(netProfit),
-    cityDistribution: [
-      { city: 'Casablanca', orders: 48, rate: 92.4, revenue: 16800 },
-      { city: 'Rabat', orders: 28, rate: 89.3, revenue: 9400 },
-      { city: 'Marrakech', orders: 24, rate: 87.5, revenue: 8200 },
-      { city: 'Tanger', orders: 19, rate: 84.2, revenue: 6500 },
-      { city: 'Fès', orders: 15, rate: 80.0, revenue: 4900 },
-      { city: 'Agadir', orders: 12, rate: 83.3, revenue: 4200 },
-    ],
+    // ── Dynamic city distribution scoped to storeSlug ──────────────────────
+    cityDistribution: (() => {
+      const cityMap = new Map<string, { orders: number; revenue: number }>();
+      storeOrders.forEach((o) => {
+        const c = o.city ?? 'Autre';
+        const existing = cityMap.get(c) ?? { orders: 0, revenue: 0 };
+        cityMap.set(c, {
+          orders: existing.orders + 1,
+          revenue: existing.revenue + (Number(o.total) || 0),
+        });
+      });
+      const total = storeOrders.length || 1;
+      return Array.from(cityMap.entries())
+        .sort((a, b) => b[1].revenue - a[1].revenue)
+        .slice(0, 6)
+        .map(([city, data]) => ({
+          city,
+          orders: data.orders,
+          rate: Number(((data.orders / total) * 100).toFixed(1)),
+          revenue: Math.round(data.revenue),
+        }));
+    })(),
   };
 }
 
 // ── Funnel / Store Journey Model ────────────────────────────────
-export function getFunnelData(_storeSlug?: string) {
+export function getFunnelData(storeSlug: string) {
+  if (!storeSlug) throw new Error('storeSlug is required');
   return {
     totalVisitors: 2840,
     conversionRate: 14.2,

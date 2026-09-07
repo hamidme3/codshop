@@ -4,7 +4,7 @@ import React, { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
   ShoppingBag, Search, Phone, MessageCircle, Truck, 
-  CheckCircle2, XCircle, Clock, Filter, Printer, ExternalLink 
+  CheckCircle2, Clock, Printer
 } from 'lucide-react';
 import { getOrders, updateOrderStatus, Order, OrderStatus } from '@/lib/backoffice';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -31,11 +31,13 @@ function OrdersContent() {
 
   const filteredOrders = orders.filter((o) => {
     const matchesFilter = filterMap[activeFilter]?.includes(o.status);
-    const matchesQuery = 
-      o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      o.phone.includes(searchQuery) ||
-      o.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      o.city.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const name = (o.customerName ?? '').toLowerCase();
+    const phone = (o.phone ?? '').toLowerCase();
+    const num = (o.orderNumber ?? '').toLowerCase();
+    const city = (o.city ?? '').toLowerCase();
+    const matchesQuery =
+      name.includes(q) || phone.includes(q) || num.includes(q) || city.includes(q);
     return matchesFilter && matchesQuery;
   });
 
@@ -51,6 +53,10 @@ function OrdersContent() {
     const tracking = `OZON-MA-${Math.floor(100000 + Math.random() * 900000)}`;
     updateOrderStatus(orderId, 'shipping', tracking);
     setOrders([...getOrders(storeSlug)]);
+    // #14 — keep drawer in sync with the dispatched order
+    if (selectedOrder?.id === orderId) {
+      setSelectedOrder({ ...selectedOrder, status: 'shipping', trackingNumber: tracking });
+    }
     alert(`Colis créé avec succès sur Ozon Express !\nN° de Suivi : ${tracking}`);
   };
 
@@ -158,10 +164,11 @@ function OrdersContent() {
                 </tr>
               ) : (
                 filteredOrders.map((order) => {
-                  const rawPhone = order.phone.replace(/[^0-9]/g, '');
+                  const rawPhone = (order.phone ?? '').replace(/[^0-9]/g, '');
                   const waNumber = rawPhone.startsWith('0') ? `212${rawPhone.slice(1)}` : rawPhone;
+                  const itemName = order.items?.[0]?.title ?? 'votre commande';
                   const waMsg = encodeURIComponent(
-                    `Salam ${order.customerName}, m3ak la boutique ${storeSlug.toUpperCase()}. Commanditi 3ndna ${order.items[0]?.title} b ${order.total} DH l ${order.city}. Bghiti nsayftouha lik ghdda nchaellah ?`
+                    `Salam ${order.customerName ?? 'Client'}, m3ak la boutique ${storeSlug.toUpperCase()}. Commanditi 3ndna ${itemName} b ${order.total ?? 0} DH l ${order.city ?? 'votre ville'}. Bghiti nsayftouha lik ghdda nchaellah ?`
                   );
 
                   return (
@@ -301,7 +308,7 @@ function OrdersContent() {
               {/* Items Summary */}
               <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
                 <div className="font-bold text-slate-300">Articles commandés :</div>
-                {selectedOrder.items.map((item, i) => (
+                {selectedOrder.items?.map((item, i) => (
                   <div key={i} className="flex justify-between items-center text-slate-200">
                     <span>{item.title} (x{item.quantity})</span>
                     <span className="font-bold">{item.price * item.quantity} DH</span>
