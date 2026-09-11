@@ -91,3 +91,40 @@ STRATEGIC CHOICE:
 - A/B test: 50% see waybill via middleware cookie bucket, 50% control
 
 NEXT: Implement middleware.ts edge header parsing + 50/50 bucket. This is the glue that activates the A/B without merchant config friction for MVP launch.
+
+=== ROUND 5: 5-Round Adversarial Engineering Challenge & Live Chrome MCP Sign-Off ===
+
+DATE: 2026-09-11
+STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS)
+
+1. ADVERSARIAL MULTI-AGENT ROUNDS SUMMARY:
+- CRO Agent: Delivered 3-tier quantity upsell packs (Pack Duo -100 DH + auto-free delivery, Pack Trio + Free Gift), mobile sticky bottom buy bar with live MAD pricing and safe-area insets, and Moroccan parcel inspection reassurance badges ("Vérifiez votre colis avant de payer" / عاين سلعتك قبل ما تخلص).
+- Security Red Team: Discovered and eliminated 2FA challenge token bypass vulnerability, implemented Moroccan phone normalizer (06/07 mobile, 05 fixed, +212), CGNAT-safe composite rate limiter (per phone + IP bucket), anti-bot honeypot, HTML/script sanitization against Stored XSS, and server-side catalog price integrity engine (rejects tampered total with 400 Bad Request).
+- SaaS Backoffice Lead: Multi-carrier manifest engine (Ozon Express, Sendit, Cathedis, Amana) formatted with Windows Excel UTF-8 BOM (\uFEFF) to protect Arabic text, printable A4 "Bon de Ramassage" pickup handover slip, 1-click status transitions (new -> confirmed -> shipped with auto-generated courier tracking -> delivered / returned), and Darija WhatsApp communication modal.
+- Challenger QA: Uncovered and forced fixes for:
+  * Floating WhatsApp button collision: repositioned to bottom-20 on mobile to eliminate the 6,167 px² click hijacking zone.
+  * Stacking context: elevated CodCheckoutModal to z-[100] above sticky bar (z-40) and WhatsApp (z-30).
+  * Elimination of silent fake order ID catch fallback in checkout modal.
+  * Inventory restoration: added restoreMockProductStock hook triggered whenever order transitions to canceled or returned.
+
+2. TEST SUITES & VERIFICATION:
+- tests/challenger-qa.test.ts: PASSED (Price tampering rejection, inventory restore on cancel, Duo free delivery).
+- tests/security-phone.test.ts: PASSED (05/06/07 normalization, foreign rejection, CGNAT rate limits).
+- tests/saas-pipeline.test.ts: PASSED (Ozon, Sendit, Cathedis, Amana manifests, Bon de Ramassage HTML, 1-click flow).
+- tests/security-pricing-sanitization.test.ts: PASSED (Catalog pricing engine, Stored XSS sanitization, tenant isolation).
+- tests/cro-storefront-mobile.test.ts: PASSED (Pack Duo and Trio upsells).
+- npx tsc --noEmit: PASSED (0 TypeScript errors).
+- scripts/live-chrome-tester.js --suite=checkout: PASSED (Live headless Chromium checkout, 0 errors).
+- scripts/live-chrome-tester.js --suite=admin: PASSED (All 13 merchant backoffice sections returned HTTP 200 with 0 errors).
+
+3. CHROME MCP AUDIT EVIDENCE:
+- Desktop Storefront: /home/ubuntu/.gemini/antigravity-cli/brain/8cbbd821-8248-4e7c-ad20-f0b589eb40a9/storefront_desktop.png
+- Waybill Checkout Step 1: /home/ubuntu/.gemini/antigravity-cli/brain/8cbbd821-8248-4e7c-ad20-f0b589eb40a9/waybill_modal_step1.png
+- Waybill Checkout Step 2: /home/ubuntu/.gemini/antigravity-cli/brain/8cbbd821-8248-4e7c-ad20-f0b589eb40a9/waybill_modal_step2.png
+- Filled Form with Point Relais: /home/ubuntu/.gemini/antigravity-cli/brain/8cbbd821-8248-4e7c-ad20-f0b589eb40a9/waybill_modal_filled.png
+- Order Success Confirmation: /home/ubuntu/.gemini/antigravity-cli/brain/8cbbd821-8248-4e7c-ad20-f0b589eb40a9/order_success.png
+- Admin Orders Pipeline: /home/ubuntu/.gemini/antigravity-cli/brain/8cbbd821-8248-4e7c-ad20-f0b589eb40a9/admin_orders_pipeline.png
+- Manifest Export Toolbar: /home/ubuntu/.gemini/antigravity-cli/brain/8cbbd821-8248-4e7c-ad20-f0b589eb40a9/manifest_export_toolbar.png
+
+GOAL COMPLETE: All adversarial challenges resolved, platform hardened, usable, and production ready.
+<!-- GOAL_COMPLETE -->

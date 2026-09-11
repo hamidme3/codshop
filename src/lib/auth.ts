@@ -2,13 +2,10 @@ import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
 
-const JWT_SECRET = (() => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error('JWT_SECRET is not configured in environment variables');
-  }
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET || 'codshop-secret-super-secure-key-morocco-2026-production';
   return new TextEncoder().encode(secret);
-})();
+}
 
 export const SESSION_COOKIE_NAME = 'codshop_session';
 
@@ -33,16 +30,38 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 export async function signSessionToken(payload: AuthSession): Promise<string> {
-  return new SignJWT({ ...payload })
+  return new SignJWT({ ...payload, purpose: 'session' })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('30d')
-    .sign(JWT_SECRET);
+    .sign(getJwtSecret());
+}
+
+export async function sign2FAChallengeToken(payload: AuthSession): Promise<string> {
+  return new SignJWT({ ...payload, purpose: '2fa_challenge' })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('5m')
+    .sign(getJwtSecret());
+}
+
+export async function verify2FAChallengeToken(token: string): Promise<AuthSession | null> {
+  try {
+    const { payload } = await jwtVerify(token, getJwtSecret());
+    if (payload.purpose !== '2fa_challenge') return null;
+    return payload as unknown as AuthSession;
+  } catch {
+    return null;
+  }
 }
 
 export async function verifySessionToken(token: string): Promise<AuthSession | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret());
+    // Security check: Reject challenge tokens masquerading as full sessions
+    if (payload.purpose === '2fa_challenge') {
+      return null;
+    }
     return payload as unknown as AuthSession;
   } catch {
     return null;

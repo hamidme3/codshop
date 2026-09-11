@@ -2,10 +2,13 @@ export type OrderStatus =
   | 'new' // Nouvelle commande
   | 'to_confirm' // À confirmer par téléphone
   | 'confirmed' // Confirmée par le client
-  | 'shipping' // En cours de livraison (Ozon/SendIt)
+  | 'shipped' // Expédiée avec transporteur
+  | 'shipping' // Alias rétrocompatible pour shipped
   | 'delivered' // Livrée & Encaissée (Cash collecté)
   | 'returned' // Colis refusé ou retourné
   | 'canceled'; // Annulée
+
+export type CourierName = 'ozon' | 'sendit' | 'cathedis' | 'amana' | 'manual';
 
 export interface OrderItem {
   id: string;
@@ -13,6 +16,9 @@ export interface OrderItem {
   quantity: number;
   price: number;
   variant?: string;
+  sku?: string;
+  color?: string;
+  size?: string;
 }
 
 export interface Order {
@@ -29,9 +35,28 @@ export interface Order {
   subtotal: number;
   shippingFee: number;
   total: number;
-  courier?: 'ozon' | 'sendit' | 'manual';
+  courier?: CourierName;
   trackingNumber?: string;
   agentNotes?: string;
+  abVariant?: 'control' | 'waybill' | string;
+  deliveryType?: 'home' | 'stopdesk';
+  agencyName?: string;
+  source?: 'web' | 'whatsapp';
+  confirmedAt?: string;
+  shippedAt?: string;
+  deliveredAt?: string;
+  returnedAt?: string;
+  canceledAt?: string;
+}
+
+export interface ProductVariantItem {
+  id?: string;
+  size?: string;
+  color?: string;
+  stock: number;
+  sku?: string;
+  image?: string;
+  price?: number;
 }
 
 export interface Product {
@@ -45,7 +70,7 @@ export interface Product {
   costPrice: number; // Prix de revient pour calcul du bénéfice net
   stock: number;
   images: string[];
-  variants: { size?: string; color?: string; stock: number }[];
+  variants: ProductVariantItem[];
   status: 'active' | 'draft';
 }
 
@@ -56,6 +81,17 @@ export interface Category {
   productCount: number;
 }
 
+export interface CustomerOrderSummary {
+  id: string;
+  orderNumber: string;
+  createdAt: string;
+  status: OrderStatus;
+  total: number;
+  itemsSummary: string;
+  courier?: string;
+  trackingNumber?: string;
+}
+
 export interface Customer {
   id: string;
   storeSlug: string;
@@ -63,11 +99,22 @@ export interface Customer {
   phone: string;
   email: string;
   city: string;
+  address?: string;
   totalOrders: number;
+  confirmedOrders?: number;
+  shippedOrders?: number;
+  deliveredOrders?: number;
+  returnedOrders?: number;
+  canceledOrders?: number;
   totalSpend: number;
   averageBasket: number;
   lastOrderDate: string;
-  status: 'active' | 'new' | 'returning';
+  lastOrderNumber?: string;
+  lastOrderStatus?: OrderStatus;
+  lastTrackingNumber?: string;
+  deliverySuccessRate?: number;
+  status: 'active' | 'new' | 'returning' | 'risk';
+  recentOrders?: CustomerOrderSummary[];
 }
 
 export interface FunnelStep {

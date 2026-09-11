@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { verifySessionToken, signSessionToken, SESSION_COOKIE_NAME } from '@/lib/auth';
+import { verifySessionToken, verify2FAChallengeToken, signSessionToken, SESSION_COOKIE_NAME } from '@/lib/auth';
 import { verifyTOTP } from '@/lib/totp';
 import { getDb, schema } from '@/db';
 import { eq } from 'drizzle-orm';
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Token temporaire et code 2FA requis' }, { status: 400 });
     }
 
-    const payload = await verifySessionToken(tempToken);
+    const payload = (await verify2FAChallengeToken(tempToken)) || (await verifySessionToken(tempToken));
     if (!payload || !payload.userId) {
       return NextResponse.json({ error: 'Session temporaire expirée' }, { status: 401 });
     }

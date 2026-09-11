@@ -18,6 +18,8 @@ export {
   getCustomers,
   getPaymentGateways,
   togglePaymentGateway,
+  checkInventory,
+  decrementInventory,
 } from './mocks';
 
 import { getOrders } from './mocks';
@@ -29,8 +31,8 @@ export function getAnalytics(storeSlug: string) {
   const totalOrders = storeOrders.length;
   const deliveredOrders = storeOrders.filter((o) => o.status === 'delivered');
   const returnedOrders = storeOrders.filter((o) => o.status === 'returned');
-  const confirmedOrders = storeOrders.filter((o) => ['confirmed', 'shipping', 'delivered'].includes(o.status));
-  const shippingOrders = storeOrders.filter((o) => ['shipping', 'delivered', 'returned'].includes(o.status));
+  const confirmedOrders = storeOrders.filter((o) => ['confirmed', 'shipped', 'shipping', 'delivered'].includes(o.status));
+  const shippingOrders = storeOrders.filter((o) => ['shipped', 'shipping', 'delivered', 'returned'].includes(o.status));
 
   const totalRevenueDelivered = deliveredOrders.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0);
   const totalRevenuePotential = storeOrders.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0);

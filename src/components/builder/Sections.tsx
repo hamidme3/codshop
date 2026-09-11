@@ -733,7 +733,7 @@ export function WhatsAppBarSection({
   const message = encodeURIComponent(settings.message || 'Salam, bghit nsewel 3la had l\'article w ncommander');
 
   return (
-    <aside aria-label="WhatsApp Support" className="fixed bottom-6 right-6 z-50 flex items-center gap-2">
+    <aside aria-label="WhatsApp Support" className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-30 flex items-center gap-2">
       <a
         href={`https://wa.me/${phone}?text=${message}`}
         target="_blank"

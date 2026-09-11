@@ -68,16 +68,29 @@ export const orders = pgTable(
     phone: text('phone').notNull(),
     city: text('city').notNull(),
     address: text('address').notNull(),
-    status: text('status').default('new').notNull(), // 'new' | 'to_confirm' | 'confirmed' | 'shipping' | 'delivered' | 'returned' | 'canceled'
+    status: text('status').default('new').notNull(), // 'new' | 'to_confirm' | 'confirmed' | 'shipped' | 'shipping' | 'delivered' | 'returned' | 'canceled'
     items: jsonb('items')
       .$type<{ id: string; title: string; quantity: number; price: number; variant?: string }[]>()
       .notNull(),
     subtotal: integer('subtotal').notNull(),
     shippingFee: integer('shipping_fee').notNull(),
     total: integer('total').notNull(),
-    courier: text('courier').default('ozon'), // 'ozon' | 'sendit' | 'manual'
+    courier: text('courier').default('ozon'), // 'ozon' | 'sendit' | 'cathedis' | 'amana' | 'manual'
     trackingNumber: text('tracking_number'), // e.g. "OZON-MA-948291"
     agentNotes: text('agent_notes'),
+    abVariant: text('ab_variant').default('control').notNull(), // 'control' | 'waybill'
+    deliveryType: text('delivery_type').default('home').notNull(), // 'home' | 'stopdesk'
+    agencyName: text('agency_name'), // Pickup branch name if stopdesk (e.g. "Agence Ozon Bernoussi")
+    source: text('source').default('web').notNull(), // 'web' | 'whatsapp'
+    confirmedAt: timestamp('confirmed_at'),
+    shippedAt: timestamp('shipped_at'),
+    deliveredAt: timestamp('delivered_at'),
+    returnedAt: timestamp('returned_at'),
+    canceledAt: timestamp('canceled_at'),
+    cancellationReason: text('cancellation_reason'), // 'unreachable' | 'declined' | 'fake' | 'duplicate'
+    rejectionReason: text('rejection_reason'), // 'damaged' | 'refused_opening' | 'unreachable_3_attempts' | 'out_of_zone'
+    manifestId: text('manifest_id'), // e.g. "MNF-20260911-891"
+    manifestExportedAt: timestamp('manifest_exported_at'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
@@ -86,6 +99,7 @@ export const orders = pgTable(
     index('order_number_idx').on(table.orderNumber),
     index('order_status_idx').on(table.status),
     index('order_phone_idx').on(table.phone),
+    index('order_manifest_idx').on(table.manifestId),
   ]
 );
 

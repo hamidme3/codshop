@@ -4,20 +4,57 @@ export interface ProductVariant {
   id: string;
   name: string; // e.g. "41", "42", "50ml", "Noir"
   inStock: boolean;
+  sku?: string;
+  stock?: number;
+  image?: string;
+  color?: string;
+  size?: string;
+  price?: number;
+}
+
+export interface ProductColorOption {
+  id: string;
+  name: string;
+  hex?: string;
+  image?: string;
+  inStock?: boolean;
+}
+
+export interface ProductSizeOption {
+  id: string;
+  name: string;
+  inStock?: boolean;
+}
+
+export interface VariantMatrixItem {
+  id: string;
+  sku: string;
+  color?: string;
+  size?: string;
+  stock: number;
+  inStock: boolean;
+  image?: string;
+  price?: number;
 }
 
 export interface QuantityTier {
   quantity: number;
   label: string;
+  labelAr?: string;
   unitPrice: number;
   totalPrice: number;
   savingsBadge?: string;
   isPopular?: boolean;
+  freeDelivery?: boolean;
+  freeGift?: string;
+  badge?: string;
+  badgeAr?: string;
 }
 
 export interface Product {
   id: string;
   slug: string;
+  sku: string;
   theme: ThemeId;
   title: string;
   titleAr?: string;
@@ -30,8 +67,11 @@ export interface Product {
   images: string[];
   description: string;
   features: string[];
+  colors?: ProductColorOption[];
+  sizes?: ProductSizeOption[];
+  variantMatrix?: VariantMatrixItem[];
   variants?: {
-    type: 'size' | 'color' | 'volume';
+    type: 'size' | 'color' | 'volume' | 'multi';
     label: string;
     options: ProductVariant[];
   };
@@ -40,10 +80,11 @@ export interface Product {
 }
 
 export const MOCK_PRODUCTS: Product[] = [
-  // LUXURY / FASHION
+  // LUXURY / FASHION — Dual Axis (Color + Size)
   {
     id: 'lux-1',
     slug: 'souliers-richelieu-cuir-italien',
+    sku: 'OTT-RICHELIEU',
     theme: 'luxury',
     title: 'Souliers Richelieu Cousu Goodyear',
     titleAr: 'حذاء كلاسيكي من الجلد الطبيعي الأصيل',
@@ -52,11 +93,11 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 1199,
     rating: 4.9,
     reviewCount: 148,
-    stockLeft: 7,
+    stockLeft: 23,
     images: [
-      'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80', // Marron
+      'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80', // Noir
+      'https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=800&q=80', // Cognac
     ],
     description: 'Une pièce maîtresse d’élégance intemporelle. Confectionné selon la noble tradition du cousu Goodyear, ce modèle offre un confort ergonomique exceptionnel et une longévité de plus de 10 ans.',
     features: [
@@ -65,28 +106,88 @@ export const MOCK_PRODUCTS: Product[] = [
       'Doublure respirante anti-transpiration',
       'Livré avec embauchoirs en bois et crème de soin offerte',
     ],
+    colors: [
+      {
+        id: 'marron',
+        name: 'Marron Vintage',
+        hex: '#5c3826',
+        image: 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80',
+        inStock: true,
+      },
+      {
+        id: 'noir',
+        name: 'Noir Onyx',
+        hex: '#18181b',
+        image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80',
+        inStock: true,
+      },
+      {
+        id: 'cognac',
+        name: 'Cognac Patiné',
+        hex: '#9a3412',
+        image: 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=800&q=80',
+        inStock: true,
+      },
+    ],
+    sizes: [
+      { id: '39', name: '39', inStock: true },
+      { id: '40', name: '40', inStock: true },
+      { id: '41', name: '41', inStock: true },
+      { id: '42', name: '42', inStock: true },
+      { id: '43', name: '43', inStock: true },
+      { id: '44', name: '44', inStock: false },
+      { id: '45', name: '45', inStock: true },
+    ],
+    variantMatrix: [
+      // Marron Vintage
+      { id: 'vm-rich-m-39', sku: 'OTT-RICH-BRN-39', color: 'Marron Vintage', size: '39', stock: 2, inStock: true, image: 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-m-40', sku: 'OTT-RICH-BRN-40', color: 'Marron Vintage', size: '40', stock: 3, inStock: true, image: 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-m-41', sku: 'OTT-RICH-BRN-41', color: 'Marron Vintage', size: '41', stock: 4, inStock: true, image: 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-m-42', sku: 'OTT-RICH-BRN-42', color: 'Marron Vintage', size: '42', stock: 2, inStock: true, image: 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-m-43', sku: 'OTT-RICH-BRN-43', color: 'Marron Vintage', size: '43', stock: 3, inStock: true, image: 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-m-44', sku: 'OTT-RICH-BRN-44', color: 'Marron Vintage', size: '44', stock: 0, inStock: false, image: 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-m-45', sku: 'OTT-RICH-BRN-45', color: 'Marron Vintage', size: '45', stock: 1, inStock: true, image: 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=800&q=80' },
+      // Noir Onyx
+      { id: 'vm-rich-n-39', sku: 'OTT-RICH-BLK-39', color: 'Noir Onyx', size: '39', stock: 1, inStock: true, image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-n-40', sku: 'OTT-RICH-BLK-40', color: 'Noir Onyx', size: '40', stock: 2, inStock: true, image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-n-41', sku: 'OTT-RICH-BLK-41', color: 'Noir Onyx', size: '41', stock: 2, inStock: true, image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-n-42', sku: 'OTT-RICH-BLK-42', color: 'Noir Onyx', size: '42', stock: 3, inStock: true, image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-n-43', sku: 'OTT-RICH-BLK-43', color: 'Noir Onyx', size: '43', stock: 1, inStock: true, image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-n-44', sku: 'OTT-RICH-BLK-44', color: 'Noir Onyx', size: '44', stock: 0, inStock: false, image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-n-45', sku: 'OTT-RICH-BLK-45', color: 'Noir Onyx', size: '45', stock: 0, inStock: false, image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80' },
+      // Cognac Patiné
+      { id: 'vm-rich-c-39', sku: 'OTT-RICH-COG-39', color: 'Cognac Patiné', size: '39', stock: 0, inStock: false, image: 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-c-40', sku: 'OTT-RICH-COG-40', color: 'Cognac Patiné', size: '40', stock: 1, inStock: true, image: 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-c-41', sku: 'OTT-RICH-COG-41', color: 'Cognac Patiné', size: '41', stock: 2, inStock: true, image: 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-c-42', sku: 'OTT-RICH-COG-42', color: 'Cognac Patiné', size: '42', stock: 2, inStock: true, image: 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-c-43', sku: 'OTT-RICH-COG-43', color: 'Cognac Patiné', size: '43', stock: 1, inStock: true, image: 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-c-44', sku: 'OTT-RICH-COG-44', color: 'Cognac Patiné', size: '44', stock: 0, inStock: false, image: 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-rich-c-45', sku: 'OTT-RICH-COG-45', color: 'Cognac Patiné', size: '45', stock: 0, inStock: false, image: 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=800&q=80' },
+    ],
     variants: {
-      type: 'size',
+      type: 'multi',
       label: 'Pointure (EU)',
       options: [
-        { id: '39', name: '39', inStock: true },
-        { id: '40', name: '40', inStock: true },
-        { id: '41', name: '41', inStock: true },
-        { id: '42', name: '42', inStock: true },
-        { id: '43', name: '43', inStock: true },
-        { id: '44', name: '44', inStock: false },
-        { id: '45', name: '45', inStock: true },
+        { id: '39', name: '39', inStock: true, sku: 'OTT-RICH-39' },
+        { id: '40', name: '40', inStock: true, sku: 'OTT-RICH-40' },
+        { id: '41', name: '41', inStock: true, sku: 'OTT-RICH-41' },
+        { id: '42', name: '42', inStock: true, sku: 'OTT-RICH-42' },
+        { id: '43', name: '43', inStock: true, sku: 'OTT-RICH-43' },
+        { id: '44', name: '44', inStock: false, sku: 'OTT-RICH-44' },
+        { id: '45', name: '45', inStock: true, sku: 'OTT-RICH-45' },
       ],
     },
     quantityTiers: [
-      { quantity: 1, label: '1 Paire', unitPrice: 699, totalPrice: 699 },
-      { quantity: 2, label: '2 Paires (Pack Duo)', unitPrice: 599, totalPrice: 1198, savingsBadge: 'Économisez 200 DH', isPopular: true },
+      { quantity: 1, label: 'Pack 1 : 1 Paire (Standard)', unitPrice: 699, totalPrice: 699, freeDelivery: false },
+      { quantity: 2, label: 'Pack 2 : Duo (2 Paires)', unitPrice: 599, totalPrice: 1198, savingsBadge: 'Économisez 200 DH', isPopular: true, freeDelivery: true, badge: '🔥 Le Plus Populaire (الأكثر طلباً)' },
+      { quantity: 3, label: 'Pack 3 : Trio VIP (3 Paires)', unitPrice: 549, totalPrice: 1647, savingsBadge: 'Économisez 450 DH + Embauchoirs Offerts 🎁', freeDelivery: true, freeGift: 'Embauchoirs en cèdre naturel offerts', badge: '💎 Pack Collectionneur' },
     ],
     whatsAppDirectNumber: '212661000000',
   },
   {
     id: 'lux-2',
     slug: 'sac-voyage-weekender-cuir',
+    sku: 'OTT-WEEKENDER',
     theme: 'luxury',
     title: 'Sac de Voyage Weekender Grand Format',
     titleAr: 'حقيبة سفر من الجلد الفاخر',
@@ -95,7 +196,7 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 1400,
     rating: 4.8,
     reviewCount: 92,
-    stockLeft: 4,
+    stockLeft: 8,
     images: [
       'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80',
@@ -106,9 +207,38 @@ export const MOCK_PRODUCTS: Product[] = [
       'Bandoulière amovible réglable avec renfort épaule',
       'Format cabine accepté par toutes les compagnies aériennes',
     ],
+    colors: [
+      {
+        id: 'havane',
+        name: 'Cuir Havane / Cognac',
+        hex: '#78350f',
+        image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80',
+        inStock: true,
+      },
+      {
+        id: 'noir',
+        name: 'Noir Ébène',
+        hex: '#1c1917',
+        image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80',
+        inStock: true,
+      },
+    ],
+    variantMatrix: [
+      { id: 'vm-week-havane', sku: 'OTT-WEEK-HAV', color: 'Cuir Havane / Cognac', stock: 5, inStock: true, image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-week-noir', sku: 'OTT-WEEK-BLK', color: 'Noir Ébène', stock: 3, inStock: true, image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80' },
+    ],
+    variants: {
+      type: 'color',
+      label: 'Couleur du Cuir',
+      options: [
+        { id: 'havane', name: 'Cuir Havane / Cognac', inStock: true, sku: 'OTT-WEEK-HAV', stock: 5 },
+        { id: 'noir', name: 'Noir Ébène', inStock: true, sku: 'OTT-WEEK-BLK', stock: 3 },
+      ],
+    },
     quantityTiers: [
-      { quantity: 1, label: '1 Sac', unitPrice: 849, totalPrice: 849 },
-      { quantity: 2, label: 'Pack Cadeau (2 Sacs)', unitPrice: 749, totalPrice: 1498, savingsBadge: 'Économisez 200 DH', isPopular: true },
+      { quantity: 1, label: 'Pack 1 : 1 Sac (Standard)', unitPrice: 849, totalPrice: 849, freeDelivery: false },
+      { quantity: 2, label: 'Pack 2 : Duo Prestige (2 Sacs)', unitPrice: 749, totalPrice: 1498, savingsBadge: 'Économisez 200 DH', isPopular: true, freeDelivery: true, badge: '🔥 Le Plus Populaire (الأكثر طلباً)' },
+      { quantity: 3, label: 'Pack 3 : Trio Voyageur (3 Sacs)', unitPrice: 699, totalPrice: 2097, savingsBadge: 'Économisez 450 DH + Trousse Cuir Offerte 🎁', freeDelivery: true, freeGift: 'Trousse de toilette en cuir assortie offerte', badge: '💎 Pack Famille & Cadeaux' },
     ],
     whatsAppDirectNumber: '212661000000',
   },
@@ -117,6 +247,7 @@ export const MOCK_PRODUCTS: Product[] = [
   {
     id: 'bt-1',
     slug: 'elixir-huile-argan-pepites-or',
+    sku: 'BIO-ARGAN',
     theme: 'beauty',
     title: 'Sérum Précieux Argan & Figue de Barbarie',
     titleAr: 'سيروم التين الشوكي وزيت الأركان النقي',
@@ -137,24 +268,29 @@ export const MOCK_PRODUCTS: Product[] = [
       'Atténue visiblement les cernes, taches brunes et ridules',
       'Convient à tous types de peaux, même sensibles',
     ],
+    variantMatrix: [
+      { id: 'vm-argan-30', sku: 'BIO-ARG-30ML', size: '30 ml (Cure 1 Mois)', stock: 10, inStock: true },
+      { id: 'vm-argan-50', sku: 'BIO-ARG-50ML', size: '50 ml (Format Économique)', stock: 2, inStock: true },
+    ],
     variants: {
       type: 'volume',
       label: 'Contenance',
       options: [
-        { id: '30ml', name: '30 ml (Cure 1 Mois)', inStock: true },
-        { id: '50ml', name: '50 ml (Format Économique)', inStock: true },
+        { id: '30ml', name: '30 ml (Cure 1 Mois)', inStock: true, sku: 'BIO-ARG-30ML', stock: 10 },
+        { id: '50ml', name: '50 ml (Format Économique)', inStock: true, sku: 'BIO-ARG-50ML', stock: 2 },
       ],
     },
     quantityTiers: [
-      { quantity: 1, label: '1 Flacon', unitPrice: 249, totalPrice: 249 },
-      { quantity: 2, label: 'Pack Duo (Cure Complète)', unitPrice: 199, totalPrice: 398, savingsBadge: 'Le Plus Vendu (-100 DH)', isPopular: true },
-      { quantity: 3, label: 'Pack Famille (3 Flacons)', unitPrice: 166, totalPrice: 498, savingsBadge: '1 Flacon Offert !' },
+      { quantity: 1, label: 'Pack 1 : 1 Flacon (Standard)', unitPrice: 249, totalPrice: 249, freeDelivery: false },
+      { quantity: 2, label: 'Pack 2 : Duo Éclat (2 Flacons)', unitPrice: 199, totalPrice: 398, savingsBadge: 'Économisez 100 DH', isPopular: true, freeDelivery: true, badge: '🔥 Le Plus Populaire (الأكثر طلباً)' },
+      { quantity: 3, label: 'Pack 3 : Trio Cure Royale (3 Flacons)', unitPrice: 166, totalPrice: 498, savingsBadge: '1 Flacon Offert + Savon Noir Bio 🎁', freeDelivery: true, freeGift: 'Savon noir à l’eucalyptus & gant kessa offerts', badge: '💎 Cure Complète 3 Mois' },
     ],
     whatsAppDirectNumber: '212661000000',
   },
   {
     id: 'bt-2',
     slug: 'masque-argile-ghassoul-rose-damas',
+    sku: 'BIO-GHASSOUL',
     theme: 'beauty',
     title: 'Masque Purifiant Ghassoul & Eau de Rose',
     titleAr: 'قناع الغاسول الطبيعي بماء الورد المقطر',
@@ -175,8 +311,9 @@ export const MOCK_PRODUCTS: Product[] = [
       'Prêt à l’emploi, texture crémeuse parfumée naturellement',
     ],
     quantityTiers: [
-      { quantity: 1, label: '1 Pot (200g)', unitPrice: 159, totalPrice: 159 },
-      { quantity: 2, label: '2 Pots (Cure 3 Mois)', unitPrice: 129, totalPrice: 258, savingsBadge: 'Économisez 60 DH', isPopular: true },
+      { quantity: 1, label: 'Pack 1 : 1 Pot 200g (Standard)', unitPrice: 159, totalPrice: 159, freeDelivery: false },
+      { quantity: 2, label: 'Pack 2 : Duo Fraîcheur (2 Pots)', unitPrice: 129, totalPrice: 258, savingsBadge: 'Économisez 60 DH', isPopular: true, freeDelivery: true, badge: '🔥 Le Plus Populaire (الأكثر طلباً)' },
+      { quantity: 3, label: 'Pack 3 : Trio Beauté (3 Pots)', unitPrice: 119, totalPrice: 357, savingsBadge: 'Économisez 120 DH + Pinceau Applicateur 🎁', freeDelivery: true, freeGift: 'Pinceau applicateur en silicone offert', badge: '💎 Pack Économique 6 Mois' },
     ],
     whatsAppDirectNumber: '212661000000',
   },
@@ -185,6 +322,7 @@ export const MOCK_PRODUCTS: Product[] = [
   {
     id: 'tech-1',
     slug: 'montre-connectee-amoled-ultra-pro',
+    sku: 'TECH-SMARTWATCH',
     theme: 'tech',
     title: 'Smartwatch Ultra Pro AMOLED HD',
     titleAr: 'ساعة ذكية عالية الدقة مع قياس النبض والمكالمات',
@@ -193,7 +331,7 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 699,
     rating: 4.8,
     reviewCount: 425,
-    stockLeft: 9,
+    stockLeft: 7,
     images: [
       'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80',
@@ -205,24 +343,54 @@ export const MOCK_PRODUCTS: Product[] = [
       'Boîtier en titane ultra-résistant et étanche IP68',
       'Compatible iPhone (iOS) et Android',
     ],
+    colors: [
+      {
+        id: 'noir',
+        name: 'Noir Carbone',
+        hex: '#18181b',
+        image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=800&q=80',
+        inStock: true,
+      },
+      {
+        id: 'argent',
+        name: 'Argent Métal',
+        hex: '#94a3b8',
+        image: 'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80',
+        inStock: true,
+      },
+      {
+        id: 'orange',
+        name: 'Orange Aventure',
+        hex: '#ea580c',
+        image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=800&q=80',
+        inStock: false,
+      },
+    ],
+    variantMatrix: [
+      { id: 'vm-watch-blk', sku: 'TECH-WATCH-BLK', color: 'Noir Carbone', stock: 4, inStock: true, image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-watch-slv', sku: 'TECH-WATCH-SLV', color: 'Argent Métal', stock: 3, inStock: true, image: 'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80' },
+      { id: 'vm-watch-org', sku: 'TECH-WATCH-ORG', color: 'Orange Aventure', stock: 0, inStock: false, image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=800&q=80' },
+    ],
     variants: {
       type: 'color',
       label: 'Couleur du Boîtier & Bracelet',
       options: [
-        { id: 'noir', name: 'Noir Carbone', inStock: true },
-        { id: 'argent', name: 'Argent Métal', inStock: true },
-        { id: 'orange', name: 'Orange Aventure', inStock: true },
+        { id: 'noir', name: 'Noir Carbone', inStock: true, sku: 'TECH-WATCH-BLK', stock: 4 },
+        { id: 'argent', name: 'Argent Métal', inStock: true, sku: 'TECH-WATCH-SLV', stock: 3 },
+        { id: 'orange', name: 'Orange Aventure', inStock: false, sku: 'TECH-WATCH-ORG', stock: 0 },
       ],
     },
     quantityTiers: [
-      { quantity: 1, label: '1 Montre', unitPrice: 389, totalPrice: 389 },
-      { quantity: 2, label: 'Pack 2 Montres (Lui & Elle)', unitPrice: 329, totalPrice: 658, savingsBadge: 'Économisez 120 DH', isPopular: true },
+      { quantity: 1, label: 'Pack 1 : 1 Montre (Standard)', unitPrice: 389, totalPrice: 389, freeDelivery: false },
+      { quantity: 2, label: 'Pack 2 : Duo Lui & Elle (2 Montres)', unitPrice: 329, totalPrice: 658, savingsBadge: 'Économisez 120 DH', isPopular: true, freeDelivery: true, badge: '🔥 Le Plus Populaire (الأكثر طلباً)' },
+      { quantity: 3, label: 'Pack 3 : Trio Famille (3 Montres)', unitPrice: 299, totalPrice: 897, savingsBadge: 'Économisez 270 DH + Bracelet Métal Offert 🎁', freeDelivery: true, freeGift: 'Bracelet milanais magnétique offert', badge: '💎 Pack Famille Connectée' },
     ],
     whatsAppDirectNumber: '212661000000',
   },
   {
     id: 'tech-2',
     slug: 'ecouteurs-sans-fil-anc-reduction-bruit',
+    sku: 'TECH-ANC-TWS',
     theme: 'tech',
     title: 'Écouteurs TWS Réduction de Bruit Active (ANC)',
     titleAr: 'سماعات بلوتوث لاسلكية عازلة للضوضاء',
@@ -243,12 +411,51 @@ export const MOCK_PRODUCTS: Product[] = [
       'Charge ultra-rapide USB-C (10 min de charge = 2h d’écoute)',
     ],
     quantityTiers: [
-      { quantity: 1, label: '1 Paire d’Écouteurs', unitPrice: 269, totalPrice: 269 },
-      { quantity: 2, label: '2 Paires (Pack Cadeau)', unitPrice: 229, totalPrice: 458, savingsBadge: 'Économisez 80 DH', isPopular: true },
+      { quantity: 1, label: 'Pack 1 : 1 Paire (Standard)', unitPrice: 269, totalPrice: 269, freeDelivery: false },
+      { quantity: 2, label: 'Pack 2 : Duo Partage (2 Paires)', unitPrice: 229, totalPrice: 458, savingsBadge: 'Économisez 80 DH', isPopular: true, freeDelivery: true, badge: '🔥 Le Plus Populaire (الأكثر طلباً)' },
+      { quantity: 3, label: 'Pack 3 : Trio Cadeau (3 Paires)', unitPrice: 199, totalPrice: 597, savingsBadge: 'Économisez 210 DH + Coque Silicone Offerte 🎁', freeDelivery: true, freeGift: 'Coque de protection antichoc avec mousqueton offerte', badge: '💎 Pack Partage Cadeaux' },
     ],
     whatsAppDirectNumber: '212661000000',
   },
 ];
+
+export function getProductQuantityTiers(product: Product): QuantityTier[] {
+  if (product.quantityTiers && product.quantityTiers.length >= 3) {
+    return product.quantityTiers;
+  }
+  const base = product.price;
+  const duoUnit = Math.round(base * 0.85);
+  const trioUnit = Math.round(base * 0.75);
+  return [
+    {
+      quantity: 1,
+      label: 'Pack 1 : 1 Pièce (Standard)',
+      unitPrice: base,
+      totalPrice: base,
+      freeDelivery: false,
+    },
+    {
+      quantity: 2,
+      label: 'Pack 2 : Duo (2 Pièces)',
+      unitPrice: duoUnit,
+      totalPrice: duoUnit * 2,
+      savingsBadge: `Économisez ${base * 2 - duoUnit * 2} DH`,
+      isPopular: true,
+      freeDelivery: true,
+      badge: '🔥 Le Plus Populaire (الأكثر طلباً)',
+    },
+    {
+      quantity: 3,
+      label: 'Pack 3 : Trio VIP (3 Pièces)',
+      unitPrice: trioUnit,
+      totalPrice: trioUnit * 3,
+      savingsBadge: `Économisez ${base * 3 - trioUnit * 3} DH + Cadeau 🎁`,
+      freeDelivery: true,
+      freeGift: 'Cadeau surprise exclusif offert 🎁',
+      badge: '💎 Meilleure Valeur (أفضل توفير)',
+    },
+  ];
+}
 
 export function getProductBySlug(slug: string): Product | undefined {
   return MOCK_PRODUCTS.find((p) => p.slug === slug);
@@ -270,5 +477,252 @@ export function getProductsByTheme(theme: ThemeId): Product[] {
   }
 
   return MOCK_PRODUCTS;
+}
+
+/**
+ * Resolves the active variant SKU, stock, and image based on user selections.
+ */
+export function getProductVariantInfo(
+  product: Product,
+  selectedColor?: string,
+  selectedSize?: string,
+  selectedVariantName?: string,
+  selectedSku?: string
+): {
+  sku: string;
+  stock: number;
+  inStock: boolean;
+  image?: string;
+  price: number;
+  label: string;
+} {
+  const baseSku = product.sku || product.slug.toUpperCase().replace(/-/g, '_');
+  const basePrice = product.price;
+
+  // 1. Try finding exact match in variantMatrix (dual-axis or explicit)
+  if (product.variantMatrix && product.variantMatrix.length > 0) {
+    let match = selectedSku
+      ? product.variantMatrix.find((vm) => vm.sku.toLowerCase() === selectedSku.toLowerCase())
+      : undefined;
+
+    if (!match && (selectedColor || selectedSize)) {
+      match = product.variantMatrix.find((vm) => {
+        const matchColor = selectedColor ? vm.color?.toLowerCase() === selectedColor.toLowerCase() : true;
+        const matchSize = selectedSize ? vm.size?.toLowerCase() === selectedSize.toLowerCase() : true;
+        return matchColor && matchSize;
+      });
+    }
+
+    if (!match && !selectedColor && !selectedSize && !selectedSku) {
+      match = product.variantMatrix[0];
+    }
+
+    if (match) {
+      const parts: string[] = [];
+      if (match.color) parts.push(match.color);
+      if (match.size) parts.push(match.size);
+      return {
+        sku: match.sku,
+        stock: match.stock,
+        inStock: match.stock > 0,
+        image: match.image,
+        price: match.price || basePrice,
+        label: parts.join(' / ') || 'Standard',
+      };
+    }
+  }
+
+  // 2. Try single-axis options list
+  if (product.variants?.options) {
+    const optName = selectedVariantName || selectedSize || selectedColor;
+    const matchOpt = product.variants.options.find(
+      (o) =>
+        (selectedSku && o.sku?.toLowerCase() === selectedSku.toLowerCase()) ||
+        (optName && o.name.toLowerCase() === optName.toLowerCase())
+    );
+    if (matchOpt) {
+      const optSku = matchOpt.sku || `${baseSku}-${matchOpt.id.toUpperCase()}`;
+      const optStock = matchOpt.stock !== undefined ? matchOpt.stock : (matchOpt.inStock ? product.stockLeft : 0);
+      return {
+        sku: optSku,
+        stock: optStock,
+        inStock: optStock > 0 && matchOpt.inStock,
+        image: matchOpt.image,
+        price: matchOpt.price || basePrice,
+        label: matchOpt.name,
+      };
+    }
+  }
+
+  // 3. Fallback: Base product info
+  return {
+    sku: baseSku,
+    stock: product.stockLeft,
+    inStock: product.stockLeft > 0,
+    image: product.images[0],
+    price: basePrice,
+    label: selectedVariantName || 'Standard',
+  };
+}
+
+/**
+ * Check stock availability for an order request.
+ */
+export function checkMockProductStock(
+  productSlugOrId: string,
+  quantity: number,
+  options?: { color?: string; size?: string; variant?: string; sku?: string } | string
+): { available: boolean; currentStock: number; sku: string; error?: string } {
+  const product = MOCK_PRODUCTS.find(
+    (p) => p.slug === productSlugOrId || p.id === productSlugOrId || p.sku === productSlugOrId
+  );
+
+  if (!product) {
+    return { available: false, currentStock: 0, sku: '', error: 'Produit introuvable' };
+  }
+
+  const optObj = typeof options === 'string' ? { sku: options } : options;
+  const info = getProductVariantInfo(product, optObj?.color, optObj?.size, optObj?.variant, optObj?.sku);
+
+  if (info.stock < quantity) {
+    return {
+      available: false,
+      currentStock: info.stock,
+      sku: info.sku,
+      error: info.stock === 0
+        ? `Variante épuisée (${info.label || info.sku}). Rupture de stock dans notre dépôt.`
+        : `Stock insuffisant : seulement ${info.stock} disponible(s) pour (${info.label || info.sku}), vous avez demandé ${quantity}.`,
+    };
+  }
+
+  return {
+    available: true,
+    currentStock: info.stock,
+    sku: info.sku,
+  };
+}
+
+/**
+ * Decrement stock in mock inventory on order creation.
+ */
+export function decrementMockProductStock(
+  productSlugOrId: string,
+  quantity: number,
+  options?: { color?: string; size?: string; variant?: string; sku?: string } | string
+): { success: boolean; newStock: number; sku: string; error?: string } {
+  const product = MOCK_PRODUCTS.find(
+    (p) => p.slug === productSlugOrId || p.id === productSlugOrId || p.sku === productSlugOrId
+  );
+
+  if (!product) {
+    return { success: false, newStock: 0, sku: '', error: 'Produit introuvable' };
+  }
+
+  const optObj = typeof options === 'string' ? { sku: options } : options;
+  let foundSku = product.sku;
+  let remainingStock = product.stockLeft;
+
+  // 1. Decrement in variantMatrix if applicable
+  if (product.variantMatrix && product.variantMatrix.length > 0) {
+    const match = product.variantMatrix.find((vm) => {
+      if (optObj?.sku && vm.sku.toLowerCase() === optObj.sku.toLowerCase()) return true;
+      const matchColor = optObj?.color ? vm.color?.toLowerCase() === optObj.color.toLowerCase() : true;
+      const matchSize = optObj?.size ? vm.size?.toLowerCase() === optObj.size.toLowerCase() : true;
+      return (optObj?.color || optObj?.size) ? (matchColor && matchSize) : false;
+    });
+
+    if (match) {
+      match.stock = Math.max(0, match.stock - quantity);
+      match.inStock = match.stock > 0;
+      foundSku = match.sku;
+      remainingStock = match.stock;
+    }
+  }
+
+  // 2. Decrement in variants options if applicable
+  if (product.variants?.options) {
+    const optName = optObj?.variant || optObj?.size || optObj?.color;
+    const matchOpt = product.variants.options.find(
+      (o) =>
+        (optObj?.sku && o.sku?.toLowerCase() === optObj.sku.toLowerCase()) ||
+        (optName && o.name.toLowerCase() === optName.toLowerCase())
+    );
+    if (matchOpt) {
+      if (matchOpt.stock !== undefined) {
+        matchOpt.stock = Math.max(0, matchOpt.stock - quantity);
+        matchOpt.inStock = matchOpt.stock > 0;
+        remainingStock = matchOpt.stock;
+      }
+      if (matchOpt.sku) foundSku = matchOpt.sku;
+    }
+  }
+
+  // 3. Decrement overall product stockLeft
+  product.stockLeft = Math.max(0, product.stockLeft - quantity);
+
+  return {
+    success: true,
+    newStock: remainingStock,
+    sku: foundSku,
+  };
+}
+
+/**
+ * Restore stock in mock inventory on order cancellation or return.
+ */
+export function restoreMockProductStock(
+  productSlugOrId: string,
+  quantity: number,
+  options?: { color?: string; size?: string; variant?: string; sku?: string }
+): { success: boolean; newStock: number; sku: string } {
+  const product = MOCK_PRODUCTS.find(
+    (p) => p.slug === productSlugOrId || p.id === productSlugOrId || p.sku === productSlugOrId
+  );
+
+  if (!product) {
+    return { success: false, newStock: 0, sku: '' };
+  }
+
+  let foundSku = product.sku;
+
+  // 1. Restore in variantMatrix if applicable
+  if (product.variantMatrix && product.variantMatrix.length > 0) {
+    const match = product.variantMatrix.find((vm) => {
+      if (options?.sku && vm.sku === options.sku) return true;
+      const matchColor = options?.color ? vm.color?.toLowerCase() === options.color.toLowerCase() : true;
+      const matchSize = options?.size ? vm.size?.toLowerCase() === options.size.toLowerCase() : true;
+      return matchColor && matchSize;
+    });
+
+    if (match) {
+      match.stock += quantity;
+      match.inStock = match.stock > 0;
+      foundSku = match.sku;
+    }
+  }
+
+  // 2. Restore in variants options if applicable
+  if (product.variants?.options) {
+    const optName = options?.variant || options?.size || options?.color;
+    const matchOpt = product.variants.options.find(
+      (o) => (options?.sku && o.sku === options.sku) || (optName && o.name.toLowerCase() === optName.toLowerCase())
+    );
+    if (matchOpt) {
+      if (matchOpt.stock !== undefined) {
+        matchOpt.stock += quantity;
+        matchOpt.inStock = matchOpt.stock > 0;
+      }
+      if (matchOpt.sku) foundSku = matchOpt.sku;
+    }
+  }
+
+  // 3. Restore overall product stockLeft
+  product.stockLeft += quantity;
+
+  return {
+    success: true,
+    newStock: product.stockLeft,
+    sku: foundSku,
+  };
 }
 

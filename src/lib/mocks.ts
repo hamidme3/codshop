@@ -1,4 +1,5 @@
-import type { Order, Product, Category, Customer, PaymentGateway } from './types';
+import type { Order, Product, Category, Customer, PaymentGateway, OrderStatus, CustomerOrderSummary } from './types';
+import { restoreMockProductStock } from './mockProducts';
 
 // ── Seed Moroccan Orders ────────────────────────────────────────
 export let ORDERS: Order[] = [
@@ -122,8 +123,8 @@ export let PRODUCTS: Product[] = [
     stock: 24,
     images: ['https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=800&auto=format&fit=crop'],
     variants: [
-      { color: 'Marron Cuir', stock: 14 },
-      { color: 'Noir Onyx', stock: 10 },
+      { color: 'Marron Cuir', stock: 14, sku: 'OTT-BAG-01-BRN' },
+      { color: 'Noir Onyx', stock: 10, sku: 'OTT-BAG-01-BLK' },
     ],
     status: 'active',
   },
@@ -138,7 +139,7 @@ export let PRODUCTS: Product[] = [
     costPrice: 85,
     stock: 8,
     images: ['https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?q=80&w=800&auto=format&fit=crop'],
-    variants: [{ color: 'Or Traditionnel', stock: 8 }],
+    variants: [{ color: 'Or Traditionnel', stock: 8, sku: 'OTT-POUCH-02-GLD' }],
     status: 'active',
   },
   {
@@ -153,8 +154,8 @@ export let PRODUCTS: Product[] = [
     stock: 35,
     images: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=800&auto=format&fit=crop'],
     variants: [
-      { size: 'M (90cm)', stock: 15 },
-      { size: 'L (105cm)', stock: 20 },
+      { size: 'M (90cm)', stock: 15, sku: 'OTT-BELT-03-M' },
+      { size: 'L (105cm)', stock: 20, sku: 'OTT-BELT-03-L' },
     ],
     status: 'active',
   },
@@ -170,9 +171,9 @@ export let PRODUCTS: Product[] = [
     stock: 4,
     images: ['https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800&auto=format&fit=crop'],
     variants: [
-      { size: '41', stock: 1 },
-      { size: '42', stock: 2 },
-      { size: '43', stock: 1 },
+      { size: '41', stock: 1, sku: 'OTT-SHOES-04-41' },
+      { size: '42', stock: 2, sku: 'OTT-SHOES-04-42' },
+      { size: '43', stock: 1, sku: 'OTT-SHOES-04-43' },
     ],
     status: 'active',
   },
@@ -311,14 +312,225 @@ export function getOrders(storeSlug: string): Order[] {
   return ORDERS.filter((o) => o.storeSlug === storeSlug);
 }
 
-export const VALID_STATUSES: Order['status'][] = ['new', 'to_confirm', 'confirmed', 'shipping', 'delivered', 'returned', 'canceled'] as const;
+/**
+ * Normalizes Moroccan phone number for CRM customer identification
+ */
+function normalizeCustomerPhone(phone?: string): string {
+  if (!phone) return '';
+  let digits = phone.replace(/[^0-9]/g, '');
+  if (digits.startsWith('212') && digits.length === 12) {
+    digits = `0${digits.slice(3)}`;
+  } else if (digits.startsWith('00212') && digits.length === 14) {
+    digits = `0${digits.slice(5)}`;
+  } else if (!digits.startsWith('0') && digits.length === 9) {
+    digits = `0${digits}`;
+  }
+  return digits;
+}
 
-export function updateOrderStatus(orderId: string, status: Order['status'], trackingNumber?: string): boolean {
+function formatRelativeOrderDate(dateStr?: string): string {
+  if (!dateStr) return "Aujourd'hui";
+  const d = new Date(dateStr);
+  const diffMs = Date.now() - d.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 60) return "Aujourd'hui";
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return "Aujourd'hui";
+  if (diffHours < 48) return 'Hier';
+  const diffDays = Math.floor(diffHours / 24);
+  return `Il y a ${diffDays} jours`;
+}
+
+/**
+ * Synchronizes and computes live CRM customer profiles directly from store orders.
+ * Seamlessly tracks:
+ * - [1. Confirmer] (Cyan): increments confirmedOrders and sets lastOrderStatus = 'confirmed'
+ * - [2. Expédier] (Orange): increments shippedOrders, records trackingNumber, and sets lastOrderStatus = 'shipped'
+ * - [3. Livrée] (Green): increments deliveredOrders, updates paid totalSpend and sets lastOrderStatus = 'delivered'
+ * - Canceled/Returned: records return risk flags
+ */
+export function syncCustomersFromOrders(storeSlug: string): Customer[] {
+  if (!storeSlug) throw new Error('storeSlug is required');
+
+  const storeOrders = ORDERS.filter((o) => o.storeSlug === storeSlug);
+  const customerMap = new Map<string, Customer>();
+
+  // 1. Seed with existing CUSTOMERS for contact info/email retention
+  for (const c of CUSTOMERS.filter((c) => c.storeSlug === storeSlug)) {
+    const key = normalizeCustomerPhone(c.phone) || c.name.toLowerCase().trim();
+    customerMap.set(key, {
+      ...c,
+      confirmedOrders: 0,
+      shippedOrders: 0,
+      deliveredOrders: 0,
+      returnedOrders: 0,
+      canceledOrders: 0,
+      recentOrders: [],
+    });
+  }
+
+  // 2. Sort orders from newest to oldest for accurate last-order state
+  const sortedOrders = [...storeOrders].sort((a, b) => {
+    const timeA = new Date(a.createdAt || 0).getTime();
+    const timeB = new Date(b.createdAt || 0).getTime();
+    return timeB - timeA;
+  });
+
+  // 3. Aggregate each order into customer profiles
+  for (const order of sortedOrders) {
+    const key = normalizeCustomerPhone(order.phone) || order.customerName.toLowerCase().trim();
+    let cust = customerMap.get(key);
+
+    if (!cust) {
+      cust = {
+        id: `cust_${key || Date.now()}`,
+        storeSlug,
+        name: order.customerName,
+        phone: order.phone,
+        email: `${order.customerName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@client.ma`,
+        city: order.city,
+        address: order.address,
+        totalOrders: 0,
+        confirmedOrders: 0,
+        shippedOrders: 0,
+        deliveredOrders: 0,
+        returnedOrders: 0,
+        canceledOrders: 0,
+        totalSpend: 0,
+        averageBasket: 0,
+        lastOrderDate: formatRelativeOrderDate(order.createdAt),
+        status: 'new',
+        recentOrders: [],
+      };
+      customerMap.set(key, cust);
+    }
+
+    // Keep name/city/address up to date from most recent orders
+    if (!cust.address && order.address) cust.address = order.address;
+    if (order.city) cust.city = order.city;
+
+    const itemsSummary = (order.items || [])
+      .map((it) => `${it.title}${it.variant ? ` (${it.variant})` : ''} x${it.quantity}`)
+      .join(', ');
+
+    cust.recentOrders = cust.recentOrders || [];
+    cust.recentOrders.push({
+      id: order.id,
+      orderNumber: order.orderNumber,
+      createdAt: order.createdAt,
+      status: order.status,
+      total: order.total,
+      itemsSummary,
+      courier: order.courier,
+      trackingNumber: order.trackingNumber,
+    });
+
+    // Count 3-stage switch pipeline statuses
+    if (order.status === 'confirmed') {
+      cust.confirmedOrders = (cust.confirmedOrders || 0) + 1;
+    } else if (order.status === 'shipped' || order.status === 'shipping') {
+      cust.shippedOrders = (cust.shippedOrders || 0) + 1;
+    } else if (order.status === 'delivered') {
+      cust.deliveredOrders = (cust.deliveredOrders || 0) + 1;
+    } else if (order.status === 'returned') {
+      cust.returnedOrders = (cust.returnedOrders || 0) + 1;
+    } else if (order.status === 'canceled') {
+      cust.canceledOrders = (cust.canceledOrders || 0) + 1;
+    }
+  }
+
+  // 4. Compute final CRM metrics for each customer
+  const result: Customer[] = [];
+
+  for (const cust of Array.from(customerMap.values())) {
+    const ordersList = cust.recentOrders || [];
+    cust.totalOrders = Math.max(cust.totalOrders || 0, ordersList.length);
+
+    // Latest order is the first item (since sorted desc)
+    const latestOrder = ordersList[0];
+    if (latestOrder) {
+      cust.lastOrderNumber = latestOrder.orderNumber;
+      cust.lastOrderStatus = latestOrder.status;
+      cust.lastTrackingNumber = latestOrder.trackingNumber;
+      cust.lastOrderDate = formatRelativeOrderDate(latestOrder.createdAt);
+    }
+
+    // Cash delivered total spend
+    const deliveredSum = ordersList
+      .filter((o) => o.status === 'delivered')
+      .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+    
+    // In Moroccan COD, if delivered > 0, totalSpend is cash collected. If brand new order pending, calculate potential.
+    if (deliveredSum > 0) {
+      cust.totalSpend = deliveredSum;
+    } else if (ordersList.length > 0) {
+      cust.totalSpend = ordersList.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+    }
+
+    cust.averageBasket = cust.totalOrders > 0 ? Math.round(cust.totalSpend / Math.max(1, cust.deliveredOrders || cust.totalOrders)) : 0;
+
+    // Delivery Success Rate: delivered / (delivered + returned)
+    const finishedShipments = (cust.deliveredOrders || 0) + (cust.returnedOrders || 0);
+    if (finishedShipments > 0) {
+      cust.deliverySuccessRate = Math.round(((cust.deliveredOrders || 0) / finishedShipments) * 100);
+    } else {
+      cust.deliverySuccessRate = (cust.returnedOrders || 0) > 0 ? 0 : 100;
+    }
+
+    // Status classification:
+    if ((cust.returnedOrders || 0) > 0) {
+      cust.status = 'risk';
+    } else if ((cust.deliveredOrders || 0) >= 2 || (cust.totalOrders >= 2 && (cust.deliveredOrders || 0) >= 1)) {
+      cust.status = 'returning'; // Client VIP / Fidèle
+    } else if ((cust.deliveredOrders || 0) >= 1 || (cust.shippedOrders || 0) >= 1 || (cust.confirmedOrders || 0) >= 1) {
+      cust.status = 'active'; // Client Actif
+    } else {
+      cust.status = 'new'; // Nouveau Client
+    }
+
+    result.push(cust);
+  }
+
+  // Update global CUSTOMERS in memory to keep parity
+  CUSTOMERS = result;
+
+  return result;
+}
+
+export const VALID_STATUSES: Order['status'][] = ['new', 'to_confirm', 'confirmed', 'shipped', 'shipping', 'delivered', 'returned', 'canceled'] as const;
+
+export function updateOrderStatus(orderId: string, status: Order['status'], trackingNumber?: string, courier?: Order['courier']): boolean {
   if (!VALID_STATUSES.includes(status)) return false;
   const order = ORDERS.find((o) => o.id === orderId);
   if (!order) return false;
+
+  const previousStatus = order.status;
   order.status = status;
   if (trackingNumber) order.trackingNumber = trackingNumber;
+  if (courier) order.courier = courier;
+
+  // Add contextual timestamps for pipeline audit
+  const nowIso = new Date().toISOString();
+  if (status === 'confirmed' && !order.confirmedAt) order.confirmedAt = nowIso;
+  if (status === 'shipped' && !order.shippedAt) order.shippedAt = nowIso;
+  if (status === 'delivered' && !order.deliveredAt) order.deliveredAt = nowIso;
+  if (status === 'canceled' && !order.canceledAt) order.canceledAt = nowIso;
+  if (status === 'returned' && !order.returnedAt) order.returnedAt = nowIso;
+
+  // Restore inventory if transitioned to canceled or returned from an active state
+  if ((status === 'canceled' || status === 'returned') && previousStatus !== 'canceled' && previousStatus !== 'returned') {
+    for (const item of order.items) {
+      const prod = PRODUCTS.find((p) => p.id === item.id);
+      if (prod) {
+        prod.stock = (prod.stock ?? 0) + item.quantity;
+      }
+      restoreMockProductStock(item.id, item.quantity, { variant: item.variant });
+    }
+  }
+
+  // Synchronize CRM immediately
+  syncCustomersFromOrders(order.storeSlug);
+
   return true;
 }
 
@@ -344,7 +556,7 @@ export function getCategories(): Category[] {
 
 export function getCustomers(storeSlug: string): Customer[] {
   if (!storeSlug) throw new Error('storeSlug is required');
-  return CUSTOMERS.filter((c) => c.storeSlug === storeSlug);
+  return syncCustomersFromOrders(storeSlug);
 }
 
 export function getPaymentGateways(): PaymentGateway[] {
@@ -355,6 +567,107 @@ export function togglePaymentGateway(id: string): boolean {
   const gw = PAYMENT_GATEWAYS.find((g) => g.id === id);
   if (!gw) return false;
   gw.active = !gw.active;
+  return true;
+}
+
+export interface InventoryItemRequest {
+  id?: string;
+  sku?: string;
+  title?: string;
+  variant?: string;
+  size?: string;
+  color?: string;
+  quantity: number;
+}
+
+export function checkInventory(
+  storeSlug: string,
+  items: InventoryItemRequest[]
+): { available: boolean; error?: string; itemErrors?: { sku?: string; title: string; available: number; requested: number }[] } {
+  const storeProducts = PRODUCTS.filter((p) => p.storeSlug === storeSlug);
+  const errors: { sku?: string; title: string; available: number; requested: number }[] = [];
+
+  for (const item of items) {
+    const prod = storeProducts.find(
+      (p) => (item.id && p.id === item.id) || (item.sku && p.sku === item.sku) || (item.title && p.title.toLowerCase() === item.title.toLowerCase())
+    );
+
+    if (!prod) continue;
+
+    if (prod.variants && prod.variants.length > 0) {
+      const matchVariant = prod.variants.find((v) => {
+        if (item.sku && v.sku === item.sku) return true;
+        if (item.color && v.color?.toLowerCase() === item.color.toLowerCase()) return true;
+        if (item.size && v.size?.toLowerCase() === item.size.toLowerCase()) return true;
+        if (item.variant && (v.color?.toLowerCase() === item.variant.toLowerCase() || v.size?.toLowerCase() === item.variant.toLowerCase())) return true;
+        return false;
+      });
+
+      if (matchVariant) {
+        if (matchVariant.stock < item.quantity) {
+          errors.push({
+            sku: matchVariant.sku || prod.sku,
+            title: `${prod.title} (${matchVariant.color || matchVariant.size || 'Variante'})`,
+            available: matchVariant.stock,
+            requested: item.quantity,
+          });
+        }
+        continue;
+      }
+    }
+
+    if (prod.stock < item.quantity) {
+      errors.push({
+        sku: prod.sku,
+        title: prod.title,
+        available: prod.stock,
+        requested: item.quantity,
+      });
+    }
+  }
+
+  if (errors.length > 0) {
+    const detail = errors.map((e) => `'${e.title}': ${e.available} en stock (demandé: ${e.requested})`).join(', ');
+    return {
+      available: false,
+      error: `Rupture ou stock insuffisant : ${detail}`,
+      itemErrors: errors,
+    };
+  }
+
+  return { available: true };
+}
+
+export function decrementInventory(
+  storeSlug: string,
+  items: InventoryItemRequest[]
+): boolean {
+  const storeProducts = PRODUCTS.filter((p) => p.storeSlug === storeSlug);
+
+  for (const item of items) {
+    const prod = storeProducts.find(
+      (p) => (item.id && p.id === item.id) || (item.sku && p.sku === item.sku) || (item.title && p.title.toLowerCase() === item.title.toLowerCase())
+    );
+
+    if (!prod) continue;
+
+    if (prod.variants && prod.variants.length > 0) {
+      const matchVariant = prod.variants.find((v) => {
+        if (item.sku && v.sku === item.sku) return true;
+        if (item.color && v.color?.toLowerCase() === item.color.toLowerCase()) return true;
+        if (item.size && v.size?.toLowerCase() === item.size.toLowerCase()) return true;
+        if (item.variant && (v.color?.toLowerCase() === item.variant.toLowerCase() || v.size?.toLowerCase() === item.variant.toLowerCase())) return true;
+        return false;
+      });
+
+      if (matchVariant) {
+        matchVariant.stock = Math.max(0, matchVariant.stock - item.quantity);
+      }
+    }
+
+    prod.stock = Math.max(0, prod.stock - item.quantity);
+  }
+
   return true;
 }
 

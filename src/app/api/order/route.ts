@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
-import { createOrder, getOrderByNumber } from '@/lib/db-repository';
+import { createOrder, getOrderByNumber, getStoreBySlug } from '@/lib/db-repository';
+import { validateAndNormalizeMoroccanPhone } from '@/lib/moroccan-phone';
+import { checkOrderRateLimit } from '@/lib/rate-limiter';
+import { verifyAndRecalculateOrder } from '@/lib/order-pricing';
+import { isValidStoreSlug } from '@/lib/sanitizer';
 
 export async function GET(req: Request) {
   try {
@@ -22,57 +26,133 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const storeSlug = body.storeSlug || body.store || 'ottavio';
 
-    const customerName = body.customerName || body.customer?.fullName || 'Client Anonyme';
-    const phone = body.customerPhone || body.customer?.phone || body.phone || '';
-    const city = body.customerCity || body.customer?.city || body.city || 'Casablanca';
-    const address = body.customerAddress || body.customer?.address || body.address || 'Adresse standard';
+    // 1. Anti-Bot Honeypot: silently accept and discard if hidden honeypot fields are filled
+    if (body._hp || body.website || body.fax) {
+      return NextResponse.json({ success: true, orderId: `CMD-${Math.floor(1000 + Math.random() * 9000)}`, message: 'Commande reçue' });
+    }
 
-    const items = Array.isArray(body.items) && body.items.length > 0
-      ? body.items.map((it: { productId?: string; id?: string; title?: string; quantity?: number; price?: number; unitPrice?: number; variant?: string }, idx: number) => ({
-          id: it.productId || it.id || String(idx + 1),
-          title: it.title || body.product?.title || 'Produit',
-          quantity: Number(it.quantity) || 1,
-          price: Number(it.price) || Number(it.unitPrice) || 299,
-          variant: it.variant || body.variant || 'Standard',
-        }))
-      : [
-          {
-            id: body.product?.id || '1',
-            title: body.product?.title || 'Produit',
-            quantity: Number(body.quantity) || 1,
-            price: Number(body.unitPrice) || Number(body.total) || 299,
-            variant: body.variant || 'Standard',
-          },
-        ];
+    // 2. Store Slug Scoping: strictly validate store slug and ensure store is active
+    const rawStoreSlug = body.storeSlug || body.store || 'ottavio';
+    if (!isValidStoreSlug(rawStoreSlug)) {
+      return NextResponse.json(
+        { success: false, message: 'Identifiant de boutique invalide' },
+        { status: 400 }
+      );
+    }
 
-    const shippingFee = Number(body.shippingFee ?? 20);
-    const total = Number(body.total) || 299;
-    const subtotal = Number(body.subtotal ?? (total - shippingFee));
+    const store = await getStoreBySlug(rawStoreSlug);
+    if (!store) {
+      return NextResponse.json(
+        { success: false, message: `Boutique "${rawStoreSlug}" introuvable ou inactive` },
+        { status: 400 }
+      );
+    }
+    const storeSlug = store.slug;
 
-    // Persist order in database
-    const savedOrder = await createOrder({
-      storeSlug,
-      customerName,
-      phone,
-      city,
-      address,
-      items,
-      subtotal,
-      shippingFee,
-      total,
-      courier: 'ozon',
-    });
+    // 3. Moroccan Phone Validation & Normalization (Mobile 06/07, Fixed line 05, +212)
+    const rawPhone = body.customerPhone || body.customer?.phone || body.phone || '';
+    const phoneResult = validateAndNormalizeMoroccanPhone(rawPhone);
+    if (!phoneResult.isValid) {
+      return NextResponse.json(
+        { success: false, message: phoneResult.error || 'Numéro de téléphone marocain invalide (06, 07 ou 05 requis)' },
+        { status: 400 }
+      );
+    }
+    const phone = phoneResult.cleanPhone;
+
+    // 4. CGNAT-Safe Composite Rate Limiting
+    const forwarded = req.headers.get('x-forwarded-for') || '';
+    const clientIp = forwarded.split(',')[0].trim() || '127.0.0.1';
+    const rateCheck = checkOrderRateLimit(clientIp, phone);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, message: rateCheck.reason || 'Trop de requêtes, veuillez patienter.' },
+        { status: 429 }
+      );
+    }
+
+    // 5. Server-Side Price Verification, Exact Tier Pricing Recalculation & Input Sanitization
+    const pricingResult = await verifyAndRecalculateOrder(body, storeSlug);
+    if (!pricingResult.success) {
+      return NextResponse.json(
+        { success: false, message: pricingResult.error || 'Erreur de calcul du prix de la commande' },
+        { status: 400 }
+      );
+    }
+
+    // 5b. Reject explicit price tampering (e.g. submitting 1 DH for 699 DH items)
+    if (pricingResult.tamperingDetected && body.total !== undefined && Math.abs(Number(body.total) - pricingResult.total) > 2) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'PRICE_TAMPERING_REJECTED',
+          message: 'Le montant soumis ne correspond pas au prix officiel du catalogue.',
+          catalogTotal: pricingResult.total,
+          submittedTotal: Number(body.total),
+        },
+        { status: 400 }
+      );
+    }
+
+    // Moroccan COD Conversion & Delivery Tracking fields
+    const abVariant = body.abVariant || req.headers.get('x-ab-variant') || 'control';
+    const source = (body.source === 'whatsapp' ? 'whatsapp' : 'web') as 'web' | 'whatsapp';
+
+    // 6. Persist order with authentic server-recalculated pricing, variant SKUs, and inventory reservation
+    let savedOrder;
+    try {
+      savedOrder = await createOrder({
+        storeSlug,
+        customerName: pricingResult.customerName,
+        phone,
+        city: pricingResult.city,
+        address: pricingResult.address,
+        items: pricingResult.items.map((it) => ({
+          id: it.id,
+          title: it.title,
+          quantity: it.quantity,
+          price: it.price,
+          variant: it.variant,
+          sku: it.sku,
+          color: it.color,
+          size: it.size,
+        })),
+        subtotal: pricingResult.subtotal,
+        shippingFee: pricingResult.shippingFee,
+        total: pricingResult.total,
+        courier: 'ozon',
+        abVariant,
+        deliveryType: pricingResult.deliveryType,
+        agencyName: pricingResult.agencyName || undefined,
+        source,
+      });
+    } catch (orderErr: any) {
+      const errMsg = orderErr?.message || '';
+      if (errMsg.toLowerCase().includes('stock') || errMsg.toLowerCase().includes('rupture') || errMsg.toLowerCase().includes('épuis')) {
+        return NextResponse.json(
+          { success: false, code: 'OUT_OF_STOCK', message: errMsg },
+          { status: 409 }
+        );
+      }
+      throw orderErr;
+    }
 
     const orderId = savedOrder.orderNumber;
 
     console.log(`[CODShop Order Created] ID: ${orderId}`, {
-      customer: customerName,
+      storeSlug,
+      customer: pricingResult.customerName,
       phone,
-      city,
-      items,
-      total,
+      city: pricingResult.city,
+      items: pricingResult.items,
+      subtotal: pricingResult.subtotal,
+      shippingFee: pricingResult.shippingFee,
+      total: pricingResult.total,
+      abVariant,
+      deliveryType: pricingResult.deliveryType,
+      source,
+      tamperingOverridden: pricingResult.tamperingDetected,
     });
 
     // Attempt forward to COD Management backend if available
@@ -83,18 +163,20 @@ export async function POST(req: Request) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderNumber: orderId,
-          customerName,
+          customerName: pricingResult.customerName,
           phone,
-          city,
-          shippingAddress: address,
-          totalPrice: total,
+          city: pricingResult.city,
+          shippingAddress: pricingResult.address,
+          totalPrice: pricingResult.total,
           currency: 'MAD',
           status: 'pending',
           source: 'codshop_storefront',
-          items: items.map((i: { title: string; quantity: number; price: number }) => ({
+          items: pricingResult.items.map((i) => ({
             title: i.title,
             quantity: i.quantity,
             price: i.price,
+            variant: i.variant,
+            sku: i.sku,
           })),
         }),
       });
@@ -105,6 +187,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       orderId,
+      order: savedOrder,
       message: 'Commande enregistrée avec succès',
     });
   } catch (error: unknown) {

@@ -31,28 +31,48 @@ function getCityFromHeaders(request: NextRequest): string | null {
   return normalizeCity(rawCity);
 }
 
-function getAbVariantCookie(request: NextRequest): 'control' | 'waybill' {
+function getAbVariantCookie(request: NextRequest): { variant: 'control' | 'waybill'; anonId?: string } {
   const existing = request.cookies.get('cod_ab_variant')?.value;
-  if (existing === 'control' || existing === 'waybill') return existing;
+  if (existing === 'control' || existing === 'waybill') return { variant: existing };
   
-  // Deterministic 50/50 bucket based on session/user identifier
-  const sessionId = request.cookies.get('codshop_session')?.value || 
-                    request.headers.get('x-forwarded-for') || 
-                    'anonymous';
-  const hash = Array.from(sessionId).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return hash % 2 === 0 ? 'control' : 'waybill';
+  // Deterministic 50/50 bucket: use session or persistent client anon ID (avoids CGNAT IP collision)
+  const sessionVal = request.cookies.get('codshop_session')?.value;
+  let anonId = request.cookies.get('cod_anon_id')?.value;
+  let isNewAnon = false;
+
+  if (!sessionVal && !anonId) {
+    anonId = 'anon_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+    isNewAnon = true;
+  }
+
+  const seed = sessionVal || anonId || 'seed';
+  const hash = Array.from(seed).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const variant = hash % 2 === 0 ? 'control' : 'waybill';
+  return { variant, anonId: isNewAnon ? anonId : undefined };
 }
 
-function setAbVariantCookie(response: NextResponse, variant: 'control' | 'waybill') {
+function setAbVariantCookie(response: NextResponse, variant: 'control' | 'waybill', anonId?: string) {
   response.cookies.set({
     name: 'cod_ab_variant',
     value: variant,
-    httpOnly: true,
+    httpOnly: false, // Accessible to client-side JS for A/B variant tracking & analytics
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   });
+
+  if (anonId) {
+    response.cookies.set({
+      name: 'cod_anon_id',
+      value: anonId,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 365 * 24 * 60 * 60, // 1 year persistent anon client seed
+    });
+  }
 }
 
 export async function middleware(request: NextRequest) {
@@ -81,7 +101,9 @@ export async function middleware(request: NextRequest) {
 
   // --- Geo + A/B Detection (before subdomain logic) ---
   const detectedCity = overrideCity || getCityFromHeaders(request);
-  const abVariant = overrideVariant as 'control' | 'waybill' || getAbVariantCookie(request);
+  const abInfo = getAbVariantCookie(request);
+  const abVariant = (overrideVariant as 'control' | 'waybill') || abInfo.variant;
+  const anonId = abInfo.anonId;
   const finalCity = detectedCity || 'Casablanca'; // default hub
   
   // Clone headers to pass tenant, geo, and A/B information downstream
@@ -163,7 +185,7 @@ export async function middleware(request: NextRequest) {
       response.headers.set('x-geo-city-final', finalCity);
       response.headers.set('x-ab-variant', abVariant);
       response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
-      setAbVariantCookie(response, abVariant);
+      setAbVariantCookie(response, abVariant, anonId);
       return response;
     }
   }
@@ -177,7 +199,7 @@ export async function middleware(request: NextRequest) {
   response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
   response.headers.set('x-geo-city-final', finalCity);
   response.headers.set('x-ab-variant', abVariant);
-  setAbVariantCookie(response, abVariant);
+  setAbVariantCookie(response, abVariant, anonId);
   return response;
 }
 

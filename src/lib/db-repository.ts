@@ -2,35 +2,61 @@ import { getDb, schema } from '@/db';
 import { eq, desc, asc, and, ne } from 'drizzle-orm';
 import type { Order, Product, Customer } from './types';
 import {
+  ORDERS,
   getOrders as getMockOrders,
   getProducts as getMockProducts,
   getCustomers as getMockCustomers,
+  syncCustomersFromOrders,
   addProduct as addMockProduct,
   updateOrderStatus as updateMockOrderStatus,
+  checkInventory,
+  decrementInventory,
 } from './mocks';
+import { MOCK_PRODUCTS, checkMockProductStock, decrementMockProductStock } from './mockProducts';
 import { 
   getStoreBySlug as getMockStoreBySlug, 
   updateStoreSections as updateMockStoreSections, 
   SectionInstance 
 } from './stores';
 import { getThemeById } from './themes';
+import { sanitizeText } from './sanitizer';
 
 // ── Store Repository ──────────────────────────────────────────
 export async function getStoreBySlug(slug: string) {
+  if (!slug || typeof slug !== 'string') return null;
+  const cleanSlug = slug.toLowerCase().trim();
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(cleanSlug)) return null;
+
   const db = getDb();
-  if (!db) {
-    return { slug, name: slug.toUpperCase(), currency: 'MAD', planTier: 'pro' };
+  if (db) {
+    try {
+      const store = await db.query.stores.findFirst({
+        where: eq(schema.stores.slug, cleanSlug),
+      });
+      if (store) return store;
+    } catch (err) {
+      console.warn('[DbRepo] Failed to fetch store from DB, checking mock catalog:', err);
+    }
   }
 
-  try {
-    const store = await db.query.stores.findFirst({
-      where: eq(schema.stores.slug, slug),
-    });
-    return store;
-  } catch (err) {
-    console.warn('[DbRepo] Failed to fetch store from DB, returning fallback:', err);
-    return { slug, name: slug.toUpperCase(), currency: 'MAD', planTier: 'pro', isWaybillEnabled: false };
+  // Check mock store catalog
+  const mockStore = getMockStoreBySlug(cleanSlug);
+  if (mockStore) {
+    if (mockStore.status === 'suspended') {
+      return null;
+    }
+    return {
+      id: mockStore.id,
+      slug: mockStore.slug,
+      name: mockStore.name,
+      currency: 'MAD',
+      planTier: mockStore.plan,
+      status: mockStore.status,
+      isWaybillEnabled: false,
+    };
   }
+
+  return null;
 }
 
 export async function createStore(data: {
@@ -216,48 +242,193 @@ export async function createOrder(data: {
   phone: string;
   city: string;
   address: string;
-  items: { id: string; title: string; quantity: number; price: number; variant?: string }[];
+  items: { id: string; title: string; quantity: number; price: number; variant?: string; sku?: string; color?: string; size?: string }[];
   subtotal: number;
   shippingFee: number;
   total: number;
   courier?: 'ozon' | 'sendit' | 'manual';
+  abVariant?: string;
+  deliveryType?: 'home' | 'stopdesk';
+  agencyName?: string;
+  source?: 'web' | 'whatsapp';
 }) {
   const db = getDb();
   const orderNumber = `CMD-${Math.floor(1000 + Math.random() * 9000)}`;
 
+  // 1. Store verification & scoping
+  const store = await getStoreBySlug(data.storeSlug);
+  if (!store || !('id' in store)) {
+    throw new Error(`Store not found or inactive: ${data.storeSlug}`);
+  }
+  if ('status' in store && (store.status as string) === 'suspended') {
+    throw new Error(`Store is suspended: ${data.storeSlug}`);
+  }
+
+  // 2. Input Sanitization (anti-XSS) & Variant Preservation
+  const cleanCustomerName = sanitizeText(data.customerName, 100) || 'Client Anonyme';
+  const cleanAddress = sanitizeText(data.address, 300) || 'Adresse standard';
+  const cleanCity = sanitizeText(data.city, 100) || 'Casablanca';
+  const cleanAgencyName = data.agencyName ? sanitizeText(data.agencyName, 150) : null;
+  const cleanItems = (data.items || []).map((it) => ({
+    id: String(it.id),
+    title: sanitizeText(it.title, 150) || 'Produit',
+    quantity: Math.max(1, Math.floor(Number(it.quantity) || 1)),
+    price: Math.max(0, Math.floor(Number(it.price) || 0)),
+    variant: it.variant ? sanitizeText(it.variant, 100) : 'Standard',
+    sku: it.sku ? sanitizeText(it.sku, 50) : undefined,
+    color: it.color ? sanitizeText(it.color, 50) : undefined,
+    size: it.size ? sanitizeText(it.size, 50) : undefined,
+  }));
+
+  // 3. Stock Status Check & Inventory Reservation
+  const invCheck = checkInventory(data.storeSlug, cleanItems);
+  if (!invCheck.available) {
+    throw new Error(invCheck.error || 'Stock insuffisant pour satisfaire cette commande.');
+  }
+
+  for (const it of cleanItems) {
+    const isMock = MOCK_PRODUCTS.some((p) => p.id === it.id || p.slug === it.id || p.sku === it.id);
+    if (isMock) {
+      const mockCheck = checkMockProductStock(it.id, it.quantity, {
+        color: it.color,
+        size: it.size,
+        variant: it.variant,
+        sku: it.sku,
+      });
+      if (!mockCheck.available) {
+        throw new Error(mockCheck.error || `Stock insuffisant pour ${it.title} (${it.sku || it.variant})`);
+      }
+    }
+  }
+
+  // 4. Inventory Decrement Execution (Reservation)
+  decrementInventory(data.storeSlug, cleanItems);
+  for (const it of cleanItems) {
+    const isMock = MOCK_PRODUCTS.some((p) => p.id === it.id || p.slug === it.id || p.sku === it.id);
+    if (isMock) {
+      decrementMockProductStock(it.id, it.quantity, {
+        color: it.color,
+        size: it.size,
+        variant: it.variant,
+        sku: it.sku,
+      });
+    }
+  }
+
+  // 5. Price Integrity check
+  const cleanSubtotal = Math.max(0, Math.floor(Number(data.subtotal) || 0));
+  const cleanShippingFee = Math.max(0, Math.floor(Number(data.shippingFee) || 0));
+  const cleanTotal = cleanSubtotal + cleanShippingFee;
+
   if (!db) {
-    return {
+    const newOrder = {
       id: `ord_${Date.now()}`,
       orderNumber,
-      ...data,
+      storeSlug: data.storeSlug,
+      customerName: cleanCustomerName,
+      phone: data.phone,
+      city: cleanCity,
+      address: cleanAddress,
+      items: cleanItems,
+      subtotal: cleanSubtotal,
+      shippingFee: cleanShippingFee,
+      total: cleanTotal,
+      courier: data.courier || 'ozon',
+      abVariant: data.abVariant || 'control',
+      deliveryType: data.deliveryType || 'home',
+      agencyName: cleanAgencyName || undefined,
+      source: data.source || 'web',
       status: 'new' as const,
       createdAt: new Date().toISOString(),
     };
+    ORDERS.unshift(newOrder);
+    syncCustomersFromOrders(data.storeSlug);
+    return newOrder;
   }
 
   try {
-    const store = await getStoreBySlug(data.storeSlug);
-    if (!store || !('id' in store)) {
-      throw new Error(`Store not found: ${data.storeSlug}`);
+    // Also decrement in Postgres if database is active
+    try {
+      for (const it of cleanItems) {
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(it.id);
+        const prod = await db.query.products.findFirst({
+          where: isUuid ? eq(schema.products.id, it.id) : eq(schema.products.sku, it.id),
+        });
+        if (prod) {
+          let updatedVariants = prod.variants;
+          if (Array.isArray(updatedVariants)) {
+            updatedVariants = updatedVariants.map((v) => {
+              const matchColor = it.color ? v.color?.toLowerCase() === it.color.toLowerCase() : true;
+              const matchSize = it.size ? v.size?.toLowerCase() === it.size.toLowerCase() : true;
+              if (matchColor && matchSize) {
+                return { ...v, stock: Math.max(0, (v.stock || 0) - it.quantity) };
+              }
+              return v;
+            });
+          }
+          await db
+            .update(schema.products)
+            .set({
+              stock: Math.max(0, prod.stock - it.quantity),
+              variants: updatedVariants,
+              updatedAt: new Date(),
+            })
+            .where(eq(schema.products.id, prod.id));
+        }
+      }
+    } catch (invDbErr) {
+      console.warn('[DbRepo] Non-fatal DB stock decrement warning:', invDbErr);
     }
 
     const [newOrder] = await db.insert(schema.orders).values({
       storeId: store.id,
       orderNumber,
-      customerName: data.customerName,
+      customerName: cleanCustomerName,
       phone: data.phone,
-      city: data.city,
-      address: data.address,
+      city: cleanCity,
+      address: cleanAddress,
       status: 'new',
-      items: data.items,
-      subtotal: data.subtotal,
-      shippingFee: data.shippingFee,
-      total: data.total,
+      items: cleanItems,
+      subtotal: cleanSubtotal,
+      shippingFee: cleanShippingFee,
+      total: cleanTotal,
       courier: data.courier || 'ozon',
+      abVariant: data.abVariant || 'control',
+      deliveryType: data.deliveryType || 'home',
+      agencyName: cleanAgencyName,
+      source: data.source || 'web',
     }).returning();
 
     // Auto-update or create Customer in CRM
-    await syncCustomerFromOrder(store.id, data.customerName, data.phone, data.city, data.total);
+    await syncCustomerFromOrder(store.id, cleanCustomerName, data.phone, cleanCity, cleanTotal);
+
+    // Sync to in-memory ORDERS cache for real-time backoffice parity
+    try {
+      const memoryOrder = {
+        id: newOrder.id,
+        orderNumber: newOrder.orderNumber,
+        storeSlug: data.storeSlug,
+        customerName: newOrder.customerName,
+        phone: newOrder.phone,
+        city: newOrder.city,
+        address: newOrder.address,
+        items: newOrder.items as any,
+        subtotal: Number(newOrder.subtotal),
+        shippingFee: Number(newOrder.shippingFee),
+        total: Number(newOrder.total),
+        courier: newOrder.courier as any,
+        abVariant: newOrder.abVariant as any,
+        deliveryType: newOrder.deliveryType as any,
+        agencyName: newOrder.agencyName || undefined,
+        source: newOrder.source as any,
+        status: 'new' as const,
+        createdAt: new Date().toISOString(),
+      };
+      ORDERS.unshift(memoryOrder);
+      syncCustomersFromOrders(data.storeSlug);
+    } catch (cacheErr) {
+      console.warn('[DbRepo] Non-fatal in-memory cache sync warning:', cacheErr);
+    }
 
     return newOrder;
   } catch (err) {
@@ -269,7 +440,8 @@ export async function createOrder(data: {
 export async function getOrderByNumber(orderNumberOrId: string) {
   const db = getDb();
   if (!db) {
-    return null;
+    const mock = ORDERS.find((o) => o.orderNumber === orderNumberOrId || o.id === orderNumberOrId);
+    return mock || null;
   }
   try {
     let order = await db.query.orders.findFirst({
@@ -280,10 +452,15 @@ export async function getOrderByNumber(orderNumberOrId: string) {
         where: eq(schema.orders.id, orderNumberOrId),
       });
     }
-    return order || null;
+    if (!order) {
+      const mock = ORDERS.find((o) => o.orderNumber === orderNumberOrId || o.id === orderNumberOrId);
+      return mock || null;
+    }
+    return order;
   } catch (err) {
     console.error('[DbRepo] Error fetching order by number or ID:', err);
-    return null;
+    const mock = ORDERS.find((o) => o.orderNumber === orderNumberOrId || o.id === orderNumberOrId);
+    return mock || null;
   }
 }
 
@@ -299,7 +476,10 @@ async function syncCustomerFromOrder(
 
   try {
     const existing = await db.query.customers.findFirst({
-      where: eq(schema.customers.phone, phone),
+      where: and(
+        eq(schema.customers.storeId, storeId),
+        eq(schema.customers.phone, phone)
+      ),
     });
 
     if (existing) {
@@ -893,7 +1073,12 @@ export async function invalidateSession(sessionId: string, accountId: string) {
     await db
       .update(schema.userSessions)
       .set({ isRevoked: 'true' })
-      .where(eq(schema.userSessions.id, sessionId));
+      .where(
+        and(
+          eq(schema.userSessions.id, sessionId),
+          eq(schema.userSessions.accountId, accountId)
+        )
+      );
     return true;
   } catch (err) {
     console.error('[DbRepo] Error invalidating session:', err);
