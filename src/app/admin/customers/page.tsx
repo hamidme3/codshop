@@ -30,10 +30,8 @@ function getContextualWhatsAppUrl(customer: Customer, storeSlug: string): string
     message = `Salam ${customer.name}, votre colis ${orderNum} est expédié avec ${courier.toUpperCase()}${trackingTxt}. Le livreur va vous contacter très prochainement. Merci de bien vouloir préparer ${totalVal} DH en espèces à la livraison.`;
   } else if (status === 'delivered') {
     message = `Salam ${customer.name}, merci pour votre confiance ! Votre commande ${orderNum} a bien été livrée. Pour vous remercier de votre fidélité chez ${storeName}, profitez de -15% sur votre prochaine commande avec le code : VIP15 !`;
-  } else if (status === 'returned') {
-    message = `Salam ${customer.name}, nous avons constaté que votre colis ${orderNum} n'a pas pu vous être remis par le livreur à ${customer.city}. Souhaitez-vous reprogrammer votre livraison à une autre date ?`;
-  } else if (status === 'canceled') {
-    message = `Salam ${customer.name}, votre commande ${orderNum} a été annulée. N'hésitez pas à nous contacter si vous avez la moindre question.`;
+  } else if (status === 'returned' || status === 'canceled') {
+    message = `Salam ${customer.name}, nous avons constaté que votre commande ${orderNum} n'a pas pu vous être remise par le livreur à ${customer.city} (Colis retourné). Souhaitez-vous reprogrammer votre livraison à une autre date ?`;
   } else {
     // new / to_confirm
     message = `Salam ${customer.name}, m3ak la boutique ${storeName}. Nous avons bien reçu votre commande ${orderNum} d'un montant de ${totalVal} DH. Confirmez-vous l'envoi à votre adresse à ${customer.city} ?`;
@@ -297,17 +295,13 @@ function CustomersContent() {
                             </span>
                             <div className="font-mono text-[11px] text-slate-300">{c.lastOrderNumber}</div>
                           </div>
-                        ) : c.lastOrderStatus === 'returned' ? (
+                        ) : c.lastOrderStatus === 'returned' || c.lastOrderStatus === 'canceled' ? (
                           <div className="space-y-1">
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40">
-                              <AlertTriangle className="w-3 h-3" /> Retourné
+                              <AlertTriangle className="w-3 h-3" /> 4. Retournée
                             </span>
                             <div className="font-mono text-[11px] text-rose-300">{c.lastOrderNumber}</div>
                           </div>
-                        ) : c.lastOrderStatus === 'canceled' ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
-                            ✕ Annulée
-                          </span>
                         ) : (
                           <div className="space-y-1">
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/40">

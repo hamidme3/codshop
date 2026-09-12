@@ -433,10 +433,8 @@ export function syncCustomersFromOrders(storeSlug: string): Customer[] {
       cust.shippedOrders = (cust.shippedOrders || 0) + 1;
     } else if (order.status === 'delivered') {
       cust.deliveredOrders = (cust.deliveredOrders || 0) + 1;
-    } else if (order.status === 'returned') {
+    } else if (order.status === 'returned' || order.status === 'canceled') {
       cust.returnedOrders = (cust.returnedOrders || 0) + 1;
-    } else if (order.status === 'canceled') {
-      cust.canceledOrders = (cust.canceledOrders || 0) + 1;
     }
   }
 

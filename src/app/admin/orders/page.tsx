@@ -40,8 +40,7 @@ function OrdersContent() {
     confirmed: ['confirmed'],
     shipped: ['shipped', 'shipping'],
     delivered: ['delivered'],
-    canceled: ['canceled'],
-    returned: ['returned'],
+    returned: ['returned', 'canceled'],
   };
 
   const filteredOrders = useMemo(() => {
@@ -61,6 +60,7 @@ function OrdersContent() {
   const confirmedCount = useMemo(() => orders.filter((o) => o.status === 'confirmed').length, [orders]);
   const shippedCount = useMemo(() => orders.filter((o) => ['shipped', 'shipping'].includes(o.status)).length, [orders]);
   const deliveredCount = useMemo(() => orders.filter((o) => o.status === 'delivered').length, [orders]);
+  const returnedCount = useMemo(() => orders.filter((o) => ['returned', 'canceled'].includes(o.status)).length, [orders]);
   const newCount = useMemo(() => orders.filter((o) => ['new', 'to_confirm'].includes(o.status)).length, [orders]);
 
   // 1-Click Fast Status Transition
@@ -74,8 +74,8 @@ function OrdersContent() {
       confirmed: 'Confirmée ✓',
       shipped: 'Expédiée 🚚',
       delivered: 'Livrée & Encaissée 💰',
-      canceled: 'Annulée ✕',
-      returned: 'Retournée ↩',
+      returned: 'Retournée (Refus / Retour) ↩',
+      canceled: 'Retournée (Refus / Retour) ↩',
     };
     showToast(`Commande ${orderId} passée à "${statusLabels[newStatus] || newStatus}"`);
   };
@@ -121,8 +121,8 @@ function OrdersContent() {
     setSelectedOrderIds([]);
   };
 
-  // 1-Click Filtered Export for Confirmed, Shipped, Delivered, or Current View
-  const handleExportByStatus = (statusFilter: 'confirmed' | 'shipped' | 'delivered' | 'current', courier: CourierKey = 'standard') => {
+  // 1-Click Filtered Export for Confirmed, Shipped, Delivered, Returned, or Current View
+  const handleExportByStatus = (statusFilter: 'confirmed' | 'shipped' | 'delivered' | 'returned' | 'current', courier: CourierKey = 'standard') => {
     let ordersToExport: Order[] = [];
     let label = '';
 
@@ -135,6 +135,9 @@ function OrdersContent() {
     } else if (statusFilter === 'delivered') {
       ordersToExport = orders.filter((o) => o.status === 'delivered');
       label = 'Commandes Livrées & Encaissées';
+    } else if (statusFilter === 'returned') {
+      ordersToExport = orders.filter((o) => ['returned', 'canceled'].includes(o.status));
+      label = 'Commandes Retournées (Refus / Retours)';
     } else {
       ordersToExport = selectedOrderIds.length > 0
         ? orders.filter((o) => selectedOrderIds.includes(o.id))
@@ -207,10 +210,9 @@ function OrdersContent() {
       case 'delivered':
         return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Livrée & Encaissée</span>;
       case 'returned':
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">Retournée</span>;
       case 'canceled':
       default:
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">Annulée</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">Retournée</span>;
     }
   };
 
@@ -283,6 +285,16 @@ function OrdersContent() {
                   <Download className="w-3.5 h-3.5 text-emerald-400" />
                 </button>
                 <button
+                  onClick={() => handleExportByStatus('returned')}
+                  className="w-full text-left px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 font-bold flex items-center justify-between transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-rose-400"></span>
+                    <span>1-Clic : Retournées ({returnedCount})</span>
+                  </span>
+                  <Download className="w-3.5 h-3.5 text-rose-400" />
+                </button>
+                <button
                   onClick={() => handleExportByStatus('current')}
                   className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 flex items-center justify-between"
                 >
@@ -326,7 +338,7 @@ function OrdersContent() {
           </div>
 
           <div className="text-xs font-mono text-slate-400 bg-slate-900 px-3 py-2 rounded-xl border border-slate-800">
-            Total : <strong>{orders.length}</strong> ({deliveredCount} Livrées)
+            Total : <strong>{orders.length}</strong> ({deliveredCount} Livrées, {returnedCount} Retournées)
           </div>
         </div>
       </div>
@@ -339,8 +351,7 @@ function OrdersContent() {
           { id: 'confirmed', label: `Confirmées (${confirmedCount})` },
           { id: 'shipped', label: `Expédiées (${shippedCount})` },
           { id: 'delivered', label: `Livrées (${deliveredCount})` },
-          { id: 'canceled', label: `Annulées (${orders.filter(o => o.status === 'canceled').length})` },
-          { id: 'returned', label: `Retournées (${orders.filter(o => o.status === 'returned').length})` },
+          { id: 'returned', label: `Retournées (${returnedCount})` },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -388,6 +399,15 @@ function OrdersContent() {
             <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
             <span>Livrées ({deliveredCount})</span>
             <Download className="w-3 h-3 text-emerald-400" />
+          </button>
+          <button
+            onClick={() => handleExportByStatus('returned')}
+            className="px-3 py-1.5 rounded-xl bg-rose-950/80 hover:bg-rose-900 border border-rose-700/60 text-rose-300 font-extrabold text-xs flex items-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer"
+            title="Télécharger immédiatement toutes les commandes retournées ou refusées pour rapprochement transporteur"
+          >
+            <span className="w-2 h-2 rounded-full bg-rose-400"></span>
+            <span>Retournées ({returnedCount})</span>
+            <Download className="w-3 h-3 text-rose-400" />
           </button>
         </div>
 
@@ -651,7 +671,7 @@ function OrdersContent() {
                             <Phone className="w-4 h-4" />
                           </a>
 
-                          {/* ── Manual 3-Stage Switch: Confirmed -> Shipped -> Delivered ── */}
+                          {/* ── Order Pipeline: Confirmed -> Shipped -> Delivered | Retournée ── */}
                           <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 shadow-inner">
                             {/* Switch 1: Confirmed Switch */}
                             <button
@@ -703,31 +723,25 @@ function OrdersContent() {
                               <span>3. Livrée</span>
                             </button>
 
-                            {/* Secondary switches: Annuler & Retour */}
-                            <div className="flex items-center gap-0.5 border-l border-slate-800 pl-1 ml-0.5">
-                              <button
-                                onClick={() => handleQuickTransition(order.id, order.status === 'canceled' ? 'new' : 'canceled')}
-                                className={`p-1 rounded-lg transition-colors cursor-pointer ${
-                                  order.status === 'canceled'
-                                    ? 'bg-rose-600 text-white'
-                                    : 'text-slate-500 hover:text-rose-400 hover:bg-rose-950/40'
-                                }`}
-                                title={order.status === 'canceled' ? 'Commande Annulée (cliquer pour réactiver)' : 'Annuler la commande'}
-                              >
-                                <X className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => handleQuickTransition(order.id, order.status === 'returned' ? 'new' : 'returned')}
-                                className={`p-1 rounded-lg transition-colors cursor-pointer ${
-                                  order.status === 'returned'
-                                    ? 'bg-rose-600 text-white'
-                                    : 'text-slate-500 hover:text-amber-400 hover:bg-amber-950/40'
-                                }`}
-                                title={order.status === 'returned' ? 'Colis Retourné (cliquer pour réactiver)' : 'Marquer Retour'}
-                              >
-                                <RotateCcw className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
+                            <span className="text-slate-700 text-[10px] font-bold mx-0.5">|</span>
+
+                            {/* Switch 4: Retournée (Replaces both Annuler & Retour) */}
+                            <button
+                              onClick={() => handleQuickTransition(order.id, order.status === 'returned' || order.status === 'canceled' ? 'new' : 'returned')}
+                              className={`px-2 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all cursor-pointer ${
+                                order.status === 'returned' || order.status === 'canceled'
+                                  ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30 ring-1 ring-rose-400 font-black'
+                                  : 'bg-slate-800 hover:bg-rose-600 hover:text-white text-slate-400 font-bold'
+                              }`}
+                              title={
+                                order.status === 'returned' || order.status === 'canceled'
+                                  ? 'Colis Retourné / Refusé (Cliquer pour réactiver)'
+                                  : 'Basculer vers : 4. Retournée (Refus / Annulation)'
+                              }
+                            >
+                              <RotateCcw className="w-3 h-3" />
+                              <span>4. Retournée</span>
+                            </button>
                           </div>
                         </div>
                       </td>
@@ -770,7 +784,7 @@ function OrdersContent() {
               <div>
                 <label className="block text-slate-400 mb-1 font-semibold">Mettre à jour le statut :</label>
                 <select
-                  value={selectedOrder.status === 'shipping' ? 'shipped' : selectedOrder.status}
+                  value={selectedOrder.status === 'shipping' ? 'shipped' : selectedOrder.status === 'canceled' ? 'returned' : selectedOrder.status}
                   onChange={(e) => handleQuickTransition(selectedOrder.id, e.target.value as OrderStatus)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-bold"
                 >
@@ -779,16 +793,15 @@ function OrdersContent() {
                   <option value="confirmed">Confirmée</option>
                   <option value="shipped">Expédiée (En Livraison)</option>
                   <option value="delivered">Livrée & Encaissée</option>
-                  <option value="returned">Retournée (Refusée)</option>
-                  <option value="canceled">Annulée</option>
+                  <option value="returned">Retournée (Refus / Annulation)</option>
                 </select>
 
-                {/* Quick 3-Stage Transition Switches */}
-                <div className="flex items-center gap-1.5 mt-2">
+                {/* Quick 4-Stage Transition Switches */}
+                <div className="grid grid-cols-4 gap-1.5 mt-2">
                   <button
                     type="button"
                     onClick={() => handleQuickTransition(selectedOrder.id, 'confirmed')}
-                    className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all ${
+                    className={`py-1.5 px-1 rounded-lg text-[10px] font-bold transition-all text-center ${
                       selectedOrder.status === 'confirmed'
                         ? 'bg-cyan-500 text-slate-950 font-black shadow-sm'
                         : 'bg-slate-900 text-cyan-400 hover:bg-cyan-950/60 border border-cyan-800/40'
@@ -799,7 +812,7 @@ function OrdersContent() {
                   <button
                     type="button"
                     onClick={() => handleQuickDispatch(selectedOrder.id, selectedOrder.courier || 'ozon')}
-                    className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all ${
+                    className={`py-1.5 px-1 rounded-lg text-[10px] font-bold transition-all text-center ${
                       ['shipped', 'shipping'].includes(selectedOrder.status)
                         ? 'bg-amber-500 text-slate-950 font-black shadow-sm'
                         : 'bg-slate-900 text-amber-400 hover:bg-amber-950/60 border border-amber-800/40'
@@ -810,13 +823,24 @@ function OrdersContent() {
                   <button
                     type="button"
                     onClick={() => handleQuickTransition(selectedOrder.id, 'delivered')}
-                    className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all ${
+                    className={`py-1.5 px-1 rounded-lg text-[10px] font-bold transition-all text-center ${
                       selectedOrder.status === 'delivered'
                         ? 'bg-emerald-500 text-slate-950 font-black shadow-sm'
                         : 'bg-slate-900 text-emerald-400 hover:bg-emerald-950/60 border border-emerald-800/40'
                     }`}
                   >
                     💰 3. Livrée
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickTransition(selectedOrder.id, selectedOrder.status === 'returned' || selectedOrder.status === 'canceled' ? 'new' : 'returned')}
+                    className={`py-1.5 px-1 rounded-lg text-[10px] font-bold transition-all text-center ${
+                      selectedOrder.status === 'returned' || selectedOrder.status === 'canceled'
+                        ? 'bg-rose-500 text-white font-black shadow-sm'
+                        : 'bg-slate-900 text-rose-400 hover:bg-rose-950/60 border border-rose-800/40'
+                    }`}
+                  >
+                    ↩ 4. Retournée
                   </button>
                 </div>
               </div>
