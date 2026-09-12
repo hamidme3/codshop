@@ -127,4 +127,53 @@ STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS)
 - Manifest Export Toolbar: /home/ubuntu/.gemini/antigravity-cli/brain/8cbbd821-8248-4e7c-ad20-f0b589eb40a9/manifest_export_toolbar.png
 
 GOAL COMPLETE: All adversarial challenges resolved, platform hardened, usable, and production ready.
+
+=== ROUND 6: Specialized Subagents Hardening & Comprehensive Platform MCP Verification ===
+
+DATE: 2026-09-12
+STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS, 43/43 CHROME TESTS PASS)
+
+1. SUBAGENT AUDIT & HARDENING VERIFICATION:
+- Theme Specialist:
+  * Eliminated React Error #418 SSR/client hydration mismatches across `ThemeSelectorBar`, `ThemeContext`, `CountdownTimer`, and `CodCheckoutModal`.
+  * Verified CSS custom property variable injection across all 25 production themes with zero visual flicker.
+  * Verified WCAG AA contrast compliance for all buttons, badges, and dark/light modes.
+- Ad Pixels Specialist:
+  * Architected unified `src/lib/pixel-tracker.ts` multi-platform dispatch engine supporting Meta (`window.fbq`), TikTok (`window.ttq`), Snapchat (`window.snaptr`), Google Analytics (`window.gtag`), and Pinterest (`window.pintrk`).
+  * Fixed global `window.TiktokAnalyticsObject = 'ttq'` initialization prerequisite to prevent external CDN runtime crashes.
+  * Embedded client error suppression barrier for 3rd-party ad SDKs and adblocker interruptions.
+  * Added `sessionStorage` deduplication guard (`cod_purchased_${orderId}`) preventing duplicate conversion firing on receipt page refreshes.
+  * Unlocked public storefront pixel configuration endpoint (`GET /api/ads/pixels?store=slug`) while keeping admin mutation authenticated and scoped.
+  * Added `pinterestPartnerId` persistence.
+- CRM & Logistics Specialist:
+  * Verified seamless 3-stage switch order progression (`1. Confirmer` -> `2. Expédier` -> `3. Livrée`).
+  * Real-time CRM customer synchronization: confirmed orders, shipped orders, delivered orders, and total MAD spend update automatically in `/admin/customers`.
+  * Multi-carrier manifest engine (Ozon Express, SendIt, Cathedis, Amana Poste Maroc) with Windows Excel UTF-8 BOM (`\uFEFF`) and Darija WhatsApp communication links.
+- Checkout & CRO Specialist:
+  * Optimized mobile inputs with `text-base sm:text-xs` (16px base) to completely eliminate iOS Safari automatic viewport zooming.
+  * Redesigned Step 2 layout to ensure primary submit CTA and WhatsApp confirmation are immediately visible above the fold on mobile viewports.
+  * Integrated quantity pack upsells (Pack Duo -100 DH + auto-free shipping, Pack Trio + Free Gift) and Stopdesk 0 DH pickup options.
+  * Strengthened catalog tier pricing engine rejecting client-side price tampering (e.g. 1 DH payload blocked with 400 Bad Request).
+
+2. TEST SUITES & REPRODUCIBLE ASSURANCE:
+- tests/crm-pipeline-sync.test.ts: PASSED (100% CRM synchronization across 3-stage switch).
+- tests/saas-pipeline.test.ts: PASSED (Ozon, Sendit, Cathedis, Amana manifests, UTF-8 BOM, 1-click status transitions).
+- tests/security-phone.test.ts: PASSED (05/06/07 normalization, foreign rejection, CGNAT composite rate limiting).
+- tests/security-pricing-sanitization.test.ts: PASSED (Catalog tier price integrity, XSS sanitization, store slug scoping).
+- tests/challenger-qa.test.ts: PASSED (Tampering rejection, inventory restore on cancellation, Duo free shipping).
+- tests/cro-storefront-mobile.test.ts: PASSED (Pack Duo & Trio upsells, sticky buy bar pricing, inspection guarantee).
+- tests/pixels-tracking.test.ts: PASSED (Multi-pixel initialization, ViewContent, InitiateCheckout, Purchase, deduplication, adblocker absorption).
+- npx tsc --noEmit: PASSED (0 TypeScript errors).
+
+3. LIVE CHROME MCP PLATFORM-WIDE AUDIT (43/43 PASSED, 0 ERRORS):
+- Storefront 25 Themes: 25/25 PASS (luxury, beauty, tech, minimal, booster, streetwear, woodmart, shoptimizer, flatsome, perfume, jewelry, babyjoy, culinary, fitness, automotive, eyewear, botanica, coffee_tea, ceramics, petcare, kids_fashion, leather_craft, kitchen, cyberpunk, velocity_cod) - Status: 200, Errors: 0.
+- COD Checkout Flow: PASS (Product page -> 1-tap modal -> customer data entry -> order submission -> /order-success confirmation) - Errors: 0.
+- Merchant Backoffice: 12/12 PASS (Command Center, 25-Theme Gallery, Orders Pipeline, Products & Inventory, Profile, KYC Verification, CRM Customers, Tracking Pixels & Pinterest, Security & Sessions, Support, Subscription & Billing, Visual Page Builder) - Status: 200, Errors: 0.
+- Onboarding & SSO: 5/5 PASS (Admin Login, New Store Onboarding, SSO Forgot Password, SSO Password Reset, SSO Phone OTP) - Status: 200, Errors: 0.
+
+4. PRODUCTION DEPLOYMENT & SYNC:
+- Coolify Docker Container: `codshop-app` running at `http://172.18.1.13:3000` (Image rebuilt and healthy).
+- Live Production Domain: `https://codshop.vipone.site` (HTTP 200 via Cloudflare and Traefik).
+- Git Repository: Synchronized with `origin/main` (`https://github.com/hamidme3/codshop.git`).
+
 <!-- GOAL_COMPLETE -->
