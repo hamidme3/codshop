@@ -265,50 +265,55 @@ function ProductsContent() {
   return (
     <div className="p-6 sm:p-10 space-y-6 max-w-7xl mx-auto font-sans">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-zinc-800/80">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-3">
-            <Package className="w-8 h-8 text-amber-400" /> Catalogue Produits & Stocks
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Catalogue & Inventaire</span>
+            <span className="text-zinc-600">•</span>
+            <span className="text-[11px] text-zinc-400 font-mono tabular-nums">{products.length} références</span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
+            <Package className="w-6 h-6 text-zinc-200" /> Catalogue Produits & Stocks
           </h1>
-          <p className="text-slate-400 text-xs sm:text-sm mt-1">
-            Gérez vos articles, prix de revient, marges bénéficiaires et catégories.
+          <p className="text-zinc-400 text-xs mt-1">
+            Gérez vos références, marges nettes unitaires et collections de vente.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={() => handleOpenAICoach()}
-            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs shadow-lg shadow-amber-500/20 transition-all border border-amber-400/50"
+            className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/80 font-medium px-3.5 py-2 rounded-lg text-xs transition-colors shadow-sm"
           >
-            <Sparkles className="w-4 h-4 text-slate-950" /> Coach IA Marocain
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Coach IA Marocain
           </button>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-colors border border-slate-700"
+            className="flex items-center gap-2 bg-zinc-100 hover:bg-white text-zinc-900 font-semibold px-3.5 py-2 rounded-lg text-xs transition-colors shadow-sm"
           >
-            <Plus className="w-4 h-4 text-amber-400" /> Ajouter un Produit
+            <Plus className="w-3.5 h-3.5" /> Ajouter un Produit
           </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-800 text-xs gap-4 font-bold">
+      <div className="flex items-center gap-1.5 p-1 bg-[#121215] border border-zinc-800/80 rounded-lg w-fit">
         <button
           onClick={() => setActiveTab('products')}
-          className={`py-3 border-b-2 transition-colors ${
+          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
             activeTab === 'products'
-              ? 'border-amber-400 text-amber-400'
-              : 'border-transparent text-slate-400 hover:text-white'
+              ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+              : 'text-zinc-400 hover:text-zinc-200'
           }`}
         >
           Tous les Produits ({products.length})
         </button>
         <button
           onClick={() => setActiveTab('categories')}
-          className={`py-3 border-b-2 transition-colors ${
+          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
             activeTab === 'categories'
-              ? 'border-amber-400 text-amber-400'
-              : 'border-transparent text-slate-400 hover:text-white'
+              ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+              : 'text-zinc-400 hover:text-zinc-200'
           }`}
         >
           Catégories & Collections ({categories.length})
@@ -318,130 +323,130 @@ function ProductsContent() {
       {activeTab === 'products' ? (
         <>
           {/* Search Bar */}
-          <div className="flex items-center justify-between gap-4 bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div className="flex items-center justify-between gap-4 bg-[#121215] border border-zinc-800/80 rounded-xl p-3 shadow-sm">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-slate-500" />
+              <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-500" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher par titre, catégorie ou SKU..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
               />
             </div>
-            <div className="text-xs text-slate-400">
-              {filteredProducts.length} article(s) trouvé(s)
+            <div className="text-xs text-zinc-400 font-mono tabular-nums">
+              <strong className="text-zinc-200">{filteredProducts.length}</strong> article(s) trouvé(s)
             </div>
           </div>
 
           {/* Products Table */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+          <div className="bg-[#121215] border border-zinc-800/80 rounded-xl overflow-hidden shadow-sm">
+            <div className="overflow-x-auto admin-scrollbar">
+              <table className="w-full text-left text-xs admin-table">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 bg-slate-950/50 font-semibold">
-                    <th className="py-3.5 px-4">Produit</th>
-                    <th className="py-3.5 px-4">Catégorie</th>
-                    <th className="py-3.5 px-4">Prix de Vente</th>
-                    <th className="py-3.5 px-4">Prix de Revient</th>
-                    <th className="py-3.5 px-4">Marge Nette</th>
-                    <th className="py-3.5 px-4">Stock Restant</th>
-                    <th className="py-3.5 px-4 text-center">Statut</th>
-                    <th className="py-3.5 px-4 text-right">Actions</th>
+                  <tr className="border-b border-zinc-800/90 text-zinc-400 bg-[#0d0d10] font-semibold">
+                    <th className="py-2.5 px-3">Produit</th>
+                    <th className="py-2.5 px-3">Catégorie</th>
+                    <th className="py-2.5 px-3">Prix Vente</th>
+                    <th className="py-2.5 px-3">Coût Achat</th>
+                    <th className="py-2.5 px-3">Marge Nette</th>
+                    <th className="py-2.5 px-3">Stock Restant</th>
+                    <th className="py-2.5 px-3 text-center">Statut</th>
+                    <th className="py-2.5 px-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-zinc-800/50">
                   {filteredProducts.map((p) => {
                     const margin = (p.price ?? 0) - (p.costPrice ?? 0);
                     const marginPercent = (p.price ?? 0) > 0 ? Math.round((margin / (p.price ?? 1)) * 100) : 0;
                     const isLowStock = p.stock <= 5;
 
                     return (
-                      <tr key={p.id} className="hover:bg-slate-800/40 transition-colors">
-                        <td className="py-3.5 px-4 flex items-center gap-3">
+                      <tr key={p.id} className="hover:bg-zinc-800/30 transition-colors">
+                        <td className="py-2.5 px-3 flex items-center gap-3">
                           <img
                             src={p.images?.[0] ?? 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=800&auto=format&fit=crop'}
                             alt={p.title ?? 'Produit'}
-                            className="w-10 h-10 rounded-lg object-cover bg-slate-950 border border-slate-800 shrink-0"
+                            className="w-9 h-9 rounded-md object-cover bg-zinc-950 border border-zinc-800 shrink-0"
                           />
                           <div>
-                            <div className="font-bold text-white text-sm">{p.title}</div>
-                            <div className="text-[10px] font-mono text-slate-500">{p.sku}</div>
+                            <div className="font-medium text-zinc-100 text-xs">{p.title}</div>
+                            <div className="text-[10px] font-mono text-zinc-400">{p.sku}</div>
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4 text-slate-300">
-                          <span className="px-2 py-0.5 rounded-md bg-slate-800 text-[11px] font-medium">
+                        <td className="py-2.5 px-3 text-zinc-300">
+                          <span className="px-2 py-0.5 rounded bg-zinc-800/80 text-zinc-300 border border-zinc-700/60 text-[11px] font-medium">
                             {p.category}
                           </span>
                         </td>
 
-                        <td className="py-3.5 px-4">
-                          <div className="font-extrabold text-white text-sm">{p.price} DH</div>
+                        <td className="py-2.5 px-3">
+                          <div className="font-mono tabular-nums font-semibold text-zinc-100 text-xs">{p.price} MAD</div>
                           {p.comparePrice && (
-                            <div className="text-[10px] text-slate-500 line-through">{p.comparePrice} DH</div>
+                            <div className="text-[10px] font-mono tabular-nums text-zinc-400 line-through">{p.comparePrice} MAD</div>
                           )}
                         </td>
 
-                        <td className="py-3.5 px-4 text-slate-400 font-medium">
-                          {p.costPrice} DH
+                        <td className="py-2.5 px-3 text-zinc-300 font-mono tabular-nums text-xs">
+                          {p.costPrice} MAD
                         </td>
 
-                        <td className="py-3.5 px-4">
-                          <div className="font-bold text-emerald-400">+{margin} DH</div>
-                          <div className="text-[10px] text-slate-400">({marginPercent}% de marge)</div>
+                        <td className="py-2.5 px-3">
+                          <div className="font-mono tabular-nums font-semibold text-emerald-400 text-xs">+{margin} MAD</div>
+                          <div className="text-[10px] font-mono tabular-nums text-zinc-400">({marginPercent}% marge)</div>
                         </td>
 
-                        <td className="py-3.5 px-4">
+                        <td className="py-2.5 px-3">
                           <div className="flex items-center gap-1.5">
                             <button
                               type="button"
                               onClick={() => handleAdjustStock(p.id, -1)}
-                              className="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-xs transition-colors border border-slate-700"
+                              className="w-5 h-5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold flex items-center justify-center text-xs transition-colors border border-zinc-700"
                               title="Diminuer stock (-1)"
                             >
                               -
                             </button>
-                            <span className="font-bold text-white min-w-[52px] text-center">{p.stock} un.</span>
+                            <span className="font-mono tabular-nums font-medium text-zinc-200 min-w-[48px] text-center text-xs">{p.stock} un.</span>
                             <button
                               type="button"
                               onClick={() => handleAdjustStock(p.id, 1)}
-                              className="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-xs transition-colors border border-slate-700"
+                              className="w-5 h-5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold flex items-center justify-center text-xs transition-colors border border-zinc-700"
                               title="Augmenter stock (+1)"
                             >
                               +
                             </button>
                             {isLowStock && (
-                              <span className="p-1 rounded bg-amber-500/20 text-amber-400 ml-0.5" title="Stock faible !">
-                                <AlertTriangle className="w-3.5 h-3.5" />
+                              <span className="p-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 ml-0.5" title="Stock faible !">
+                                <AlertTriangle className="w-3 h-3" />
                               </span>
                             )}
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4 text-center">
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        <td className="py-2.5 px-3 text-center">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                             Actif
                           </span>
                         </td>
 
-                        <td className="py-3.5 px-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
+                        <td className="py-2.5 px-3 text-right">
+                          <div className="flex items-center justify-end gap-1">
                             <button
                               type="button"
                               onClick={() => handleOpenEditModal(p)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20 transition-all inline-flex items-center cursor-pointer"
+                              className="p-1 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 border border-transparent hover:border-zinc-700 transition-colors inline-flex items-center cursor-pointer"
                               title="Modifier ce produit (prix, stock, variantes)"
                             >
-                              <Edit3 className="w-4 h-4" />
+                              <Edit3 className="w-3.5 h-3.5" />
                             </button>
                             <button
                               type="button"
                               onClick={() => handleDeleteProduct(p)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all inline-flex items-center cursor-pointer"
+                              className="p-1 rounded text-zinc-400 hover:text-rose-400 hover:bg-rose-950/40 border border-transparent hover:border-rose-800/40 transition-colors inline-flex items-center cursor-pointer"
                               title="Supprimer ce produit"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </td>
@@ -457,58 +462,59 @@ function ProductsContent() {
         /* Categories View */
         <div className="space-y-4">
           {/* Categories Toolbar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#121215] border border-zinc-800/80 rounded-xl p-4 shadow-sm">
             <div>
-              <h2 className="font-black text-white text-sm">Gestion des Catégories & Collections</h2>
-              <p className="text-slate-400 text-xs mt-0.5">
+              <h2 className="font-semibold text-white text-sm">Gestion des Catégories & Collections</h2>
+              <p className="text-zinc-400 text-xs mt-0.5">
                 Créez de nouvelles collections et gérez les associations produits avec garde-fous de sécurité.
               </p>
             </div>
             <button
               type="button"
               onClick={() => setShowAddCategoryModal(true)}
-              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition-colors shadow-lg shadow-amber-500/20 self-start sm:self-auto"
+              className="inline-flex items-center gap-2 bg-zinc-100 hover:bg-white text-zinc-900 font-semibold px-3.5 py-2 rounded-lg text-xs transition-colors shadow-sm self-start sm:self-auto"
             >
-              <Plus className="w-4 h-4" /> Nouvelle Catégorie
+              <Plus className="w-3.5 h-3.5" /> Nouvelle Catégorie
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
             {categories.map((c) => {
               const hasProducts = (c.productCount ?? 0) > 0;
               return (
                 <div 
                   key={c.id} 
-                  className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between space-y-4 hover:border-slate-700 transition-colors"
+                  data-category-card
+                  className="p-4 sm:p-5 rounded-xl bg-[#121215] border border-zinc-800/80 flex flex-col justify-between space-y-3 hover:border-zinc-700/80 transition-colors shadow-sm"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                        <Tag className="w-4 h-4 text-amber-400" />
+                      <div className="w-8 h-8 rounded-lg bg-zinc-800/80 border border-zinc-700/80 flex items-center justify-center">
+                        <Tag className="w-3.5 h-3.5 text-zinc-300" />
                       </div>
-                      <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${
+                      <span className={`text-[11px] font-mono tabular-nums px-2 py-0.5 rounded border ${
                         hasProducts 
-                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' 
-                          : 'bg-slate-800 text-slate-400 border-slate-700'
+                          ? 'bg-zinc-800/80 text-zinc-200 border-zinc-700/80' 
+                          : 'bg-zinc-900/60 text-zinc-500 border-zinc-800'
                       }`}>
                         {c.productCount} {c.productCount === 1 ? 'article' : 'articles'}
                       </span>
                     </div>
-                    <div className="font-extrabold text-white text-base tracking-tight">{c.name}</div>
-                    <div className="text-[11px] font-mono text-slate-500">slug: {c.slug}</div>
+                    <div className="font-medium text-white text-sm tracking-tight">{c.name}</div>
+                    <div className="text-[11px] font-mono text-zinc-500">slug: {c.slug}</div>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
-                    <span className="text-[10px] text-slate-500">
-                      {hasProducts ? 'Catégorie active' : 'Prête à supprimer'}
+                  <div className="pt-2.5 border-t border-zinc-800/80 flex items-center justify-between">
+                    <span className="text-[10px] text-zinc-400">
+                      {hasProducts ? 'Catégorie active' : 'Aucun produit rattaché'}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleDeleteCategory(c)}
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-colors ${
                         hasProducts
-                          ? 'text-slate-500 hover:text-amber-400 hover:bg-amber-500/10'
-                          : 'text-rose-400 hover:text-white hover:bg-rose-600 bg-rose-500/10 border border-rose-500/30'
+                          ? 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/60'
+                          : 'text-rose-400 hover:text-white hover:bg-rose-900/60 bg-rose-950/30 border border-rose-800/40'
                       }`}
                       title={hasProducts ? 'Protégée : contient des produits' : 'Supprimer cette catégorie vide'}
                     >
@@ -525,17 +531,22 @@ function ProductsContent() {
 
       {/* Add Product Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-lg w-full space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 className="text-base font-black text-white">Ajouter un Nouveau Produit</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white">✕</button>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#121215] border border-zinc-800 rounded-xl p-6 max-w-lg w-full space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
+              <h3 className="text-base font-semibold text-white">Ajouter un Nouveau Produit</h3>
+              <button 
+                onClick={() => setShowAddModal(false)} 
+                className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors"
+              >
+                ✕
+              </button>
             </div>
 
             {/* Coach IA Trigger Banner */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-amber-500/10 to-amber-600/10 border border-amber-500/30">
-              <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
-                <Sparkles className="w-4 h-4 text-amber-400" />
+            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/70 border border-zinc-800">
+              <div className="flex items-center gap-2 text-zinc-300 font-medium text-xs">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                 <span>Textes de vente & packs optimisés Maroc</span>
               </div>
               <button
@@ -543,33 +554,33 @@ function ProductsContent() {
                 onClick={() => {
                   handleOpenAICoach(category, title, price);
                 }}
-                className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[11px] transition-colors flex items-center gap-1.5"
+                className="px-2.5 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-medium text-[11px] transition-colors flex items-center gap-1.5"
               >
-                <Wand2 className="w-3.5 h-3.5" /> Générer avec l'IA 🇲🇦
+                <Wand2 className="w-3 h-3 text-amber-400" /> Générer avec l'IA 🇲🇦
               </button>
             </div>
 
-            <form onSubmit={handleCreateProduct} className="space-y-4 text-xs">
+            <form onSubmit={handleCreateProduct} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Titre du Produit :</label>
+                <label className="block text-zinc-300 font-medium mb-1">Titre du Produit :</label>
                 <input
                   type="text"
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Ex: Robe Soie Dubaï Édition Prestige"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-slate-300 font-semibold">Catégorie :</label>
+                    <label className="block text-zinc-300 font-medium">Catégorie :</label>
                     <button
                       type="button"
                       onClick={() => setShowAddCategoryModal(true)}
-                      className="text-[11px] text-amber-400 hover:text-amber-300 font-bold hover:underline inline-flex items-center gap-0.5"
+                      className="text-[11px] text-zinc-400 hover:text-zinc-200 font-medium inline-flex items-center gap-0.5"
                     >
                       <Plus className="w-3 h-3" /> Nouvelle
                     </button>
@@ -577,7 +588,7 @@ function ProductsContent() {
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 focus:outline-none focus:border-zinc-600"
                   >
                     {categories.map((c) => (
                       <option key={c.id} value={c.name}>{c.name}</option>
@@ -586,70 +597,70 @@ function ProductsContent() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Stock Initial :</label>
+                  <label className="block text-zinc-300 font-medium mb-1">Stock Initial :</label>
                   <input
                     type="number"
                     value={stock}
                     onChange={(e) => setStock(Number(e.target.value))}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 font-mono tabular-nums focus:outline-none focus:border-zinc-600"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Prix Vente (DH) :</label>
+                  <label className="block text-zinc-300 font-medium mb-1">Prix Vente (DH) :</label>
                   <input
                     type="number"
                     value={price}
                     onChange={(e) => setPrice(Number(e.target.value))}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-bold"
+                    className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 font-mono tabular-nums font-semibold focus:outline-none focus:border-zinc-600"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Prix Barré (DH) :</label>
+                  <label className="block text-zinc-300 font-medium mb-1">Prix Barré (DH) :</label>
                   <input
                     type="number"
                     value={comparePrice}
                     onChange={(e) => setComparePrice(Number(e.target.value))}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
+                    className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-400 font-mono tabular-nums focus:outline-none focus:border-zinc-600"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Coût Achat (DH) :</label>
+                  <label className="block text-zinc-300 font-medium mb-1">Coût Achat (DH) :</label>
                   <input
                     type="number"
                     value={costPrice}
                     onChange={(e) => setCostPrice(Number(e.target.value))}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-emerald-400 font-bold"
+                    className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-emerald-400 font-mono tabular-nums font-semibold focus:outline-none focus:border-zinc-600"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Image Principale (URL) :</label>
+                <label className="block text-zinc-300 font-medium mb-1">Image Principale (URL) :</label>
                 <input
                   type="text"
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="https://..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-mono text-[11px]"
+                  className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-300 font-mono text-[11px] focus:outline-none focus:border-zinc-600"
                 />
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2 pt-2 border-t border-zinc-800/80">
                 <button
                   type="submit"
-                  className="flex-1 py-3 rounded-xl bg-amber-500 text-slate-950 font-black text-xs hover:bg-amber-400 transition-colors"
+                  className="flex-1 py-2 px-4 rounded-lg bg-zinc-100 hover:bg-white text-zinc-900 font-semibold text-xs transition-colors shadow-sm"
                 >
                   Enregistrer le Produit
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="py-3 px-4 rounded-xl bg-slate-800 text-slate-300 text-xs hover:bg-slate-700 font-bold"
+                  className="py-2 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-colors"
                 >
                   Annuler
                 </button>
@@ -661,47 +672,47 @@ function ProductsContent() {
 
       {/* Edit Product Modal with Variant & Pricing Manager */}
       {showEditModal && editingProduct && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                  <Edit3 className="w-4 h-4 text-amber-400" />
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-[#121215] border border-zinc-800 rounded-xl p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl admin-scrollbar">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-zinc-800/80 border border-zinc-700/80 flex items-center justify-center">
+                  <Edit3 className="w-4 h-4 text-zinc-300" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-white">Modifier le Produit</h3>
-                  <div className="text-[11px] font-mono text-slate-400">{editingProduct.sku}</div>
+                  <h3 className="text-base font-semibold text-white">Modifier le Produit</h3>
+                  <div className="text-[11px] font-mono text-zinc-400">{editingProduct.sku}</div>
                 </div>
               </div>
               <button 
                 type="button"
                 onClick={() => setShowEditModal(false)} 
-                className="text-slate-400 hover:text-white p-1 text-lg"
+                className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleSaveEditProduct} className="space-y-4 text-xs">
+            <form onSubmit={handleSaveEditProduct} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Titre du Produit :</label>
+                <label className="block text-zinc-300 font-medium mb-1">Titre du Produit :</label>
                 <input
                   type="text"
                   required
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500 font-bold"
+                  className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 focus:outline-none focus:border-zinc-600 font-medium"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-slate-300 font-semibold">Catégorie :</label>
+                    <label className="block text-zinc-300 font-medium">Catégorie :</label>
                     <button
                       type="button"
                       onClick={() => setShowAddCategoryModal(true)}
-                      className="text-[11px] text-amber-400 hover:text-amber-300 font-bold hover:underline inline-flex items-center gap-0.5"
+                      className="text-[11px] text-zinc-400 hover:text-zinc-200 font-medium inline-flex items-center gap-0.5"
                     >
                       <Plus className="w-3 h-3" /> Nouvelle
                     </button>
@@ -709,7 +720,7 @@ function ProductsContent() {
                   <select
                     value={editCategory}
                     onChange={(e) => setEditCategory(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500 font-medium"
+                    className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 focus:outline-none focus:border-zinc-600 font-medium"
                   >
                     {categories.map((c) => (
                       <option key={c.id} value={c.name}>{c.name}</option>
@@ -718,95 +729,95 @@ function ProductsContent() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Stock Global :</label>
+                  <label className="block text-zinc-300 font-medium mb-1">Stock Global :</label>
                   <input
                     type="number"
                     value={editStock}
                     onChange={(e) => setEditStock(Number(e.target.value))}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500 font-bold"
+                    className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 font-mono tabular-nums focus:outline-none focus:border-zinc-600 font-semibold"
                   />
                 </div>
               </div>
 
               {/* Pricing & Dynamic Margin Calculation */}
-              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
+              <div className="p-3.5 rounded-lg bg-[#0d0d10] border border-zinc-800/80 space-y-2.5">
                 <div className="grid grid-cols-3 gap-2.5">
                   <div>
-                    <label className="block text-slate-400 font-semibold mb-1">Prix Vente (DH) :</label>
+                    <label className="block text-zinc-400 font-medium mb-1">Prix Vente (DH) :</label>
                     <input
                       type="number"
                       value={editPrice}
                       onChange={(e) => setEditPrice(Number(e.target.value))}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white font-black text-sm"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-2 text-zinc-100 font-mono tabular-nums font-semibold text-xs focus:outline-none focus:border-zinc-600"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-slate-400 font-semibold mb-1">Prix Barré (DH) :</label>
+                    <label className="block text-zinc-400 font-medium mb-1">Prix Barré (DH) :</label>
                     <input
                       type="number"
                       value={editComparePrice}
                       onChange={(e) => setEditComparePrice(Number(e.target.value))}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-300"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-2 text-zinc-400 font-mono tabular-nums text-xs focus:outline-none focus:border-zinc-600"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-slate-400 font-semibold mb-1">Coût Achat (DH) :</label>
+                    <label className="block text-zinc-400 font-medium mb-1">Coût Achat (DH) :</label>
                     <input
                       type="number"
                       value={editCostPrice}
                       onChange={(e) => setEditCostPrice(Number(e.target.value))}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-emerald-400 font-bold"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-2 text-emerald-400 font-mono tabular-nums font-semibold text-xs focus:outline-none focus:border-zinc-600"
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-emerald-950/20 border border-emerald-500/20 text-emerald-400 text-xs">
+                <div className="flex items-center justify-between px-3 py-1.5 rounded-md bg-emerald-950/20 border border-emerald-800/40 text-emerald-400 text-xs">
                   <span>Marge Nette prévisionnelle :</span>
-                  <span className="font-extrabold text-sm">
-                    +{(editPrice || 0) - (editCostPrice || 0)} DH ({((editPrice || 0) > 0 ? Math.round((((editPrice || 0) - (editCostPrice || 0)) / (editPrice || 1)) * 100) : 0)}%)
+                  <span className="font-mono tabular-nums font-semibold">
+                    +{(editPrice || 0) - (editCostPrice || 0)} MAD ({((editPrice || 0) > 0 ? Math.round((((editPrice || 0) - (editCostPrice || 0)) / (editPrice || 1)) * 100) : 0)}%)
                   </span>
                 </div>
               </div>
 
               {/* Variants & Size/Color Matrix */}
-              <div className="space-y-2.5 p-3.5 rounded-xl bg-slate-950 border border-slate-800">
+              <div className="space-y-2.5 p-3.5 rounded-lg bg-[#0d0d10] border border-zinc-800/80">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-bold text-white text-xs flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-amber-400" />
+                    <div className="font-medium text-zinc-200 text-xs flex items-center gap-1.5">
+                      <Layers className="w-3.5 h-3.5 text-zinc-400" />
                       <span>Variantes & Stocks Détaillés</span>
                     </div>
-                    <div className="text-[11px] text-slate-400 mt-0.5">
+                    <div className="text-[11px] text-zinc-500 mt-0.5">
                       Couleurs, pointures et unités en entrepôt.
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={handleAddEditVariant}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 font-bold text-[11px] border border-slate-700 transition-colors"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium text-[11px] border border-zinc-700 transition-colors"
                   >
                     <Plus className="w-3 h-3" /> Ajouter Variante
                   </button>
                 </div>
 
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1 admin-scrollbar">
                   {editVariants.map((v, idx) => (
-                    <div key={idx} className="flex items-center gap-2 bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                    <div key={idx} className="flex items-center gap-2 bg-zinc-900/90 p-2 rounded-lg border border-zinc-800">
                       <input
                         type="text"
                         placeholder="Couleur (ex: Noir)"
                         value={v.color || ''}
                         onChange={(e) => handleUpdateEditVariant(idx, 'color', e.target.value)}
-                        className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-white placeholder-slate-600 text-xs"
+                        className="flex-1 bg-[#0d0d10] border border-zinc-800 rounded-md px-2.5 py-1 text-zinc-100 placeholder-zinc-600 text-xs"
                       />
                       <input
                         type="text"
                         placeholder="Taille / Réf (ex: 42, L)"
                         value={v.size || ''}
                         onChange={(e) => handleUpdateEditVariant(idx, 'size', e.target.value)}
-                        className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-white placeholder-slate-600 text-xs"
+                        className="flex-1 bg-[#0d0d10] border border-zinc-800 rounded-md px-2.5 py-1 text-zinc-100 placeholder-zinc-600 text-xs"
                       />
                       <div className="flex items-center gap-1">
                         <input
@@ -814,14 +825,14 @@ function ProductsContent() {
                           placeholder="Stock"
                           value={v.stock}
                           onChange={(e) => handleUpdateEditVariant(idx, 'stock', Number(e.target.value))}
-                          className="w-16 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-center font-bold text-xs"
+                          className="w-16 bg-[#0d0d10] border border-zinc-800 rounded-md px-2 py-1 text-zinc-100 text-center font-mono tabular-nums font-semibold text-xs"
                         />
-                        <span className="text-[10px] text-slate-500 font-mono">un.</span>
+                        <span className="text-[10px] text-zinc-500 font-mono">un.</span>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleRemoveEditVariant(idx)}
-                        className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                        className="p-1 rounded text-zinc-500 hover:text-rose-400 hover:bg-rose-950/40 transition-colors"
                         title="Supprimer cette variante"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -832,27 +843,27 @@ function ProductsContent() {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Image Principale (URL) :</label>
+                <label className="block text-zinc-300 font-medium mb-1">Image Principale (URL) :</label>
                 <input
                   type="text"
                   value={editImageUrl}
                   onChange={(e) => setEditImageUrl(e.target.value)}
                   placeholder="https://..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-mono text-[11px]"
+                  className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-300 font-mono text-[11px] focus:outline-none focus:border-zinc-600"
                 />
               </div>
 
-              <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <div className="flex gap-2 pt-2 border-t border-zinc-800/80">
                 <button
                   type="submit"
-                  className="flex-1 py-3 rounded-xl bg-amber-500 text-slate-950 font-black text-xs hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20"
+                  className="flex-1 py-2 px-4 rounded-lg bg-zinc-100 hover:bg-white text-zinc-900 font-semibold text-xs transition-colors shadow-sm"
                 >
                   Enregistrer les Modifications
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="py-3 px-5 rounded-xl bg-slate-800 text-slate-300 text-xs hover:bg-slate-700 font-bold"
+                  className="py-2 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-colors"
                 >
                   Annuler
                 </button>
@@ -864,36 +875,36 @@ function ProductsContent() {
 
       {/* Coach IA Marocain Modal */}
       {showAICoach && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#121215] border border-zinc-800 rounded-xl p-6 sm:p-7 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-5 shadow-2xl admin-scrollbar">
             {/* Modal Header */}
-            <div className="flex items-start justify-between pb-4 border-b border-slate-800">
+            <div className="flex items-start justify-between pb-3.5 border-b border-zinc-800/80">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                    Propulsé par IA E-commerce Maroc
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider bg-zinc-800 text-zinc-300 border border-zinc-700">
+                    Assistant Marketing Maroc
                   </span>
                 </div>
-                <h3 className="text-lg sm:text-xl font-black text-white mt-1 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-amber-400" /> Coach IA Marocain (Darija / FR)
+                <h3 className="text-base sm:text-lg font-semibold text-white mt-1 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-400" /> Coach IA Marocain (Darija / FR)
                 </h3>
-                <p className="text-slate-400 text-xs mt-0.5">
-                  Générez instantanément des titres vendeurs, des accroches en Darija et des packs irrésistibles.
+                <p className="text-zinc-400 text-xs mt-0.5">
+                  Générez des titres vendeurs, des accroches en Darija et des offres dégressives.
                 </p>
               </div>
               <button 
                 onClick={() => setShowAICoach(false)} 
-                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold"
+                className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors"
               >
                 ✕
               </button>
             </div>
 
             {/* Generator Controls */}
-            <div className="space-y-4 bg-slate-950/60 p-4 rounded-2xl border border-slate-800 text-xs">
+            <div className="space-y-3.5 bg-[#0d0d10] p-4 rounded-xl border border-zinc-800/80 text-xs">
               <div>
-                <label className="block text-slate-400 font-semibold mb-1.5">Secteur / Niche :</label>
-                <div className="flex flex-wrap gap-2">
+                <label className="block text-zinc-400 font-medium mb-1.5">Secteur / Niche :</label>
+                <div className="flex flex-wrap gap-1.5">
                   {MOROCCAN_NICHES.map((niche) => (
                     <button
                       key={niche}
@@ -902,10 +913,10 @@ function ProductsContent() {
                         setAiNiche(niche);
                         handleOpenAICoach(niche, aiKeyword, aiPrice);
                       }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                         aiNiche === niche
-                          ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                          : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
+                          ? 'bg-zinc-100 text-zinc-900 font-semibold shadow-sm'
+                          : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
                       }`}
                     >
                       {niche}
@@ -914,24 +925,24 @@ function ProductsContent() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <div>
-                  <label className="block text-slate-400 font-semibold mb-1">Nom ou mot-clé :</label>
+                  <label className="block text-zinc-400 font-medium mb-1">Nom ou mot-clé :</label>
                   <input
                     type="text"
                     value={aiKeyword}
                     onChange={(e) => setAiKeyword(e.target.value)}
                     placeholder="Ex: Sacoche Cuir Marron"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-[#121215] border border-zinc-800 rounded-lg px-3 py-1.5 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-400 font-semibold mb-1">Prix de Vente Ciblé (DH) :</label>
+                  <label className="block text-zinc-400 font-medium mb-1">Prix de Vente Ciblé (DH) :</label>
                   <input
                     type="number"
                     value={aiPrice}
                     onChange={(e) => setAiPrice(Number(e.target.value))}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-500"
+                    className="w-full bg-[#121215] border border-zinc-800 rounded-lg px-3 py-1.5 text-zinc-100 font-mono tabular-nums font-semibold focus:outline-none focus:border-zinc-600"
                   />
                 </div>
               </div>
@@ -939,75 +950,75 @@ function ProductsContent() {
               <button
                 type="button"
                 onClick={() => handleOpenAICoach(aiNiche, aiKeyword, aiPrice)}
-                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 font-black text-xs flex items-center justify-center gap-2 border border-slate-700 transition-colors"
+                className="w-full py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium text-xs flex items-center justify-center gap-2 border border-zinc-700 transition-colors"
               >
-                <Wand2 className="w-3.5 h-3.5" /> Régénérer de Nouvelles Variantes
+                <Wand2 className="w-3.5 h-3.5 text-amber-400" /> Régénérer de Nouvelles Variantes
               </button>
             </div>
 
             {/* Generated Results */}
             {generatedCopy && (
-              <div className="space-y-4 text-xs">
+              <div className="space-y-3.5 text-xs">
                 {/* Title */}
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-1.5">
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold uppercase tracking-wider">
-                    <span>Titre E-commerce Recommandé</span>
+                <div className="bg-[#0d0d10] border border-zinc-800/80 rounded-xl p-3.5 space-y-1">
+                  <div className="flex items-center justify-between text-[11px] text-zinc-400 font-mono uppercase tracking-wider">
+                    <span>Titre Recommandé</span>
                     <button
                       onClick={() => copyToClipboard(generatedCopy.title, 'title')}
-                      className="text-amber-400 hover:underline flex items-center gap-1 font-bold lowercase"
+                      className="text-zinc-300 hover:text-white flex items-center gap-1 font-sans text-xs transition-colors"
                     >
                       {copiedField === 'title' ? <CheckCheck className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                       {copiedField === 'title' ? 'Copié !' : 'Copier'}
                     </button>
                   </div>
-                  <div className="text-white font-black text-sm">{generatedCopy.title}</div>
+                  <div className="text-zinc-100 font-semibold text-sm">{generatedCopy.title}</div>
                 </div>
 
                 {/* Moroccan Darija Hook */}
-                <div className="bg-gradient-to-r from-amber-500/10 via-slate-950 to-slate-950 border border-amber-500/30 rounded-2xl p-4 space-y-1.5">
-                  <div className="flex items-center justify-between text-[11px] font-bold">
-                    <span className="text-amber-400 flex items-center gap-1">
-                      <Flame className="w-3.5 h-3.5" /> Accroche Vendeuse en Darija (Haute Conversion)
+                <div className="bg-[#0d0d10] border border-zinc-800/80 rounded-xl p-3.5 space-y-1">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-zinc-300 font-medium flex items-center gap-1">
+                      <Flame className="w-3.5 h-3.5 text-amber-400" /> Accroche en Darija
                     </span>
                     <button
                       onClick={() => copyToClipboard(generatedCopy.hookDarija, 'darija')}
-                      className="text-amber-400 hover:underline flex items-center gap-1 font-bold"
+                      className="text-zinc-300 hover:text-white flex items-center gap-1 font-sans text-xs transition-colors"
                     >
                       {copiedField === 'darija' ? <CheckCheck className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                       {copiedField === 'darija' ? 'Copié !' : 'Copier'}
                     </button>
                   </div>
-                  <div className="text-white text-sm font-semibold text-right leading-relaxed" dir="rtl">
+                  <div className="text-zinc-100 text-sm font-medium text-right leading-relaxed" dir="rtl">
                     {generatedCopy.hookDarija}
                   </div>
                 </div>
 
                 {/* French Hook */}
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-1.5">
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold">
-                    <span>Accroche en Français (Élégante & Professionnelle)</span>
+                <div className="bg-[#0d0d10] border border-zinc-800/80 rounded-xl p-3.5 space-y-1">
+                  <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                    <span>Accroche en Français</span>
                     <button
                       onClick={() => copyToClipboard(generatedCopy.hookFrench, 'french')}
-                      className="text-amber-400 hover:underline flex items-center gap-1 font-bold"
+                      className="text-zinc-300 hover:text-white flex items-center gap-1 font-sans text-xs transition-colors"
                     >
                       {copiedField === 'french' ? <CheckCheck className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                       {copiedField === 'french' ? 'Copié !' : 'Copier'}
                     </button>
                   </div>
-                  <div className="text-slate-200 text-xs leading-relaxed italic">
+                  <div className="text-zinc-300 text-xs leading-relaxed italic">
                     « {generatedCopy.hookFrench} »
                   </div>
                 </div>
 
                 {/* Guarantees & COD Reassurance */}
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-2">
-                  <div className="text-[11px] text-slate-400 font-bold flex items-center gap-1.5">
+                <div className="bg-[#0d0d10] border border-zinc-800/80 rounded-xl p-3.5 space-y-2">
+                  <div className="text-[11px] text-zinc-400 font-medium flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                     <span>Arguments de Réassurance Spécifiques au Marché Marocain :</span>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     {generatedCopy.reassurancesDarija.map((r, idx) => (
-                      <div key={idx} className="text-slate-300 text-xs flex items-center justify-between bg-slate-900/60 px-3 py-2 rounded-xl">
+                      <div key={idx} className="text-zinc-300 text-xs flex items-center justify-between bg-zinc-900/60 px-3 py-1.5 rounded-lg border border-zinc-800/60">
                         <span dir="rtl" className="text-right w-full font-medium">{r}</span>
                       </div>
                     ))}
@@ -1016,43 +1027,43 @@ function ProductsContent() {
 
                 {/* Bundle Offers */}
                 <div className="space-y-2">
-                  <div className="text-[11px] text-slate-400 font-bold">Packs & Offres Dégressives Suggérés :</div>
+                  <div className="text-[11px] text-zinc-400 font-medium">Packs & Offres Dégressives Suggérés :</div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     {generatedCopy.bundles.map((bundle, idx) => (
                       <div 
                         key={idx} 
-                        className={`p-3 rounded-2xl border ${
+                        className={`p-3 rounded-xl border ${
                           bundle.isPopular 
-                            ? 'bg-amber-500/10 border-amber-500/40' 
-                            : 'bg-slate-950 border-slate-800'
+                            ? 'bg-zinc-900 border-zinc-700 shadow-sm' 
+                            : 'bg-[#0d0d10] border-zinc-800/80'
                         } space-y-1 text-center`}
                       >
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
-                          bundle.isPopular ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-400'
+                        <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-semibold uppercase ${
+                          bundle.isPopular ? 'bg-zinc-100 text-zinc-900' : 'bg-zinc-800 text-zinc-400'
                         }`}>
                           {bundle.discountBadge}
                         </span>
-                        <div className="font-bold text-white text-xs">{bundle.name}</div>
-                        <div className="text-amber-400 font-black text-sm">{bundle.priceTotal} DH</div>
+                        <div className="font-medium text-zinc-200 text-xs">{bundle.name}</div>
+                        <div className="text-white font-mono tabular-nums font-semibold text-sm">{bundle.priceTotal} MAD</div>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Footer Buttons */}
-                <div className="flex items-center gap-3 pt-4 border-t border-slate-800">
+                <div className="flex items-center gap-2.5 pt-3.5 border-t border-zinc-800/80">
                   <button
                     type="button"
                     onClick={() => handleApplyAIToProduct(generatedCopy)}
-                    className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2"
+                    className="flex-1 py-2 px-4 rounded-lg bg-zinc-100 hover:bg-white text-zinc-900 font-semibold text-xs transition-colors shadow-sm flex items-center justify-center gap-2"
                   >
-                    <Sparkles className="w-4 h-4 text-slate-950" />
-                    <span>Appliquer Directement au Produit</span>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Appliquer au Produit</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowAICoach(false)}
-                    className="py-3.5 px-5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors"
+                    className="py-2 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 font-medium text-xs transition-colors"
                   >
                     Fermer
                   </button>
@@ -1065,25 +1076,25 @@ function ProductsContent() {
 
       {/* Add Category Modal */}
       {showAddCategoryModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-[#121215] border border-zinc-800 rounded-xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
               <div className="flex items-center gap-2">
-                <Tag className="w-5 h-5 text-amber-400" />
-                <h3 className="text-base font-black text-white">Ajouter une Catégorie</h3>
+                <Tag className="w-4 h-4 text-zinc-300" />
+                <h3 className="text-base font-semibold text-white">Ajouter une Catégorie</h3>
               </div>
               <button 
                 type="button"
                 onClick={() => setShowAddCategoryModal(false)} 
-                className="text-slate-400 hover:text-white text-lg p-1"
+                className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleCreateCategory} className="space-y-4 text-xs">
+            <form onSubmit={handleCreateCategory} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Nom de la Catégorie :</label>
+                <label className="block text-zinc-300 font-medium mb-1">Nom de la Catégorie :</label>
                 <input
                   type="text"
                   required
@@ -1096,35 +1107,35 @@ function ProductsContent() {
                       setNewCatSlug(val.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''));
                     }
                   }}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Slug URL (auto-généré) :</label>
+                <label className="block text-zinc-300 font-medium mb-1">Slug URL (auto-généré) :</label>
                 <input
                   type="text"
                   placeholder="ex: bijouterie-artisanale"
                   value={newCatSlug}
                   onChange={(e) => setNewCatSlug(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-300 font-mono focus:outline-none focus:border-amber-500"
+                  className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-300 font-mono focus:outline-none focus:border-zinc-600"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-zinc-500 mt-1">
                   Ce slug servira pour le filtrage par collection et les liens de campagne.
                 </p>
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-zinc-800/80">
                 <button
                   type="button"
                   onClick={() => setShowAddCategoryModal(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 font-bold"
+                  className="px-4 py-2 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 text-xs font-medium transition-colors"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black shadow-lg shadow-amber-500/20"
+                  className="px-4 py-2 rounded-lg bg-zinc-100 hover:bg-white text-zinc-900 font-semibold text-xs transition-colors shadow-sm"
                 >
                   Créer la Catégorie
                 </button>
@@ -1136,8 +1147,8 @@ function ProductsContent() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 border border-amber-500/40 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs font-semibold animate-in fade-in slide-in-from-bottom-2 duration-200">
-          <Check className="w-4 h-4 text-amber-400 shrink-0" />
+        <div className="fixed bottom-6 right-6 z-50 bg-zinc-900/95 backdrop-blur-md border border-zinc-700/80 text-zinc-100 px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2.5 text-xs font-medium animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <Check className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}

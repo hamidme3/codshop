@@ -474,7 +474,7 @@ async function auditInteractiveCrud(browser, sessionToken) {
 
     // Try deleting "Maroquinerie & Cuir"
     await page.evaluate(() => {
-      const cards = Array.from(document.querySelectorAll('div.p-5'));
+      const cards = Array.from(document.querySelectorAll('[data-category-card], div.p-5, div.p-4'));
       const maroCard = cards.find((c) => c.innerText.includes('Maroquinerie & Cuir'));
       if (maroCard) {
         const delBtn = maroCard.querySelector('button');
@@ -495,7 +495,7 @@ async function auditInteractiveCrud(browser, sessionToken) {
     });
 
     await page.evaluate(() => {
-      const cards = Array.from(document.querySelectorAll('div.p-5'));
+      const cards = Array.from(document.querySelectorAll('[data-category-card], div.p-5, div.p-4'));
       const honeyCard = cards.find((c) => c.innerText.includes('Miels & Terroir Atlas'));
       if (honeyCard) {
         const delBtn = honeyCard.querySelector('button');
@@ -507,7 +507,7 @@ async function auditInteractiveCrud(browser, sessionToken) {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'crud-category-deleted.png') });
 
     const isCatDeleted = await page.evaluate(() => {
-      const cards = Array.from(document.querySelectorAll('div.p-5'));
+      const cards = Array.from(document.querySelectorAll('[data-category-card], div.p-5, div.p-4'));
       return !cards.some((c) => c.innerText.includes('Miels & Terroir Atlas'));
     });
 

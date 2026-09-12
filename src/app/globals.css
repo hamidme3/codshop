@@ -270,3 +270,71 @@ h1 {
   content-visibility: auto;
   contain-intrinsic-size: 300px 400px;
 }
+
+/* ── 2026 Enterprise Admin Design System (Linear x Stripe Standard) ── */
+.admin-shell {
+  background-color: #09090b;
+  color: #f4f4f5;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Precision micro-surfaces */
+.admin-surface {
+  background-color: #121215;
+  border: 1px solid rgba(39, 39, 42, 0.8);
+}
+
+.admin-surface-subtle {
+  background-color: #18181b;
+  border: 1px solid rgba(39, 39, 42, 0.6);
+}
+
+/* Linear-style data table */
+.admin-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.admin-table th {
+  background-color: #0d0d10;
+  border-bottom: 1px solid rgba(39, 39, 42, 0.9);
+  color: #a1a1aa;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.625rem 0.875rem;
+  text-align: left;
+}
+
+.admin-table td {
+  border-bottom: 1px solid rgba(39, 39, 42, 0.45);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+}
+
+.admin-table tr:hover td {
+  background-color: rgba(24, 24, 27, 0.5);
+}
+
+/* Smooth micro-scrollbars */
+.admin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.admin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-scrollbar::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 9999px;
+}
+.admin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
