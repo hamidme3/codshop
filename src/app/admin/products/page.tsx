@@ -7,7 +7,10 @@ import {
   Layers, Check, Trash2, Edit3, ArrowUpRight,
   Sparkles, Wand2, Copy, CheckCheck, ShieldCheck, Flame
 } from 'lucide-react';
-import { getProducts, addProduct, getCategories, Product } from '@/lib/backoffice';
+import { 
+  getProducts, addProduct, deleteProduct, updateProductStock, 
+  getCategories, addCategory, deleteCategory, Product, Category 
+} from '@/lib/backoffice';
 import { generateMoroccanProductCopy, MOROCCAN_NICHES, MoroccanAICopy } from '@/lib/ai-copywriter';
 
 function ProductsContent() {
@@ -16,17 +19,78 @@ function ProductsContent() {
 
   // #16 — re-sync when storeSlug changes
   const [products, setProducts] = useState<Product[]>(() => getProducts(storeSlug));
-  const [categories, setCategories] = useState(getCategories());
+  const [categories, setCategories] = useState<Category[]>(() => getCategories(storeSlug));
   // #18 — refresh category counts when products change
   useEffect(() => {
     setProducts(getProducts(storeSlug));
   }, [storeSlug]);
   useEffect(() => {
-    setCategories(getCategories());
-  }, [products.length]);
+    setCategories(getCategories(storeSlug));
+  }, [products.length, storeSlug]);
   const [activeTab, setActiveTab] = useState<'products' | 'categories'>('products');
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+
+  // Category Modal & Notification State
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatSlug, setNewCatSlug] = useState('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleCreateCategory = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCatName.trim()) return;
+    try {
+      const created = addCategory({ name: newCatName, slug: newCatSlug });
+      setCategories(getCategories(storeSlug));
+      setShowAddCategoryModal(false);
+      setNewCatName('');
+      setNewCatSlug('');
+      showToast(`Catégorie "${created.name}" créée avec succès !`);
+      setCategory(created.name);
+    } catch (err: any) {
+      alert(err.message || 'Erreur lors de la création de la catégorie.');
+    }
+  };
+
+  const handleDeleteCategory = (cat: Category) => {
+    if (cat.productCount > 0) {
+      alert(`Action bloquée : La catégorie "${cat.name}" contient encore ${cat.productCount} produit(s) rattaché(s). Veuillez d'abord réassigner ou supprimer ces produits.`);
+      return;
+    }
+    if (confirm(`Êtes-vous sûr de vouloir supprimer définitivement la catégorie "${cat.name}" ?`)) {
+      const res = deleteCategory(cat.id, storeSlug);
+      if (res.success) {
+        setCategories(getCategories(storeSlug));
+        showToast(`Catégorie "${cat.name}" supprimée avec succès.`);
+      } else {
+        alert(res.error || 'Erreur lors de la suppression.');
+      }
+    }
+  };
+
+  const handleDeleteProduct = (prod: Product) => {
+    if (confirm(`Confirmez-vous la suppression du produit "${prod.title}" du catalogue ?`)) {
+      deleteProduct(prod.id);
+      setProducts(getProducts(storeSlug));
+      setCategories(getCategories(storeSlug));
+      showToast(`Produit "${prod.title}" retiré du catalogue.`);
+    }
+  };
+
+  const handleAdjustStock = (prodId: string, delta: number) => {
+    const prod = products.find((p) => p.id === prodId);
+    if (!prod) return;
+    const newStock = Math.max(0, (prod.stock ?? 0) + delta);
+    updateProductStock(prodId, newStock);
+    setProducts(getProducts(storeSlug));
+    showToast(`Stock de "${prod.title}" ajusté : ${newStock} unités.`);
+  };
 
   // Coach IA Moroccan Copywriter State
   const [showAICoach, setShowAICoach] = useState(false);
@@ -196,7 +260,8 @@ function ProductsContent() {
                     <th className="py-3.5 px-4">Prix de Revient</th>
                     <th className="py-3.5 px-4">Marge Nette</th>
                     <th className="py-3.5 px-4">Stock Restant</th>
-                    <th className="py-3.5 px-4 text-right">Statut</th>
+                    <th className="py-3.5 px-4 text-center">Statut</th>
+                    <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
@@ -243,19 +308,46 @@ function ProductsContent() {
 
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-white">{p.stock} unités</span>
+                            <button
+                              type="button"
+                              onClick={() => handleAdjustStock(p.id, -1)}
+                              className="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-xs transition-colors border border-slate-700"
+                              title="Diminuer stock (-1)"
+                            >
+                              -
+                            </button>
+                            <span className="font-bold text-white min-w-[52px] text-center">{p.stock} un.</span>
+                            <button
+                              type="button"
+                              onClick={() => handleAdjustStock(p.id, 1)}
+                              className="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-xs transition-colors border border-slate-700"
+                              title="Augmenter stock (+1)"
+                            >
+                              +
+                            </button>
                             {isLowStock && (
-                              <span className="p-1 rounded bg-amber-500/20 text-amber-400" title="Stock faible !">
+                              <span className="p-1 rounded bg-amber-500/20 text-amber-400 ml-0.5" title="Stock faible !">
                                 <AlertTriangle className="w-3.5 h-3.5" />
                               </span>
                             )}
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4 text-right">
+                        <td className="py-3.5 px-4 text-center">
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                             Actif
                           </span>
+                        </td>
+
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProduct(p)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all inline-flex items-center"
+                            title="Supprimer ce produit"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </td>
                       </tr>
                     );
@@ -267,17 +359,71 @@ function ProductsContent() {
         </>
       ) : (
         /* Categories View */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {categories.map((c) => (
-            <div key={c.id} className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
-              <div className="flex items-center justify-between">
-                <Tag className="w-5 h-5 text-amber-400" />
-                <span className="text-xs text-slate-400">{c.productCount} articles</span>
-              </div>
-              <div className="font-extrabold text-white text-base">{c.name}</div>
-              <div className="text-[11px] font-mono text-slate-500">slug: {c.slug}</div>
+        <div className="space-y-4">
+          {/* Categories Toolbar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-2xl p-4">
+            <div>
+              <h2 className="font-black text-white text-sm">Gestion des Catégories & Collections</h2>
+              <p className="text-slate-400 text-xs mt-0.5">
+                Créez de nouvelles collections et gérez les associations produits avec garde-fous de sécurité.
+              </p>
             </div>
-          ))}
+            <button
+              type="button"
+              onClick={() => setShowAddCategoryModal(true)}
+              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition-colors shadow-lg shadow-amber-500/20 self-start sm:self-auto"
+            >
+              <Plus className="w-4 h-4" /> Nouvelle Catégorie
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {categories.map((c) => {
+              const hasProducts = (c.productCount ?? 0) > 0;
+              return (
+                <div 
+                  key={c.id} 
+                  className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between space-y-4 hover:border-slate-700 transition-colors"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                        <Tag className="w-4 h-4 text-amber-400" />
+                      </div>
+                      <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${
+                        hasProducts 
+                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' 
+                          : 'bg-slate-800 text-slate-400 border-slate-700'
+                      }`}>
+                        {c.productCount} {c.productCount === 1 ? 'article' : 'articles'}
+                      </span>
+                    </div>
+                    <div className="font-extrabold text-white text-base tracking-tight">{c.name}</div>
+                    <div className="text-[11px] font-mono text-slate-500">slug: {c.slug}</div>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                    <span className="text-[10px] text-slate-500">
+                      {hasProducts ? 'Catégorie active' : 'Prête à supprimer'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCategory(c)}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                        hasProducts
+                          ? 'text-slate-500 hover:text-amber-400 hover:bg-amber-500/10'
+                          : 'text-rose-400 hover:text-white hover:bg-rose-600 bg-rose-500/10 border border-rose-500/30'
+                      }`}
+                      title={hasProducts ? 'Protégée : contient des produits' : 'Supprimer cette catégorie vide'}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Supprimer</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -322,7 +468,16 @@ function ProductsContent() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Catégorie :</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-slate-300 font-semibold">Catégorie :</label>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddCategoryModal(true)}
+                      className="text-[11px] text-amber-400 hover:text-amber-300 font-bold hover:underline inline-flex items-center gap-0.5"
+                    >
+                      <Plus className="w-3 h-3" /> Nouvelle
+                    </button>
+                  </div>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
@@ -606,6 +761,85 @@ function ProductsContent() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Add Category Modal */}
+      {showAddCategoryModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <Tag className="w-5 h-5 text-amber-400" />
+                <h3 className="text-base font-black text-white">Ajouter une Catégorie</h3>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setShowAddCategoryModal(false)} 
+                className="text-slate-400 hover:text-white text-lg p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateCategory} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Nom de la Catégorie :</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="ex: Bijouterie Artisanale, Cosmétique Bio..."
+                  value={newCatName}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setNewCatName(val);
+                    if (!newCatSlug || newCatSlug === newCatName.toLowerCase().replace(/[^a-z0-9]+/g, '-')) {
+                      setNewCatSlug(val.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''));
+                    }
+                  }}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Slug URL (auto-généré) :</label>
+                <input
+                  type="text"
+                  placeholder="ex: bijouterie-artisanale"
+                  value={newCatSlug}
+                  onChange={(e) => setNewCatSlug(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-300 font-mono focus:outline-none focus:border-amber-500"
+                />
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Ce slug servira pour le filtrage par collection et les liens de campagne.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowAddCategoryModal(false)}
+                  className="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 font-bold"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black shadow-lg shadow-amber-500/20"
+                >
+                  Créer la Catégorie
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 border border-amber-500/40 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs font-semibold animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <Check className="w-4 h-4 text-amber-400 shrink-0" />
+          <span>{toastMessage}</span>
         </div>
       )}
     </div>

@@ -564,8 +564,108 @@ export function addProduct(product: Omit<Product, 'id'>): Product {
   return newProd;
 }
 
-export function getCategories(): Category[] {
-  return CATEGORIES;
+export function deleteProduct(productId: string): boolean {
+  const index = PRODUCTS.findIndex((p) => p.id === productId);
+  if (index === -1) return false;
+  PRODUCTS.splice(index, 1);
+  return true;
+}
+
+export function updateProductStock(productId: string, newStock: number): boolean {
+  const prod = PRODUCTS.find((p) => p.id === productId);
+  if (!prod) return false;
+  prod.stock = Math.max(0, newStock);
+  return true;
+}
+
+export function getCategories(storeSlug: string = 'ottavio'): Category[] {
+  const storeProducts = PRODUCTS.filter((p) => !storeSlug || p.storeSlug === storeSlug);
+  return CATEGORIES.map((cat) => {
+    const count = storeProducts.filter((p) => {
+      const pCat = (p.category || '').toLowerCase().trim();
+      const cName = cat.name.toLowerCase().trim();
+      const cSlug = cat.slug.toLowerCase().trim();
+      return pCat === cName || pCat === cSlug;
+    }).length;
+    return {
+      ...cat,
+      productCount: count,
+    };
+  });
+}
+
+export function addCategory(category: { name: string; slug?: string }): Category {
+  const trimmedName = category.name.trim();
+  if (!trimmedName) throw new Error('Le nom de la catégorie est obligatoire.');
+  const slug = (category.slug?.trim() || trimmedName)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  const existing = CATEGORIES.find(
+    (c) => c.slug === slug || c.name.toLowerCase().trim() === trimmedName.toLowerCase()
+  );
+  if (existing) {
+    return existing;
+  }
+
+  const newCat: Category = {
+    id: `cat_${Date.now()}`,
+    name: trimmedName,
+    slug: slug || `cat-${Date.now()}`,
+    productCount: 0,
+  };
+  CATEGORIES.push(newCat);
+  return newCat;
+}
+
+export function deleteCategory(idOrSlug: string, storeSlug: string = 'ottavio'): { success: boolean; error?: string } {
+  const cat = CATEGORIES.find((c) => c.id === idOrSlug || c.slug === idOrSlug);
+  if (!cat) return { success: false, error: 'Catégorie introuvable.' };
+
+  const storeProducts = PRODUCTS.filter((p) => !storeSlug || p.storeSlug === storeSlug);
+  const activeProducts = storeProducts.filter((p) => {
+    const pCat = (p.category || '').toLowerCase().trim();
+    return pCat === cat.name.toLowerCase().trim() || pCat === cat.slug.toLowerCase().trim();
+  });
+
+  if (activeProducts.length > 0) {
+    return {
+      success: false,
+      error: `Impossible de supprimer "${cat.name}" : ${activeProducts.length} produit(s) y sont encore associés dans votre catalogue. Réassignez d'abord ces produits.`,
+    };
+  }
+
+  CATEGORIES = CATEGORIES.filter((c) => c.id !== cat.id);
+  return { success: true };
+}
+
+export function deleteOrder(orderId: string, storeSlug: string = 'ottavio'): boolean {
+  const index = ORDERS.findIndex((o) => o.id === orderId);
+  if (index === -1) return false;
+  const order = ORDERS[index];
+
+  // Restore inventory if order was active (not canceled or returned)
+  if (order.status !== 'canceled' && order.status !== 'returned') {
+    for (const item of order.items) {
+      const prod = PRODUCTS.find((p) => p.id === item.id);
+      if (prod) {
+        prod.stock = (prod.stock ?? 0) + item.quantity;
+      }
+      restoreMockProductStock(item.id, item.quantity, { variant: item.variant });
+    }
+  }
+
+  ORDERS.splice(index, 1);
+  syncCustomersFromOrders(order.storeSlug || storeSlug);
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('cod_orders_updated', { detail: { orderId, action: 'deleted' } }));
+  }
+
+  return true;
 }
 
 export function getCustomers(storeSlug: string): Customer[] {

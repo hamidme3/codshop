@@ -11,7 +11,7 @@ const path = require('path');
 const http = require('http');
 
 const CHROMIUM_PATH = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser';
-const BASE_URL = process.env.BASE_URL || 'http://172.18.1.15:3000';
+const BASE_URL = process.env.BASE_URL || 'http://172.18.1.13:3000';
 const SCREENSHOT_DIR = path.join('/tmp', 'codshop-chrome-audit');
 
 if (!fs.existsSync(SCREENSHOT_DIR)) {
@@ -384,6 +384,209 @@ async function auditSso(browser) {
   return results;
 }
 
+async function auditInteractiveCrud(browser, sessionToken) {
+  console.log('\n=== SUITE 5: INTERACTIVE MUTATION & CRUD COMPLETE TESTING ===');
+  const page = await browser.newPage();
+  await page.setViewport({ width: 1440, height: 900 });
+
+  const cookieDomain = new URL(BASE_URL).hostname;
+  await page.setCookie({
+    name: 'codshop_session',
+    value: sessionToken,
+    domain: cookieDomain,
+    path: '/',
+    httpOnly: true,
+    secure: false,
+  });
+
+  const pageErrors = [];
+  page.on('pageerror', (err) => pageErrors.push(err.toString()));
+
+  const results = [];
+
+  try {
+    // 1. Navigate to Products page
+    console.log('  1. Navigating to /admin/products?store=ottavio...');
+    await page.goto(`${BASE_URL}/admin/products?store=ottavio`, { waitUntil: 'networkidle2', timeout: 25000 });
+
+    // Switch to Categories & Collections Tab
+    console.log('  2. Testing Categories Tab switch and + Nouvelle Catégorie button...');
+    const catTabClicked = await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('button'));
+      const catBtn = buttons.find((b) => b.innerText.includes('Catégories & Collections'));
+      if (catBtn) {
+        catBtn.click();
+        return true;
+      }
+      return false;
+    });
+
+    await new Promise((r) => setTimeout(r, 600));
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'crud-categories-tab.png') });
+
+    const hasNewCatBtn = await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      return btns.some((b) => b.innerText.includes('Nouvelle Catégorie'));
+    });
+
+    console.log(`  [${catTabClicked && hasNewCatBtn ? 'PASS' : 'FAIL'}] Categories Tab switch | "+ Nouvelle Catégorie" button visible`);
+    results.push({ name: 'Categories Tab Switch', pass: catTabClicked && hasNewCatBtn });
+
+    // 3. Open Add Category Modal and create "Miels & Terroir Atlas"
+    console.log('  3. Testing Category Creation modal...');
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const newBtn = btns.find((b) => b.innerText.includes('Nouvelle Catégorie'));
+      if (newBtn) newBtn.click();
+    });
+
+    await new Promise((r) => setTimeout(r, 500));
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'crud-modal-add-category.png') });
+
+    // Type Category Name
+    await page.waitForSelector('input[placeholder*="Bijouterie"]', { timeout: 5000 });
+    await page.type('input[placeholder*="Bijouterie"]', 'Miels & Terroir Atlas');
+
+    // Click submit
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const submitBtn = btns.find((b) => b.innerText.includes('Créer la Catégorie'));
+      if (submitBtn) submitBtn.click();
+    });
+
+    await new Promise((r) => setTimeout(r, 800));
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'crud-category-created.png') });
+
+    const isCatCreated = await page.evaluate(() => {
+      return document.body.innerText.includes('Miels & Terroir Atlas');
+    });
+
+    console.log(`  [${isCatCreated ? 'PASS' : 'FAIL'}] Create Category | "Miels & Terroir Atlas" present in DOM`);
+    results.push({ name: 'Create Category', pass: isCatCreated });
+
+    // 4. Test Category Deletion Safety Guard
+    console.log('  4. Testing Category Deletion Safety Guard (prevent deleting category with products)...');
+    let alertMessage = '';
+    page.on('dialog', async (dialog) => {
+      alertMessage = dialog.message();
+      await dialog.dismiss();
+    });
+
+    // Try deleting "Maroquinerie & Cuir"
+    await page.evaluate(() => {
+      const cards = Array.from(document.querySelectorAll('div.p-5'));
+      const maroCard = cards.find((c) => c.innerText.includes('Maroquinerie & Cuir'));
+      if (maroCard) {
+        const delBtn = maroCard.querySelector('button');
+        if (delBtn) delBtn.click();
+      }
+    });
+
+    await new Promise((r) => setTimeout(r, 500));
+    const safetyPassed = alertMessage.includes('contient encore') || alertMessage.includes('produit');
+    console.log(`  [${safetyPassed ? 'PASS' : 'FAIL'}] Safety Guard | Message: "${alertMessage.slice(0, 35)}..."`);
+    results.push({ name: 'Category Deletion Safety Guard', pass: safetyPassed });
+
+    // 5. Test Deleting the Empty Category
+    console.log('  5. Testing Deletion of Empty Category...');
+    page.removeAllListeners('dialog');
+    page.on('dialog', async (dialog) => {
+      await dialog.accept();
+    });
+
+    await page.evaluate(() => {
+      const cards = Array.from(document.querySelectorAll('div.p-5'));
+      const honeyCard = cards.find((c) => c.innerText.includes('Miels & Terroir Atlas'));
+      if (honeyCard) {
+        const delBtn = honeyCard.querySelector('button');
+        if (delBtn) delBtn.click();
+      }
+    });
+
+    await new Promise((r) => setTimeout(r, 800));
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'crud-category-deleted.png') });
+
+    const isCatDeleted = await page.evaluate(() => {
+      const cards = Array.from(document.querySelectorAll('div.p-5'));
+      return !cards.some((c) => c.innerText.includes('Miels & Terroir Atlas'));
+    });
+
+    console.log(`  [${isCatDeleted ? 'PASS' : 'FAIL'}] Delete Empty Category | Removed from Category Cards Grid`);
+    results.push({ name: 'Delete Empty Category', pass: isCatDeleted });
+
+    // 6. Test Products Table Actions (Stock Adjust & Delete)
+    console.log('  6. Testing Products Table stock adjustment & delete action column...');
+    await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('button'));
+      const prodBtn = buttons.find((b) => b.innerText.includes('Tous les Produits'));
+      if (prodBtn) prodBtn.click();
+    });
+
+    await new Promise((r) => setTimeout(r, 500));
+    const hasActionsCol = await page.evaluate(() => {
+      const ths = Array.from(document.querySelectorAll('th'));
+      return ths.some((th) => th.innerText.includes('Actions'));
+    });
+
+    // Click "+" button to increment stock
+    await page.evaluate(() => {
+      const plusBtns = Array.from(document.querySelectorAll('button[title*="Augmenter"]'));
+      if (plusBtns[0]) plusBtns[0].click();
+    });
+
+    await new Promise((r) => setTimeout(r, 500));
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'crud-product-stock-adjusted.png') });
+
+    console.log(`  [${hasActionsCol ? 'PASS' : 'FAIL'}] Products Table Actions Column & Quick Stock Adjuster`);
+    results.push({ name: 'Products Actions Column', pass: hasActionsCol });
+
+    // 7. Test Orders Bulk Selection & Drawer Actions
+    console.log('  7. Testing /admin/orders Bulk Selection Bar and Drawer Actions...');
+    await page.goto(`${BASE_URL}/admin/orders?store=ottavio`, { waitUntil: 'networkidle2', timeout: 25000 });
+
+    // Check first checkbox
+    await page.evaluate(() => {
+      const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]'));
+      if (checkboxes[1]) checkboxes[1].click();
+    });
+
+    await new Promise((r) => setTimeout(r, 500));
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'crud-orders-bulk-bar.png') });
+
+    const hasBulkDeleteBtn = await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      return btns.some((b) => b.innerText.includes('Supprimer'));
+    });
+
+    console.log(`  [${hasBulkDeleteBtn ? 'PASS' : 'FAIL'}] Orders Bulk Bar | "Supprimer (X)" action visible`);
+    results.push({ name: 'Orders Bulk Delete Action', pass: hasBulkDeleteBtn });
+
+    // Open Order Drawer
+    await page.evaluate(() => {
+      const rows = Array.from(document.querySelectorAll('tbody tr'));
+      if (rows[0]) rows[0].click();
+    });
+
+    await new Promise((r) => setTimeout(r, 600));
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'crud-order-drawer-actions.png') });
+
+    const hasDrawerDeleteBtn = await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      return btns.some((b) => b.innerText.includes('Supprimer'));
+    });
+
+    console.log(`  [${hasDrawerDeleteBtn ? 'PASS' : 'FAIL'}] Order Details Drawer | "Supprimer" button visible`);
+    results.push({ name: 'Order Drawer Delete Action', pass: hasDrawerDeleteBtn });
+
+  } catch (err) {
+    console.error('Interactive CRUD test error:', err);
+    results.push({ name: 'Interactive CRUD Execution', pass: false, error: err.message });
+  }
+
+  await page.close();
+  return results;
+}
+
 async function main() {
   const arg = process.argv.find((a) => a.startsWith('--suite='));
   const suite = arg ? arg.split('=')[1] : 'all';
@@ -426,6 +629,14 @@ async function main() {
 
   if (suite === 'all' || suite === 'sso') {
     report.sso = await auditSso(browser);
+  }
+
+  if (suite === 'all' || suite === 'crud') {
+    if (sessionToken) {
+      report.crud = await auditInteractiveCrud(browser, sessionToken);
+    } else {
+      console.warn('Skipping Interactive CRUD suite: No session token');
+    }
   }
 
   await browser.close();

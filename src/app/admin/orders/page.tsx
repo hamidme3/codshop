@@ -5,9 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import { 
   ShoppingBag, Search, Phone, MessageCircle, Truck, 
   CheckCircle2, Clock, Download, Check, X, DollarSign,
-  RotateCcw, FileSpreadsheet, ChevronDown, ChevronUp, AlertCircle
+  RotateCcw, FileSpreadsheet, ChevronDown, ChevronUp, AlertCircle, Trash2
 } from 'lucide-react';
-import { getOrders, updateOrderStatus, Order, OrderStatus } from '@/lib/backoffice';
+import { getOrders, updateOrderStatus, deleteOrder, Order, OrderStatus } from '@/lib/backoffice';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { buildWhatsAppLink, WhatsAppTemplateType } from '@/lib/whatsapp-templates';
 import { exportCourierManifest, CourierKey, ShippingCourier } from '@/lib/courier-manifest';
@@ -132,6 +132,27 @@ function OrdersContent() {
     setOrders([...getOrders(storeSlug)]);
     showToast(`${selectedOrderIds.length} commandes expédiées avec ${courier.toUpperCase()} !`);
     setSelectedOrderIds([]);
+  };
+
+  const handleDeleteSingleOrder = (orderId: string) => {
+    if (confirm(`Confirmez-vous la suppression définitive de la commande #${orderId} ?`)) {
+      deleteOrder(orderId, storeSlug);
+      setOrders([...getOrders(storeSlug)]);
+      if (selectedOrder?.id === orderId) setSelectedOrder(null);
+      setSelectedOrderIds((prev) => prev.filter((id) => id !== orderId));
+      showToast(`Commande #${orderId} supprimée.`);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedOrderIds.length === 0) return;
+    if (confirm(`Voulez-vous vraiment supprimer définitivement ces ${selectedOrderIds.length} commandes sélectionnées ?`)) {
+      selectedOrderIds.forEach((id) => deleteOrder(id, storeSlug));
+      setOrders([...getOrders(storeSlug)]);
+      showToast(`${selectedOrderIds.length} commandes supprimées avec succès.`);
+      setSelectedOrderIds([]);
+      if (selectedOrder && selectedOrderIds.includes(selectedOrder.id)) setSelectedOrder(null);
+    }
   };
 
   // 1-Click Filtered Export for Confirmed, Shipped, Delivered, Returned, or Current View
@@ -460,6 +481,13 @@ function OrdersContent() {
               <Download className="w-3.5 h-3.5" /> Exporter CSV ({selectedOrderIds.length})
             </button>
             <button
+              onClick={handleBulkDelete}
+              className="px-3 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-rose-500/30 transition-colors cursor-pointer"
+              title="Supprimer définitivement les commandes sélectionnées"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Supprimer ({selectedOrderIds.length})
+            </button>
+            <button
               onClick={() => setSelectedOrderIds([])}
               className="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white text-xs font-semibold"
             >
@@ -756,6 +784,19 @@ function OrdersContent() {
                               <span>4. Retournée</span>
                             </button>
                           </div>
+
+                          {/* Quick Delete Order Action */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteSingleOrder(order.id);
+                            }}
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                            title="Supprimer cette commande"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -923,6 +964,14 @@ function OrdersContent() {
                 className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors"
               >
                 <Download className="w-4 h-4" /> Exporter en CSV
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeleteSingleOrder(selectedOrder.id)}
+                className="py-2.5 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Supprimer définitivement cette commande"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Supprimer
               </button>
               <button
                 onClick={() => setSelectedOrder(null)}
