@@ -9,19 +9,30 @@ export function ThemeSelectorBar() {
   const { themeId, setThemeId, lang, setLang, theme } = useTheme();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [isDemoEnabled, setIsDemoEnabled] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
-  // Gate demo chrome in production unless env enabled or ?theme_preview
-  const isDemoEnabled = (() => {
-    if (typeof window === 'undefined') return true;
-    if (process.env.NEXT_PUBLIC_ENABLE_THEME_DEMO === 'true') return true;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('theme_preview') === '1' || params.get('theme') !== null) return true;
-    // Allow in development
-    if (process.env.NODE_ENV !== 'production') return true;
-    return false;
-  })();
+  // Gate demo chrome safely on client mount to eliminate SSR hydration mismatch
+  useEffect(() => {
+    try {
+      if (process.env.NEXT_PUBLIC_ENABLE_THEME_DEMO === 'true') {
+        setIsDemoEnabled(true);
+        return;
+      }
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('theme_preview') === '1' || params.get('theme') !== null) {
+        setIsDemoEnabled(true);
+        return;
+      }
+      if (process.env.NODE_ENV !== 'production') {
+        setIsDemoEnabled(true);
+        return;
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const categories = [
     { id: 'all', label: 'Tous (25)' },

@@ -223,20 +223,24 @@ async function auditCheckout(browser) {
   const modalScreenshot = path.join(SCREENSHOT_DIR, 'checkout-modal-filled.png');
   await page.screenshot({ path: modalScreenshot });
 
-  // Submit checkout form
+  // Submit checkout form specifically targeting the form submit button
   console.log('  Submitting COD order...');
   await page.evaluate(() => {
-    const btns = Array.from(document.querySelectorAll('button'));
-    const confirmBtn = btns.find(b => b.innerText.includes('Confirmer') || b.innerText.includes('Valider') || b.innerText.includes('Acheter') || b.type === 'submit');
-    if (confirmBtn) confirmBtn.click();
+    const formSubmitBtn = document.querySelector('form button[type="submit"]') ||
+      Array.from(document.querySelectorAll('form button')).find(b => b.innerText.includes('Confirmer'));
+    if (formSubmitBtn) {
+      formSubmitBtn.click();
+    } else {
+      const form = document.querySelector('form');
+      if (form) form.requestSubmit();
+    }
   });
 
-  // Wait for navigation to order success
+  // Wait for SPA router.push redirection to order confirmation page
   console.log('  Waiting for redirection to order confirmation page...');
-  try {
-    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 });
-  } catch {
-    await new Promise(r => setTimeout(r, 4000));
+  for (let i = 0; i < 25; i++) {
+    if (page.url().includes('/order-success/')) break;
+    await new Promise((r) => setTimeout(r, 400));
   }
 
   const successUrl = page.url();
