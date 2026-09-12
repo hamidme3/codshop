@@ -68,10 +68,13 @@ export function CodCheckoutModal({
   const { theme, formatMAD, lang } = useTheme();
   const formRef = React.useRef<HTMLFormElement>(null);
 
-  // Stable waybill serial number (prevents re-rolling on keystrokes)
-  const waybillNumber = useMemo(() => {
+  // Stable waybill serial number (initialized deterministically to prevent hydration mismatch)
+  const [waybillNumber, setWaybillNumber] = useState(
+    `MA-${product.id.slice(0, 4).toUpperCase()}-1088`
+  );
+  useEffect(() => {
     const rand = Math.floor(1000 + Math.random() * 9000);
-    return `MA-${product.id.slice(0, 4).toUpperCase()}-${rand}`;
+    setWaybillNumber(`MA-${product.id.slice(0, 4).toUpperCase()}-${rand}`);
   }, [product.id]);
 
   // A/B: detect waybill variant from cookie (set by middleware). Default: standard modal.
@@ -381,7 +384,7 @@ Merci de me confirmer la livraison !`;
           <div className="bg-zinc-900 text-white p-3 sm:p-4 border-b-2 border-dashed border-zinc-700 relative">
             <div className="flex items-center justify-between border-b border-zinc-700 pb-2 mb-2">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[10px] tracking-wider bg-zinc-800 text-emerald-400 px-2 py-0.5 rounded border border-zinc-700">
+                <span suppressHydrationWarning className="font-mono text-[10px] tracking-wider bg-zinc-800 text-emerald-400 px-2 py-0.5 rounded border border-zinc-700">
                   BORDEREAU N° {waybillNumber}
                 </span>
                 <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">

@@ -30,14 +30,17 @@ export function CountdownTimer({ endTimeISO }: { endTimeISO?: string }) {
   const fmt = (n: number) => n.toString().padStart(2, '0');
 
   return (
-    <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-amber-600 bg-amber-50 rounded-lg px-2.5 py-1 border border-amber-200 shadow-sm">
-      <span className="tabular-nums">{fmt(remaining.d)}Jour</span>
+    <div
+      suppressHydrationWarning
+      className="flex items-center gap-1.5 font-mono text-xs font-bold text-amber-600 bg-amber-50 rounded-lg px-2.5 py-1 border border-amber-200 shadow-sm"
+    >
+      <span className="tabular-nums" suppressHydrationWarning>{fmt(remaining.d)}Jour</span>
       <span className="text-zinc-300">|</span>
-      <span className="tabular-nums">{fmt(remaining.h)}heure</span>
+      <span className="tabular-nums" suppressHydrationWarning>{fmt(remaining.h)}heure</span>
       <span className="text-zinc-300">|</span>
-      <span className="tabular-nums">{fmt(remaining.m)}minute</span>
+      <span className="tabular-nums" suppressHydrationWarning>{fmt(remaining.m)}minute</span>
       <span className="text-zinc-300">|</span>
-      <span className="tabular-nums">{fmt(remaining.s)}seconde</span>
+      <span className="tabular-nums" suppressHydrationWarning>{fmt(remaining.s)}seconde</span>
     </div>
   );
 }
