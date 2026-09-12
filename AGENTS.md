@@ -176,4 +176,54 @@ STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS, 43/43 CHROME TESTS PASS)
 - Live Production Domain: `https://codshop.vipone.site` (HTTP 200 via Cloudflare and Traefik).
 - Git Repository: Synchronized with `origin/main` (`https://github.com/hamidme3/codshop.git`).
 
+=== ROUND 7: Specialized UI/UX Subagents Audit & Visual Elevation ===
+
+DATE: 2026-09-12
+STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS, 43/43 CHROME TESTS PASS)
+
+1. SPECIALIZED UI/UX SUBAGENT ELEVATIONS:
+- Theme & Design System Lead:
+  * Hardened WCAG AA contrast compliance for `fitness` theme (`primary: #c2410c` at 5.18:1 contrast ratio against white text, `primaryHover: #9a3412`, high-contrast badge style).
+  * Synchronized `:root[data-theme]` on `document.documentElement` to trigger dark mode scrollbars, focus rings, and color schemes.
+  * Added `mounted` transition guard in `ThemeContext.tsx` to eliminate initial 200ms page-load FOUC color flashes.
+  * Capped theme selector title max-width (`sm:max-w-[170px] lg:max-w-[210px]`) in `ThemeSelectorBar.tsx` to eliminate 173px horizontal CLS shift on theme switching.
+- Checkout & CRO UX Specialist:
+  * Enforced iOS Safari and mobile ergonomics: added `viewportFit: "cover"` in `layout.tsx` and safe-area inset bottom padding (`pb-[calc(7.5rem+env(safe-area-inset-bottom))] md:pb-12`).
+  * Enforced $\ge 44$px touch targets on modal close buttons, variant options, WhatsApp ordering buttons, and modifier buttons.
+  * Increased popular Moroccan city quick-chips to `min-h-[38px] px-3` for thumb tapping.
+  * Made authentic courier waybill barcode visible on mobile viewports.
+  * Added compact Moroccan parcel inspection guarantee micro-banner at the top of Step 2 ("Garantie Sérénité : Ouvrez et vérifiez votre colis avant de payer / عاين سلعتك").
+- Merchant Backoffice UI Designer:
+  * Enforced strict 4-stage pipeline color hierarchy: Amber is reserved strictly for Stage 2 `shipped` / `shipping`. Status `new` set to neutral Slate (`bg-slate-800 text-slate-300`), and `to_confirm` to Blue (`bg-blue-500/10 text-blue-400`).
+  * Grouped 1-Click Status Export Toolbar with distinct semantic icons: `CheckCircle2` (Confirmées Cyan), `Truck` (Expédiées Amber), `DollarSign` (Livrées Emerald), and `RotateCcw` (Retournées Rose).
+  * Optimized table row density to `py-2.5 px-3` with expanded address truncation (`max-w-[200px]`) and tabular numbers for fast scanning of 50+ orders.
+  * Added backdrop dismissal, `e.stopPropagation()`, and global `Escape` key listener on the order details drawer, restyling "Fermer" as neutral slate.
+  * Updated CRM customer subtitle to 4 stages, and styled `VIP Fidèle` customer badge as Purple/Gold (`bg-purple-500/15 text-purple-300`) to avoid amber collision.
+- Pixels & Onboarding UX Lead:
+  * Restructured pixel manager into a balanced 3-column responsive grid (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3`).
+  * Added Card 5 (Pinterest Tag Officiel) and Card 6 (Google Merchant Center) with dedicated inputs and helper copy.
+  * Added reactive status badges (`Actif` with animated green pulse vs `Non configuré` in slate) for all pixel cards.
+  * Corrected input placeholders to authentic formats (Snapchat 36-char UUID, TikTok 20-char alphanumeric).
+  * Fixed all French apostrophes (`d'enregistrement`, `d'optimiser`, `d'achat`, `l'identifiant`, `l'événement`).
+  * Unlocked Pinterest Tag ID input (`disabled={false}`) so merchants can update tracking credentials anytime.
+  * Anchored feedback messages next to the Save button with 4-second auto-dismiss.
+
+2. VERIFICATION & ZERO-REGRESSION SUITE:
+- TypeScript Compilation: `npx tsc --noEmit` PASSED with 0 ERRORS.
+- Automated Test Suites:
+  * `tests/order-pipeline-4stage.test.ts`: PASSED (100% 4-stage transitions & warehouse restoration).
+  * `tests/crm-pipeline-sync.test.ts`: PASSED (100% CRM sync).
+  * `tests/saas-pipeline.test.ts`: PASSED (Ozon, Sendit, Cathedis, Amana manifests, UTF-8 BOM).
+  * `tests/security-phone.test.ts`: PASSED (Moroccan 05/06/07 phone normalizer, foreign rejection, rate limiter).
+  * `tests/security-pricing-sanitization.test.ts`: PASSED (Price tampering rejection, input sanitization, catalog tier pricing).
+  * `tests/challenger-qa.test.ts`: PASSED (Adversarial edge cases, stock restoration).
+  * `tests/cro-storefront-mobile.test.ts`: PASSED (Pack Duo & Trio upsells, sticky buy bar pricing, trust badges).
+  * `tests/pixels-tracking.test.ts`: PASSED (5-platform pixel tracking, deduplication guard, adblocker resistance).
+- Chrome Live Browsing Platform Audit: 43/43 PASSED with 0 ERRORS.
+
+3. PRODUCTION DEPLOYMENT & SYNC:
+- Coolify Docker Container: `codshop-app` running at `http://172.18.1.13:3000` (Rebuilt and Healthy).
+- Live Production Domain: `https://codshop.vipone.site` (HTTP 200 via Cloudflare and Traefik).
+- Git Repository: Synchronized with `origin/main`.
+
 <!-- GOAL_COMPLETE -->

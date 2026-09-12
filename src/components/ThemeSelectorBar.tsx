@@ -117,7 +117,7 @@ export function ThemeSelectorBar() {
               className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 rounded-lg text-[11px] font-semibold text-zinc-200 transition shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
             >
               <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: theme.colors.accent }} aria-hidden="true" />
-              <span className="truncate max-w-[140px] sm:max-w-none">{theme.name}</span>
+              <span className="truncate max-w-[130px] sm:max-w-[170px] lg:max-w-[210px]">{theme.name}</span>
               <span className="text-[10px] text-zinc-400 font-normal hidden md:inline">({theme.sourceInspiration})</span>
               <ChevronDown className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
             </button>

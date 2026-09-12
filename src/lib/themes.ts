@@ -773,8 +773,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     category: 'sports',
     sourceInspiration: 'Impulse (Shopify)',
     colors: {
-      primary: '#ea580c',
-      primaryHover: '#c2410c',
+      primary: '#c2410c',
+      primaryHover: '#9a3412',
       accent: '#f97316',
       accentHover: '#ea580c',
       bgPage: '#18181b',
@@ -802,7 +802,7 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     styleTokens: {
       buttonRadius: 'rounded-lg',
       cardRadius: 'rounded-xl',
-      badgeStyle: 'border-2 border-orange-500 text-white bg-orange-600 font-black tracking-wide',
+      badgeStyle: 'border-2 border-orange-600 text-orange-950 bg-orange-100 font-black tracking-wide',
     },
     announcementText: 'TRANSFORMEZ VOTRE PHYSIQUE • Pack Salle à Domicile en promo • Livraison Express 24h',
     announcementBg: '#f97316',

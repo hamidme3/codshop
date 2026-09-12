@@ -108,7 +108,7 @@ export default function ProductDetailPage() {
     : 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 pb-28 md:pb-12 space-y-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 pb-[calc(7.5rem+env(safe-area-inset-bottom))] md:pb-12 space-y-12">
       {/* YouCan-style promo banner — zero-JS, mobile-first */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white p-4 sm:p-6 shadow-xl">
         <div className="flex items-center justify-between gap-4">
@@ -152,7 +152,7 @@ export default function ProductDetailPage() {
                 -{discountPercent}% OFF
               </span>
               <span className="bg-emerald-600 text-white font-bold text-xs px-2.5 py-1 rounded-md shadow-sm">
-                Paiement Cash à la Livraison
+                Paiement Cash • Inspection autorisée (عاين سلعتك)
               </span>
             </div>
           </div>
@@ -190,7 +190,10 @@ export default function ProductDetailPage() {
               <span className="text-zinc-400">({product.reviewCount} avis certifiés)</span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 mt-2">
+            <h1
+              className={`${theme.typography.scale.h1} ${theme.typography.headingClass} mt-2`}
+              style={{ color: 'var(--theme-text-primary)' }}
+            >
               {product.title}
             </h1>
 
@@ -220,7 +223,10 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Price Tag */}
-          <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-200 flex items-center justify-between">
+          <div
+            className="p-4 rounded-2xl border flex items-center justify-between"
+            style={{ backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-border)' }}
+          >
             <div>
               <div className="text-xs text-zinc-500">Prix Spécial Promotionnel :</div>
               <div className="flex items-baseline gap-3 mt-0.5">
@@ -275,7 +281,7 @@ export default function ProductDetailPage() {
                           if (idx !== -1) setActiveImage(idx);
                         }
                       }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                      className={`flex items-center gap-2 px-3 py-2 min-h-[44px] rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                         isSelected
                           ? 'border-zinc-900 bg-zinc-900 text-white shadow-md ring-2 ring-zinc-900/20'
                           : 'border-zinc-200 bg-white text-zinc-800 hover:border-zinc-400'
@@ -313,7 +319,7 @@ export default function ProductDetailPage() {
                       key={s.id}
                       type="button"
                       onClick={() => setSelectedSize(s.name)}
-                      className={`min-w-[44px] px-3.5 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
+                      className={`min-w-[44px] min-h-[44px] px-3.5 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
                         isComboOutOfStock
                           ? 'opacity-35 line-through bg-zinc-100 border-zinc-200 text-zinc-400'
                           : isSelected
@@ -345,7 +351,7 @@ export default function ProductDetailPage() {
                       type="button"
                       disabled={!opt.inStock}
                       onClick={() => setSelectedVariant(opt.name)}
-                      className={`px-4 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
+                      className={`px-4 py-2 min-h-[44px] text-xs font-bold rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
                         !opt.inStock
                           ? 'opacity-30 line-through bg-zinc-100 border-zinc-200 text-zinc-400 cursor-not-allowed'
                           : isSelected
@@ -619,12 +625,21 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Sticky Mobile Buy Bar (< 768px) */}
-      <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-zinc-200 shadow-[0_-4px_25px_rgba(0,0,0,0.12)] p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:hidden animate-in slide-in-from-bottom duration-200">
+      <div
+        className="fixed bottom-0 inset-x-0 z-40 backdrop-blur-md border-t shadow-[0_-4px_25px_rgba(0,0,0,0.12)] p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:hidden animate-in slide-in-from-bottom duration-200"
+        style={{
+          backgroundColor: 'var(--theme-card-bg)',
+          borderColor: 'var(--theme-border)',
+        }}
+      >
         <div className="flex items-center justify-between gap-3 max-w-lg mx-auto">
           {/* Left: Dynamic Price & Delivery Badge */}
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline gap-1.5 truncate">
-              <span className="text-lg font-black text-zinc-950 tracking-tight">
+              <span
+                className="text-lg font-black tracking-tight"
+                style={{ color: 'var(--theme-text-primary)' }}
+              >
                 {formatMAD(activeTier?.totalPrice ?? product.price)}
               </span>
               {product.originalPrice > product.price && (

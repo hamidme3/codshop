@@ -115,7 +115,7 @@ function CustomersContent() {
             <Users className="w-8 h-8 text-amber-400" /> CRM & Gestion des Clients
           </h1>
           <p className="text-slate-400 text-xs sm:text-sm mt-1">
-            Synchronisé en temps réel avec vos 3 étapes commandes : <strong className="text-cyan-400">1. Confirmée</strong>, <strong className="text-amber-400">2. Expédiée</strong>, <strong className="text-emerald-400">3. Livrée</strong>.
+            Synchronisé en temps réel avec vos 4 étapes commandes : <strong className="text-cyan-400">1. Confirmée</strong>, <strong className="text-amber-400">2. Expédiée</strong>, <strong className="text-emerald-400">3. Livrée</strong>, <strong className="text-rose-400">4. Retournée</strong>.
           </p>
         </div>
 
@@ -256,8 +256,8 @@ function CustomersContent() {
                           <div className="font-bold text-white text-sm">{c.name}</div>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             {c.status === 'returning' ? (
-                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                                VIP Fidèle
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-purple-500/15 text-purple-300 border border-purple-500/30 flex items-center gap-1">
+                                ★ VIP Fidèle
                               </span>
                             ) : c.status === 'risk' ? (
                               <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-rose-500/20 text-rose-400 border border-rose-500/30">

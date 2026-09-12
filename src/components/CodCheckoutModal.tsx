@@ -391,7 +391,12 @@ Merci de me confirmer la livraison !`;
                   ● Express National
                 </span>
               </div>
-              <button type="button" onClick={onClose} aria-label="Fermer" className="p-1 rounded-full text-zinc-400 hover:text-white">
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Fermer"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -407,9 +412,9 @@ Merci de me confirmer la livraison !`;
                   Paiement sécurisé en espèces à la livraison après vérification
                 </p>
               </div>
-              <div className="hidden sm:flex flex-col items-end opacity-80 font-mono text-[9px] text-zinc-400">
-                <span>||||||| | ||| |||| |</span>
-                <span>EXPÉDITION 24/48H</span>
+              <div className="flex flex-col items-end opacity-85 font-mono text-[9px] text-zinc-300">
+                <span className="tracking-widest">||||||| | ||| |||| |</span>
+                <span className="text-[8px] text-emerald-400 font-bold">EXPÉDITION 24/48H</span>
               </div>
             </div>
           </div>
@@ -432,7 +437,7 @@ Merci de me confirmer la livraison !`;
               type="button"
               onClick={onClose}
               aria-label="Fermer"
-              className="p-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-700/60 transition cursor-pointer shrink-0"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-zinc-400 hover:text-white hover:bg-zinc-700/60 transition cursor-pointer shrink-0"
             >
               <X className="w-5 h-5" />
             </button>
@@ -677,7 +682,7 @@ Merci de me confirmer la livraison !`;
                           type="button"
                           disabled={!opt.inStock}
                           onClick={() => setSelectedVariant(opt.name)}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
+                          className={`px-3 py-2 min-h-[44px] flex items-center justify-center text-xs font-bold rounded-lg border transition-all cursor-pointer ${
                             !opt.inStock
                               ? 'opacity-40 line-through bg-zinc-100 border-zinc-200 cursor-not-allowed text-zinc-400'
                               : isSelected
@@ -731,7 +736,7 @@ Merci de me confirmer la livraison !`;
                 <button
                   type="button"
                   onClick={handleWhatsAppOrder}
-                  className="w-full py-2.5 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 px-4 min-h-[44px] bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <MessageCircle className="w-4 h-4 text-emerald-600" />
                   <span>Commander en 1 Clic via WhatsApp</span>
@@ -743,6 +748,12 @@ Merci de me confirmer la livraison !`;
           {/* ================= STEP 2: CONTACT INFO FORM + ADDRESS + DELIVERY ESTIMATE + FINAL PRICE + SUBMIT ================= */}
           {step === 2 && (
             <div className="space-y-4 animate-in fade-in-50 duration-150">
+              {/* Moroccan COD Trust Reassurance Micro-Banner */}
+              <div className="p-2.5 bg-emerald-50/90 border border-emerald-200/90 rounded-xl flex items-center gap-2 text-emerald-900 text-xs font-semibold shadow-2xs">
+                <PackageCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="truncate">Garantie Sérénité : Ouvrez et vérifiez votre colis avant de payer (عاين سلعتك)</span>
+              </div>
+
               {/* Chosen Offer Recap Banner with Edit Button */}
               <div className="p-2.5 sm:p-3 bg-zinc-50 border border-zinc-200 rounded-xl flex items-center justify-between">
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -762,7 +773,7 @@ Merci de me confirmer la livraison !`;
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="text-[11px] font-bold text-zinc-700 hover:text-zinc-950 flex items-center gap-1 cursor-pointer underline underline-offset-2 shrink-0 ml-2"
+                  className="min-h-[44px] px-2 text-[11px] font-bold text-zinc-700 hover:text-zinc-950 flex items-center gap-1 cursor-pointer underline underline-offset-2 shrink-0 ml-2"
                 >
                   <Edit2 className="w-3 h-3" />
                   <span>Modifier</span>
@@ -876,7 +887,7 @@ Merci de me confirmer la livraison !`;
                           key={cityName}
                           type="button"
                           onClick={() => setCity(cityName)}
-                          className={`text-[11px] px-2.5 py-1.5 min-h-[32px] rounded-lg border font-semibold transition-all cursor-pointer ${
+                          className={`text-xs px-3 py-1.5 min-h-[38px] rounded-lg border font-semibold transition-all cursor-pointer ${
                             city.toLowerCase() === cityName.toLowerCase()
                               ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
                               : 'bg-zinc-100 text-zinc-700 border-zinc-200 hover:bg-zinc-200'

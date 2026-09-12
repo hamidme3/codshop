@@ -63,11 +63,12 @@ export default function AdsHubPage() {
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        setFeedback({ type: 'error', message: data.error || 'Erreur d enregistrement' });
+        setFeedback({ type: 'error', message: data.error || "Erreur d'enregistrement" });
         return;
       }
 
       setFeedback({ type: 'success', message: 'Pixels publicitaires enregistrés et synchronisés avec votre boutique !' });
+      setTimeout(() => setFeedback(null), 4000);
     } catch {
       setFeedback({ type: 'error', message: 'Erreur réseau' });
     } finally {
@@ -95,6 +96,7 @@ export default function AdsHubPage() {
 
       setPinterestClaimed(true);
       setFeedback({ type: 'success', message: data.message });
+      setTimeout(() => setFeedback(null), 4000);
     } catch {
       setFeedback({ type: 'error', message: 'Erreur réseau' });
     } finally {
@@ -103,7 +105,7 @@ export default function AdsHubPage() {
   };
 
   const handleSendTestPurchase = async () => {
-    setTestEventStatus('Envoi de l événement test Purchase (349 DH)...');
+    setTestEventStatus("Envoi de l'événement test Purchase (349 DH)...");
     try {
       const res = await fetch('/api/tracking/events', {
         method: 'POST',
@@ -177,7 +179,7 @@ export default function AdsHubPage() {
               Doublez votre crédit publicitaire Pinterest Ads !
             </h2>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Ajoutez l identifiant partenaire CODShop dans votre Business Manager Pinterest. Dès validation (sous 72h), votre premier budget publicitaire sera doublé pour lancer vos campagnes au Maroc.
+              Ajoutez l&apos;identifiant partenaire CODShop dans votre Business Manager Pinterest. Dès validation (sous 72h), votre premier budget publicitaire sera doublé pour lancer vos campagnes au Maroc.
             </p>
           </div>
 
@@ -190,14 +192,13 @@ export default function AdsHubPage() {
               placeholder="Ex: 549755829104829"
               value={pinterestPartnerId}
               onChange={(e) => setPinterestPartnerId(e.target.value)}
-              disabled={pinterestClaimed}
               className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs outline-none focus:border-red-400"
             />
             <button
               type="button"
               onClick={handleConnectPinterest}
               disabled={connectingPinterest || !pinterestPartnerId || pinterestClaimed}
-              className="w-full py-2 px-3 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+              className="w-full py-2 px-3 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
               {pinterestClaimed ? 'Partenaire Connecté ✓' : connectingPinterest ? 'Connexion...' : 'Réclamer le double crédit'}
             </button>
@@ -207,120 +208,241 @@ export default function AdsHubPage() {
 
       {/* Main Pixels Configuration */}
       <form onSubmit={handleSavePixels} className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Card 1: Meta Pixel */}
-          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-blue-400">
-                Meta Pixel (Facebook & Instagram)
-              </span>
-              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+          <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-black uppercase tracking-wider text-blue-400">
+                  Meta Pixel (FB & IG)
+                </span>
+                {metaPixelId.trim() ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Actif
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full">
+                    Non configuré
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Script `fbq` pour tracker automatiquement les ajouts au panier et les commandes COD en Dirhams (MAD).
+              </p>
             </div>
-            <p className="text-xs text-slate-400">
-              Injecte le script `fbq` pour tracker automatiquement les ajouts au panier et les commandes COD en Dirhams (MAD).
-            </p>
-            <div className="space-y-1">
+            <div className="space-y-1 pt-1">
               <label className="text-[11px] font-bold text-slate-300">Pixel ID (15-16 chiffres)</label>
               <input
                 type="text"
                 placeholder="Ex: 1386256236443220"
                 value={metaPixelId}
                 onChange={(e) => setMetaPixelId(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-blue-400"
+                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-blue-400"
               />
             </div>
           </div>
 
           {/* Card 2: TikTok Pixel */}
-          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-teal-400">
-                TikTok Pixel
-              </span>
-              <span className="w-2 h-2 rounded-full bg-teal-400" />
+          <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-black uppercase tracking-wider text-teal-400">
+                  TikTok Pixel
+                </span>
+                {tiktokPixelId.trim() ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Actif
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full">
+                    Non configuré
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Audiences personnalisées et optimisation du ROAS pour les campagnes TikTok Ads au Maroc.
+              </p>
             </div>
-            <p className="text-xs text-slate-400">
-              Permet de créer des audiences personnalisées et d optimiser le ROAS sur TikTok Ads au Maroc.
-            </p>
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-300">TikTok Pixel Code</label>
+            <div className="space-y-1 pt-1">
+              <label className="text-[11px] font-bold text-slate-300">TikTok Pixel Code (20 caractères)</label>
               <input
                 type="text"
-                placeholder="Ex: C8K92L81938"
+                placeholder="Ex: C8K92L81938AKJSD0192"
                 value={tiktokPixelId}
                 onChange={(e) => setTiktokPixelId(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-teal-400"
+                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-teal-400"
               />
             </div>
           </div>
 
           {/* Card 3: Snapchat Pixel */}
-          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-yellow-400">
-                Snapchat Pixel
-              </span>
-              <span className="w-2 h-2 rounded-full bg-yellow-400" />
+          <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-black uppercase tracking-wider text-yellow-400">
+                  Snapchat Pixel
+                </span>
+                {snapchatPixelId.trim() ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Actif
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full">
+                    Non configuré
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Idéal pour les campagnes Stories & Spotlight auprès de l&apos;audience jeune marocaine.
+              </p>
             </div>
-            <p className="text-xs text-slate-400">
-              Essentiel pour les campagnes e-commerce orientées Stories & Discover sur le marché marocain.
-            </p>
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-300">Snap Pixel ID</label>
+            <div className="space-y-1 pt-1">
+              <label className="text-[11px] font-bold text-slate-300">Snap Pixel ID (UUID format)</label>
               <input
                 type="text"
-                placeholder="Ex: snap-9482-1048-29"
+                placeholder="Ex: 4c3b679a-7a52-45e2-a083-efd0b6d218fa"
                 value={snapchatPixelId}
                 onChange={(e) => setSnapchatPixelId(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-yellow-400"
+                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-yellow-400"
               />
             </div>
           </div>
 
-          {/* Card 4: Google Analytics 4 */}
-          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-amber-400">
-                Google Analytics 4 & Ads
-              </span>
-              <span className="w-2 h-2 rounded-full bg-amber-400" />
+          {/* Card 4: Google Analytics 4 & Ads */}
+          <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-black uppercase tracking-wider text-amber-400">
+                  Google Analytics 4 & Ads
+                </span>
+                {googleAnalyticsId.trim() ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Actif
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full">
+                    Non configuré
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Mesurez le trafic de votre boutique et synchronisez vos conversions avec Google Ads.
+              </p>
             </div>
-            <p className="text-xs text-slate-400">
-              Mesurez le trafic de votre boutique et synchronisez vos produits avec Google Merchant Center.
-            </p>
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-300">Measurement ID</label>
+            <div className="space-y-1 pt-1">
+              <label className="text-[11px] font-bold text-slate-300">Measurement ID (G-...)</label>
               <input
                 type="text"
                 placeholder="Ex: G-LN3S0WSM3B"
                 value={googleAnalyticsId}
                 onChange={(e) => setGoogleAnalyticsId(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-amber-400"
+              />
+            </div>
+          </div>
+
+          {/* Card 5: Pinterest Tag */}
+          <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-black uppercase tracking-wider text-red-400">
+                  Pinterest Tag Officiel
+                </span>
+                {pinterestPartnerId.trim() ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Actif
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full">
+                    Non configuré
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Tracking `pintrk` officiel pour vos épingles sponsorisées et le catalogue shopping Pinterest.
+              </p>
+            </div>
+            <div className="space-y-1 pt-1">
+              <label className="text-[11px] font-bold text-slate-300">Pinterest Tag ID (13 chiffres)</label>
+              <input
+                type="text"
+                placeholder="Ex: 2618934029148"
+                value={pinterestPartnerId}
+                onChange={(e) => setPinterestPartnerId(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-red-400"
+              />
+            </div>
+          </div>
+
+          {/* Card 6: Google Merchant Center */}
+          <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-black uppercase tracking-wider text-orange-400">
+                  Google Merchant Center
+                </span>
+                {googleMerchantCenterId.trim() ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Actif
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full">
+                    Non configuré
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Synchronisez vos flux produits et inventaires COD pour Google Shopping Maroc.
+              </p>
+            </div>
+            <div className="space-y-1 pt-1">
+              <label className="text-[11px] font-bold text-slate-300">Merchant Center ID</label>
+              <input
+                type="text"
+                placeholder="Ex: 504829103"
+                value={googleMerchantCenterId}
+                onChange={(e) => setGoogleMerchantCenterId(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-orange-400"
               />
             </div>
           </div>
         </div>
 
-        {/* Action Button */}
-        <div className="flex items-center justify-between pt-2">
+        {/* Action Button & Anchored Feedback Toast */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
           <button
             type="button"
             onClick={handleSendTestPurchase}
-            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-amber-400 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-amber-400 transition-colors cursor-pointer"
           >
             <Activity className="w-4 h-4" />
-            <span>Tester un événement d achat test (349 DH)</span>
+            <span>Tester un événement d&apos;achat test (349 DH)</span>
           </button>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-black text-xs transition-colors shadow-lg shadow-amber-500/10"
-          >
-            {saving ? 'Enregistrement...' : (
-              <><Save className="w-4 h-4" /> Enregistrer les pixels</>
+          <div className="flex items-center gap-3">
+            {feedback && (
+              <span
+                className={`text-xs font-bold px-3 py-1.5 rounded-xl border flex items-center gap-1.5 animate-in fade-in ${
+                  feedback.type === 'success'
+                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                    : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
+                }`}
+              >
+                {feedback.type === 'success' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+                <span>{feedback.message}</span>
+              </span>
             )}
-          </button>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-black text-xs transition-colors shadow-lg shadow-amber-500/10 cursor-pointer"
+            >
+              {saving ? 'Enregistrement...' : (
+                <><Save className="w-4 h-4" /> Enregistrer les pixels</>
+              )}
+            </button>
+          </div>
         </div>
 
         {testEventStatus && (

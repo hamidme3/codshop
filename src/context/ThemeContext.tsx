@@ -17,10 +17,12 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [themeId, setThemeIdState] = useState<ThemeId>('luxury');
   const [lang, setLangState] = useState<'fr' | 'ar'>('fr');
+  const [mounted, setMounted] = useState(false);
   const [, startTransition] = useTransition();
 
   // Safely hydrate theme and lang from URL or localStorage on mount
   useEffect(() => {
+    setMounted(true);
     try {
       const params = new URLSearchParams(window.location.search);
       const urlTheme = params.get('theme') as ThemeId;
@@ -43,6 +45,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const theme = useMemo(() => THEMES[themeId] || THEMES.luxury, [themeId]);
+
+  // Sync data-theme attribute on documentElement for dark mode tokens and scrollbars
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', themeId);
+    }
+  }, [themeId]);
 
   // Sync lang dir/lang on mount + changes
   useEffect(() => {
@@ -141,7 +150,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         data-theme={themeId}
         suppressHydrationWarning
         style={{ ...styleVars, colorScheme: isDark ? 'dark' : 'light' } as React.CSSProperties}
-        className={`min-h-screen transition-[background-color,color,border-color] duration-[var(--motion-base)] ${theme.typography.fontFamily === 'serif' ? 'font-serif' : theme.typography.fontFamily === 'monospace' ? 'font-mono' : 'font-sans'}`}
+        className={`min-h-screen ${mounted ? 'transition-[background-color,color,border-color] duration-[var(--motion-base)]' : ''} ${theme.typography.fontFamily === 'serif' ? 'font-serif' : theme.typography.fontFamily === 'monospace' ? 'font-mono' : 'font-sans'}`}
       >
         {children}
       </div>

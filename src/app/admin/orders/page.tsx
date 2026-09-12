@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, Suspense, useMemo } from 'react';
+import React, { useState, useEffect, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
   ShoppingBag, Search, Phone, MessageCircle, Truck, 
-  CheckCircle2, Clock, Download, Check, X, 
+  CheckCircle2, Clock, Download, Check, X, DollarSign,
   RotateCcw, FileSpreadsheet, ChevronDown, ChevronUp, AlertCircle
 } from 'lucide-react';
 import { getOrders, updateOrderStatus, Order, OrderStatus } from '@/lib/backoffice';
@@ -27,6 +27,19 @@ function OrdersContent() {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [activeWaOrderId, setActiveWaOrderId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Global Escape key dismiss listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedOrder(null);
+        setIsExportOpen(false);
+        setActiveWaOrderId(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -199,14 +212,14 @@ function OrdersContent() {
   const getStatusBadge = (status: OrderStatus) => {
     switch (status) {
       case 'new':
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">Nouvelle</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">Nouvelle</span>;
       case 'to_confirm':
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/30">À Confirmer</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">À Confirmer</span>;
       case 'confirmed':
         return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">Confirmée</span>;
       case 'shipped':
       case 'shipping':
-        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">Expédiée</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">Expédiée</span>;
       case 'delivered':
         return <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Livrée & Encaissée</span>;
       case 'returned':
@@ -380,16 +393,16 @@ function OrdersContent() {
           >
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
             <span>Confirmées ({confirmedCount})</span>
-            <Download className="w-3 h-3 text-cyan-400" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
           </button>
           <button
             onClick={() => handleExportByStatus('shipped')}
-            className="px-3 py-1.5 rounded-xl bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/60 text-indigo-300 font-extrabold text-xs flex items-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer"
+            className="px-3 py-1.5 rounded-xl bg-amber-950/80 hover:bg-amber-900 border border-amber-700/60 text-amber-300 font-extrabold text-xs flex items-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer"
             title="Télécharger immédiatement toutes les commandes expédiées en cours de livraison"
           >
-            <span className="w-2 h-2 rounded-full bg-indigo-400"></span>
+            <span className="w-2 h-2 rounded-full bg-amber-400"></span>
             <span>Expédiées ({shippedCount})</span>
-            <Download className="w-3 h-3 text-indigo-400" />
+            <Truck className="w-3.5 h-3.5 text-amber-400" />
           </button>
           <button
             onClick={() => handleExportByStatus('delivered')}
@@ -398,7 +411,7 @@ function OrdersContent() {
           >
             <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
             <span>Livrées ({deliveredCount})</span>
-            <Download className="w-3 h-3 text-emerald-400" />
+            <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
           </button>
           <button
             onClick={() => handleExportByStatus('returned')}
@@ -407,7 +420,7 @@ function OrdersContent() {
           >
             <span className="w-2 h-2 rounded-full bg-rose-400"></span>
             <span>Retournées ({returnedCount})</span>
-            <Download className="w-3 h-3 text-rose-400" />
+            <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
           </button>
         </div>
 
@@ -480,7 +493,7 @@ function OrdersContent() {
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-slate-800 text-slate-400 bg-slate-950/50 font-semibold">
-                <th className="py-3.5 px-4 w-10 text-center">
+                <th className="py-2.5 px-3 w-10 text-center">
                   <input
                     type="checkbox"
                     checked={selectedOrderIds.length === filteredOrders.length && filteredOrders.length > 0}
@@ -488,13 +501,13 @@ function OrdersContent() {
                     className="w-4 h-4 accent-amber-500 rounded cursor-pointer"
                   />
                 </th>
-                <th className="py-3.5 px-4">Commande</th>
-                <th className="py-3.5 px-4">Client</th>
-                <th className="py-3.5 px-4">Ville</th>
-                <th className="py-3.5 px-4">Articles</th>
-                <th className="py-3.5 px-4">Montant COD</th>
-                <th className="py-3.5 px-4">Statut</th>
-                <th className="py-3.5 px-4 text-center">Actions Rapides 1-Clic</th>
+                <th className="py-2.5 px-3">Commande</th>
+                <th className="py-2.5 px-3">Client</th>
+                <th className="py-2.5 px-3">Ville</th>
+                <th className="py-2.5 px-3">Articles</th>
+                <th className="py-2.5 px-3">Montant COD</th>
+                <th className="py-2.5 px-3">Statut</th>
+                <th className="py-2.5 px-3 text-center">Actions Rapides 1-Clic</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
@@ -514,7 +527,7 @@ function OrdersContent() {
                       key={order.id} 
                       className={`hover:bg-slate-800/40 transition-colors ${isSelected ? 'bg-amber-500/5' : ''}`}
                     >
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-2.5 px-3 text-center">
                         <input
                           type="checkbox"
                           checked={isSelected}
@@ -523,7 +536,7 @@ function OrdersContent() {
                         />
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-3">
                         <button
                           onClick={() => setSelectedOrder(order)}
                           className="font-mono font-bold text-amber-400 hover:underline"
@@ -535,12 +548,12 @@ function OrdersContent() {
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-3">
                         <div className="font-bold text-white">{order.customerName}</div>
                         <div className="text-[11px] text-slate-400 font-mono">{order.phone}</div>
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-3">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <span className="font-semibold text-slate-200">{order.city}</span>
                           {order.deliveryType === 'stopdesk' && (
@@ -558,10 +571,10 @@ function OrdersContent() {
                             </span>
                           )}
                         </div>
-                        <div className="text-[10px] text-slate-500 truncate max-w-[140px]">{order.address}</div>
+                        <div className="text-[10px] text-slate-500 truncate max-w-[200px]">{order.address}</div>
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-3">
                         <div className="text-slate-200 font-medium flex items-center gap-1.5 flex-wrap">
                           <span>{order.items[0]?.title}</span>
                           {order.items[0]?.sku && (
@@ -579,12 +592,12 @@ function OrdersContent() {
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4">
-                        <div className="font-extrabold text-white text-sm">{order.total} DH</div>
+                      <td className="py-2.5 px-3">
+                        <div className="font-extrabold text-white text-sm tabular-nums">{order.total} DH</div>
                         <div className="text-[10px] text-slate-400">Livraison : {order.shippingFee} DH</div>
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-3">
                         {getStatusBadge(order.status)}
                         {order.trackingNumber && (
                           <div className="text-[10px] font-mono text-cyan-400 mt-1">
@@ -593,7 +606,7 @@ function OrdersContent() {
                         )}
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-3">
                         <div className="flex items-center justify-center gap-1.5">
                           {/* WhatsApp Darija Smart Button with Template Chooser */}
                           <div className="relative">
@@ -756,8 +769,14 @@ function OrdersContent() {
 
       {/* Order Details Drawer / Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-lg w-full space-y-5 shadow-2xl animate-in zoom-in-95">
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-pointer"
+          onClick={() => setSelectedOrder(null)}
+        >
+          <div 
+            className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-lg w-full space-y-5 shadow-2xl animate-in zoom-in-95 cursor-default"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div>
                 <span className="text-xs text-amber-400 font-mono">Détails de la commande</span>
@@ -907,7 +926,7 @@ function OrdersContent() {
               </button>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="py-2.5 px-4 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400"
+                className="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 font-bold text-xs transition-colors cursor-pointer"
               >
                 Fermer
               </button>
