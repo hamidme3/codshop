@@ -7,32 +7,54 @@ import { Order } from './types';
 
 export type WhatsAppTemplateType = 'confirmation' | 'unreachable' | 'gps_request' | 'shipped';
 
+export interface NormalizedPhone {
+  international: string; // e.g. "212661234567" for WhatsApp wa.me
+  national: string;      // e.g. "0661234567" for Couriers & local calls
+  isValid: boolean;
+}
+
 /**
- * Robust Moroccan phone sanitizer.
- * Converts: "0661234567", "+212 6 61 23 45 67", "00212661234567", "07...", "05..."
- * into international format without plus: "212661234567"
+ * Universal Moroccan Phone Sanitizer.
+ * Accurately parses:
+ * - "0661234567", "07...", "05..."
+ * - "+212 6 61 23 45 67", "+2120661234567", "+212 (0)6..."
+ * - "00212 6 61...", "0021206..."
+ * - "661234567" (9 digits without leading 0)
+ * - Raw inputs with dashes, dots, spaces, parens
  */
-export function normalizeMoroccanPhone(phone: string): string {
-  if (!phone) return '';
-  // Keep only numeric digits
-  let cleaned = phone.replace(/[^0-9]/g, '');
+export function sanitizeMoroccanPhone(phone?: string | null): NormalizedPhone {
+  if (!phone) return { international: '', national: '', isValid: false };
 
-  // Handle international prefix 00212...
-  if (cleaned.startsWith('00212')) {
-    cleaned = cleaned.slice(2);
+  let digits = String(phone).replace(/[^0-9]/g, '');
+
+  // 1. Strip international dial prefixes
+  if (digits.startsWith('00212')) {
+    digits = digits.slice(5);
+  } else if (digits.startsWith('212')) {
+    digits = digits.slice(3);
   }
 
-  // Handle local Moroccan number starting with 0 (e.g., 06..., 07..., 05...)
-  if (cleaned.startsWith('0') && cleaned.length === 10) {
-    cleaned = `212${cleaned.slice(1)}`;
+  // 2. Strip redundant trunk zero after international prefix (e.g. +212 06... -> 06...)
+  if (digits.startsWith('0')) {
+    digits = digits.slice(1);
   }
 
-  // Handle standard number without leading 0 or prefix (9 digits e.g. 661234567)
-  if (cleaned.length === 9 && (cleaned.startsWith('6') || cleaned.startsWith('7') || cleaned.startsWith('5'))) {
-    cleaned = `212${cleaned}`;
-  }
+  // 3. National significant number in Morocco is 9 digits starting with 5, 6, or 7
+  const isValid = digits.length === 9 && /^[567]/.test(digits);
 
-  return cleaned;
+  return {
+    international: isValid ? `212${digits}` : digits,
+    national: isValid ? `0${digits}` : digits,
+    isValid,
+  };
+}
+
+export function normalizeMoroccanPhone(phone?: string | null): string {
+  return sanitizeMoroccanPhone(phone).international;
+}
+
+export function formatCourierPhone(phone?: string | null): string {
+  return sanitizeMoroccanPhone(phone).national;
 }
 
 /**

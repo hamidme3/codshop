@@ -5,7 +5,7 @@
  */
 
 import { Order } from './types';
-import { formatOrderItemsSummary } from './whatsapp-templates';
+import { formatOrderItemsSummary, formatCourierPhone } from './whatsapp-templates';
 import { escapeHtml } from './sanitizer';
 
 export type ShippingCourier = 'ozon' | 'sendit' | 'cathedis' | 'amana' | 'manual';
@@ -28,17 +28,6 @@ function escapeCsv(value: string | number | undefined | null, delimiter = ';'): 
     return `"${str.replace(/"/g, '""')}"`;
   }
   return str;
-}
-
-/** Clean phone number for courier systems (e.g. 06XXXXXXXX or 07XXXXXXXX) */
-function formatCourierPhone(phone: string): string {
-  let digits = phone.replace(/[^0-9]/g, '');
-  if (digits.startsWith('212') && digits.length === 12) {
-    digits = `0${digits.slice(3)}`;
-  } else if (digits.startsWith('00212') && digits.length === 14) {
-    digits = `0${digits.slice(5)}`;
-  }
-  return digits;
 }
 
 // ── 1. Ozon Express Manifest ──────────────────────────────────────────
@@ -75,7 +64,7 @@ export function generateOzonManifest(orders: Order[], storeName = 'Boutique'): M
   return {
     courier: 'ozon',
     filename: `ozon_manifest_${storeName.toLowerCase()}_${dateStr}.csv`,
-    mimeType: 'text/csv;charset=utf-8;',
+    mimeType: 'text/csv;charset=utf-8',
     content: csvContent,
     orderCount: orders.length,
     totalCrbt,
@@ -116,7 +105,7 @@ export function generateSenditManifest(orders: Order[], storeName = 'Boutique'):
   return {
     courier: 'sendit',
     filename: `sendit_manifest_${storeName.toLowerCase()}_${dateStr}.csv`,
-    mimeType: 'text/csv;charset=utf-8;',
+    mimeType: 'text/csv;charset=utf-8',
     content: csvContent,
     orderCount: orders.length,
     totalCrbt,
@@ -139,7 +128,8 @@ export function generateCathedisManifest(orders: Order[], storeName = 'Boutique'
   ];
 
   const rows = orders.map((o) => {
-    const totalQty = o.items.reduce((q, it) => q + (it.quantity || 1), 0);
+    const items = Array.isArray(o.items) ? o.items : [];
+    const totalQty = items.reduce((q, it) => q + (it.quantity || 1), 0);
     return [
       escapeCsv(o.orderNumber, delimiter),
       escapeCsv(o.customerName, delimiter),
@@ -160,7 +150,7 @@ export function generateCathedisManifest(orders: Order[], storeName = 'Boutique'
   return {
     courier: 'cathedis',
     filename: `cathedis_manifest_${storeName.toLowerCase()}_${dateStr}.csv`,
-    mimeType: 'text/csv;charset=utf-8;',
+    mimeType: 'text/csv;charset=utf-8',
     content: csvContent,
     orderCount: orders.length,
     totalCrbt,
@@ -199,7 +189,7 @@ export function generateAmanaManifest(orders: Order[], storeName = 'Boutique'): 
   return {
     courier: 'amana',
     filename: `amana_manifest_${storeName.toLowerCase()}_${dateStr}.csv`,
-    mimeType: 'text/csv;charset=utf-8;',
+    mimeType: 'text/csv;charset=utf-8',
     content: csvContent,
     orderCount: orders.length,
     totalCrbt,
@@ -233,7 +223,7 @@ export function generateStandardCodManifest(orders: Order[], storeName = 'Boutiq
     escapeCsv(o.orderNumber, delimiter),
     escapeCsv(o.createdAt ? new Date(o.createdAt).toLocaleString('fr-FR') : '', delimiter),
     escapeCsv(o.customerName, delimiter),
-    escapeCsv(formatCourierPhone(o.phone), delimiter),
+    escapeCsv(`="${formatCourierPhone(o.phone)}"`, delimiter),
     escapeCsv(o.city, delimiter),
     escapeCsv(o.deliveryType === 'stopdesk' ? 'Point Relais (Stopdesk)' : 'Livraison à Domicile', delimiter),
     escapeCsv(o.address, delimiter),
@@ -256,7 +246,7 @@ export function generateStandardCodManifest(orders: Order[], storeName = 'Boutiq
   return {
     courier: 'standard',
     filename: `cod_orders_${storeName.toLowerCase()}_${dateStr}.csv`,
-    mimeType: 'text/csv;charset=utf-8;',
+    mimeType: 'text/csv;charset=utf-8',
     content: csvContent,
     orderCount: orders.length,
     totalCrbt,

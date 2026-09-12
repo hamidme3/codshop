@@ -52,10 +52,16 @@ export async function POST(req: Request) {
 
     // 3. Moroccan Phone Validation & Normalization (Mobile 06/07, Fixed line 05, +212)
     const rawPhone = body.customerPhone || body.customer?.phone || body.phone || '';
-    const phoneResult = validateAndNormalizeMoroccanPhone(rawPhone);
+    const source = (body.source === 'whatsapp' ? 'whatsapp' : 'web') as 'web' | 'whatsapp';
+    const isPendingWhatsAppLead = source === 'whatsapp' && (!rawPhone || rawPhone.toLowerCase().includes('whatsapp'));
+
+    const phoneResult = isPendingWhatsAppLead
+      ? { isValid: true, cleanPhone: '0600000000', type: 'mobile' as const }
+      : validateAndNormalizeMoroccanPhone(rawPhone);
+
     if (!phoneResult.isValid) {
       return NextResponse.json(
-        { success: false, message: phoneResult.error || 'Numéro de téléphone marocain invalide (06, 07 ou 05 requis)' },
+        { success: false, message: (phoneResult as any).error || 'Numéro de téléphone marocain invalide (06, 07 ou 05 requis)' },
         { status: 400 }
       );
     }
@@ -97,7 +103,6 @@ export async function POST(req: Request) {
 
     // Moroccan COD Conversion & Delivery Tracking fields
     const abVariant = body.abVariant || req.headers.get('x-ab-variant') || 'control';
-    const source = (body.source === 'whatsapp' ? 'whatsapp' : 'web') as 'web' | 'whatsapp';
 
     // 6. Persist order with authentic server-recalculated pricing, variant SKUs, and inventory reservation
     let savedOrder;

@@ -37,6 +37,12 @@ export const MOROCCAN_CITIES: MoroccanCity[] = [
   { id: 'ouarzazate', name: 'Ouarzazate', nameAr: 'ورزازات', region: 'Drâa-Tafilalet', shippingFee: 45, deliverySla: '48h à 72h' },
   { id: 'laayoune', name: 'Laâyoune', nameAr: 'العيون', region: 'Laâyoune-Sakia El Hamra', shippingFee: 45, deliverySla: '48h à 72h' },
   { id: 'dakhla', name: 'Dakhla', nameAr: 'الداخلة', region: 'Dakhla-Oued Ed-Dahab', shippingFee: 50, deliverySla: '3 à 4 jours' },
+  { id: 'bouskoura', name: 'Bouskoura', nameAr: 'بوسكورة', region: 'Casablanca-Settat', shippingFee: 20, deliverySla: '24h' },
+  { id: 'dar-bouazza', name: 'Dar Bouazza', nameAr: 'دار بوعزة', region: 'Casablanca-Settat', shippingFee: 20, deliverySla: '24h' },
+  { id: 'essaouira', name: 'Essaouira', nameAr: 'الصويرة', region: 'Marrakech-Safi', shippingFee: 35, deliverySla: '48h' },
+  { id: 'al-hoceima', name: 'Al Hoceïma', nameAr: 'الحسيمة', region: 'Tanger-Tétouan-Al Hoceïma', shippingFee: 35, deliverySla: '48h' },
+  { id: 'chefchaouen', name: 'Chefchaouen', nameAr: 'شفشاون', region: 'Tanger-Tétouan-Al Hoceïma', shippingFee: 35, deliverySla: '48h' },
+  { id: 'autre', name: 'Autre ville / Autre région', nameAr: 'مدينة أخرى', region: 'Maroc', shippingFee: 35, deliverySla: '24h à 48h partout au Maroc' },
 ];
 
 export const FREE_SHIPPING_THRESHOLD = 400; // Free delivery above 400 MAD
@@ -204,16 +210,26 @@ export function validateMoroccanPhone(phone: string): {
     return { isValid: false, cleanPhone: '', formatted: '', error: 'Le numéro de téléphone est obligatoire' };
   }
 
-  // Remove spaces, dashes, parentheses
-  let cleaned = phone.replace(/[\s\-().]/g, '');
+  // Remove spaces, dashes, parentheses, zero-width chars
+  let cleaned = phone.replace(/[\s\-().\u200E\u200F]/g, '');
 
   // Convert international prefixes +212 or 00212 or 212
   if (cleaned.startsWith('+212')) {
-    cleaned = '0' + cleaned.substring(4);
+    cleaned = cleaned.substring(4);
   } else if (cleaned.startsWith('00212')) {
-    cleaned = '0' + cleaned.substring(5);
-  } else if (cleaned.startsWith('212') && cleaned.length === 12) {
-    cleaned = '0' + cleaned.substring(3);
+    cleaned = cleaned.substring(5);
+  } else if (cleaned.startsWith('212') && (cleaned.length === 11 || cleaned.length === 12)) {
+    cleaned = cleaned.substring(3);
+  }
+
+  // Strip redundant trunk zero (e.g. +212 06... or 06...)
+  if (cleaned.startsWith('0')) {
+    cleaned = cleaned.substring(1);
+  }
+
+  // If 9 digits starting with 5, 6, or 7, prepend national zero
+  if (/^[5-7][0-9]{8}$/.test(cleaned)) {
+    cleaned = '0' + cleaned;
   }
 
   // Check valid Moroccan mobile or fixed pattern: 10 digits starting with 05, 06, or 07

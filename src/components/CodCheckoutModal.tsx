@@ -31,6 +31,7 @@ import {
   PackageCheck,
   Zap,
 } from 'lucide-react';
+import { trackInitiateCheckout } from '@/lib/pixel-tracker';
 
 interface CodCheckoutModalProps {
   product: Product;
@@ -65,12 +66,24 @@ export function CodCheckoutModal({
 }: CodCheckoutModalProps) {
   const router = useRouter();
   const { theme, formatMAD, lang } = useTheme();
+  const formRef = React.useRef<HTMLFormElement>(null);
+
+  // Stable waybill serial number (prevents re-rolling on keystrokes)
+  const waybillNumber = useMemo(() => {
+    const rand = Math.floor(1000 + Math.random() * 9000);
+    return `MA-${product.id.slice(0, 4).toUpperCase()}-${rand}`;
+  }, [product.id]);
 
   // A/B: detect waybill variant from cookie (set by middleware). Default: standard modal.
   const [isWaybill, setIsWaybill] = useState(false);
 
   // Multi-step state: Step 1 (Offre & Options) -> Step 2 (Coordonnées & Livraison)
   const [step, setStep] = useState<1 | 2>(1);
+
+  // Reset scroll to top of form when step changes
+  useEffect(() => {
+    formRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+  }, [step]);
 
   // Form State
   const [fullName, setFullName] = useState('');
@@ -90,6 +103,18 @@ export function CodCheckoutModal({
   const [selectedTier, setSelectedTier] = useState<QuantityTier>(
     tiers.find((t) => t.quantity === initialQuantity) || tiers[0]
   );
+
+  // Track InitiateCheckout on pixel channels when modal is opened
+  useEffect(() => {
+    if (isOpen) {
+      trackInitiateCheckout({
+        id: product.id,
+        title: product.title,
+        price: selectedTier?.unitPrice || product.price,
+        quantity: selectedTier?.quantity || 1,
+      });
+    }
+  }, [isOpen, product.id, product.title, selectedTier]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -357,7 +382,7 @@ Merci de me confirmer la livraison !`;
             <div className="flex items-center justify-between border-b border-zinc-700 pb-2 mb-2">
               <div className="flex items-center gap-2">
                 <span className="font-mono text-[10px] tracking-wider bg-zinc-800 text-emerald-400 px-2 py-0.5 rounded border border-zinc-700">
-                  BORDEREAU N° MA-{product.id.slice(0, 4).toUpperCase()}-{Math.floor(1000 + Math.random() * 9000)}
+                  BORDEREAU N° {waybillNumber}
                 </span>
                 <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
                   ● Express National
@@ -472,7 +497,7 @@ Merci de me confirmer la livraison !`;
         </div>
 
         {/* Scrollable Form Body (320px safe & max-h-[82vh]) */}
-        <form onSubmit={handleSubmit} className="p-3.5 sm:p-5 space-y-4 max-h-[82vh] overflow-y-auto">
+        <form ref={formRef} onSubmit={handleSubmit} className="p-3.5 sm:p-5 space-y-4 max-h-[82vh] overflow-y-auto">
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
@@ -758,6 +783,11 @@ Merci de me confirmer la livraison !`;
                   <div className="relative">
                     <input
                       type="text"
+                      name="name"
+                      autoComplete="name"
+                      autoCapitalize="words"
+                      autoCorrect="off"
+                      spellCheck={false}
                       required
                       value={fullName}
                       onChange={(e) => {
@@ -766,7 +796,7 @@ Merci de me confirmer la livraison !`;
                       }}
                       onBlur={() => setTouched((prev) => ({ ...prev, fullName: true }))}
                       placeholder="Ex: Youssef El Amrani"
-                      className={`w-full px-3.5 py-2.5 bg-zinc-50 border rounded-xl text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition ${
+                      className={`w-full px-3.5 py-2.5 bg-zinc-50 border rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition ${
                         touched.fullName && !nameValidation.isValid
                           ? 'border-red-400 bg-red-50/30'
                           : touched.fullName && nameValidation.isValid
@@ -803,6 +833,7 @@ Merci de me confirmer la livraison !`;
                     </span>
                     <input
                       type="tel"
+                      name="tel"
                       inputMode="tel"
                       autoComplete="tel"
                       required
@@ -810,7 +841,7 @@ Merci de me confirmer la livraison !`;
                       onChange={handlePhoneChange}
                       onBlur={() => setTouched((prev) => ({ ...prev, phone: true }))}
                       placeholder="06 12 34 56 78"
-                      className={`w-full pl-20 pr-3.5 py-2.5 bg-zinc-50 border rounded-xl text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition ${
+                      className={`w-full pl-20 pr-3.5 py-2.5 bg-zinc-50 border rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition ${
                         touched.phone && !phoneValidation.isValid
                           ? 'border-red-400 bg-red-50/30'
                           : phoneValidation.isValid
@@ -828,21 +859,21 @@ Merci de me confirmer la livraison !`;
                   )}
                 </div>
 
-                {/* City & Delivery Estimate */}
+                {/* City & Delivery Mode Selection */}
                 <div className="space-y-2">
                   <div>
                     <label className="block text-xs font-bold text-zinc-700 mb-1">
                       Ville de Livraison <span className="text-red-500">*</span>
                     </label>
 
-                    {/* Popular Moroccan Cities Quick-Chips */}
+                    {/* Popular Moroccan Cities Quick-Chips with accessible touch targets */}
                     <div className="flex flex-wrap gap-1.5 mb-2">
                       {POPULAR_CITIES.map((cityName) => (
                         <button
                           key={cityName}
                           type="button"
                           onClick={() => setCity(cityName)}
-                          className={`text-[11px] px-2.5 py-1 rounded-lg border font-semibold transition-all cursor-pointer ${
+                          className={`text-[11px] px-2.5 py-1.5 min-h-[32px] rounded-lg border font-semibold transition-all cursor-pointer ${
                             city.toLowerCase() === cityName.toLowerCase()
                               ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
                               : 'bg-zinc-100 text-zinc-700 border-zinc-200 hover:bg-zinc-200'
@@ -856,7 +887,7 @@ Merci de me confirmer la livraison !`;
                     <select
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 rounded-xl text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition cursor-pointer"
+                      className="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition cursor-pointer"
                     >
                       {MOROCCAN_CITIES.map((c) => (
                         <option key={c.id} value={c.name}>
@@ -867,6 +898,59 @@ Merci de me confirmer la livraison !`;
                     <p className="text-[10px] text-zinc-500 mt-1 font-normal">
                       Délais et frais calculés automatiquement selon la ville choisie.
                     </p>
+                  </div>
+
+                  {/* Delivery Mode Choice: Home vs Stopdesk / Agence (Positioned above estimate) */}
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-700 mb-1.5">
+                      Mode de Réception <span className="text-red-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryType('home')}
+                        className={`p-2.5 rounded-xl border-2 text-left transition cursor-pointer flex flex-col justify-between min-h-[56px] ${
+                          deliveryType === 'home'
+                            ? 'border-zinc-900 bg-zinc-900 text-white shadow-xs'
+                            : 'border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-800'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-1 font-bold text-xs">
+                          <span>🏠 À Domicile</span>
+                          <span className={`text-[10px] font-black ${
+                            deliveryType === 'home' ? 'text-emerald-300' : 'text-emerald-700'
+                          }`}>
+                            {effectiveShippingFee === 0 || isFreeShipping ? 'Gratuit' : `${deliveryEstimate.shippingFee} DH`}
+                          </span>
+                        </div>
+                        <span className={`text-[10px] mt-1 ${deliveryType === 'home' ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                          Livreur à votre porte
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryType('stopdesk')}
+                        className={`p-2.5 rounded-xl border-2 text-left transition cursor-pointer flex flex-col justify-between relative min-h-[56px] ${
+                          deliveryType === 'stopdesk'
+                            ? 'border-emerald-600 bg-emerald-50 text-emerald-950 ring-1 ring-emerald-600'
+                            : 'border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-800'
+                        }`}
+                      >
+                        <span className="absolute -top-2 right-2 text-[8px] font-black uppercase bg-emerald-600 text-white px-1.5 py-0.5 rounded-full shadow-xs">
+                          100% Gratuit
+                        </span>
+                        <div className="flex items-center justify-between gap-1 font-bold text-xs text-emerald-800">
+                          <span>🏢 Point Relais</span>
+                          <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">
+                            0 DH
+                          </span>
+                        </div>
+                        <span className="text-[10px] mt-1 text-emerald-700">
+                          En agence (Ozon / Sendit)
+                        </span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Dynamic Moroccan Delivery Estimate Card */}
@@ -892,51 +976,6 @@ Merci de me confirmer la livraison !`;
                   </div>
                 </div>
 
-                {/* Delivery Mode Choice: Home vs Stopdesk / Agence */}
-                <div>
-                  <label className="block text-xs font-bold text-zinc-700 mb-1.5">
-                    Mode de Réception <span className="text-red-500">*</span>
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setDeliveryType('home')}
-                      className={`p-2.5 rounded-xl border-2 text-left transition cursor-pointer flex flex-col justify-between ${
-                        deliveryType === 'home'
-                          ? 'border-zinc-900 bg-zinc-900 text-white shadow-xs'
-                          : 'border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-800'
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5 font-bold text-xs">
-                        <span>🏠 À Domicile</span>
-                      </div>
-                      <span className={`text-[10px] mt-1 ${deliveryType === 'home' ? 'text-zinc-300' : 'text-zinc-500'}`}>
-                        Livreur à votre porte
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setDeliveryType('stopdesk')}
-                      className={`p-2.5 rounded-xl border-2 text-left transition cursor-pointer flex flex-col justify-between relative ${
-                        deliveryType === 'stopdesk'
-                          ? 'border-emerald-600 bg-emerald-50 text-emerald-950 ring-1 ring-emerald-600'
-                          : 'border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-800'
-                      }`}
-                    >
-                      <span className="absolute -top-2 right-2 text-[8px] font-black uppercase bg-emerald-600 text-white px-1.5 py-0.2 rounded-full shadow-xs">
-                        100% Gratuit
-                      </span>
-                      <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-800">
-                        <span>🏢 Point Relais</span>
-                      </div>
-                      <span className="text-[10px] mt-1 text-emerald-700">
-                        En agence (Ozon / Sendit)
-                      </span>
-                    </button>
-                  </div>
-                </div>
-
                 {/* Address or Agency Selection */}
                 {deliveryType === 'home' ? (
                   <div>
@@ -951,6 +990,9 @@ Merci de me confirmer la livraison !`;
                       )}
                     </label>
                     <textarea
+                      name="address"
+                      autoComplete="street-address"
+                      autoCapitalize="sentences"
                       required
                       rows={2}
                       value={address}
@@ -960,7 +1002,7 @@ Merci de me confirmer la livraison !`;
                       }}
                       onBlur={() => setTouched((prev) => ({ ...prev, address: true }))}
                       placeholder="Ex: Quartier Maârif, Rue Abou Bakr Essedik, Résidence Al Manar Appt 4"
-                      className={`w-full px-3.5 py-2 bg-zinc-50 border rounded-xl text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition ${
+                      className={`w-full px-3.5 py-2 bg-zinc-50 border rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition ${
                         touched.address && !addressValidation.isValid
                           ? 'border-red-400 bg-red-50/30'
                           : touched.address && addressValidation.isValid
@@ -991,7 +1033,7 @@ Merci de me confirmer la livraison !`;
                       value={agencyName}
                       onChange={(e) => setAgencyName(e.target.value)}
                       placeholder="Ex: Agence Ozon Maârif, Sendit Agdal, Barid Cash, ou le plus proche"
-                      className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-300 rounded-xl text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition"
+                      className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-300 rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition"
                     />
                     <p className="text-[10px] text-zinc-500 mt-1 font-normal">
                       Laissez vide pour recevoir le colis à l'agence la plus proche de votre zone. SMS envoyé dès réception.
@@ -1037,36 +1079,25 @@ Merci de me confirmer la livraison !`;
               </div>
 
               {/* Step 2 CTA Actions */}
-              <div className="space-y-3 pt-2 border-t border-zinc-200">
-                {/* Inspection guarantee checklist — Moroccan COD trust signals */}
-                <div className={`p-3 rounded-xl border text-[11px] space-y-1.5 ${
-                  isWaybill ? 'border-dashed border-amber-300 bg-amber-50/50' : 'border-emerald-200 bg-emerald-50/40'
-                }`}>
-                  <div className="font-black text-xs text-emerald-950 flex items-center gap-1.5 mb-1">
-                    <PackageCheck className="w-4 h-4 text-emerald-600" />
-                    <span>Engagements de Livraison COD Shop Maroc :</span>
+              <div className="space-y-2.5 pt-2 border-t border-zinc-200">
+                {/* 1. Compact Reassurance Badge right above CTA */}
+                <div className="p-2.5 bg-emerald-50 border border-emerald-200/90 rounded-xl flex items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <PackageCheck className="w-4 h-4 text-emerald-700 shrink-0" />
+                    <span className="font-bold text-emerald-950 text-[11px] truncate">
+                      "Vérifiez votre colis avant de payer" (عاين سلعتك قبل ما تخلص)
+                    </span>
                   </div>
-                  <div className="flex items-start gap-2 text-zinc-700">
-                    <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3] shrink-0 mt-0.5" />
-                    <span><strong>Inspection autorisée :</strong> "Vérifiez votre colis avant de payer" (عاين سلعتك قبل ما تخلص).</span>
-                  </div>
-                  <div className="flex items-start gap-2 text-zinc-700">
-                    <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3] shrink-0 mt-0.5" />
-                    <span><strong>Délais garantis :</strong> Casablanca 24h, Hors Casa 48h partout au Maroc.</span>
-                  </div>
-                  <div className="flex items-start gap-2 text-zinc-700">
-                    <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3] shrink-0 mt-0.5" />
-                    <span><strong>Appel du livreur :</strong> Contact téléphonique ou WhatsApp avant passage.</span>
-                  </div>
-                  <div className="flex items-start gap-2 text-zinc-700">
-                    <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3] shrink-0 mt-0.5" />
-                    <span><strong>Paiement en espèces :</strong> 100% Cash à la livraison, pas d'avance bancaire.</span>
-                  </div>
+                  <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full shrink-0">
+                    100% Cash COD
+                  </span>
                 </div>
+
+                {/* 2. Primary CTA Button directly visible */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full py-3.5 px-4 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:opacity-95 ${theme.styleTokens.buttonRadius}`}
+                  className={`w-full py-3.5 px-4 text-white font-black text-xs sm:text-sm shadow-md hover:shadow-lg active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:opacity-95 min-h-[48px] ${theme.styleTokens.buttonRadius}`}
                   style={{ backgroundColor: theme.colors.primary }}
                 >
                   {loading ? (
@@ -1082,25 +1113,35 @@ Merci de me confirmer la livraison !`;
                   )}
                 </button>
 
+                {/* 3. Secondary Actions: Back & WhatsApp */}
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="w-1/3 py-2.5 px-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold rounded-xl text-xs transition flex items-center justify-center gap-1 cursor-pointer"
+                    className="w-1/3 py-2.5 px-3 min-h-[44px] bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold rounded-xl text-xs transition flex items-center justify-center gap-1 cursor-pointer"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
                     <span>Retour</span>
                   </button>
 
-                  {/* Alternative: Order via WhatsApp */}
                   <button
                     type="button"
                     onClick={handleWhatsAppOrder}
-                    className="w-2/3 py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-2/3 py-2.5 px-3 min-h-[44px] bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <MessageCircle className="w-4 h-4 text-emerald-600" />
                     <span>Commander via WhatsApp</span>
                   </button>
+                </div>
+
+                {/* 4. Detailed Guarantees Checklist placed underneath for trust */}
+                <div className={`p-2.5 rounded-xl border text-[10px] space-y-1 ${
+                  isWaybill ? 'border-dashed border-amber-300 bg-amber-50/50' : 'border-emerald-200/80 bg-emerald-50/30'
+                }`}>
+                  <div className="font-bold text-zinc-800 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Garanties COD Shop : Inspection avant paiement • Appel du livreur • Zéro avance bancaire</span>
+                  </div>
                 </div>
               </div>
             </div>

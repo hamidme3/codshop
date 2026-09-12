@@ -163,6 +163,9 @@ function ThemeGalleryContent() {
       }
 
       setActiveThemeId(theme.id);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('codshop_theme', theme.id);
+      }
       setSuccessMessage(
         language === 'ar'
           ? `تم تفعيل قالب "${theme.name}" بنجاح!`

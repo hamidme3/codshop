@@ -82,8 +82,9 @@ function OrdersContent() {
 
   // 1-Click Fast Dispatch with Moroccan Couriers
   const handleQuickDispatch = (orderId: string, courier: ShippingCourier = 'ozon') => {
+    const existingOrder = orders.find((o) => o.id === orderId);
     const courierPrefix = courier.toUpperCase();
-    const tracking = `${courierPrefix}-MA-${Math.floor(100000 + Math.random() * 900000)}`;
+    const tracking = existingOrder?.trackingNumber || `${courierPrefix}-MA-${Math.floor(100000 + Math.random() * 900000)}`;
     handleQuickTransition(orderId, 'shipped', tracking, courier);
   };
 
@@ -111,7 +112,8 @@ function OrdersContent() {
 
   const handleBulkDispatch = (courier: ShippingCourier = 'ozon') => {
     selectedOrderIds.forEach((id) => {
-      const tracking = `${courier.toUpperCase()}-MA-${Math.floor(100000 + Math.random() * 900000)}`;
+      const existing = orders.find((o) => o.id === id);
+      const tracking = existing?.trackingNumber || `${courier.toUpperCase()}-MA-${Math.floor(100000 + Math.random() * 900000)}`;
       updateOrderStatus(id, 'shipped', tracking, courier);
     });
     setOrders([...getOrders(storeSlug)]);
@@ -162,7 +164,33 @@ function OrdersContent() {
 
   // Export Manifest Engine (CSV download)
   const handleExportManifest = (courier: CourierKey = 'standard') => {
-    handleExportByStatus('current', courier);
+    let ordersToExport: Order[] = [];
+    if (selectedOrderIds.length > 0) {
+      ordersToExport = orders.filter((o) => selectedOrderIds.includes(o.id));
+    } else if (activeFilter === 'all' || activeFilter === 'new') {
+      ordersToExport = orders.filter((o) => ['confirmed', 'shipped', 'shipping'].includes(o.status));
+    } else {
+      ordersToExport = filteredOrders.filter((o) => !['canceled', 'returned'].includes(o.status));
+    }
+
+    if (ordersToExport.length === 0) {
+      showToast(`Aucune commande prête pour expédition (${courier.toUpperCase()}).`);
+      return;
+    }
+
+    const result = exportCourierManifest(courier, ordersToExport, `${storeSlug}_manifest`);
+    const blob = new Blob([result.content], { type: result.mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = result.filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    setIsExportOpen(false);
+    showToast(`Manifeste ${courier.toUpperCase()} téléchargé (${result.orderCount} commandes - ${result.totalCrbt} DH)`);
   };
 
   const getStatusBadge = (status: OrderStatus) => {
@@ -567,7 +595,9 @@ function OrdersContent() {
                             </button>
 
                             {isWaOpen && (
-                              <div className="absolute right-0 top-8 w-56 bg-slate-900 border border-slate-800 rounded-xl p-1.5 shadow-2xl z-30 text-[11px] space-y-1">
+                              <>
+                                <div className="fixed inset-0 z-20" onClick={() => setActiveWaOrderId(null)} />
+                                <div className="absolute right-0 top-8 w-56 bg-slate-900 border border-slate-800 rounded-xl p-1.5 shadow-2xl z-30 text-[11px] space-y-1">
                                 <div className="text-[9px] font-bold uppercase text-slate-500 px-2 py-1">
                                   Modèles Darija WhatsApp
                                 </div>
@@ -608,7 +638,8 @@ function OrdersContent() {
                                   🚚 4. Avis d&apos;Expédition
                                 </a>
                               </div>
-                            )}
+                            </>
+                          )}
                           </div>
 
                           {/* Direct Call */}
@@ -739,7 +770,7 @@ function OrdersContent() {
               <div>
                 <label className="block text-slate-400 mb-1 font-semibold">Mettre à jour le statut :</label>
                 <select
-                  value={selectedOrder.status}
+                  value={selectedOrder.status === 'shipping' ? 'shipped' : selectedOrder.status}
                   onChange={(e) => handleQuickTransition(selectedOrder.id, e.target.value as OrderStatus)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-bold"
                 >

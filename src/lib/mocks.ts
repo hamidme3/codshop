@@ -1,5 +1,5 @@
 import type { Order, Product, Category, Customer, PaymentGateway, OrderStatus, CustomerOrderSummary } from './types';
-import { restoreMockProductStock } from './mockProducts';
+import { restoreMockProductStock, decrementMockProductStock } from './mockProducts';
 
 // ── Seed Moroccan Orders ────────────────────────────────────────
 export let ORDERS: Order[] = [
@@ -366,6 +366,7 @@ export function syncCustomersFromOrders(storeSlug: string): Customer[] {
       returnedOrders: 0,
       canceledOrders: 0,
       recentOrders: [],
+      totalSpend: c.totalSpend || 0,
     });
   }
 
@@ -455,17 +456,13 @@ export function syncCustomersFromOrders(storeSlug: string): Customer[] {
       cust.lastOrderDate = formatRelativeOrderDate(latestOrder.createdAt);
     }
 
-    // Cash delivered total spend
+    // Cash delivered total spend (Strict Moroccan COD: Only count collected cash upon delivery)
     const deliveredSum = ordersList
       .filter((o) => o.status === 'delivered')
       .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
     
-    // In Moroccan COD, if delivered > 0, totalSpend is cash collected. If brand new order pending, calculate potential.
-    if (deliveredSum > 0) {
-      cust.totalSpend = deliveredSum;
-    } else if (ordersList.length > 0) {
-      cust.totalSpend = ordersList.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
-    }
+    const initialSpend = cust.totalSpend || 0;
+    cust.totalSpend = deliveredSum > 0 ? deliveredSum : initialSpend;
 
     cust.averageBasket = cust.totalOrders > 0 ? Math.round(cust.totalSpend / Math.max(1, cust.deliveredOrders || cust.totalOrders)) : 0;
 
@@ -526,10 +523,29 @@ export function updateOrderStatus(orderId: string, status: Order['status'], trac
       }
       restoreMockProductStock(item.id, item.quantity, { variant: item.variant });
     }
+  } else if ((previousStatus === 'canceled' || previousStatus === 'returned') && status !== 'canceled' && status !== 'returned') {
+    // Re-decrement inventory when transitioning back to an active state
+    for (const item of order.items) {
+      const prod = PRODUCTS.find((p) => p.id === item.id);
+      if (prod) {
+        prod.stock = Math.max(0, (prod.stock ?? 0) - item.quantity);
+      }
+      decrementMockProductStock(item.id, item.quantity, { variant: item.variant });
+    }
   }
 
   // Synchronize CRM immediately
   syncCustomersFromOrders(order.storeSlug);
+
+  // Broadcast real-time update event to CRM and active browser tabs
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('cod_orders_updated', { detail: { orderId, status } }));
+    try {
+      const bc = new BroadcastChannel('cod_pipeline_sync');
+      bc.postMessage({ type: 'ORDER_UPDATED', orderId, status });
+      bc.close();
+    } catch (_) {}
+  }
 
   return true;
 }

@@ -6,14 +6,35 @@ import { eq } from 'drizzle-orm';
 export async function GET(request: Request) {
   try {
     const session = await getSession();
-    if (!session) {
-      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
-    }
-
-    const storeId = session.activeStoreId || session.storeId;
     const db = getDb();
 
-    if (!db) {
+    let storeId = session?.activeStoreId || session?.storeId;
+
+    // If unauthenticated public storefront query
+    if (!storeId && db) {
+      try {
+        const { searchParams } = new URL(request.url);
+        const queryStore = searchParams.get('store');
+        const queryStoreId = searchParams.get('storeId');
+
+        if (queryStoreId) {
+          storeId = queryStoreId;
+        } else if (queryStore) {
+          const storeRecord = await db.query.stores.findFirst({
+            where: eq(schema.stores.slug, queryStore),
+          });
+          if (storeRecord) storeId = storeRecord.id;
+        } else {
+          // Fallback to default active store
+          const defaultStore = await db.query.stores.findFirst();
+          if (defaultStore) storeId = defaultStore.id;
+        }
+      } catch {
+        // Fall through
+      }
+    }
+
+    if (!db || !storeId) {
       return NextResponse.json({
         metaPixelId: '',
         tiktokPixelId: '',
@@ -68,6 +89,7 @@ export async function POST(request: Request) {
       snapchatPixelId: body.snapchatPixelId || null,
       googleAnalyticsId: body.googleAnalyticsId || null,
       googleMerchantCenterId: body.googleMerchantCenterId || null,
+      pinterestPartnerId: body.pinterestPartnerId || null,
       updatedAt: new Date(),
     };
 

@@ -33,7 +33,7 @@ export function validateAndNormalizeMoroccanPhone(rawPhone: string | null | unde
     nationalDigits = clean.slice(4);
   } else if (clean.startsWith('00212')) {
     nationalDigits = clean.slice(5);
-  } else if (clean.startsWith('212') && clean.length === 12) {
+  } else if (clean.startsWith('212') && (clean.length === 11 || clean.length === 12 || clean.length === 13)) {
     nationalDigits = clean.slice(3);
   } else if (clean.startsWith('0')) {
     nationalDigits = clean.slice(1);
@@ -48,6 +48,11 @@ export function validateAndNormalizeMoroccanPhone(rawPhone: string | null | unde
       type: 'unknown',
       error: 'Format de téléphone marocain invalide (doit commencer par 05, 06, 07 ou +212)',
     };
+  }
+
+  // Strip redundant trunk zero after international prefix (e.g. +212 06... -> 06...)
+  if (nationalDigits.startsWith('0')) {
+    nationalDigits = nationalDigits.slice(1);
   }
 
   // Moroccan numbers have exactly 9 digits after country code or leading 0

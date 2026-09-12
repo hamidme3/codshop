@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import { getProductBySlug, getProductQuantityTiers, getProductVariantInfo } from '@/lib/mockProducts';
-import { getDeliveryDateEstimate } from '@/lib/moroccanCities';
+import { getDeliveryDateEstimate, FREE_SHIPPING_THRESHOLD } from '@/lib/moroccanCities';
 import { CountdownTimer } from '@/components/CountdownTimer';
 import { useTheme } from '@/context/ThemeContext';
 import {
@@ -22,12 +22,27 @@ import {
 } from 'lucide-react';
 import { CodCheckoutModal } from '@/components/CodCheckoutModal';
 import { CartWidget } from '@/components/CartWidget';
+import { fetchAndInitPixels, trackViewContent } from '@/lib/pixel-tracker';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
   const product = getProductBySlug(slug);
   const { formatMAD, theme } = useTheme();
+
+  // Initialize and track ViewContent across ad platforms
+  useEffect(() => {
+    if (product) {
+      fetchAndInitPixels().then(() => {
+        trackViewContent({
+          id: product.id,
+          title: product.title,
+          price: product.price,
+          category: product.theme,
+        });
+      });
+    }
+  }, [product]);
 
   const [activeImage, setActiveImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(
@@ -225,9 +240,9 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Authentic Variant-Level Urgency: countdown + dynamic variant stock + visitors */}
-          <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 shadow-sm">
             <CountdownTimer endTimeISO={new Date(Date.now() + 24 * 3600 * 1000).toISOString()} />
-            <div className="w-px h-5 bg-amber-200" />
+            <div className="hidden sm:block w-px h-5 bg-amber-200" />
             <div className="flex items-center gap-2 text-[11px] font-bold text-amber-700">
               {activeVariantInfo.inStock ? (
                 <span>Plus que {activeVariantInfo.stock} en stock pour cette option!</span>
@@ -426,7 +441,7 @@ export default function ProductDetailPage() {
 
                         {/* Badges: Free delivery + Free gift */}
                         <div className="flex flex-wrap gap-1 mt-2">
-                          {(tier.freeDelivery || tier.quantity >= 2) ? (
+                          {(tier.freeDelivery || tier.quantity >= 2 || tier.totalPrice >= FREE_SHIPPING_THRESHOLD) ? (
                             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100/90 px-1.5 py-0.5 rounded">
                               <Truck className="w-3 h-3 text-emerald-700 shrink-0" />
                               Livraison Gratuite 24h
@@ -522,7 +537,7 @@ export default function ProductDetailPage() {
                 <div className="font-bold text-zinc-900 flex items-center justify-between">
                   <span>Livraison estimée : {deliveryEstimate.formattedEstimate}</span>
                   <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
-                    {activeTier.freeDelivery || activeTier.quantity >= 2 ? 'GRATUITE' : 'Standard'}
+                    {activeTier.freeDelivery || activeTier.quantity >= 2 || deliveryEstimate?.isFree ? 'GRATUITE' : 'Standard'}
                   </span>
                 </div>
                 <p className="text-[11px] text-zinc-600 mt-0.5">
@@ -621,13 +636,13 @@ export default function ProductDetailPage() {
             <div className="flex items-center gap-1.5 mt-0.5">
               <span
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black ${
-                  activeTier?.freeDelivery || (activeTier?.quantity ?? 1) >= 2
+                  activeTier?.freeDelivery || (activeTier?.quantity ?? 1) >= 2 || (activeTier?.totalPrice ?? 0) >= FREE_SHIPPING_THRESHOLD
                     ? 'bg-emerald-100 text-emerald-800'
                     : 'bg-zinc-100 text-zinc-700'
                 }`}
               >
                 <Truck className="w-3 h-3 stroke-[2.5]" />
-                {activeTier?.freeDelivery || (activeTier?.quantity ?? 1) >= 2
+                {activeTier?.freeDelivery || (activeTier?.quantity ?? 1) >= 2 || (activeTier?.totalPrice ?? 0) >= FREE_SHIPPING_THRESHOLD
                   ? 'Livraison Gratuite 24h'
                   : 'Livraison 24h/48h COD'}
               </span>
@@ -644,7 +659,7 @@ export default function ProductDetailPage() {
             type="button"
             disabled={!activeVariantInfo.inStock}
             onClick={() => setShowCheckoutModal(true)}
-            className="py-3 px-4 sm:px-5 text-white font-black text-xs sm:text-sm tracking-tight shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0 min-h-[48px] rounded-xl"
+            className={`py-3 px-4 sm:px-5 text-white font-black text-xs sm:text-sm tracking-tight shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0 min-h-[48px] ${theme.styleTokens.buttonRadius}`}
             style={{ backgroundColor: activeVariantInfo.inStock ? theme.colors.primary : '#6b7280' }}
             aria-label="Acheter maintenant - Paiement à la livraison"
           >

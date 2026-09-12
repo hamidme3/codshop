@@ -9,15 +9,10 @@ import {
   AlertTriangle, ChevronRight, X, Clock, RefreshCw, Package
 } from 'lucide-react';
 import { getCustomers, Customer, OrderStatus } from '@/lib/backoffice';
+import { normalizeMoroccanPhone } from '@/lib/whatsapp-templates';
 
 function getContextualWhatsAppUrl(customer: Customer, storeSlug: string): string {
-  const rawPhone = (customer.phone || '').replace(/[^0-9]/g, '');
-  let waPhone = rawPhone;
-  if (waPhone.startsWith('0') && waPhone.length === 10) {
-    waPhone = `212${waPhone.slice(1)}`;
-  } else if (waPhone.length === 9) {
-    waPhone = `212${waPhone}`;
-  }
+  const waPhone = normalizeMoroccanPhone(customer.phone);
 
   const storeName = storeSlug.toUpperCase();
   const orderNum = customer.lastOrderNumber || 'votre commande';
@@ -60,11 +55,27 @@ function CustomersContent() {
     setCustomers(getCustomers(storeSlug));
   };
 
+  // Real-time synchronization with order pipeline updates
+  React.useEffect(() => {
+    const handleSync = () => setCustomers(getCustomers(storeSlug));
+    window.addEventListener('cod_orders_updated', handleSync);
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel('cod_pipeline_sync');
+      bc.onmessage = () => handleSync();
+    } catch (_) {}
+
+    return () => {
+      window.removeEventListener('cod_orders_updated', handleSync);
+      if (bc) bc.close();
+    };
+  }, [storeSlug]);
+
   // ── Dynamic KPIs calculated directly from synchronized store customers ──
   const totalCustomersCount = customers.length;
-  const confirmedPipelineCount = customers.filter((c) => c.lastOrderStatus === 'confirmed').length;
-  const shippedPipelineCount = customers.filter((c) => c.lastOrderStatus === 'shipped' || c.lastOrderStatus === 'shipping').length;
-  const deliveredPipelineCount = customers.filter((c) => (c.deliveredOrders || 0) > 0).length;
+  const confirmedPipelineCount = customers.filter((c) => c.lastOrderStatus === 'confirmed' || (c.confirmedOrders || 0) > 0).length;
+  const shippedPipelineCount = customers.filter((c) => ['shipped', 'shipping'].includes(c.lastOrderStatus || '') || (c.shippedOrders || 0) > 0).length;
+  const deliveredPipelineCount = customers.filter((c) => c.lastOrderStatus === 'delivered' || (c.deliveredOrders || 0) > 0).length;
   const totalDeliveredRevenue = customers.reduce((sum, c) => sum + (c.totalSpend || 0), 0);
   const vipCustomersCount = customers.filter((c) => c.status === 'returning' || (c.deliveredOrders || 0) >= 2).length;
   const riskCustomersCount = customers.filter((c) => c.status === 'risk' || (c.returnedOrders || 0) > 0).length;

@@ -667,8 +667,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     category: 'kids',
     sourceInspiration: 'Showcase (Shopify)',
     colors: {
-      primary: '#0284c7',
-      primaryHover: '#0369a1',
+      primary: '#0369a1',
+      primaryHover: '#075985',
       accent: '#f59e0b',
       accentHover: '#d97706',
       bgPage: '#f0f9ff',
@@ -773,8 +773,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     category: 'sports',
     sourceInspiration: 'Impulse (Shopify)',
     colors: {
-      primary: '#09090b',
-      primaryHover: '#18181b',
+      primary: '#ea580c',
+      primaryHover: '#c2410c',
       accent: '#f97316',
       accentHover: '#ea580c',
       bgPage: '#18181b',
@@ -1303,8 +1303,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     category: 'tech',
     sourceInspiration: 'Baseline (Shopify)',
     colors: {
-      primary: '#050505',
-      primaryHover: '#121212',
+      primary: '#7c3aed',
+      primaryHover: '#6d28d9',
       accent: '#8b5cf6',
       accentHover: '#7c3aed',
       bgPage: '#09090b',
@@ -1356,8 +1356,8 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     category: 'general',
     sourceInspiration: 'YouCan.shop Proprietary Engine',
     colors: {
-      primary: '#059669',
-      primaryHover: '#047857',
+      primary: '#047857',
+      primaryHover: '#065f46',
       accent: '#eab308',
       accentHover: '#ca8a04',
       bgPage: '#f8fafc',

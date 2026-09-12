@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { CheckCircle2, PhoneCall, Truck, Banknote, MessageCircle, ArrowLeft, User, MapPin } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
+import { fetchAndInitPixels, trackPurchase } from '@/lib/pixel-tracker';
 
 interface OrderSuccessClientProps {
   orderId: string;
@@ -34,7 +35,17 @@ export default function OrderSuccessClient({
     } catch {
       // ignore
     }
-  }, []);
+
+    // Initialize pixels and fire deduplicated Purchase event
+    fetchAndInitPixels().then(() => {
+      trackPurchase({
+        orderId,
+        total: total || 0,
+        items,
+        customerCity: city,
+      });
+    });
+  }, [orderId, total, items, city]);
 
   const whatsAppUrl = `https://wa.me/212661000000?text=${encodeURIComponent(
     `Salam, je confirme ma commande #${orderId} au nom de ${customerName} (${city}${total ? `, Total: ${total} DH` : ''})`

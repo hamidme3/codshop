@@ -6,7 +6,7 @@
 
 import { getDb, schema } from '@/db';
 import { eq } from 'drizzle-orm';
-import { MOCK_PRODUCTS, QuantityTier } from './mockProducts';
+import { MOCK_PRODUCTS, QuantityTier, getProductQuantityTiers } from './mockProducts';
 import { PRODUCTS } from './mocks';
 import { getStoreBySlug as getMockStoreBySlug } from './stores';
 import { MOROCCAN_CITIES, getCityShipping, FREE_SHIPPING_THRESHOLD } from './moroccanCities';
@@ -51,10 +51,13 @@ export async function resolveCatalogProduct(
           return false;
         });
         if (matched) {
+          const mockMatch = MOCK_PRODUCTS.find((p) => p.id === matched.id || p.sku === matched.sku || p.slug === matched.sku);
+          const tiers = mockMatch?.quantityTiers;
           return {
             id: matched.id,
             title: matched.title,
             price: Number(matched.price),
+            quantityTiers: tiers,
           };
         }
       }
@@ -100,10 +103,13 @@ export async function resolveCatalogProduct(
     return false;
   });
   if (repoProduct) {
+    const mockMatch = MOCK_PRODUCTS.find((p) => p.id === repoProduct.id || p.sku === repoProduct.sku || p.slug === repoProduct.sku);
+    const tiers = mockMatch?.quantityTiers;
     return {
       id: repoProduct.id,
       title: repoProduct.title,
       price: repoProduct.price,
+      quantityTiers: tiers,
     };
   }
 
@@ -151,7 +157,7 @@ export function calculateItemTierPricing(
 ): { unitPrice: number; itemSubtotal: number } {
   const qty = Math.max(1, Math.floor(quantity));
 
-  // Case 1: Product has explicit quantityTiers (e.g. mockProducts.ts)
+  // Priority 1: Product has explicit quantityTiers (e.g. mockProducts.ts)
   if (product.quantityTiers && product.quantityTiers.length > 0) {
     const exactTier = product.quantityTiers.find((t) => t.quantity === qty);
     if (exactTier) {
@@ -164,7 +170,6 @@ export function calculateItemTierPricing(
     const sorted = [...product.quantityTiers].sort((a, b) => a.quantity - b.quantity);
     const highest = sorted[sorted.length - 1];
     if (qty > highest.quantity) {
-      // Applied volume unit discount
       return {
         unitPrice: highest.unitPrice,
         itemSubtotal: highest.unitPrice * qty,
@@ -178,25 +183,39 @@ export function calculateItemTierPricing(
     };
   }
 
-  // Case 2: Moroccan Standard Pack Tier Rules (Pack Duo -100 DH, Pack Trio -200 DH)
-  const duoDiscount = storeDiscounts?.packDuoDiscount ?? 100;
-  const trioDiscount = storeDiscounts?.packTrioDiscount ?? 200;
+  // Priority 2: Explicit storeDiscounts passed (e.g. from store settings or test overrides)
+  if (storeDiscounts?.packDuoDiscount !== undefined || storeDiscounts?.packTrioDiscount !== undefined) {
+    if (qty === 1) {
+      return { unitPrice: product.price, itemSubtotal: product.price };
+    } else if (qty === 2) {
+      const discount = storeDiscounts.packDuoDiscount ?? 0;
+      const subtotal = Math.max(product.price, product.price * 2 - discount);
+      return { unitPrice: Math.round(subtotal / 2), itemSubtotal: subtotal };
+    } else {
+      const discount = storeDiscounts.packTrioDiscount ?? 0;
+      const subtotal = Math.max(product.price, product.price * qty - discount);
+      return { unitPrice: Math.round(subtotal / qty), itemSubtotal: subtotal };
+    }
+  }
 
+  // Priority 3: Moroccan Standard Pack Tier Rules (Pack Duo -15%, Pack Trio -25%)
   if (qty === 1) {
     return {
       unitPrice: product.price,
       itemSubtotal: product.price,
     };
   } else if (qty === 2) {
-    const subtotal = Math.max(product.price, product.price * 2 - duoDiscount);
+    const duoUnit = Math.round(product.price * 0.85);
+    const subtotal = duoUnit * 2;
     return {
-      unitPrice: Math.round(subtotal / 2),
+      unitPrice: duoUnit,
       itemSubtotal: subtotal,
     };
   } else {
-    const subtotal = Math.max(product.price, product.price * qty - trioDiscount);
+    const trioUnit = Math.round(product.price * 0.75);
+    const subtotal = trioUnit * qty;
     return {
-      unitPrice: Math.round(subtotal / qty),
+      unitPrice: trioUnit,
       itemSubtotal: subtotal,
     };
   }
@@ -209,24 +228,20 @@ export function calculateVerifiedShippingFee(
   cityName: string,
   subtotal: number,
   totalQuantity: number,
-  deliveryType: 'home' | 'stopdesk'
+  deliveryType: 'home' | 'stopdesk',
+  tierFreeDelivery: boolean = false
 ): { shippingFee: number; isFreeShipping: boolean } {
   // 1. Stopdesk / Relais pickup is always free
-  if (deliveryType === 'stopdesk') {
+  if (deliveryType === 'stopdesk' || totalQuantity >= 2 || tierFreeDelivery) {
     return { shippingFee: 0, isFreeShipping: true };
   }
 
-  // 2. Pack Duo or multi-item orders (>= 2 units) unlock Free Shipping
-  if (totalQuantity >= 2) {
-    return { shippingFee: 0, isFreeShipping: true };
-  }
-
-  // 3. Free shipping threshold (400 MAD) nationwide
+  // 2. Free shipping threshold (400 MAD) nationwide
   if (subtotal >= FREE_SHIPPING_THRESHOLD && subtotal > 0) {
     return { shippingFee: 0, isFreeShipping: true };
   }
 
-  // 4. City-specific shipping rate
+  // 3. City-specific shipping rate
   const cityInfo = getCityShipping(cityName, subtotal);
   return {
     shippingFee: cityInfo.fee,
@@ -308,14 +323,17 @@ export async function verifyAndRecalculateOrder(
 
   let computedSubtotal = 0;
   let totalQuantity = 0;
+  let hasTierFreeDelivery = false;
 
   // Store discount settings
   const mockStore = getMockStoreBySlug(safeStoreSlug);
   const codSection = mockStore?.pages?.[0]?.sections?.find((s) => s.type === 'cod_checkout');
-  const storeDiscounts = {
-    packDuoDiscount: codSection?.settings?.packDuoDiscount ?? 100,
-    packTrioDiscount: codSection?.settings?.packTrioDiscount ?? 200,
-  };
+  const storeDiscounts = codSection?.settings?.packDuoDiscount !== undefined || codSection?.settings?.packTrioDiscount !== undefined
+    ? {
+        packDuoDiscount: codSection.settings.packDuoDiscount !== undefined ? Number(codSection.settings.packDuoDiscount) : undefined,
+        packTrioDiscount: codSection.settings.packTrioDiscount !== undefined ? Number(codSection.settings.packTrioDiscount) : undefined,
+      }
+    : undefined;
 
   for (const rawIt of rawItems) {
     const qty = Math.max(1, Math.floor(Number(rawIt.quantity) || 1));
@@ -342,6 +360,11 @@ export async function verifyAndRecalculateOrder(
       };
     }
 
+    const matchedTier = catalogProd.quantityTiers?.find((t) => t.quantity === qty);
+    if (rawIt.freeDelivery || matchedTier?.freeDelivery) {
+      hasTierFreeDelivery = true;
+    }
+
     const pricing = calculateItemTierPricing(catalogProd, qty, storeDiscounts);
     computedSubtotal += pricing.itemSubtotal;
     totalQuantity += qty;
@@ -360,7 +383,7 @@ export async function verifyAndRecalculateOrder(
   }
 
   // 4. Recalculate shipping fee strictly server-side
-  const shippingResult = calculateVerifiedShippingFee(city, computedSubtotal, totalQuantity, deliveryType);
+  const shippingResult = calculateVerifiedShippingFee(city, computedSubtotal, totalQuantity, deliveryType, hasTierFreeDelivery);
   const computedShippingFee = shippingResult.shippingFee;
   const computedTotal = computedSubtotal + computedShippingFee;
 

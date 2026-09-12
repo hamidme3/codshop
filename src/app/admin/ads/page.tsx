@@ -57,6 +57,7 @@ export default function AdsHubPage() {
           snapchatPixelId,
           googleAnalyticsId,
           googleMerchantCenterId,
+          pinterestPartnerId,
         }),
       });
 
