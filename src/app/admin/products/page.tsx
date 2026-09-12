@@ -8,7 +8,7 @@ import {
   Sparkles, Wand2, Copy, CheckCheck, ShieldCheck, Flame
 } from 'lucide-react';
 import { 
-  getProducts, addProduct, deleteProduct, updateProductStock, 
+  getProducts, addProduct, updateProduct, deleteProduct, updateProductStock, 
   getCategories, addCategory, deleteCategory, Product, Category 
 } from '@/lib/backoffice';
 import { generateMoroccanProductCopy, MOROCCAN_NICHES, MoroccanAICopy } from '@/lib/ai-copywriter';
@@ -30,6 +30,18 @@ function ProductsContent() {
   const [activeTab, setActiveTab] = useState<'products' | 'categories'>('products');
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+
+  // Edit Product Modal State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editCategory, setEditCategory] = useState('');
+  const [editPrice, setEditPrice] = useState<number>(0);
+  const [editComparePrice, setEditComparePrice] = useState<number>(0);
+  const [editCostPrice, setEditCostPrice] = useState<number>(0);
+  const [editStock, setEditStock] = useState<number>(0);
+  const [editImageUrl, setEditImageUrl] = useState('');
+  const [editVariants, setEditVariants] = useState<Array<{ color?: string; size?: string; stock: number; sku?: string }>>([]);
 
   // Category Modal & Notification State
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
@@ -90,6 +102,80 @@ function ProductsContent() {
     updateProductStock(prodId, newStock);
     setProducts(getProducts(storeSlug));
     showToast(`Stock de "${prod.title}" ajusté : ${newStock} unités.`);
+  };
+
+  const handleOpenEditModal = (prod: Product) => {
+    setEditingProduct(prod);
+    setEditTitle(prod.title || '');
+    setEditCategory(prod.category || 'Maroquinerie & Cuir');
+    setEditPrice(prod.price || 0);
+    setEditComparePrice(prod.comparePrice || 0);
+    setEditCostPrice(prod.costPrice || 0);
+    setEditStock(prod.stock || 0);
+    setEditImageUrl(prod.images?.[0] || '');
+    const vars = (prod.variants && prod.variants.length > 0)
+      ? prod.variants.map((v: any) => ({
+          color: v.color || '',
+          size: v.size || '',
+          stock: v.stock ?? 0,
+          sku: v.sku || '',
+        }))
+      : [{ size: 'Standard', stock: prod.stock || 0 }];
+    setEditVariants(vars);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEditProduct = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct || !editTitle.trim()) return;
+
+    const totalVariantStock = editVariants.length > 0
+      ? editVariants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0)
+      : Number(editStock);
+
+    const updated = updateProduct(editingProduct.id, {
+      title: editTitle,
+      category: editCategory,
+      price: Number(editPrice),
+      comparePrice: Number(editComparePrice),
+      costPrice: Number(editCostPrice),
+      stock: totalVariantStock,
+      images: [editImageUrl || editingProduct.images?.[0] || 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=800&auto=format&fit=crop'],
+      variants: editVariants.map((v) => ({
+        color: v.color || undefined,
+        size: v.size || undefined,
+        stock: Number(v.stock) || 0,
+        sku: v.sku || undefined,
+      })),
+    });
+
+    if (updated) {
+      setProducts(getProducts(storeSlug));
+      setCategories(getCategories(storeSlug));
+      setShowEditModal(false);
+      setEditingProduct(null);
+      showToast(`Produit "${editTitle}" mis à jour avec succès !`);
+    } else {
+      alert('Erreur lors de la mise à jour du produit.');
+    }
+  };
+
+  const handleAddEditVariant = () => {
+    setEditVariants([...editVariants, { color: '', size: '', stock: 5, sku: '' }]);
+  };
+
+  const handleRemoveEditVariant = (idx: number) => {
+    if (editVariants.length <= 1) {
+      alert('Un produit doit comporter au moins une variante ou taille standard.');
+      return;
+    }
+    setEditVariants(editVariants.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdateEditVariant = (idx: number, field: string, val: any) => {
+    setEditVariants(
+      editVariants.map((v, i) => (i === idx ? { ...v, [field]: val } : v))
+    );
   };
 
   // Coach IA Moroccan Copywriter State
@@ -340,14 +426,24 @@ function ProductsContent() {
                         </td>
 
                         <td className="py-3.5 px-4 text-right">
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteProduct(p)}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all inline-flex items-center"
-                            title="Supprimer ce produit"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditModal(p)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20 transition-all inline-flex items-center cursor-pointer"
+                              title="Modifier ce produit (prix, stock, variantes)"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteProduct(p)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all inline-flex items-center cursor-pointer"
+                              title="Supprimer ce produit"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -554,6 +650,209 @@ function ProductsContent() {
                   type="button"
                   onClick={() => setShowAddModal(false)}
                   className="py-3 px-4 rounded-xl bg-slate-800 text-slate-300 text-xs hover:bg-slate-700 font-bold"
+                >
+                  Annuler
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Product Modal with Variant & Pricing Manager */}
+      {showEditModal && editingProduct && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                  <Edit3 className="w-4 h-4 text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white">Modifier le Produit</h3>
+                  <div className="text-[11px] font-mono text-slate-400">{editingProduct.sku}</div>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setShowEditModal(false)} 
+                className="text-slate-400 hover:text-white p-1 text-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditProduct} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Titre du Produit :</label>
+                <input
+                  type="text"
+                  required
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500 font-bold"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-slate-300 font-semibold">Catégorie :</label>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddCategoryModal(true)}
+                      className="text-[11px] text-amber-400 hover:text-amber-300 font-bold hover:underline inline-flex items-center gap-0.5"
+                    >
+                      <Plus className="w-3 h-3" /> Nouvelle
+                    </button>
+                  </div>
+                  <select
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500 font-medium"
+                  >
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Stock Global :</label>
+                  <input
+                    type="number"
+                    value={editStock}
+                    onChange={(e) => setEditStock(Number(e.target.value))}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500 font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* Pricing & Dynamic Margin Calculation */}
+              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
+                <div className="grid grid-cols-3 gap-2.5">
+                  <div>
+                    <label className="block text-slate-400 font-semibold mb-1">Prix Vente (DH) :</label>
+                    <input
+                      type="number"
+                      value={editPrice}
+                      onChange={(e) => setEditPrice(Number(e.target.value))}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white font-black text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-400 font-semibold mb-1">Prix Barré (DH) :</label>
+                    <input
+                      type="number"
+                      value={editComparePrice}
+                      onChange={(e) => setEditComparePrice(Number(e.target.value))}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-300"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-400 font-semibold mb-1">Coût Achat (DH) :</label>
+                    <input
+                      type="number"
+                      value={editCostPrice}
+                      onChange={(e) => setEditCostPrice(Number(e.target.value))}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-emerald-400 font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-emerald-950/20 border border-emerald-500/20 text-emerald-400 text-xs">
+                  <span>Marge Nette prévisionnelle :</span>
+                  <span className="font-extrabold text-sm">
+                    +{(editPrice || 0) - (editCostPrice || 0)} DH ({((editPrice || 0) > 0 ? Math.round((((editPrice || 0) - (editCostPrice || 0)) / (editPrice || 1)) * 100) : 0)}%)
+                  </span>
+                </div>
+              </div>
+
+              {/* Variants & Size/Color Matrix */}
+              <div className="space-y-2.5 p-3.5 rounded-xl bg-slate-950 border border-slate-800">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-bold text-white text-xs flex items-center gap-1.5">
+                      <Layers className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Variantes & Stocks Détaillés</span>
+                    </div>
+                    <div className="text-[11px] text-slate-400 mt-0.5">
+                      Couleurs, pointures et unités en entrepôt.
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddEditVariant}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 font-bold text-[11px] border border-slate-700 transition-colors"
+                  >
+                    <Plus className="w-3 h-3" /> Ajouter Variante
+                  </button>
+                </div>
+
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {editVariants.map((v, idx) => (
+                    <div key={idx} className="flex items-center gap-2 bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                      <input
+                        type="text"
+                        placeholder="Couleur (ex: Noir)"
+                        value={v.color || ''}
+                        onChange={(e) => handleUpdateEditVariant(idx, 'color', e.target.value)}
+                        className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-white placeholder-slate-600 text-xs"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Taille / Réf (ex: 42, L)"
+                        value={v.size || ''}
+                        onChange={(e) => handleUpdateEditVariant(idx, 'size', e.target.value)}
+                        className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-white placeholder-slate-600 text-xs"
+                      />
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          placeholder="Stock"
+                          value={v.stock}
+                          onChange={(e) => handleUpdateEditVariant(idx, 'stock', Number(e.target.value))}
+                          className="w-16 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-center font-bold text-xs"
+                        />
+                        <span className="text-[10px] text-slate-500 font-mono">un.</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveEditVariant(idx)}
+                        className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                        title="Supprimer cette variante"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Image Principale (URL) :</label>
+                <input
+                  type="text"
+                  value={editImageUrl}
+                  onChange={(e) => setEditImageUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-mono text-[11px]"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2 border-t border-slate-800">
+                <button
+                  type="submit"
+                  className="flex-1 py-3 rounded-xl bg-amber-500 text-slate-950 font-black text-xs hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20"
+                >
+                  Enregistrer les Modifications
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="py-3 px-5 rounded-xl bg-slate-800 text-slate-300 text-xs hover:bg-slate-700 font-bold"
                 >
                   Annuler
                 </button>

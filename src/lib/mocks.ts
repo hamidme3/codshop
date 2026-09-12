@@ -578,6 +578,25 @@ export function updateProductStock(productId: string, newStock: number): boolean
   return true;
 }
 
+export function updateProduct(productId: string, updates: Partial<Product>): Product | null {
+  const prod = PRODUCTS.find((p) => p.id === productId);
+  if (!prod) return null;
+
+  if (updates.title !== undefined) prod.title = updates.title.trim();
+  if (updates.category !== undefined) prod.category = updates.category.trim();
+  if (updates.price !== undefined) prod.price = Number(updates.price);
+  if (updates.comparePrice !== undefined) prod.comparePrice = Number(updates.comparePrice);
+  if (updates.costPrice !== undefined) prod.costPrice = Number(updates.costPrice);
+  if (updates.stock !== undefined) prod.stock = Math.max(0, Number(updates.stock));
+  if (updates.images !== undefined) prod.images = updates.images;
+  if (updates.variants !== undefined) prod.variants = updates.variants;
+  if (updates.sku !== undefined) prod.sku = updates.sku.trim();
+  if (updates.status !== undefined) prod.status = updates.status;
+
+  return { ...prod };
+}
+
+
 export function getCategories(storeSlug: string = 'ottavio'): Category[] {
   const storeProducts = PRODUCTS.filter((p) => !storeSlug || p.storeSlug === storeSlug);
   return CATEGORIES.map((cat) => {

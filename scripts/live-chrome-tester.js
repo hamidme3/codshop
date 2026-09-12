@@ -540,6 +540,45 @@ async function auditInteractiveCrud(browser, sessionToken) {
     console.log(`  [${hasActionsCol ? 'PASS' : 'FAIL'}] Products Table Actions Column & Quick Stock Adjuster`);
     results.push({ name: 'Products Actions Column', pass: hasActionsCol });
 
+    // 6b. Test Product Edit Modal & Variant Manager
+    console.log('  6b. Testing Product Edit Modal & Variant Management...');
+    await page.evaluate(() => {
+      const editBtns = Array.from(document.querySelectorAll('button[title*="Modifier ce produit"]'));
+      if (editBtns[0]) editBtns[0].click();
+    });
+
+    await new Promise((r) => setTimeout(r, 600));
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'crud-product-edit-modal.png') });
+
+    const isEditModalOpen = await page.evaluate(() => {
+      const headings = Array.from(document.querySelectorAll('h3'));
+      return headings.some((h) => h.innerText.includes('Modifier le Produit'));
+    });
+
+    const hasVariantManager = await page.evaluate(() => {
+      return document.body.innerText.includes('Variantes & Stocks Détaillés') &&
+             document.body.innerText.includes('Marge Nette prévisionnelle');
+    });
+
+    // Test clicking "+ Ajouter Variante"
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const addVarBtn = btns.find((b) => b.innerText.includes('Ajouter Variante'));
+      if (addVarBtn) addVarBtn.click();
+    });
+    await new Promise((r) => setTimeout(r, 400));
+
+    // Save modifications
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const saveBtn = btns.find((b) => b.innerText.includes('Enregistrer les Modifications'));
+      if (saveBtn) saveBtn.click();
+    });
+    await new Promise((r) => setTimeout(r, 800));
+
+    console.log(`  [${isEditModalOpen && hasVariantManager ? 'PASS' : 'FAIL'}] Edit Product Modal & Variant Management`);
+    results.push({ name: 'Edit Product Modal & Variants', pass: isEditModalOpen && hasVariantManager });
+
     // 7. Test Orders Bulk Selection & Drawer Actions
     console.log('  7. Testing /admin/orders Bulk Selection Bar and Drawer Actions...');
     await page.goto(`${BASE_URL}/admin/orders?store=ottavio`, { waitUntil: 'networkidle2', timeout: 25000 });

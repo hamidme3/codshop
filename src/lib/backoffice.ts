@@ -15,6 +15,7 @@ export {
   deleteOrder,
   getProducts,
   addProduct,
+  updateProduct,
   deleteProduct,
   updateProductStock,
   getCategories,

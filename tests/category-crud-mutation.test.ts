@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { 
   getCategories, addCategory, deleteCategory, 
-  getProducts, addProduct, deleteProduct, updateProductStock,
+  getProducts, addProduct, updateProduct, deleteProduct, updateProductStock,
   getOrders, deleteOrder, getCustomers, PRODUCTS, ORDERS
 } from '../src/lib/backoffice';
 
@@ -85,6 +85,30 @@ async function runCategoryCrudTests() {
   const prodAfterStock = getProducts(storeSlug).find(p => p.id === testProduct.id);
   assert.strictEqual(prodAfterStock?.stock, 25, 'Stock must be updated to 25');
   console.log('  ✓ Stock successfully updated to 25 units.');
+
+  // 5b. Full Product & Variant Update (updateProduct)
+  console.log('5b. Testing Full Product Update with Variants (updateProduct)...');
+  const updateResult = updateProduct(testProduct.id, {
+    title: 'Sac Bandoulière Cuir Fès Édition Prestige VIP',
+    price: 399,
+    comparePrice: 650,
+    costPrice: 130,
+    stock: 30,
+    variants: [
+      { color: 'Marron Vintage', size: 'M', stock: 15, sku: 'TEST-BAG-M' },
+      { color: 'Noir Carbone', size: 'L', stock: 15, sku: 'TEST-BAG-L' },
+    ],
+  });
+  assert.ok(updateResult, 'updateProduct must return updated product');
+  assert.strictEqual(updateResult.title, 'Sac Bandoulière Cuir Fès Édition Prestige VIP');
+  assert.strictEqual(updateResult.price, 399);
+  assert.strictEqual(updateResult.comparePrice, 650);
+  assert.strictEqual(updateResult.costPrice, 130);
+  assert.strictEqual(updateResult.stock, 30);
+  assert.strictEqual(updateResult.variants?.length, 2);
+  assert.strictEqual(updateResult.variants[0].color, 'Marron Vintage');
+  assert.strictEqual(updateResult.variants[1].size, 'L');
+  console.log('  ✓ Product title, pricing, margin, and variant matrix updated successfully.');
 
   // 6. Product Deletion (deleteProduct)
   console.log('6. Testing Product Deletion (deleteProduct)...');
