@@ -22,6 +22,7 @@ export {
   addCategory,
   deleteCategory,
   getCustomers,
+  updateCustomerNotes,
   getPaymentGateways,
   togglePaymentGateway,
   checkInventory,

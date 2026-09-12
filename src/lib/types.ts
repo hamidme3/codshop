@@ -100,6 +100,7 @@ export interface Customer {
   email: string;
   city: string;
   address?: string;
+  addressNotes?: string;
   totalOrders: number;
   confirmedOrders?: number;
   shippedOrders?: number;

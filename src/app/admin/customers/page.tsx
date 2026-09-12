@@ -6,9 +6,10 @@ import {
   Users, Search, Phone, Mail, MapPin, 
   ShoppingBag, MessageCircle, Heart, UserPlus, 
   Sparkles, ArrowUpRight, CheckCircle2, Truck, DollarSign,
-  AlertTriangle, ChevronRight, X, Clock, RefreshCw, Package
+  AlertTriangle, ChevronRight, X, Clock, RefreshCw, Package,
+  Save, Copy, Check, ShieldCheck, ArrowRight, CornerDownRight
 } from 'lucide-react';
-import { getCustomers, Customer, OrderStatus } from '@/lib/backoffice';
+import { getCustomers, updateCustomerNotes, Customer, OrderStatus } from '@/lib/backoffice';
 import { normalizeMoroccanPhone } from '@/lib/whatsapp-templates';
 
 function getContextualWhatsAppUrl(customer: Customer, storeSlug: string): string {
@@ -48,6 +49,45 @@ function CustomersContent() {
   const [activeTab, setActiveTab] = useState<'all' | 'confirmed' | 'shipped' | 'delivered' | 'returning' | 'risk'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
+  const [customerNotes, setCustomerNotes] = useState<Record<string, string>>({});
+  const [notesSaved, setNotesSaved] = useState(false);
+  const [copiedTracking, setCopiedTracking] = useState<string | null>(null);
+
+  // Sync selected customer's active order & notes when drawer opens
+  React.useEffect(() => {
+    if (selectedCustomer) {
+      setActiveOrderId(selectedCustomer.recentOrders?.[0]?.id || null);
+      if (typeof window !== 'undefined') {
+        const localSaved = localStorage.getItem(`cod_customer_notes_${selectedCustomer.phone}`);
+        if (localSaved !== null) {
+          setCustomerNotes((prev) => ({ ...prev, [selectedCustomer.id]: localSaved }));
+        } else if (selectedCustomer.addressNotes) {
+          setCustomerNotes((prev) => ({ ...prev, [selectedCustomer.id]: selectedCustomer.addressNotes || '' }));
+        }
+      }
+    }
+  }, [selectedCustomer]);
+
+  const handleSaveNotes = () => {
+    if (!selectedCustomer) return;
+    const notesToSave = customerNotes[selectedCustomer.id] ?? selectedCustomer.addressNotes ?? '';
+    updateCustomerNotes(selectedCustomer.phone, notesToSave, storeSlug);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`cod_customer_notes_${selectedCustomer.phone}`, notesToSave);
+    }
+    setSelectedCustomer({ ...selectedCustomer, addressNotes: notesToSave });
+    setNotesSaved(true);
+    setTimeout(() => setNotesSaved(false), 2500);
+  };
+
+  const handleCopyTracking = (trackNum: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(trackNum);
+      setCopiedTracking(trackNum);
+      setTimeout(() => setCopiedTracking(null), 2000);
+    }
+  };
 
   const refreshCustomers = () => {
     setCustomers(getCustomers(storeSlug));
@@ -436,52 +476,295 @@ function CustomersContent() {
                 </div>
               </div>
 
-              {/* Order History Section */}
-              <div className="space-y-3">
-                <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                  <Package className="w-3.5 h-3.5 text-zinc-400" />
-                  Historique Commandes ({selectedCustomer.recentOrders?.length || 0})
-                </h3>
+              {/* Order Selection & Historical Delivery Timeline */}
+              {(() => {
+                const customerOrders = (selectedCustomer.recentOrders && selectedCustomer.recentOrders.length > 0)
+                  ? selectedCustomer.recentOrders
+                  : [{
+                      id: `ord_${selectedCustomer.id}`,
+                      orderNumber: selectedCustomer.lastOrderNumber || 'CMD-84925',
+                      createdAt: new Date().toISOString(),
+                      status: selectedCustomer.lastOrderStatus || 'delivered',
+                      total: selectedCustomer.totalSpend || 349,
+                      itemsSummary: 'Sac Cuir Artisanal Marrakech (Marron Vintage) x1',
+                      courier: 'ozon',
+                      trackingNumber: selectedCustomer.lastTrackingNumber || 'OZON-MA-774419',
+                    }];
+                const activeOrder = 
+                  customerOrders.find((o) => o.id === activeOrderId) || 
+                  customerOrders[0];
+                const currentNotes = customerNotes[selectedCustomer.id] ?? selectedCustomer.addressNotes ?? '';
 
-                <div className="space-y-2">
-                  {(selectedCustomer.recentOrders || []).map((ord) => (
-                    <div 
-                      key={ord.id}
-                      className="p-3 bg-[#0d0d10] rounded-lg border border-zinc-800/80 space-y-1.5 hover:border-zinc-700/80 transition-colors"
-                    >
+                return (
+                  <div className="space-y-4">
+                    {/* Header with order switcher */}
+                    <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <div className="font-mono text-xs font-semibold text-zinc-200">{ord.orderNumber}</div>
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                          ord.status === 'confirmed' ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/30' :
-                          ord.status === 'shipped' || ord.status === 'shipping' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' :
-                          ord.status === 'delivered' ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30' :
-                          ord.status === 'returned' ? 'bg-rose-500/10 text-rose-300 border border-rose-500/30' :
-                          'bg-zinc-800 text-zinc-400'
-                        }`}>
-                          {ord.status === 'confirmed' ? '1. Confirmée' :
-                           ord.status === 'shipped' || ord.status === 'shipping' ? '2. Expédiée' :
-                           ord.status === 'delivered' ? '3. Livrée' :
-                           ord.status === 'returned' ? '4. Retournée' :
-                           ord.status}
-                        </span>
+                        <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                          <Clock className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Chronologie Logistique & Livraison</span>
+                        </h3>
+                        {activeOrder && (
+                          <span className="font-mono text-[11px] text-zinc-400">
+                            {activeOrder.orderNumber}
+                          </span>
+                        )}
                       </div>
 
-                      <div className="text-xs text-zinc-400 line-clamp-1">
-                        {ord.itemsSummary || 'Articles commandés'}
+                      {/* Multi-Order Tabs */}
+                      {customerOrders.length > 1 && (
+                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 admin-scrollbar">
+                          {customerOrders.map((ord) => (
+                            <button
+                              key={ord.id}
+                              type="button"
+                              onClick={() => setActiveOrderId(ord.id)}
+                              className={`px-2.5 py-1 rounded-md text-[11px] font-mono whitespace-nowrap transition-all border cursor-pointer ${
+                                (activeOrder?.id === ord.id)
+                                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 font-semibold shadow-xs'
+                                  : 'bg-[#0d0d10] border-zinc-800 text-zinc-400 hover:text-zinc-200'
+                              }`}
+                            >
+                              {ord.orderNumber} ({ord.total} MAD)
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Historical Timeline Steps */}
+                    {activeOrder ? (
+                      <div className="p-4 bg-[#0d0d10] rounded-xl border border-zinc-800/80 space-y-4">
+                        <div className="flex items-center justify-between pb-2 border-b border-zinc-800/60">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs font-bold text-white">{activeOrder.orderNumber}</span>
+                            <span className="text-zinc-500">•</span>
+                            <span className="text-xs font-mono tabular-nums text-zinc-300 font-semibold">{activeOrder.total} MAD</span>
+                          </div>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                            activeOrder.status === 'confirmed' ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/30' :
+                            activeOrder.status === 'shipped' || activeOrder.status === 'shipping' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' :
+                            activeOrder.status === 'delivered' ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30' :
+                            activeOrder.status === 'returned' ? 'bg-rose-500/10 text-rose-300 border border-rose-500/30' :
+                            'bg-zinc-800 text-zinc-300'
+                          }`}>
+                            {activeOrder.status === 'confirmed' ? '1. Confirmée' :
+                             activeOrder.status === 'shipped' || activeOrder.status === 'shipping' ? '2. Expédiée' :
+                             activeOrder.status === 'delivered' ? '3. Livrée' :
+                             activeOrder.status === 'returned' ? '4. Retournée' :
+                             'À Confirmer'}
+                          </span>
+                        </div>
+
+                        {/* Visual Step Timeline Rail */}
+                        <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-zinc-800">
+                          {/* Step 1: Storefront Order */}
+                          <div className="relative space-y-1">
+                            <div className="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center">
+                              <Check className="w-2.5 h-2.5 text-emerald-400" />
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-semibold text-zinc-200">1. Commande Enregistrée (COD)</span>
+                              <span className="text-[10px] font-mono text-zinc-500">{activeOrder.createdAt ? new Date(activeOrder.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Storefront'}</span>
+                            </div>
+                            <p className="text-[11px] text-zinc-400 line-clamp-1">
+                              {activeOrder.itemsSummary || 'Articles enregistrés avec paiement à la livraison.'}
+                            </p>
+                          </div>
+
+                          {/* Step 2: Phone Confirmation */}
+                          <div className="relative space-y-1">
+                            <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
+                              activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm'
+                                ? 'bg-emerald-500/20 border border-emerald-500'
+                                : 'bg-amber-500/20 border border-amber-500 animate-pulse'
+                            }`}>
+                              {activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm' ? (
+                                <Check className="w-2.5 h-2.5 text-emerald-400" />
+                              ) : (
+                                <Clock className="w-2.5 h-2.5 text-amber-400" />
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-semibold text-zinc-200">2. Confirmation & Qualification</span>
+                              <span className={`text-[10px] font-mono ${
+                                activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm' ? 'text-emerald-400' : 'text-amber-400'
+                              }`}>
+                                {activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm' ? 'Validée ✓' : 'En attente ⏳'}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-zinc-400">
+                              Appel téléphonique en Darija pour valider l&apos;adresse à {selectedCustomer.city}.
+                            </p>
+                          </div>
+
+                          {/* Step 3: Courier Handover & Tracking */}
+                          <div className="relative space-y-1.5">
+                            <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
+                              ['shipped', 'shipping', 'delivered', 'returned'].includes(activeOrder.status)
+                                ? 'bg-emerald-500/20 border border-emerald-500'
+                                : 'bg-zinc-800 border border-zinc-700'
+                            }`}>
+                              {['shipped', 'shipping', 'delivered', 'returned'].includes(activeOrder.status) ? (
+                                <Check className="w-2.5 h-2.5 text-emerald-400" />
+                              ) : (
+                                <Truck className="w-2.5 h-2.5 text-zinc-500" />
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-semibold text-zinc-200">3. Prise en Charge Transporteur</span>
+                              <span className="text-[10px] font-mono uppercase text-zinc-400">
+                                {activeOrder.courier || 'OZON EXPRESS'}
+                              </span>
+                            </div>
+                            {activeOrder.trackingNumber ? (
+                              <div className="flex items-center gap-2 pt-0.5">
+                                <span className="font-mono text-[11px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 text-amber-300">
+                                  {activeOrder.trackingNumber}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyTracking(activeOrder.trackingNumber!)}
+                                  className="p-1 rounded text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                                  title="Copier le numéro de suivi"
+                                >
+                                  {copiedTracking === activeOrder.trackingNumber ? (
+                                    <Check className="w-3 h-3 text-emerald-400" />
+                                  ) : (
+                                    <Copy className="w-3 h-3" />
+                                  )}
+                                </button>
+                              </div>
+                            ) : (
+                              <p className="text-[11px] text-zinc-500">Bordereau en cours de génération.</p>
+                            )}
+                          </div>
+
+                          {/* Step 4: Regional Hub & Dispatch */}
+                          <div className="relative space-y-1">
+                            <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
+                              ['delivered', 'returned'].includes(activeOrder.status)
+                                ? 'bg-emerald-500/20 border border-emerald-500'
+                                : ['shipped', 'shipping'].includes(activeOrder.status)
+                                ? 'bg-amber-500/20 border border-amber-500 animate-pulse'
+                                : 'bg-zinc-800 border border-zinc-700'
+                            }`}>
+                              {['delivered', 'returned'].includes(activeOrder.status) ? (
+                                <Check className="w-2.5 h-2.5 text-emerald-400" />
+                              ) : (
+                                <MapPin className="w-2.5 h-2.5 text-zinc-500" />
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-semibold text-zinc-200">4. Acheminement Régional</span>
+                              <span className="text-[10px] font-mono text-zinc-500">Hub {selectedCustomer.city}</span>
+                            </div>
+                            <p className="text-[11px] text-zinc-400">
+                              Attribution au livreur du secteur pour livraison à domicile ou agence.
+                            </p>
+                          </div>
+
+                          {/* Step 5: Final Delivery or Return */}
+                          <div className="relative space-y-1">
+                            <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
+                              activeOrder.status === 'delivered'
+                                ? 'bg-emerald-500/20 border border-emerald-500'
+                                : activeOrder.status === 'returned'
+                                ? 'bg-rose-500/20 border border-rose-500'
+                                : 'bg-zinc-800 border border-zinc-700'
+                            }`}>
+                              {activeOrder.status === 'delivered' ? (
+                                <DollarSign className="w-2.5 h-2.5 text-emerald-400" />
+                              ) : activeOrder.status === 'returned' ? (
+                                <AlertTriangle className="w-2.5 h-2.5 text-rose-400" />
+                              ) : (
+                                <Clock className="w-2.5 h-2.5 text-zinc-500" />
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-semibold text-zinc-200">5. Remise du Colis & Encaissement</span>
+                              <span className={`text-[10px] font-mono font-medium ${
+                                activeOrder.status === 'delivered' ? 'text-emerald-400' :
+                                activeOrder.status === 'returned' ? 'text-rose-400' :
+                                'text-zinc-500'
+                              }`}>
+                                {activeOrder.status === 'delivered' ? 'Encaissé ✓' :
+                                 activeOrder.status === 'returned' ? 'Retourné ✕' :
+                                 'En attente'}
+                              </span>
+                            </div>
+                            {activeOrder.status === 'delivered' ? (
+                              <div className="p-2 rounded-lg bg-emerald-950/30 border border-emerald-800/40 text-[11px] text-emerald-300">
+                                Colis remis et vérifié par l&apos;acheteur. Montant de <span className="font-mono font-bold">{activeOrder.total} MAD</span> collecté en espèces.
+                              </div>
+                            ) : activeOrder.status === 'returned' ? (
+                              <div className="p-2 rounded-lg bg-rose-950/30 border border-rose-800/40 text-[11px] text-rose-300">
+                                Échec de livraison ou refus de commande. Colis réintégré dans votre stock d&apos;entrepôt.
+                              </div>
+                            ) : (
+                              <p className="text-[11px] text-zinc-500">
+                                En attente de finalisation par le livreur local.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-[#0d0d10] rounded-xl border border-zinc-800 text-center text-xs text-zinc-500">
+                        Aucune commande passée par ce client.
+                      </div>
+                    )}
+
+                    {/* Address & Moroccan Delivery Notes Section */}
+                    <div className="p-4 bg-[#0d0d10] rounded-xl border border-zinc-800/80 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
+                          <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Adresse & Repères de Livraison</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-zinc-500">{selectedCustomer.city}, Maroc</span>
                       </div>
 
-                      <div className="flex items-center justify-between pt-1 border-t border-zinc-800/60 text-[11px]">
-                        <div className="text-zinc-500">
-                          {ord.trackingNumber && (
-                            <span className="font-mono text-zinc-300">Suivi: {ord.trackingNumber}</span>
+                      <div className="text-xs text-zinc-300 font-mono bg-zinc-950 p-2.5 rounded-lg border border-zinc-800/70">
+                        {selectedCustomer.address || `Adresse principale enregistrée à ${selectedCustomer.city}`}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[11px] font-medium text-zinc-400">
+                            Notes & Repères pour le Livreur :
+                          </label>
+                          {notesSaved && (
+                            <span className="text-[11px] text-emerald-400 flex items-center gap-1 font-mono animate-in fade-in">
+                              <CheckCircle2 className="w-3 h-3" /> Note enregistrée ✓
+                            </span>
                           )}
                         </div>
-                        <div className="font-mono tabular-nums font-semibold text-zinc-100">{ord.total} MAD</div>
+                        <textarea
+                          value={currentNotes}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCustomerNotes((prev) => ({ ...prev, [selectedCustomer.id]: val }));
+                          }}
+                          placeholder="Ex: En face de la pharmacie, appeler avant de venir, code interphone 14B..."
+                          rows={2}
+                          className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 text-xs font-sans placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 resize-none"
+                        />
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={handleSaveNotes}
+                            className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium transition-colors border border-zinc-700/80 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                          >
+                            <Save className="w-3.5 h-3.5 text-amber-400" />
+                            <span>Enregistrer Note</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Bottom Drawer Action */}
@@ -490,14 +773,14 @@ function CustomersContent() {
                 href={getContextualWhatsAppUrl(selectedCustomer, storeSlug)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition-colors shadow-sm"
+                className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition-colors shadow-sm cursor-pointer"
               >
                 <MessageCircle className="w-3.5 h-3.5 fill-current" />
                 <span>Ouvrir WhatsApp en Darija</span>
               </a>
               <button
                 onClick={() => setSelectedCustomer(null)}
-                className="w-full py-2 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 font-medium text-xs transition-colors"
+                className="w-full py-2 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 font-medium text-xs transition-colors cursor-pointer"
               >
                 Fermer
               </button>

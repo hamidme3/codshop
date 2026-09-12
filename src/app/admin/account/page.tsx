@@ -136,42 +136,44 @@ export default function AccountProfilePage() {
   }
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-16">
+    <div className="space-y-8 max-w-5xl mx-auto pb-16 font-sans">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
         <div>
-          <div className="flex items-center gap-3 mb-1">
-            <span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              <User className="w-5 h-5" />
-            </span>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Paramètres du Compte Marchand</h1>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Paramètres & Compte</span>
+            <span className="text-zinc-600">•</span>
+            <span className="text-[11px] text-zinc-400 font-mono">Administration Marchand</span>
           </div>
-          <p className="text-sm text-slate-400">
-            Gérez vos informations personnelles, adresse de facturation et sécurité d’accès.
+          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
+            <User className="w-5 h-5 text-amber-400" /> Paramètres du Compte Marchand
+          </h1>
+          <p className="text-xs text-zinc-400 mt-1">
+            Gérez vos informations personnelles, adresse fiscale de facturation et identifiants d&apos;accès.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <Link
             href="/admin/security"
-            className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition"
+            className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 rounded-lg text-xs font-medium transition shadow-sm"
           >
             <Shield className="w-3.5 h-3.5 text-blue-400" />
-            Sécurité &amp; 2FA
+            <span>Sécurité &amp; 2FA</span>
           </Link>
           <Link
             href="/admin/identity"
-            className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition"
+            className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 rounded-lg text-xs font-medium transition shadow-sm"
           >
             <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
-            Conformité KYC
+            <span>Conformité KYC</span>
           </Link>
         </div>
       </div>
 
       {feedback && (
         <div
-          className={`p-4 rounded-xl text-xs flex items-center gap-2.5 border animate-in fade-in duration-150 ${
+          className={`p-3.5 rounded-xl text-xs flex items-center gap-2.5 border animate-in fade-in duration-150 ${
             feedback.type === 'success'
               ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
               : 'bg-rose-500/10 border-rose-500/20 text-rose-300'
@@ -189,69 +191,69 @@ export default function AccountProfilePage() {
       {/* Grid: Profile & Address */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Personal Details */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-6 space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+        <div className="bg-[#121215] border border-zinc-800/80 rounded-2xl p-6 space-y-4 shadow-sm hover:border-zinc-700/80 transition-colors">
+          <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
             <User className="w-4 h-4 text-amber-400" />
-            <h3 className="text-sm font-bold text-white">Informations Personnelles</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200">Informations Personnelles</h3>
           </div>
 
           <form onSubmit={handleSaveProfile} className="space-y-3.5">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Prénom</label>
+                <label className="block text-xs font-medium text-zinc-300 mb-1">Prénom</label>
                 <input
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Nom</label>
+                <label className="block text-xs font-medium text-zinc-300 mb-1">Nom</label>
                 <input
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Email</label>
+              <label className="block text-xs font-medium text-zinc-300 mb-1">Email</label>
               <div className="relative">
-                <Mail className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Mail className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
                   disabled
                   value={email}
-                  className="w-full pl-8 pr-3 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-xs text-slate-400 cursor-not-allowed"
+                  className="w-full pl-8 pr-3 py-2 bg-zinc-900/60 border border-zinc-800 rounded-lg text-xs text-zinc-400 font-mono cursor-not-allowed"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Numéro de Téléphone (WhatsApp)</label>
+              <label className="block text-xs font-medium text-zinc-300 mb-1">Numéro de Téléphone (WhatsApp)</label>
               <div className="relative">
-                <Phone className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Phone className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="tel"
                   placeholder="+212 6 XX XX XX XX"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                  className="w-full pl-8 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 font-mono"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Langue de l’Interface</label>
+              <label className="block text-xs font-medium text-zinc-300 mb-1">Langue de l’Interface</label>
               <div className="relative">
-                <Globe className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Globe className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
                 <select
                   value={preferredLocale}
                   onChange={(e) => setPreferredLocale(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full pl-8 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 cursor-pointer"
                 >
                   <option value="fr">Français</option>
                   <option value="ar">العربية (RTL)</option>
@@ -264,63 +266,63 @@ export default function AccountProfilePage() {
               <button
                 type="submit"
                 disabled={savingProfile}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-lg text-xs font-semibold transition"
+                className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-zinc-950 rounded-lg text-xs font-semibold transition cursor-pointer shadow-xs"
               >
                 <Save className="w-3.5 h-3.5" />
-                {savingProfile ? 'Enregistrement...' : 'Enregistrer les modifications'}
+                <span>{savingProfile ? 'Enregistrement...' : 'Enregistrer les modifications'}</span>
               </button>
             </div>
           </form>
         </div>
 
         {/* Company & Billing Address */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-6 space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+        <div className="bg-[#121215] border border-zinc-800/80 rounded-2xl p-6 space-y-4 shadow-sm hover:border-zinc-700/80 transition-colors">
+          <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
             <MapPin className="w-4 h-4 text-emerald-400" />
-            <h3 className="text-sm font-bold text-white">Adresse Fiscale de Facturation</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200">Adresse Fiscale de Facturation</h3>
           </div>
 
           <form onSubmit={handleSaveAddress} className="space-y-3.5">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Adresse (Rue / N° / Immeuble)</label>
+              <label className="block text-xs font-medium text-zinc-300 mb-1">Adresse (Rue / N° / Immeuble)</label>
               <input
                 type="text"
                 placeholder="Ex: 45 Boulevard d'Anfa, Étage 3"
                 value={firstLine}
                 onChange={(e) => setFirstLine(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Ville</label>
+                <label className="block text-xs font-medium text-zinc-300 mb-1">Ville</label>
                 <input
                   type="text"
                   placeholder="Casablanca"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Code Postal</label>
+                <label className="block text-xs font-medium text-zinc-300 mb-1">Code Postal</label>
                 <input
                   type="text"
                   placeholder="20000"
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 font-mono"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Pays</label>
+              <label className="block text-xs font-medium text-zinc-300 mb-1">Pays</label>
               <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 cursor-pointer"
               >
                 <option value="MA">Maroc (MA)</option>
                 <option value="FR">France (FR)</option>
@@ -333,10 +335,10 @@ export default function AccountProfilePage() {
               <button
                 type="submit"
                 disabled={savingAddress}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold transition border border-slate-700"
+                className="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded-lg text-xs font-semibold transition border border-zinc-800 cursor-pointer shadow-xs"
               >
                 <Save className="w-3.5 h-3.5" />
-                {savingAddress ? 'Enregistrement...' : 'Mettre à jour l’adresse'}
+                <span>{savingAddress ? 'Enregistrement...' : 'Mettre à jour l’adresse'}</span>
               </button>
             </div>
           </form>
@@ -344,46 +346,46 @@ export default function AccountProfilePage() {
       </div>
 
       {/* Change Password Card */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-6 space-y-4">
-        <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+      <div className="bg-[#121215] border border-zinc-800/80 rounded-2xl p-6 space-y-4 shadow-sm hover:border-zinc-700/80 transition-colors">
+        <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
           <Lock className="w-4 h-4 text-blue-400" />
-          <h3 className="text-sm font-bold text-white">Changer le Mot de Passe</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200">Changer le Mot de Passe</h3>
         </div>
 
         <form onSubmit={handleUpdatePassword} className="space-y-4 max-w-xl">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Mot de passe actuel</label>
+            <label className="block text-xs font-medium text-zinc-300 mb-1">Mot de passe actuel</label>
             <input
               type="password"
               required
               placeholder="••••••••"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+              className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Nouveau mot de passe</label>
+              <label className="block text-xs font-medium text-zinc-300 mb-1">Nouveau mot de passe</label>
               <input
                 type="password"
                 required
                 placeholder="Au moins 6 caractères"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Confirmer le nouveau mot de passe</label>
+              <label className="block text-xs font-medium text-zinc-300 mb-1">Confirmer le nouveau mot de passe</label>
               <input
                 type="password"
                 required
                 placeholder="Retapez le mot de passe"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
               />
             </div>
           </div>
@@ -391,10 +393,10 @@ export default function AccountProfilePage() {
           <button
             type="submit"
             disabled={updatingPassword}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-lg text-xs font-semibold transition"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white border border-zinc-800 disabled:opacity-50 rounded-lg text-xs font-semibold transition cursor-pointer shadow-xs"
           >
             <KeyRound className="w-3.5 h-3.5" />
-            {updatingPassword ? 'Modification...' : 'Modifier mon mot de passe'}
+            <span>{updatingPassword ? 'Modification...' : 'Modifier mon mot de passe'}</span>
           </button>
         </form>
       </div>

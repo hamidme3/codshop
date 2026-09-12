@@ -4,6 +4,24 @@ import { restoreMockProductStock, decrementMockProductStock } from './mockProduc
 // ── Seed Moroccan Orders ────────────────────────────────────────
 export let ORDERS: Order[] = [
   {
+    id: 'ord_100',
+    orderNumber: 'CMD-84925',
+    storeSlug: 'ottavio',
+    createdAt: new Date(Date.now() - 5 * 60000).toISOString(),
+    customerName: 'Berrada Yasmine',
+    phone: '0612345678',
+    city: 'Casablanca',
+    address: '14 Rue Ibn Battouta, Quartier Maârif',
+    status: 'delivered',
+    items: [{ id: 'it_1', title: 'Sac Cuir Artisanal Marrakech', quantity: 3, price: 349, variant: 'Noir Ébène' }],
+    subtotal: 1047,
+    shippingFee: 0,
+    total: 1047,
+    courier: 'ozon',
+    trackingNumber: 'OZON-MA-774419',
+    agentNotes: 'Commande VIP Pack Trio livrée avec succès.',
+  },
+  {
     id: 'ord_101',
     orderNumber: 'CMD-84920',
     storeSlug: 'ottavio',
@@ -196,6 +214,8 @@ export let CUSTOMERS: Customer[] = [
     phone: '0612345678',
     email: 'yasmine.berrada@gmail.com',
     city: 'Casablanca',
+    address: '14 Rue Ibn Battouta, Quartier Maârif',
+    addressNotes: 'En face du café France, appeler 15 min avant svp',
     totalOrders: 3,
     totalSpend: 1047,
     averageBasket: 349,
@@ -209,6 +229,8 @@ export let CUSTOMERS: Customer[] = [
     phone: '0661234567',
     email: 'k.bennani@outlook.com',
     city: 'Casablanca',
+    address: 'Résidence Al Mansour 2, Imm C Apt 8, Bourgogne',
+    addressNotes: 'Code interphone 24B, sonner chez le gardien Hassan si absent',
     totalOrders: 2,
     totalSpend: 698,
     averageBasket: 349,
@@ -222,6 +244,8 @@ export let CUSTOMERS: Customer[] = [
     phone: '0678901234',
     email: 'fe.kadiri@gmail.com',
     city: 'Rabat',
+    address: 'Avenue Allal Ben Abdellah, Agdal',
+    addressNotes: 'Livraison de préférence le matin avant 12h',
     totalOrders: 1,
     totalSpend: 299,
     averageBasket: 299,
@@ -235,6 +259,8 @@ export let CUSTOMERS: Customer[] = [
     phone: '0665432198',
     email: 'yassine.m@gmail.com',
     city: 'Marrakech',
+    address: 'Rue de la Liberté, Guéliz',
+    addressNotes: 'Près de la Grande Poste, Point Relais Ozon préféré',
     totalOrders: 4,
     totalSpend: 1396,
     averageBasket: 349,
@@ -248,6 +274,8 @@ export let CUSTOMERS: Customer[] = [
     phone: '0612348765',
     email: 'nadia.cherkaoui@yahoo.fr',
     city: 'Tanger',
+    address: 'Boulevard Pasteur, Centre Ville',
+    addressNotes: 'Bureau 4ème étage, appeler à l’arrivée au pied de l’immeuble',
     totalOrders: 1,
     totalSpend: 360,
     averageBasket: 360,
@@ -261,6 +289,8 @@ export let CUSTOMERS: Customer[] = [
     phone: '0655443322',
     email: 'hicham.tahiri@gmail.com',
     city: 'Casablanca',
+    address: 'Lotissement Al Firdaous, Sidi Maarouf',
+    addressNotes: 'Près de la mosquée Al-Qods, villa n° 12',
     totalOrders: 2,
     totalSpend: 718,
     averageBasket: 359,
@@ -802,6 +832,21 @@ export function decrementInventory(
   }
 
   return true;
+}
+
+/** Update delivery and address notes for a specific customer */
+export function updateCustomerNotes(phoneOrId: string, notes: string, storeSlug: string): boolean {
+  const normTarget = normalizeCustomerPhone(phoneOrId) || phoneOrId.toLowerCase().trim();
+  const c = CUSTOMERS.find(
+    (cust) =>
+      cust.storeSlug === storeSlug &&
+      (cust.id === phoneOrId || normalizeCustomerPhone(cust.phone) === normTarget)
+  );
+  if (c) {
+    c.addressNotes = notes;
+    return true;
+  }
+  return false;
 }
 
 /** Reset all mock arrays to initial seed (useful for tests). */
