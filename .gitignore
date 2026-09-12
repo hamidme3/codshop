@@ -33,3 +33,7 @@ next-env.d.ts
 # test outputs
 playwright-report/
 test-results/
+
+# agent & tooling
+.mcp/
+
