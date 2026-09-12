@@ -74,6 +74,22 @@ export function initPixels(config: PixelConfig): void {
   currentConfig = config;
   if (!window.__cod_loaded_pixels) {
     window.__cod_loaded_pixels = new Set<string>();
+
+    try {
+      window.addEventListener('error', (event) => {
+        if (
+          event.filename &&
+          (event.filename.includes('tiktok') ||
+           event.filename.includes('facebook') ||
+           event.filename.includes('sc-static') ||
+           event.filename.includes('googletagmanager') ||
+           event.filename.includes('pinimg'))
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }, true);
+    } catch {}
   }
 
   // 1. Meta (Facebook) Pixel
@@ -106,6 +122,7 @@ export function initPixels(config: PixelConfig): void {
   if (config.tiktokPixelId && !window.__cod_loaded_pixels.has(`tt_${config.tiktokPixelId}`)) {
     try {
       if (!window.ttq) {
+        (window as any).TiktokAnalyticsObject = 'ttq';
         const ttq: any = (window.ttq = []);
         ttq.methods = [
           'page',

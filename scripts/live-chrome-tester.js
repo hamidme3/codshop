@@ -176,17 +176,33 @@ async function auditCheckout(browser) {
   // Fill Moroccan customer form
   console.log('  Filling Moroccan customer information...');
   await page.evaluate(() => {
-    const nameInput = document.querySelector('input[type="text"], input[name="name"], input[placeholder*="Nom"]');
-    if (nameInput) {
-      nameInput.value = 'Hicham Benali';
-      nameInput.dispatchEvent(new Event('input', { bubbles: true }));
-    }
+    const setNativeValue = (element, val) => {
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+      if (setter) {
+        setter.call(element, val);
+      } else {
+        element.value = val;
+      }
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    const setNativeTextarea = (element, val) => {
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
+      if (setter) {
+        setter.call(element, val);
+      } else {
+        element.value = val;
+      }
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    const nameInput = document.querySelector('input[name="name"], input[placeholder*="Nom"], input[autoComplete="name"]');
+    if (nameInput) setNativeValue(nameInput, 'Hicham Benali');
 
     const phoneInput = document.querySelector('input[type="tel"], input[name="phone"], input[placeholder*="06"]');
-    if (phoneInput) {
-      phoneInput.value = '0661998877';
-      phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
-    }
+    if (phoneInput) setNativeValue(phoneInput, '0661998877');
 
     const citySelect = document.querySelector('select');
     if (citySelect) {
@@ -196,8 +212,11 @@ async function auditCheckout(browser) {
 
     const addressInput = document.querySelector('textarea, input[name="address"], input[placeholder*="Adresse"]');
     if (addressInput) {
-      addressInput.value = '15 Rue de la Liberté, Quartier Gauthier';
-      addressInput.dispatchEvent(new Event('input', { bubbles: true }));
+      if (addressInput.tagName === 'TEXTAREA') {
+        setNativeTextarea(addressInput, '15 Rue de la Liberté, Quartier Gauthier');
+      } else {
+        setNativeValue(addressInput, '15 Rue de la Liberté, Quartier Gauthier');
+      }
     }
   });
 
