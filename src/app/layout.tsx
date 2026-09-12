@@ -60,8 +60,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={`${inter.variable} ${playfair.variable} ${jetbrains.variable} ${cairo.variable}`}>
-      <body className="antialiased">
+    <html lang="fr" suppressHydrationWarning className={`${inter.variable} ${playfair.variable} ${jetbrains.variable} ${cairo.variable}`}>
+      <body className="antialiased" suppressHydrationWarning>
         <ThemeProvider>
           <StorefrontShell>{children}</StorefrontShell>
         </ThemeProvider>

@@ -165,6 +165,14 @@ async function auditCheckout(browser) {
   });
   console.log(`  Checkout modal opened: ${modalOpen}`);
 
+  // Check if 2-step modal and advance to Step 2 (Customer details)
+  await page.evaluate(() => {
+    const btns = Array.from(document.querySelectorAll('button'));
+    const nextBtn = btns.find(b => b.innerText.includes('Continuer') || b.innerText.includes('Étape suivante'));
+    if (nextBtn) nextBtn.click();
+  });
+  await new Promise(r => setTimeout(r, 800));
+
   // Fill Moroccan customer form
   console.log('  Filling Moroccan customer information...');
   await page.evaluate(() => {
@@ -260,6 +268,7 @@ async function auditAdmin(browser, sessionToken) {
     { path: '/admin/products?store=ottavio', name: 'Products & Inventory' },
     { path: '/admin/account?store=ottavio', name: 'Merchant Profile & Address' },
     { path: '/admin/identity?store=ottavio', name: 'Moroccan KYC Verification' },
+    { path: '/admin/customers?store=ottavio', name: 'Moroccan CRM Customers' },
     { path: '/admin/ads?store=ottavio', name: 'Tracking Pixels & Pinterest' },
     { path: '/admin/security?store=ottavio', name: 'Security & Session Revocation' },
     { path: '/admin/support?store=ottavio', name: 'Support & Concierge' },

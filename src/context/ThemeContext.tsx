@@ -14,33 +14,33 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-function getInitialThemeId(): ThemeId {
-  if (typeof window === 'undefined') return 'luxury';
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const urlTheme = params.get('theme') as ThemeId;
-    if (urlTheme && THEMES[urlTheme]) return urlTheme;
-    const saved = localStorage.getItem('codshop_theme') as ThemeId;
-    if (saved && THEMES[saved]) return saved;
-  } catch {
-    // SSR guard
-  }
-  return 'luxury';
-}
-
-function getInitialLang(): 'fr' | 'ar' {
-  if (typeof window === 'undefined') return 'fr';
-  try {
-    return (localStorage.getItem('codshop_lang') as 'fr' | 'ar') || 'fr';
-  } catch {
-    return 'fr';
-  }
-}
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [themeId, setThemeIdState] = useState<ThemeId>(() => getInitialThemeId());
-  const [lang, setLangState] = useState<'fr' | 'ar'>(() => getInitialLang());
+  const [themeId, setThemeIdState] = useState<ThemeId>('luxury');
+  const [lang, setLangState] = useState<'fr' | 'ar'>('fr');
   const [, startTransition] = useTransition();
+
+  // Safely hydrate theme and lang from URL or localStorage on mount
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const urlTheme = params.get('theme') as ThemeId;
+      if (urlTheme && THEMES[urlTheme]) {
+        setThemeIdState(urlTheme);
+      } else {
+        const saved = localStorage.getItem('codshop_theme') as ThemeId;
+        if (saved && THEMES[saved]) {
+          setThemeIdState(saved);
+        }
+      }
+
+      const savedLang = localStorage.getItem('codshop_lang') as 'fr' | 'ar';
+      if (savedLang && (savedLang === 'fr' || savedLang === 'ar')) {
+        setLangState(savedLang);
+      }
+    } catch {
+      // Guard against SSR/storage access issues
+    }
+  }, []);
 
   const theme = useMemo(() => THEMES[themeId] || THEMES.luxury, [themeId]);
 
@@ -139,6 +139,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     <ThemeContext.Provider value={{ themeId, theme, setThemeId, lang, setLang, formatMAD }}>
       <div
         data-theme={themeId}
+        suppressHydrationWarning
         style={{ ...styleVars, colorScheme: isDark ? 'dark' : 'light' } as React.CSSProperties}
         className={`min-h-screen transition-[background-color,color,border-color] duration-[var(--motion-base)] ${theme.typography.fontFamily === 'serif' ? 'font-serif' : theme.typography.fontFamily === 'monospace' ? 'font-mono' : 'font-sans'}`}
       >
