@@ -28,11 +28,36 @@ function OrdersContent() {
   const storeSlug = searchParams.get('store') || 'ottavio';
   const { t } = useLanguage();
 
-  const [orders, setOrders] = useState<Order[]>(getOrders(storeSlug));
+  const [orders, setOrders] = useState<Order[]>(() => getOrders(storeSlug));
+  const [isLoadingLive, setIsLoadingLive] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
+
+  const fetchLiveOrders = React.useCallback(async (silent = false) => {
+    try {
+      if (!silent) setIsLoadingLive(true);
+      const res = await fetch(`/api/admin/orders?store=${encodeURIComponent(storeSlug)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.orders)) {
+          setOrders(data.orders);
+        }
+      }
+    } catch (err) {
+      console.warn('[Admin Orders] Could not fetch live orders, using fallback:', err);
+    } finally {
+      if (!silent) setIsLoadingLive(false);
+    }
+  }, [storeSlug]);
+
+  useEffect(() => {
+    // Initial sync from memory
+    setOrders(getOrders(storeSlug));
+    // Fetch live from database
+    fetchLiveOrders();
+  }, [storeSlug, fetchLiveOrders]);
 
   // Bulk Selection State
   const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
@@ -159,10 +184,34 @@ function OrdersContent() {
   // 1-Click Fast Status Transition
   const handleQuickTransition = (orderId: string, newStatus: OrderStatus, tracking?: string, courier?: Order['courier']) => {
     updateOrderStatus(orderId, newStatus, tracking, courier);
-    setOrders([...getOrders(storeSlug)]);
-    if (selectedOrder?.id === orderId) {
-      setSelectedOrder({ ...selectedOrder, status: newStatus, trackingNumber: tracking || selectedOrder.trackingNumber });
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === orderId || o.orderNumber === orderId
+          ? {
+              ...o,
+              status: newStatus,
+              trackingNumber: tracking || o.trackingNumber,
+              courier: courier || o.courier,
+            }
+          : o
+      )
+    );
+    if (selectedOrder?.id === orderId || selectedOrder?.orderNumber === orderId) {
+      setSelectedOrder({
+        ...selectedOrder,
+        status: newStatus,
+        trackingNumber: tracking || selectedOrder.trackingNumber,
+        courier: courier || selectedOrder.courier,
+      });
     }
+
+    // Persist to PostgreSQL database asynchronously
+    fetch('/api/admin/orders', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ storeSlug, orderId, status: newStatus, trackingNumber: tracking, courier }),
+    }).catch(() => {});
+
     const statusLabels: Record<string, string> = {
       confirmed: 'Confirmée ✓',
       shipped: 'Expédiée 🚚',
@@ -175,7 +224,7 @@ function OrdersContent() {
 
   // 1-Click Fast Dispatch with Moroccan Couriers
   const handleQuickDispatch = (orderId: string, courier: ShippingCourier = 'ozon') => {
-    const existingOrder = orders.find((o) => o.id === orderId);
+    const existingOrder = orders.find((o) => o.id === orderId || o.orderNumber === orderId);
     const courierPrefix = courier.toUpperCase();
     const tracking = existingOrder?.trackingNumber || `${courierPrefix}-MA-${Math.floor(100000 + Math.random() * 900000)}`;
     handleQuickTransition(orderId, 'shipped', tracking, courier);
@@ -197,19 +246,39 @@ function OrdersContent() {
   };
 
   const handleBulkConfirm = () => {
-    selectedOrderIds.forEach((id) => updateOrderStatus(id, 'confirmed'));
-    setOrders([...getOrders(storeSlug)]);
+    selectedOrderIds.forEach((id) => {
+      updateOrderStatus(id, 'confirmed');
+      fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ storeSlug, orderId: id, status: 'confirmed' }),
+      }).catch(() => {});
+    });
+    setOrders((prev) =>
+      prev.map((o) => (selectedOrderIds.includes(o.id) ? { ...o, status: 'confirmed' as const } : o))
+    );
     showToast(`${selectedOrderIds.length} commandes confirmées en 1 clic !`);
     setSelectedOrderIds([]);
   };
 
   const handleBulkDispatch = (courier: ShippingCourier = 'ozon') => {
     selectedOrderIds.forEach((id) => {
-      const existing = orders.find((o) => o.id === id);
+      const existing = orders.find((o) => o.id === id || o.orderNumber === id);
       const tracking = existing?.trackingNumber || `${courier.toUpperCase()}-MA-${Math.floor(100000 + Math.random() * 900000)}`;
       updateOrderStatus(id, 'shipped', tracking, courier);
+      fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ storeSlug, orderId: id, status: 'shipped', trackingNumber: tracking, courier }),
+      }).catch(() => {});
     });
-    setOrders([...getOrders(storeSlug)]);
+    setOrders((prev) =>
+      prev.map((o) =>
+        selectedOrderIds.includes(o.id)
+          ? { ...o, status: 'shipped' as const, courier }
+          : o
+      )
+    );
     showToast(`${selectedOrderIds.length} commandes expédiées avec ${courier.toUpperCase()} !`);
     setSelectedOrderIds([]);
   };
@@ -217,9 +286,12 @@ function OrdersContent() {
   const handleDeleteSingleOrder = (orderId: string) => {
     if (confirm(`Confirmez-vous la suppression définitive de la commande #${orderId} ?`)) {
       deleteOrder(orderId, storeSlug);
-      setOrders([...getOrders(storeSlug)]);
-      if (selectedOrder?.id === orderId) setSelectedOrder(null);
+      setOrders((prev) => prev.filter((o) => o.id !== orderId && o.orderNumber !== orderId));
+      if (selectedOrder?.id === orderId || selectedOrder?.orderNumber === orderId) setSelectedOrder(null);
       setSelectedOrderIds((prev) => prev.filter((id) => id !== orderId));
+      fetch(`/api/admin/orders?orderId=${encodeURIComponent(orderId)}&store=${encodeURIComponent(storeSlug)}`, {
+        method: 'DELETE',
+      }).catch(() => {});
       showToast(`Commande #${orderId} supprimée.`);
     }
   };
@@ -227,8 +299,13 @@ function OrdersContent() {
   const handleBulkDelete = () => {
     if (selectedOrderIds.length === 0) return;
     if (confirm(`Voulez-vous vraiment supprimer définitivement ces ${selectedOrderIds.length} commandes sélectionnées ?`)) {
-      selectedOrderIds.forEach((id) => deleteOrder(id, storeSlug));
-      setOrders([...getOrders(storeSlug)]);
+      selectedOrderIds.forEach((id) => {
+        deleteOrder(id, storeSlug);
+        fetch(`/api/admin/orders?orderId=${encodeURIComponent(id)}&store=${encodeURIComponent(storeSlug)}`, {
+          method: 'DELETE',
+        }).catch(() => {});
+      });
+      setOrders((prev) => prev.filter((o) => !selectedOrderIds.includes(o.id)));
       showToast(`${selectedOrderIds.length} commandes supprimées avec succès.`);
       setSelectedOrderIds([]);
       if (selectedOrder && selectedOrderIds.includes(selectedOrder.id)) setSelectedOrder(null);

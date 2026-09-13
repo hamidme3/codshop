@@ -32,8 +32,58 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, orderId: `CMD-${Math.floor(1000 + Math.random() * 9000)}`, message: 'Commande reçue' });
     }
 
-    // 2. Store Slug Scoping: strictly validate store slug and ensure store is active
-    const rawStoreSlug = body.storeSlug || body.store || 'ottavio';
+    // 2. Store Slug Scoping: detect store slug from body, x-store-slug header, Host subdomain, or Referer
+    let detectedStoreSlug = body.storeSlug || body.store;
+
+    if (!detectedStoreSlug) {
+      const headerSlug = req.headers.get('x-store-slug');
+      if (headerSlug && headerSlug !== 'codshop' && isValidStoreSlug(headerSlug)) {
+        detectedStoreSlug = headerSlug;
+      }
+    }
+
+    if (!detectedStoreSlug) {
+      const host = req.headers.get('host') || '';
+      const cleanHost = host.split(':')[0].toLowerCase();
+      const rootDomain = process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site';
+      if (cleanHost.endsWith(rootDomain) && cleanHost !== rootDomain && cleanHost !== `www.${rootDomain}`) {
+        const sub = cleanHost.replace(`.${rootDomain}`, '');
+        if (isValidStoreSlug(sub)) {
+          detectedStoreSlug = sub;
+        }
+      } else if (cleanHost.endsWith('.localhost')) {
+        const sub = cleanHost.replace('.localhost', '');
+        if (isValidStoreSlug(sub)) {
+          detectedStoreSlug = sub;
+        }
+      }
+    }
+
+    if (!detectedStoreSlug) {
+      const referer = req.headers.get('referer');
+      if (referer) {
+        try {
+          const refUrl = new URL(referer);
+          const refStore = refUrl.searchParams.get('store');
+          if (refStore && isValidStoreSlug(refStore)) {
+            detectedStoreSlug = refStore;
+          } else {
+            const refHost = refUrl.hostname.toLowerCase();
+            const rootDomain = process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site';
+            if (refHost.endsWith(rootDomain) && refHost !== rootDomain && refHost !== `www.${rootDomain}`) {
+              const sub = refHost.replace(`.${rootDomain}`, '');
+              if (isValidStoreSlug(sub)) {
+                detectedStoreSlug = sub;
+              }
+            }
+          }
+        } catch {
+          // ignore malformed referer
+        }
+      }
+    }
+
+    const rawStoreSlug = detectedStoreSlug || 'ottavio';
     if (!isValidStoreSlug(rawStoreSlug)) {
       return NextResponse.json(
         { success: false, message: 'Identifiant de boutique invalide' },

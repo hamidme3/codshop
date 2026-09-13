@@ -37,6 +37,7 @@ interface CodCheckoutModalProps {
   product: Product;
   isOpen: boolean;
   onClose: () => void;
+  storeSlug?: string;
   initialQuantity?: number;
   initialVariant?: string;
   initialSku?: string;
@@ -56,6 +57,7 @@ export function CodCheckoutModal({
   product,
   isOpen,
   onClose,
+  storeSlug,
   initialQuantity = 1,
   initialVariant,
   initialSku,
@@ -67,6 +69,24 @@ export function CodCheckoutModal({
   const router = useRouter();
   const { theme, formatMAD, lang } = useTheme();
   const formRef = React.useRef<HTMLFormElement>(null);
+
+  // Detect active store slug from prop, search param, or subdomain
+  const effectiveStoreSlug = React.useMemo(() => {
+    if (storeSlug) return storeSlug;
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search).get('store');
+      if (sp) return sp;
+      const host = window.location.hostname.toLowerCase();
+      const rootDomain = 'codshop.vipone.site';
+      if (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) {
+        return host.replace(`.${rootDomain}`, '');
+      }
+      if (host.endsWith('.localhost')) {
+        return host.replace('.localhost', '');
+      }
+    }
+    return (product as any)?.storeSlug || 'ottavio';
+  }, [storeSlug, product]);
 
   // Stable waybill serial number (initialized deterministically to prevent hydration mismatch)
   const [waybillNumber, setWaybillNumber] = useState(
@@ -256,6 +276,8 @@ export function CodCheckoutModal({
             size: selectedSize,
           },
         ],
+        storeSlug: effectiveStoreSlug,
+        store: effectiveStoreSlug,
         quantity: selectedTier.quantity,
         unitPrice: selectedTier.unitPrice,
         subtotal: selectedTier.totalPrice,
@@ -287,7 +309,7 @@ export function CodCheckoutModal({
 
       if (data.success) {
         onClose();
-        router.push(`/order-success/${data.orderId}?total=${finalTotal}&city=${encodeURIComponent(city)}`);
+        router.push(`/order-success/${data.orderId}?total=${finalTotal}&city=${encodeURIComponent(city)}&store=${encodeURIComponent(effectiveStoreSlug)}`);
       } else {
         if (data.code === 'OUT_OF_STOCK') {
           setError(`⚠️ RUPTURE DE STOCK (Entrepôt Aïn Sebaâ) : ${data.message || 'Cette variante est en rupture de stock.'}`);
@@ -310,6 +332,8 @@ export function CodCheckoutModal({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          storeSlug: effectiveStoreSlug,
+          store: effectiveStoreSlug,
           product: {
             id: product.id,
             title: product.title,

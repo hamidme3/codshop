@@ -22,6 +22,16 @@ function OverviewContent() {
   useEffect(() => {
     setOrders(getOrders(storeSlug));
     setAnalytics(getAnalytics(storeSlug));
+
+    // Fetch live orders from PostgreSQL database
+    fetch(`/api/admin/orders?store=${encodeURIComponent(storeSlug)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.orders)) {
+          setOrders(data.orders);
+        }
+      })
+      .catch((err) => console.warn('[OverviewContent] Live orders fetch notice:', err));
   }, [storeSlug]);
 
   const { t } = useLanguage();
