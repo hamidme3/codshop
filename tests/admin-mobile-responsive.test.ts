@@ -51,6 +51,13 @@ assert.ok(ordersCode.includes('hidden md:block'), 'Desktop table must be hidden 
 assert.ok(ordersCode.includes('stage-pill-'), 'Status badges must use strict stage-pill tokens');
 assert.ok(ordersCode.includes('tel:'), 'Direct click-to-call link must be present on mobile order cards');
 assert.ok(ordersCode.includes('buildWhatsAppLink'), 'Direct WhatsApp link must be present on mobile order cards');
+
+// Mobile CSV Export Dropdown Viewport Bounds & Backdrop
+assert.ok(ordersCode.includes('left-0 sm:left-auto sm:right-0'), 'Exporter CSV dropdown must align left-0 on mobile to prevent clipping off-screen');
+assert.ok(ordersCode.includes('max-w-[calc(100vw-2rem)]'), 'Exporter CSV dropdown must be constrained to viewport width');
+assert.ok(ordersCode.includes('max-h-[calc(100vh-14rem)]'), 'Exporter CSV dropdown must have max-height and scrolling to prevent bottom nav collision');
+assert.ok(ordersCode.includes('setIsExportOpen(false)'), 'Exporter CSV dropdown must have click-outside backdrop dismissal');
+console.log('  ✓ Exporter CSV dropdown verified: mobile safe-alignment, viewport constraints, and backdrop dismissal.');
 console.log('  ✓ orders/page.tsx verified: Adaptive mobile card stream, click-to-call, and WhatsApp actions present.');
 
 // ── Test 4: Verify Products Catalog Table-to-Card Responsive Transformation ──

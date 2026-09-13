@@ -528,7 +528,7 @@ function OrdersContent() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
           {/* Export CSV Dropdown */}
           <div className="relative">
             <button
@@ -537,95 +537,117 @@ function OrdersContent() {
             >
               <Download className="w-4 h-4 text-emerald-400" />
               <span>Exporter CSV</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isExportOpen && (
-              <div className="absolute right-0 mt-2 w-72 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2 z-40 space-y-1 text-xs">
-                <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 flex items-center justify-between">
-                  <span>Export 1-Clic par Statut</span>
-                  <span className="text-emerald-400">Excel / Sheets</span>
-                </div>
-                <button
-                  onClick={() => handleExportByStatus('confirmed')}
-                  className="w-full text-left px-3 py-2 rounded-xl bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-300 font-bold flex items-center justify-between transition-colors"
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-                    <span>1-Clic : Confirmées ({confirmedCount})</span>
-                  </span>
-                  <Download className="w-3.5 h-3.5 text-cyan-400" />
-                </button>
-                <button
-                  onClick={() => handleExportByStatus('shipped')}
-                  className="w-full text-left px-3 py-2 rounded-xl bg-sky-950/40 hover:bg-sky-900/60 text-sky-300 font-bold flex items-center justify-between transition-colors"
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-sky-400"></span>
-                    <span>1-Clic : Expédiées ({shippedCount})</span>
-                  </span>
-                  <Download className="w-3.5 h-3.5 text-sky-400" />
-                </button>
-                <button
-                  onClick={() => handleExportByStatus('delivered')}
-                  className="w-full text-left px-3 py-2 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 font-bold flex items-center justify-between transition-colors"
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                    <span>1-Clic : Livrées ({deliveredCount})</span>
-                  </span>
-                  <Download className="w-3.5 h-3.5 text-emerald-400" />
-                </button>
-                <button
-                  onClick={() => handleExportByStatus('returned')}
-                  className="w-full text-left px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 font-bold flex items-center justify-between transition-colors"
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-rose-400"></span>
-                    <span>1-Clic : Retournées ({returnedCount})</span>
-                  </span>
-                  <Download className="w-3.5 h-3.5 text-rose-400" />
-                </button>
-                <button
-                  onClick={() => handleExportByStatus('current')}
-                  className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 flex items-center justify-between"
-                >
-                  <span>📄 Filtre Actuel ({filteredOrders.length})</span>
-                  <Download className="w-3.5 h-3.5 text-slate-400" />
-                </button>
+              <>
+                {/* Backdrop for mobile click-outside dismissal */}
+                <div
+                  className="fixed inset-0 z-40 bg-black/40 sm:bg-transparent backdrop-blur-[1px] sm:backdrop-blur-none"
+                  onClick={() => setIsExportOpen(false)}
+                />
 
-                <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-t border-b border-slate-800 mt-1">
-                  Formats Transporteurs Spécifiques
+                <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2.5 z-50 space-y-1 text-xs max-h-[calc(100vh-14rem)] overflow-y-auto admin-scrollbar animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 flex items-center justify-between">
+                    <span>Export 1-Clic par Statut</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-400 font-mono">Excel / Sheets</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsExportOpen(false);
+                        }}
+                        className="p-0.5 rounded text-slate-400 hover:text-white hover:bg-slate-800"
+                        title="Fermer"
+                        aria-label="Fermer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleExportByStatus('confirmed')}
+                    className="w-full text-left px-3 py-2 rounded-xl bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-300 font-bold flex items-center justify-between transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+                      <span>1-Clic : Confirmées ({confirmedCount})</span>
+                    </span>
+                    <Download className="w-3.5 h-3.5 text-cyan-400" />
+                  </button>
+                  <button
+                    onClick={() => handleExportByStatus('shipped')}
+                    className="w-full text-left px-3 py-2 rounded-xl bg-sky-950/40 hover:bg-sky-900/60 text-sky-300 font-bold flex items-center justify-between transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-sky-400"></span>
+                      <span>1-Clic : Expédiées ({shippedCount})</span>
+                    </span>
+                    <Download className="w-3.5 h-3.5 text-sky-400" />
+                  </button>
+                  <button
+                    onClick={() => handleExportByStatus('delivered')}
+                    className="w-full text-left px-3 py-2 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 font-bold flex items-center justify-between transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                      <span>1-Clic : Livrées ({deliveredCount})</span>
+                    </span>
+                    <Download className="w-3.5 h-3.5 text-emerald-400" />
+                  </button>
+                  <button
+                    onClick={() => handleExportByStatus('returned')}
+                    className="w-full text-left px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 font-bold flex items-center justify-between transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-rose-400"></span>
+                      <span>1-Clic : Retournées ({returnedCount})</span>
+                    </span>
+                    <Download className="w-3.5 h-3.5 text-rose-400" />
+                  </button>
+                  <button
+                    onClick={() => handleExportByStatus('current')}
+                    className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 flex items-center justify-between"
+                  >
+                    <span>📄 Filtre Actuel ({filteredOrders.length})</span>
+                    <Download className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-t border-b border-slate-800 mt-1">
+                    Formats Transporteurs Spécifiques
+                  </div>
+                  <button
+                    onClick={() => handleExportManifest('ozon')}
+                    className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-between"
+                  >
+                    <span>📦 Ozon Express (.csv)</span>
+                    <Download className="w-3.5 h-3.5 text-sky-400" />
+                  </button>
+                  <button
+                    onClick={() => handleExportManifest('sendit')}
+                    className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-between"
+                  >
+                    <span>📦 SendIt Express (.csv)</span>
+                    <Download className="w-3.5 h-3.5 text-cyan-400" />
+                  </button>
+                  <button
+                    onClick={() => handleExportManifest('cathedis')}
+                    className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-between"
+                  >
+                    <span>📦 Cathedis (.csv)</span>
+                    <Download className="w-3.5 h-3.5 text-indigo-400" />
+                  </button>
+                  <button
+                    onClick={() => handleExportManifest('amana')}
+                    className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-between"
+                  >
+                    <span>📦 Amana Poste Maroc (.csv)</span>
+                    <Download className="w-3.5 h-3.5 text-emerald-400" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleExportManifest('ozon')}
-                  className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-between"
-                >
-                  <span>📦 Ozon Express (.csv)</span>
-                  <Download className="w-3.5 h-3.5 text-sky-400" />
-                </button>
-                <button
-                  onClick={() => handleExportManifest('sendit')}
-                  className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-between"
-                >
-                  <span>📦 SendIt Express (.csv)</span>
-                  <Download className="w-3.5 h-3.5 text-cyan-400" />
-                </button>
-                <button
-                  onClick={() => handleExportManifest('cathedis')}
-                  className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-between"
-                >
-                  <span>📦 Cathedis (.csv)</span>
-                  <Download className="w-3.5 h-3.5 text-indigo-400" />
-                </button>
-                <button
-                  onClick={() => handleExportManifest('amana')}
-                  className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-between"
-                >
-                  <span>📦 Amana Poste Maroc (.csv)</span>
-                  <Download className="w-3.5 h-3.5 text-emerald-400" />
-                </button>
-              </div>
+              </>
             )}
           </div>
 
