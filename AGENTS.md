@@ -646,5 +646,28 @@ STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS, 15/15 AUTOMATED TEST SUI
 - Live Catalog Endpoint: `https://codshop.vipone.site/catalog` (HTTP 200).
 - Git Repository: Synchronized with `origin/main`.
 
+=== ROUND 17: Permanent Architectural Rules & Universal Global COD SaaS Standards ===
+
+DATE: 2026-09-13
+STATUS: PERMANENT CORE MANDATE
+
+1. PERMANENT RULE 1: SOLELY A CASH-ON-DELIVERY (COD) SAAS E-COMMERCE PLATFORM (SOFTWARE-ONLY)
+- CODShop is STRICTLY and SOLELY an e-commerce SaaS software platform for Cash-on-Delivery merchants (software-only, like Shopify / YouCan / Storeino for COD).
+- CODShop DOES NOT own, manage, operate, or partner as a shipping fleet, delivery fleet, or logistics courier.
+- BANNED TERMINOLOGY: Agents, documentation, and platform copy must NEVER use terms like "carrier fleet", "partner carrier fleet", "flotte de transporteurs", "notre flotte de livraison", or imply logistics courier ownership.
+- MANDATED TERMINOLOGY: Always describe courier functionality as "software integrations", "carrier compatibility", "1-click manifest exports (CSV with UTF-8 BOM)", and "third-party courier handover" (compatible with Ozon Express, SendIt, Cathedis, Amana, SMSA, Aramex, DHL, etc.).
+
+2. PERMANENT RULE 2: CLEAN MULTI-TENANT SUBDOMAIN ARCHITECTURE (NO `?store=slug` ON PUBLIC URLS)
+- Public Root Domain (https://codshop.vipone.site): Strictly the Universal Global COD SaaS Landing Page (merchant acquisition, feature showcase, 25-theme gallery, COD unit economics simulator, transparent pricing, and store registration).
+- Public Merchant Stores: Exist SOLELY on clean subdomains (e.g. `https://[store].codshop.vipone.site/`, `https://[store].codshop.vipone.site/catalog`, `https://[store].codshop.vipone.site/product/[slug]`).
+- Public buyer/visitor URLs must NEVER expose query parameters like `?store=slug`.
+- `?store=slug` is STRICTLY an internal/developer fallback for environments without wildcard DNS (like localhost:3000 during local dev) and inside authenticated merchant admin sessions (`/admin/orders?store=slug`), NEVER on public buyer-facing storefront URLs.
+- Next.js middleware rewrites subdomains internally to map tenant context without modifying the public browser URL.
+
+3. PERMANENT RULE 3: UNIVERSAL GLOBAL COD POSITIONING
+- The SaaS landing page and platform features are universal across all Cash-on-Delivery markets globally, never restricted to Morocco alone.
+- Supported markets: Morocco (MAD), Saudi Arabia (SAR), UAE (AED), Kuwait & GCC (KWD), Egypt (EGP), and Europe/International (EUR/USD).
+- All platform features (1-tap waybill checkout, multi-currency auto-detection, local phone normalizers, courier manifest formats, WhatsApp templates) must support global COD corridors.
+
 <!-- GOAL_COMPLETE -->
 
