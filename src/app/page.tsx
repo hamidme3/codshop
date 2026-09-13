@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 import { getCountryConfig } from '@/lib/geo';
 import { getProductsByTheme, MOCK_PRODUCTS } from '@/lib/mockProducts';
 import { ProductCard } from '@/components/ProductCard';
 import { Award, Sparkles, Zap, ArrowRight, Star, ShieldCheck, Truck } from 'lucide-react';
+import { UniversalLandingPage } from '@/components/landing/UniversalLandingPage';
 
-export default function HomePage() {
+function StorefrontHome() {
   const { theme, lang, countryCode } = useTheme();
   const countryConfig = useMemo(() => getCountryConfig(countryCode), [countryCode]);
   const products = getProductsByTheme(theme.id);
@@ -187,10 +189,10 @@ export default function HomePage() {
         >
           <div className="text-left">
             <h4 className="text-xs font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-              Envie d'explorer plus d'articles ?
+              Envie d&apos;explorer plus d&apos;articles ?
             </h4>
             <p className="text-[11px]" style={{ color: 'var(--theme-text-secondary)' }}>
-              Découvrez l'ensemble de notre catalogue avec filtres par catégorie, budget et recherche directe.
+              Découvrez l&apos;ensemble de notre catalogue avec filtres par catégorie, budget et recherche directe.
             </p>
           </div>
           <a
@@ -232,5 +234,39 @@ export default function HomePage() {
         </div>
       </section>
     </div>
+  );
+}
+
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const storeParam = searchParams.get('store');
+  const [isSubdomain, setIsSubdomain] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const host = window.location.hostname.toLowerCase();
+      const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
+      const hasSub = (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
+                     (host.endsWith('.localhost') && host !== 'localhost');
+      setIsSubdomain(hasSub);
+    }
+  }, []);
+
+  // If a merchant store is explicitly loaded via ?store= or via tenant subdomain, render their storefront
+  const isMerchantStore = Boolean(storeParam) || isSubdomain;
+
+  if (isMerchantStore) {
+    return <StorefrontHome />;
+  }
+
+  // Otherwise, on the root domain, render the Universal Global Cash-on-Delivery SaaS Platform Landing Page
+  return <UniversalLandingPage />;
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#09090b]" />}>
+      <HomeContent />
+    </Suspense>
   );
 }

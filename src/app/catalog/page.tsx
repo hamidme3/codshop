@@ -17,6 +17,7 @@ import {
   Compass,
   Check,
   Filter,
+  ExternalLink,
 } from 'lucide-react';
 
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'rating';
@@ -30,6 +31,17 @@ export default function CatalogPage() {
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortOption>('featured');
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [isSubdomain, setIsSubdomain] = useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const host = window.location.hostname.toLowerCase();
+      const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
+      const hasSub = (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
+                     (host.endsWith('.localhost') && host !== 'localhost');
+      setIsSubdomain(hasSub);
+    }
+  }, []);
 
   // Dynamic Category Definitions based on mock catalog
   const categories = useMemo(
@@ -128,6 +140,40 @@ export default function CatalogPage() {
         }}
       >
         <div className="max-w-7xl mx-auto space-y-3">
+          {/* SaaS Platform Demo Catalog Banner (when visited on root domain) */}
+          {!isSubdomain && (
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-zinc-900/90 border border-emerald-500/30 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs mb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold shrink-0">
+                  ✨
+                </div>
+                <div>
+                  <span className="font-bold text-white">Catalogue Démonstration Plateforme :</span>
+                  <span className="text-zinc-400 ml-1.5">
+                    Vous explorez la vitrine de démonstration. Chaque vendeur CODShop dispose de son propre catalogue isolé sur son sous-domaine dédié.
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href="https://ottavio.codshop.vipone.site/catalog"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-300 hover:text-white bg-zinc-800 border border-zinc-700 transition-colors flex items-center gap-1"
+                >
+                  <span>Démo Ottavio</span>
+                  <ExternalLink className="w-3 h-3 text-zinc-400" />
+                </a>
+                <a
+                  href="/register-store"
+                  className="px-3 py-1.5 rounded-lg text-xs font-black text-black bg-emerald-400 hover:bg-emerald-300 transition-colors"
+                >
+                  Créer Ma Boutique
+                </a>
+              </div>
+            </div>
+          )}
+
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-xs font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
             <a href="/" className="hover:underline">

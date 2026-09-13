@@ -207,10 +207,12 @@ export async function middleware(request: NextRequest) {
     requestHeaders.set('x-store-slug', subdomain);
     requestHeaders.set('x-tenant-type', 'subdomain');
 
-    // If accessing root "/" under a merchant subdomain (e.g. boutique.codshop.vipone.site),
+    // If accessing public storefront routes under a merchant subdomain (e.g. boutique.codshop.vipone.site/catalog),
     // inject the store parameter so the storefront renders their products and 1-step COD form
-    if (url.pathname === '/') {
-      url.searchParams.set('store', subdomain);
+    if (!url.pathname.startsWith('/admin') && !url.pathname.startsWith('/api')) {
+      if (!url.searchParams.has('store')) {
+        url.searchParams.set('store', subdomain);
+      }
       const response = NextResponse.rewrite(url, {
         request: { headers: requestHeaders },
       });
@@ -230,6 +232,8 @@ export async function middleware(request: NextRequest) {
       });
       return response;
     }
+  } else {
+    requestHeaders.set('x-tenant-type', 'platform');
   }
 
   // Return standard response with enriched headers
