@@ -19,7 +19,7 @@ function AnalyticsContent() {
       {/* Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-3">
-          <TrendingUp className="w-8 h-8 text-amber-400" /> Analytiques & Rentabilité COD
+          <TrendingUp className="w-8 h-8 text-emerald-400" /> Analytiques & Rentabilité COD
         </h1>
         <p className="text-slate-400 text-xs sm:text-sm mt-1">
           Performances de confirmation, taux de livraison par ville et bénéfice net réel en Dirhams (MAD).
@@ -29,7 +29,7 @@ function AnalyticsContent() {
       {/* 4 Moroccan Operational KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Taux de Livraison */}
-        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
+        <div className="p-5 rounded-2xl bg-[#13171c] border border-slate-800/70 space-y-2 bento-card shadow-sm">
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
             <span>Taux de Livraison (Réussite)</span>
             <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
@@ -45,10 +45,10 @@ function AnalyticsContent() {
         </div>
 
         {/* Taux de Confirmation */}
-        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
+        <div className="p-5 rounded-2xl bg-[#13171c] border border-slate-800/70 space-y-2 bento-card shadow-sm">
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
             <span>Taux de Confirmation</span>
-            <span className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400">
+            <span className="p-1.5 rounded-lg bg-sky-500/10 text-sky-400">
               <Phone className="w-4 h-4" />
             </span>
           </div>
@@ -61,7 +61,7 @@ function AnalyticsContent() {
         </div>
 
         {/* Taux de Retour */}
-        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
+        <div className="p-5 rounded-2xl bg-[#13171c] border border-slate-800/70 space-y-2 bento-card shadow-sm">
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
             <span>Taux de Retour</span>
             <span className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400">
@@ -77,17 +77,17 @@ function AnalyticsContent() {
         </div>
 
         {/* Bénéfice Net Estimé */}
-        <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
-          <div className="flex items-center justify-between text-xs text-amber-300 font-semibold">
+        <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2 bento-card shadow-sm">
+          <div className="flex items-center justify-between text-xs text-emerald-300 font-semibold">
             <span>Bénéfice Net Réel</span>
-            <span className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400">
+            <span className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400">
               <Wallet className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-3xl font-black text-amber-400">
+          <div className="text-3xl font-black text-emerald-400">
             {analytics.netProfit.toLocaleString()} <span className="text-sm font-semibold text-slate-400">DH</span>
           </div>
-          <div className="text-[11px] text-amber-300">
+          <div className="text-[11px] text-emerald-300">
             Après déduction coût produit & transporteurs
           </div>
         </div>
@@ -122,7 +122,7 @@ function AnalyticsContent() {
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
         <div>
           <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-amber-400" /> Taux de Livraison par Ville Marocaine
+            <MapPin className="w-5 h-5 text-sky-400" /> Taux de Livraison par Ville Marocaine
           </h2>
           <p className="text-xs text-slate-400">
             Identifiez les villes les plus rentables pour optimiser vos budgets publicitaires Facebook/TikTok.

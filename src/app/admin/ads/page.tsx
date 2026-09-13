@@ -208,7 +208,7 @@ export default function AdsHubPage() {
             <span className="text-[11px] text-zinc-400 font-mono">Multi-Canal COD Maroc</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-            <Zap className="w-5 h-5 text-amber-400" /> Pixels Publicitaires & Partenaires Ads
+            <Zap className="w-5 h-5 text-emerald-400" /> Pixels Publicitaires & Partenaires Ads
           </h1>
           <p className="text-zinc-400 text-xs mt-1">
             Configuration 2-colonnes haute précision avec bascules tactiles, identifiants monospace et pings de vérification instantanés.
@@ -221,7 +221,7 @@ export default function AdsHubPage() {
             onClick={handleSendTestPurchase}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white text-xs font-medium transition-colors shadow-sm cursor-pointer"
           >
-            <Activity className="w-3.5 h-3.5 text-amber-400" />
+            <Activity className="w-3.5 h-3.5 text-sky-400" />
             <span>Simuler Achat (349 DH)</span>
           </button>
         </div>
@@ -328,7 +328,7 @@ export default function AdsHubPage() {
                   placeholder="Ex: 1386256236443220"
                   value={metaPixelId}
                   onChange={(e) => setMetaPixelId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
             </div>
@@ -338,10 +338,10 @@ export default function AdsHubPage() {
               <div className="text-[11px] font-mono">
                 {pings.meta?.loading ? (
                   <span className="text-zinc-500 flex items-center gap-1">
-                    <RefreshCw className="w-3 h-3 animate-spin text-amber-400" /> Ping en cours...
+                    <RefreshCw className="w-3 h-3 animate-spin text-sky-400" /> Ping en cours...
                   </span>
                 ) : pings.meta?.message ? (
-                  <span className={pings.meta.valid ? 'text-emerald-400' : 'text-amber-400'}>
+                  <span className={pings.meta.valid ? 'text-emerald-400' : 'text-sky-400'}>
                     {pings.meta.message}
                   </span>
                 ) : (
@@ -405,7 +405,7 @@ export default function AdsHubPage() {
                   placeholder="Ex: C8K92L81938AKJSD0192"
                   value={tiktokPixelId}
                   onChange={(e) => setTiktokPixelId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
             </div>
@@ -415,10 +415,10 @@ export default function AdsHubPage() {
               <div className="text-[11px] font-mono">
                 {pings.tiktok?.loading ? (
                   <span className="text-zinc-500 flex items-center gap-1">
-                    <RefreshCw className="w-3 h-3 animate-spin text-amber-400" /> Ping en cours...
+                    <RefreshCw className="w-3 h-3 animate-spin text-sky-400" /> Ping en cours...
                   </span>
                 ) : pings.tiktok?.message ? (
-                  <span className={pings.tiktok.valid ? 'text-emerald-400' : 'text-amber-400'}>
+                  <span className={pings.tiktok.valid ? 'text-emerald-400' : 'text-sky-400'}>
                     {pings.tiktok.message}
                   </span>
                 ) : (
@@ -482,7 +482,7 @@ export default function AdsHubPage() {
                   placeholder="Ex: 4c3b679a-7a52-45e2-a083-efd0b6d218fa"
                   value={snapchatPixelId}
                   onChange={(e) => setSnapchatPixelId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
             </div>
@@ -492,10 +492,10 @@ export default function AdsHubPage() {
               <div className="text-[11px] font-mono">
                 {pings.snap?.loading ? (
                   <span className="text-zinc-500 flex items-center gap-1">
-                    <RefreshCw className="w-3 h-3 animate-spin text-amber-400" /> Ping en cours...
+                    <RefreshCw className="w-3 h-3 animate-spin text-sky-400" /> Ping en cours...
                   </span>
                 ) : pings.snap?.message ? (
-                  <span className={pings.snap.valid ? 'text-emerald-400' : 'text-amber-400'}>
+                  <span className={pings.snap.valid ? 'text-emerald-400' : 'text-sky-400'}>
                     {pings.snap.message}
                   </span>
                 ) : (
@@ -520,11 +520,11 @@ export default function AdsHubPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-bold text-xs">
+                  <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 font-bold text-xs">
                     g4
                   </div>
                   <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400">Google Tag</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-sky-400">Google Tag</h3>
                     <p className="text-[10px] text-zinc-500">Google Analytics 4 & Ads</p>
                   </div>
                 </div>
@@ -559,7 +559,7 @@ export default function AdsHubPage() {
                   placeholder="Ex: G-LN3S0WSM3B"
                   value={googleAnalyticsId}
                   onChange={(e) => setGoogleAnalyticsId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
             </div>
@@ -569,10 +569,10 @@ export default function AdsHubPage() {
               <div className="text-[11px] font-mono">
                 {pings.google?.loading ? (
                   <span className="text-zinc-500 flex items-center gap-1">
-                    <RefreshCw className="w-3 h-3 animate-spin text-amber-400" /> Ping en cours...
+                    <RefreshCw className="w-3 h-3 animate-spin text-sky-400" /> Ping en cours...
                   </span>
                 ) : pings.google?.message ? (
-                  <span className={pings.google.valid ? 'text-emerald-400' : 'text-amber-400'}>
+                  <span className={pings.google.valid ? 'text-emerald-400' : 'text-sky-400'}>
                     {pings.google.message}
                   </span>
                 ) : (
@@ -636,7 +636,7 @@ export default function AdsHubPage() {
                   placeholder="Ex: 2618934029148"
                   value={pinterestPartnerId}
                   onChange={(e) => setPinterestPartnerId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
             </div>
@@ -646,10 +646,10 @@ export default function AdsHubPage() {
               <div className="text-[11px] font-mono">
                 {pings.pinterest?.loading ? (
                   <span className="text-zinc-500 flex items-center gap-1">
-                    <RefreshCw className="w-3 h-3 animate-spin text-amber-400" /> Ping en cours...
+                    <RefreshCw className="w-3 h-3 animate-spin text-sky-400" /> Ping en cours...
                   </span>
                 ) : pings.pinterest?.message ? (
-                  <span className={pings.pinterest.valid ? 'text-emerald-400' : 'text-amber-400'}>
+                  <span className={pings.pinterest.valid ? 'text-emerald-400' : 'text-sky-400'}>
                     {pings.pinterest.message}
                   </span>
                 ) : (
@@ -674,11 +674,11 @@ export default function AdsHubPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 font-bold text-xs">
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs">
                     mc
                   </div>
                   <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-orange-400">Merchant Center</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400">Merchant Center</h3>
                     <p className="text-[10px] text-zinc-500">Google Shopping Maroc (Flux)</p>
                   </div>
                 </div>
@@ -713,7 +713,7 @@ export default function AdsHubPage() {
                   placeholder="Ex: 504829103"
                   value={googleMerchantCenterId}
                   onChange={(e) => setGoogleMerchantCenterId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
             </div>
@@ -723,10 +723,10 @@ export default function AdsHubPage() {
               <div className="text-[11px] font-mono">
                 {pings.gmc?.loading ? (
                   <span className="text-zinc-500 flex items-center gap-1">
-                    <RefreshCw className="w-3 h-3 animate-spin text-amber-400" /> Ping en cours...
+                    <RefreshCw className="w-3 h-3 animate-spin text-sky-400" /> Ping en cours...
                   </span>
                 ) : pings.gmc?.message ? (
-                  <span className={pings.gmc.valid ? 'text-emerald-400' : 'text-amber-400'}>
+                  <span className={pings.gmc.valid ? 'text-emerald-400' : 'text-sky-400'}>
                     {pings.gmc.message}
                   </span>
                 ) : (
@@ -770,7 +770,7 @@ export default function AdsHubPage() {
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-zinc-950 font-semibold text-xs transition-colors shadow-sm cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 font-semibold text-xs transition-colors shadow-sm shadow-emerald-500/20 cursor-pointer"
             >
               {saving ? 'Enregistrement...' : (
                 <><Save className="w-4 h-4" /> Enregistrer les pixels</>
@@ -780,7 +780,7 @@ export default function AdsHubPage() {
         </div>
 
         {testEventStatus && (
-          <div className="p-3 rounded-xl bg-zinc-950 border border-amber-500/30 text-amber-400 text-xs font-mono">
+          <div className="p-3 rounded-xl bg-zinc-950 border border-sky-500/30 text-sky-400 text-xs font-mono">
             {testEventStatus}
           </div>
         )}

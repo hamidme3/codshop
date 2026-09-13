@@ -58,14 +58,14 @@ export default function StoreSwitcher({ currentSlug }: { currentSlug: string }) 
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all text-left group"
+        className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#13171c] border border-slate-800 hover:border-slate-700 transition-all text-left group cursor-pointer"
       >
         <div className="flex items-center gap-2.5 min-w-0 pr-2">
-          <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
             <Store className="w-3.5 h-3.5" />
           </div>
           <div className="min-w-0">
-            <p className="font-bold text-xs text-white truncate group-hover:text-amber-400 transition-colors">
+            <p className="font-bold text-xs text-white truncate group-hover:text-emerald-400 transition-colors">
               {currentStore.name}
             </p>
             <p className="text-[10px] text-slate-400 font-mono truncate">
@@ -75,13 +75,13 @@ export default function StoreSwitcher({ currentSlug }: { currentSlug: string }) 
         </div>
         <ChevronDown
           className={`w-4 h-4 text-slate-400 transition-transform shrink-0 ${
-            isOpen ? 'rotate-180 text-amber-400' : ''
+            isOpen ? 'rotate-180 text-emerald-400' : ''
           }`}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 z-50 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl shadow-black/80 overflow-hidden text-xs">
+        <div className="absolute top-full left-0 right-0 mt-2 z-50 rounded-2xl bg-[#13171c] border border-slate-800 shadow-2xl shadow-black/80 overflow-hidden text-xs">
           <div className="p-2 border-b border-slate-800/80 bg-slate-950/40">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
               Mes Boutiques ({stores.length})
@@ -95,9 +95,9 @@ export default function StoreSwitcher({ currentSlug }: { currentSlug: string }) 
                 <button
                   key={s.id}
                   onClick={() => handleSwitch(s.url)}
-                  className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-colors ${
+                  className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-colors cursor-pointer ${
                     isSelected
-                      ? 'bg-amber-500/10 text-amber-400 font-bold border border-amber-500/20'
+                      ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20'
                       : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                   }`}
                 >
@@ -107,7 +107,7 @@ export default function StoreSwitcher({ currentSlug }: { currentSlug: string }) 
                       {s.slug}.codshop.vipone.site
                     </p>
                   </div>
-                  {isSelected && <Check className="w-4 h-4 text-amber-400 shrink-0" />}
+                  {isSelected && <Check className="w-4 h-4 text-emerald-400 shrink-0" />}
                 </button>
               );
             })}
@@ -121,7 +121,7 @@ export default function StoreSwitcher({ currentSlug }: { currentSlug: string }) 
                   <button
                     key={s.id}
                     onClick={() => handleSwitch(s.url)}
-                    className="w-full flex items-center justify-between p-2 rounded-xl text-left text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                    className="w-full flex items-center justify-between p-2 rounded-xl text-left text-slate-300 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
                   >
                     <div className="min-w-0 pr-2">
                       <p className="truncate text-xs font-semibold">{s.name}</p>
@@ -143,7 +143,7 @@ export default function StoreSwitcher({ currentSlug }: { currentSlug: string }) 
                   window.location.href = `/onboarding?store=${slug}`;
                 }
               }}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-bold text-[11px] transition-colors border border-amber-500/30"
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-bold text-[11px] transition-colors border border-emerald-500/30 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" /> Ajouter une nouvelle boutique
             </button>

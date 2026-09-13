@@ -160,20 +160,20 @@ function CustomersContent() {
             <Users className="w-6 h-6 text-zinc-200" /> CRM & Profils Acheteurs
           </h1>
           <p className="text-zinc-400 text-xs mt-1">
-            Synchronisé avec vos 4 étapes : <span className="text-cyan-300 font-mono text-[11px]">1. Confirmée</span>, <span className="text-amber-300 font-mono text-[11px]">2. Expédiée</span>, <span className="text-emerald-300 font-mono text-[11px]">3. Livrée</span>, <span className="text-rose-300 font-mono text-[11px]">4. Retournée</span>.
+            Synchronisé avec vos 4 étapes : <span className="text-cyan-300 font-mono text-[11px]">1. Confirmée</span>, <span className="text-sky-300 font-mono text-[11px]">2. Expédiée</span>, <span className="text-emerald-300 font-mono text-[11px]">3. Livrée</span>, <span className="text-rose-300 font-mono text-[11px]">4. Retournée</span>.
           </p>
         </div>
 
         <div className="flex items-center gap-2.5">
           <button
             onClick={refreshCustomers}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-xs font-medium text-zinc-300 hover:text-white transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-xs font-medium text-zinc-300 hover:text-white transition-colors shadow-sm cursor-pointer"
             title="Rafraîchir les données CRM"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Actualiser</span>
           </button>
-          <div className="text-xs font-mono text-zinc-400 bg-[#121215] px-3 py-1.5 rounded-lg border border-zinc-800/80">
+          <div className="text-xs font-mono text-zinc-400 bg-[#13171c] px-3 py-1.5 rounded-lg border border-slate-800/80">
             Base active: <strong className="text-zinc-200 tabular-nums">{totalCustomersCount}</strong>
           </div>
         </div>
@@ -182,7 +182,7 @@ function CustomersContent() {
       {/* 4 Synchronized KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Total Base */}
-        <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800/80 space-y-1.5 shadow-sm">
+        <div className="p-4 rounded-xl bg-[#13171c] border border-slate-800/70 bento-card space-y-1.5 shadow-sm">
           <div className="flex items-center justify-between text-xs text-zinc-400 font-medium">
             <span>Total Clients CRM</span>
             <Users className="w-3.5 h-3.5 text-zinc-500" />
@@ -192,7 +192,7 @@ function CustomersContent() {
         </div>
 
         {/* 1. Confirmer (Cyan) */}
-        <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800/80 space-y-1.5 shadow-sm">
+        <div className="p-4 rounded-xl bg-[#13171c] border border-slate-800/70 bento-card space-y-1.5 shadow-sm">
           <div className="flex items-center justify-between text-xs text-zinc-400 font-medium">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
@@ -204,21 +204,21 @@ function CustomersContent() {
           <div className="text-[11px] text-zinc-500">En cours de préparation / emballage</div>
         </div>
 
-        {/* 2. Expédier (Amber) */}
-        <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800/80 space-y-1.5 shadow-sm">
+        {/* 2. Expédier (Sky Blue) */}
+        <div className="p-4 rounded-xl bg-[#13171c] border border-slate-800/70 bento-card space-y-1.5 shadow-sm">
           <div className="flex items-center justify-between text-xs text-zinc-400 font-medium">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span className="w-2 h-2 rounded-full bg-sky-400"></span>
               Étape 2 : En Expédition
             </span>
-            <Truck className="w-3.5 h-3.5 text-amber-400" />
+            <Truck className="w-3.5 h-3.5 text-sky-400" />
           </div>
           <div className="text-2xl font-mono tabular-nums font-bold text-white tracking-tight">{shippedPipelineCount}</div>
-          <div className="text-[11px] text-zinc-500">En cours d'acheminement transporteur</div>
+          <div className="text-[11px] text-zinc-500">En cours d&apos;acheminement transporteur</div>
         </div>
 
         {/* 3. Livrée & Cash Encaissé (Emerald) */}
-        <div className="p-4 rounded-xl bg-[#121215] border border-zinc-800/80 space-y-1.5 shadow-sm">
+        <div className="p-4 rounded-xl bg-[#13171c] border border-slate-800/70 bento-card space-y-1.5 shadow-sm">
           <div className="flex items-center justify-between text-xs text-zinc-400 font-medium">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -465,7 +465,7 @@ function CustomersContent() {
                           </div>
                         ) : c.lastOrderStatus === 'shipped' || c.lastOrderStatus === 'shipping' ? (
                           <div className="space-y-0.5">
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-sky-500/10 text-sky-300 border border-sky-500/30">
                               <Truck className="w-3 h-3" /> 2. Expédiée
                             </span>
                             <div className="font-mono text-[10px] text-zinc-400">{c.lastTrackingNumber || c.lastOrderNumber}</div>
@@ -515,7 +515,7 @@ function CustomersContent() {
                         </div>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <span className={`px-1.5 py-0.2 rounded text-[10px] font-mono tabular-nums font-medium ${
-                            deliveryRate >= 80 ? 'text-emerald-400 bg-emerald-950/40 border border-emerald-800/40' : deliveryRate >= 50 ? 'text-amber-400 bg-amber-950/40 border border-amber-800/40' : 'text-rose-400 bg-rose-950/40 border border-rose-800/40'
+                            deliveryRate >= 80 ? 'text-emerald-400 bg-emerald-950/40 border border-emerald-800/40' : deliveryRate >= 50 ? 'text-sky-400 bg-sky-950/40 border border-sky-800/40' : 'text-rose-400 bg-rose-950/40 border border-rose-800/40'
                           }`}>
                             {deliveryRate}% Livré
                           </span>
@@ -629,7 +629,7 @@ function CustomersContent() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                          <Clock className="w-3.5 h-3.5 text-amber-400" />
+                          <Clock className="w-3.5 h-3.5 text-sky-400" />
                           <span>Chronologie Logistique & Livraison</span>
                         </h3>
                         {activeOrder && (
@@ -649,7 +649,7 @@ function CustomersContent() {
                               onClick={() => setActiveOrderId(ord.id)}
                               className={`px-2.5 py-1 rounded-md text-[11px] font-mono whitespace-nowrap transition-all border cursor-pointer ${
                                 (activeOrder?.id === ord.id)
-                                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 font-semibold shadow-xs'
+                                  ? 'bg-sky-500/15 border-sky-500/40 text-sky-300 font-semibold shadow-xs'
                                   : 'bg-[#0d0d10] border-zinc-800 text-zinc-400 hover:text-zinc-200'
                               }`}
                             >
@@ -671,7 +671,7 @@ function CustomersContent() {
                           </div>
                           <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
                             activeOrder.status === 'confirmed' ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/30' :
-                            activeOrder.status === 'shipped' || activeOrder.status === 'shipping' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' :
+                            activeOrder.status === 'shipped' || activeOrder.status === 'shipping' ? 'bg-sky-500/10 text-sky-300 border border-sky-500/30' :
                             activeOrder.status === 'delivered' ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30' :
                             activeOrder.status === 'returned' ? 'bg-rose-500/10 text-rose-300 border border-rose-500/30' :
                             'bg-zinc-800 text-zinc-300'
@@ -705,18 +705,18 @@ function CustomersContent() {
                             <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
                               activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm'
                                 ? 'bg-emerald-500/20 border border-emerald-500'
-                                : 'bg-amber-500/20 border border-amber-500 animate-pulse'
+                                : 'bg-sky-500/20 border border-sky-500 animate-pulse'
                             }`}>
                               {activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm' ? (
                                 <Check className="w-2.5 h-2.5 text-emerald-400" />
                               ) : (
-                                <Clock className="w-2.5 h-2.5 text-amber-400" />
+                                <Clock className="w-2.5 h-2.5 text-sky-400" />
                               )}
                             </div>
                             <div className="flex items-center justify-between text-xs">
                               <span className="font-semibold text-zinc-200">2. Confirmation & Qualification</span>
                               <span className={`text-[10px] font-mono ${
-                                activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm' ? 'text-emerald-400' : 'text-amber-400'
+                                activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm' ? 'text-emerald-400' : 'text-sky-400'
                               }`}>
                                 {activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm' ? 'Validée ✓' : 'En attente ⏳'}
                               </span>
@@ -747,7 +747,7 @@ function CustomersContent() {
                             </div>
                             {activeOrder.trackingNumber ? (
                               <div className="flex items-center gap-2 pt-0.5">
-                                <span className="font-mono text-[11px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 text-amber-300">
+                                <span className="font-mono text-[11px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 text-sky-300">
                                   {activeOrder.trackingNumber}
                                 </span>
                                 <button
@@ -774,7 +774,7 @@ function CustomersContent() {
                               ['delivered', 'returned'].includes(activeOrder.status)
                                 ? 'bg-emerald-500/20 border border-emerald-500'
                                 : ['shipped', 'shipping'].includes(activeOrder.status)
-                                ? 'bg-amber-500/20 border border-amber-500 animate-pulse'
+                                ? 'bg-sky-500/20 border border-sky-500 animate-pulse'
                                 : 'bg-zinc-800 border border-zinc-700'
                             }`}>
                               {['delivered', 'returned'].includes(activeOrder.status) ? (
@@ -847,7 +847,7 @@ function CustomersContent() {
                     <div className="p-4 bg-[#0d0d10] rounded-xl border border-zinc-800/80 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
-                          <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                          <MapPin className="w-3.5 h-3.5 text-sky-400" />
                           <span>Adresse & Repères de Livraison</span>
                         </div>
                         <span className="text-[10px] font-mono text-zinc-500">{selectedCustomer.city}, Maroc</span>
@@ -876,7 +876,7 @@ function CustomersContent() {
                           }}
                           placeholder="Ex: En face de la pharmacie, appeler avant de venir, code interphone 14B..."
                           rows={2}
-                          className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 text-xs font-sans placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 resize-none"
+                          className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 text-xs font-sans placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 resize-none"
                         />
                         <div className="flex justify-end">
                           <button
@@ -884,7 +884,7 @@ function CustomersContent() {
                             onClick={handleSaveNotes}
                             className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium transition-colors border border-zinc-700/80 flex items-center gap-1.5 cursor-pointer shadow-xs"
                           >
-                            <Save className="w-3.5 h-3.5 text-amber-400" />
+                            <Save className="w-3.5 h-3.5 text-emerald-400" />
                             <span>Enregistrer Note</span>
                           </button>
                         </div>

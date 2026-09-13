@@ -609,13 +609,13 @@ function ProductsContent() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => handleOpenAICoach()}
-            className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/80 font-medium px-3.5 py-2 rounded-lg text-xs transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-slate-700/80 font-medium px-3.5 py-2 rounded-lg text-xs transition-colors shadow-sm cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Coach IA Marocain
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> Coach IA Marocain
           </button>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 bg-zinc-100 hover:bg-white text-zinc-900 font-semibold px-3.5 py-2 rounded-lg text-xs transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black px-3.5 py-2 rounded-lg text-xs transition-colors shadow-sm shadow-emerald-500/20 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" /> Ajouter un Produit
           </button>
@@ -623,12 +623,12 @@ function ProductsContent() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1.5 p-1 bg-[#121215] border border-zinc-800/80 rounded-lg w-fit">
+      <div className="flex items-center gap-1.5 p-1 bg-[#13171c] border border-slate-800/80 rounded-lg w-fit bento-card">
         <button
           onClick={() => setActiveTab('products')}
-          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
             activeTab === 'products'
-              ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+              ? 'bg-slate-800 text-white font-semibold shadow-sm'
               : 'text-zinc-400 hover:text-zinc-200'
           }`}
         >
@@ -717,7 +717,7 @@ function ProductsContent() {
                         <div>
                           <div className="text-[10px] text-zinc-500">Marge Nette</div>
                           <div className={`font-mono font-bold text-xs tabular-nums ${
-                            marginPercent >= 35 ? 'text-emerald-400' : marginPercent >= 15 ? 'text-amber-400' : 'text-rose-400'
+                            marginPercent >= 35 ? 'text-emerald-400' : marginPercent >= 15 ? 'text-sky-400' : 'text-rose-400'
                           }`}>
                             +{margin} DH ({marginPercent}%)
                           </div>
@@ -747,7 +747,7 @@ function ProductsContent() {
                             +
                           </button>
                           {isLowStock && (
-                            <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] flex items-center gap-0.5">
+                            <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/30 text-[10px] flex items-center gap-0.5">
                               <AlertTriangle className="w-3 h-3" /> Faible
                             </span>
                           )}
@@ -855,8 +855,8 @@ function ProductsContent() {
                               +
                             </button>
                             {isLowStock && (
-                              <span className="p-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 ml-0.5" title="Stock faible !">
-                                <AlertTriangle className="w-3 h-3" />
+                              <span className="p-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/30 ml-0.5" title="Stock faible !">
+                                <AlertTriangle className="w-3 h-3 text-rose-400" />
                               </span>
                             )}
                           </div>
@@ -979,7 +979,7 @@ function ProductsContent() {
             {/* Modal Header */}
             <div className="px-5 py-4 border-b border-zinc-800/80 flex items-center justify-between bg-[#0f0f12]">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-zinc-800/90 border border-zinc-700/80 flex items-center justify-center text-amber-400">
+                <div className="w-8 h-8 rounded-lg bg-zinc-800/90 border border-zinc-700/80 flex items-center justify-center text-emerald-400">
                   <Package className="w-4 h-4" />
                 </div>
                 <div>
@@ -995,7 +995,7 @@ function ProductsContent() {
                   onClick={() => handleOpenAICoach(category, title, price)}
                   className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
                   <span className="hidden sm:inline">Coach IA Maroc</span>
                 </button>
                 <button 
@@ -1009,15 +1009,15 @@ function ProductsContent() {
 
             {/* Draft Restore Alert Banner */}
             {draftLoaded && (
-              <div className="px-5 py-2 bg-amber-500/10 border-b border-amber-500/20 text-amber-300 text-xs flex items-center justify-between">
+              <div className="px-5 py-2 bg-emerald-500/10 border-b border-emerald-500/20 text-emerald-300 text-xs flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                   <span>Brouillon restauré automatiquement depuis votre session précédente.</span>
                 </span>
                 <button
                   type="button"
                   onClick={handleClearDraft}
-                  className="text-amber-400 hover:text-white font-medium underline text-[11px] cursor-pointer"
+                  className="text-emerald-400 hover:text-white font-medium underline text-[11px] cursor-pointer"
                 >
                   Effacer le brouillon
                 </button>
@@ -1071,7 +1071,7 @@ function ProductsContent() {
                     : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
                 }`}
               >
-                <Gift className="w-3.5 h-3.5 text-amber-400" />
+                <Gift className="w-3.5 h-3.5 text-emerald-400" />
                 <span>4. Packs Upsell Maroc</span>
               </button>
               <button
@@ -1102,7 +1102,7 @@ function ProductsContent() {
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Ex: Sacoche Cuir Artisanal Marrakech — Édition Atlas"
-                        className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 font-medium placeholder-zinc-500 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/20"
+                        className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 font-medium placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/20"
                       />
                     </div>
 
@@ -1113,7 +1113,7 @@ function ProductsContent() {
                           <button
                             type="button"
                             onClick={() => setShowAddCategoryModal(true)}
-                            className="text-[11px] text-amber-400 hover:text-amber-300 font-medium inline-flex items-center gap-0.5 cursor-pointer"
+                            className="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium inline-flex items-center gap-0.5 cursor-pointer"
                           >
                             <Plus className="w-3 h-3" /> + Nouvelle Catégorie
                           </button>
@@ -1121,7 +1121,7 @@ function ProductsContent() {
                         <select
                           value={category}
                           onChange={(e) => setCategory(e.target.value)}
-                          className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 focus:outline-none focus:border-amber-500/60 font-medium cursor-pointer"
+                          className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 focus:outline-none focus:border-emerald-500/60 font-medium cursor-pointer"
                         >
                           {categories.map((c) => (
                             <option key={c.id} value={c.name}>
@@ -1136,7 +1136,7 @@ function ProductsContent() {
                         <select
                           value={addBadge}
                           onChange={(e) => setAddBadge(e.target.value)}
-                          className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 focus:outline-none focus:border-amber-500/60 font-medium cursor-pointer"
+                          className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 focus:outline-none focus:border-emerald-500/60 font-medium cursor-pointer"
                         >
                           <option value="100% Cuir Véritable">100% Cuir Véritable</option>
                           <option value="Bordereau Express">Bordereau Express</option>
@@ -1192,7 +1192,7 @@ function ProductsContent() {
                       <div className="flex items-center justify-between">
                         <div>
                           <label className="block text-zinc-200 font-medium text-xs flex items-center gap-1.5">
-                            <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                            <ImageIcon className="w-3.5 h-3.5 text-emerald-400" />
                             <span>Portfolio Photos & Médias</span>
                             <span className="text-zinc-500 font-mono text-[11px]">({addImages.length} photo{addImages.length !== 1 ? 's' : ''})</span>
                           </label>
@@ -1227,7 +1227,7 @@ function ProductsContent() {
                               <div
                                 key={idx}
                                 className={`relative rounded-xl overflow-hidden border ${
-                                  isPrimary ? 'border-amber-500/80 ring-1 ring-amber-500/50' : 'border-zinc-800'
+                                  isPrimary ? 'border-emerald-500/80 ring-1 ring-emerald-500/50' : 'border-zinc-800'
                                 } bg-zinc-900 group shadow-xs`}
                               >
                                 <img
@@ -1239,7 +1239,7 @@ function ProductsContent() {
                                   }}
                                 />
                                 {isPrimary ? (
-                                  <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded bg-amber-500/90 text-black font-semibold text-[9px] flex items-center gap-0.5 shadow">
+                                  <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded bg-emerald-500 text-zinc-950 font-bold text-[9px] flex items-center gap-0.5 shadow">
                                     <Star className="w-2.5 h-2.5 fill-current" /> Principale
                                   </span>
                                 ) : (
@@ -1301,7 +1301,7 @@ function ProductsContent() {
                             }
                           }}
                           placeholder="Coller l'URL d'une image (https://...)"
-                          className="flex-1 bg-[#0d0d10] border border-zinc-800 rounded-lg px-3 py-2 text-zinc-200 placeholder-zinc-600 text-xs font-mono focus:outline-none focus:border-amber-500/60"
+                          className="flex-1 bg-[#0d0d10] border border-zinc-800 rounded-lg px-3 py-2 text-zinc-200 placeholder-zinc-600 text-xs font-mono focus:outline-none focus:border-emerald-500/60"
                         />
                         <button
                           type="button"
@@ -1326,7 +1326,7 @@ function ProductsContent() {
                           required
                           value={price}
                           onChange={(e) => handlePriceChange(Number(e.target.value))}
-                          className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 font-mono tabular-nums font-semibold text-xs focus:outline-none focus:border-amber-500/60"
+                          className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 font-mono tabular-nums font-semibold text-xs focus:outline-none focus:border-emerald-500/60"
                         />
                       </div>
                       <div>
@@ -1548,7 +1548,7 @@ function ProductsContent() {
                 {/* TAB 4: PACKS UPSELL MAROC */}
                 {addModalTab === 'packs' && (
                   <div className="space-y-4">
-                    <div className="p-3.5 rounded-xl bg-amber-950/20 border border-amber-800/40 text-amber-300 text-xs leading-relaxed">
+                    <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-800/40 text-emerald-300 text-xs leading-relaxed">
                       💡 <strong>Standard E-Commerce Marocain :</strong> Plus de 40% des acheteurs COD choisissent un Pack Duo ou Trio si la livraison est offerte. La commande est expédiée dans <strong>un seul colis</strong>, ce qui amortit vos frais de transport.
                     </div>
 
@@ -1556,7 +1556,7 @@ function ProductsContent() {
                     <div className="p-4 rounded-xl bg-[#0f0f12] border border-zinc-800 space-y-3">
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                             ⭐ Pack Duo (Meilleure Vente Maroc)
                           </span>
                           <h4 className="text-sm font-semibold text-white mt-1">Pack Duo — 2 Unités</h4>
@@ -1567,12 +1567,12 @@ function ProductsContent() {
                           aria-checked={packDuoEnabled}
                           onClick={() => setPackDuoEnabled(!packDuoEnabled)}
                           className={`w-9 h-5 flex items-center rounded-full p-0.5 transition-colors cursor-pointer border ${
-                            packDuoEnabled ? 'bg-amber-500/20 border-amber-500/60' : 'bg-zinc-800 border-zinc-700'
+                            packDuoEnabled ? 'bg-emerald-500/20 border-emerald-500/60' : 'bg-zinc-800 border-zinc-700'
                           }`}
                         >
                           <span
                             className={`w-3.5 h-3.5 rounded-full transition-transform transform shadow-sm ${
-                              packDuoEnabled ? 'translate-x-4 bg-amber-400' : 'translate-x-0 bg-zinc-400'
+                              packDuoEnabled ? 'translate-x-4 bg-emerald-400' : 'translate-x-0 bg-zinc-400'
                             }`}
                           />
                         </button>
@@ -1598,7 +1598,7 @@ function ProductsContent() {
                                 type="checkbox"
                                 checked={packDuoFreeShipping}
                                 onChange={(e) => setPackDuoFreeShipping(e.target.checked)}
-                                className="rounded border-zinc-700 bg-zinc-900 text-amber-500 focus:ring-amber-500/20"
+                                className="rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500/20"
                               />
                               <span>Livraison Gratuite Automatique (0 DH)</span>
                             </label>
@@ -1702,7 +1702,7 @@ function ProductsContent() {
                             className="w-full h-48 object-cover"
                           />
                           {addBadge && addBadge !== 'Sans Badge' && (
-                            <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500 text-black shadow-md">
+                            <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500 text-zinc-950 shadow-md">
                               {addBadge}
                             </span>
                           )}
@@ -1710,7 +1710,7 @@ function ProductsContent() {
 
                         {/* Title & Category */}
                         <div>
-                          <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider">{category}</span>
+                          <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider">{category}</span>
                           <h3 className="font-bold text-white text-sm mt-0.5 leading-snug">
                             {title || 'Titre du Produit Exemple'}
                           </h3>
@@ -1734,12 +1734,12 @@ function ProductsContent() {
 
                         {/* Upsell Pack Preview */}
                         {packDuoEnabled && (
-                          <div className="p-2.5 rounded-lg border border-amber-500/50 bg-amber-500/10 flex items-center justify-between text-xs">
+                          <div className="p-2.5 rounded-lg border border-emerald-500/50 bg-emerald-500/10 flex items-center justify-between text-xs">
                             <div>
-                              <span className="text-[10px] font-semibold text-amber-400 uppercase">Pack Duo (2x)</span>
+                              <span className="text-[10px] font-semibold text-emerald-400 uppercase">Pack Duo (2x)</span>
                               <div className="font-mono font-bold text-white">{packDuoPrice} MAD</div>
                             </div>
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500 text-black font-semibold">
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500 text-zinc-950 font-bold">
                               Livraison Gratuite
                             </span>
                           </div>
@@ -1749,7 +1749,7 @@ function ProductsContent() {
                         <div className="pt-2 border-t border-zinc-800">
                           <button
                             type="button"
-                            className="w-full py-2.5 rounded-xl bg-amber-500 text-black font-bold text-xs flex items-center justify-center gap-2 shadow-md cursor-default"
+                            className="w-full py-2.5 rounded-xl bg-emerald-500 text-zinc-950 font-black text-xs flex items-center justify-center gap-2 shadow-md cursor-default"
                           >
                             <ShoppingBag className="w-3.5 h-3.5" />
                             <span>Commander Maintenant ({price} MAD)</span>
@@ -2095,7 +2095,7 @@ function ProductsContent() {
                         <div
                           key={idx}
                           className={`relative rounded-lg overflow-hidden border ${
-                            isPrimary ? 'border-amber-500/80 ring-1 ring-amber-500/50' : 'border-zinc-800'
+                            isPrimary ? 'border-emerald-500/80 ring-1 ring-emerald-500/50' : 'border-zinc-800'
                           } bg-zinc-900 group`}
                         >
                           <img
@@ -2108,7 +2108,7 @@ function ProductsContent() {
                           />
                           {/* Primary Badge */}
                           {isPrimary ? (
-                            <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-amber-500/90 text-black font-semibold text-[9px] flex items-center gap-0.5 shadow">
+                            <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-emerald-500 text-zinc-950 font-bold text-[9px] flex items-center gap-0.5 shadow">
                               <Star className="w-2.5 h-2.5 fill-current" /> Principale
                             </span>
                           ) : (
@@ -2216,7 +2216,7 @@ function ProductsContent() {
                   </span>
                 </div>
                 <h3 className="text-base sm:text-lg font-semibold text-white mt-1 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-400" /> Coach IA Marocain (Darija / FR)
+                  <Sparkles className="w-4 h-4 text-emerald-400" /> Coach IA Marocain (Darija / FR)
                 </h3>
                 <p className="text-zinc-400 text-xs mt-0.5">
                   Générez des titres vendeurs, des accroches en Darija et des offres dégressives.
@@ -2224,7 +2224,7 @@ function ProductsContent() {
               </div>
               <button 
                 onClick={() => setShowAICoach(false)} 
-                className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors"
+                className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 ✕
               </button>
@@ -2243,7 +2243,7 @@ function ProductsContent() {
                         setAiNiche(niche);
                         handleOpenAICoach(niche, aiKeyword, aiPrice);
                       }}
-                      className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                         aiNiche === niche
                           ? 'bg-zinc-100 text-zinc-900 font-semibold shadow-sm'
                           : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
@@ -2280,9 +2280,9 @@ function ProductsContent() {
               <button
                 type="button"
                 onClick={() => handleOpenAICoach(aiNiche, aiKeyword, aiPrice)}
-                className="w-full py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium text-xs flex items-center justify-center gap-2 border border-zinc-700 transition-colors"
+                className="w-full py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium text-xs flex items-center justify-center gap-2 border border-zinc-700 transition-colors cursor-pointer"
               >
-                <Wand2 className="w-3.5 h-3.5 text-amber-400" /> Régénérer de Nouvelles Variantes
+                <Wand2 className="w-3.5 h-3.5 text-emerald-400" /> Régénérer de Nouvelles Variantes
               </button>
             </div>
 
@@ -2295,7 +2295,7 @@ function ProductsContent() {
                     <span>Titre Recommandé</span>
                     <button
                       onClick={() => copyToClipboard(generatedCopy.title, 'title')}
-                      className="text-zinc-300 hover:text-white flex items-center gap-1 font-sans text-xs transition-colors"
+                      className="text-zinc-300 hover:text-white flex items-center gap-1 font-sans text-xs transition-colors cursor-pointer"
                     >
                       {copiedField === 'title' ? <CheckCheck className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                       {copiedField === 'title' ? 'Copié !' : 'Copier'}
@@ -2308,7 +2308,7 @@ function ProductsContent() {
                 <div className="bg-[#0d0d10] border border-zinc-800/80 rounded-xl p-3.5 space-y-1">
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="text-zinc-300 font-medium flex items-center gap-1">
-                      <Flame className="w-3.5 h-3.5 text-amber-400" /> Accroche en Darija
+                      <Flame className="w-3.5 h-3.5 text-emerald-400" /> Accroche en Darija
                     </span>
                     <button
                       onClick={() => copyToClipboard(generatedCopy.hookDarija, 'darija')}
@@ -2465,7 +2465,7 @@ function ProductsContent() {
                       onClick={() => setNewCatIcon(ico)}
                       className={`w-8 h-8 rounded-md flex items-center justify-center text-sm transition-all ${
                         newCatIcon === ico
-                          ? 'bg-zinc-700 border-2 border-amber-400 scale-105 shadow-sm'
+                          ? 'bg-zinc-700 border-2 border-emerald-400 scale-105 shadow-sm'
                           : 'bg-zinc-850 hover:bg-zinc-800 border border-zinc-700/60'
                       }`}
                     >
@@ -2512,7 +2512,7 @@ function ProductsContent() {
           <div className="bg-[#121215] border border-zinc-800 rounded-xl p-6 max-w-md w-full space-y-4 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
               <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
+                <AlertTriangle className="w-4 h-4 text-sky-400" />
                 <h3 className="text-base font-semibold text-white">Réassigner les Produits</h3>
               </div>
               <button 
@@ -2525,7 +2525,7 @@ function ProductsContent() {
             </div>
 
             <form onSubmit={handleConfirmReassign} className="space-y-3.5 text-xs">
-              <div className="p-3 rounded-lg bg-amber-950/20 border border-amber-800/40 text-amber-300 text-xs leading-relaxed">
+              <div className="p-3 rounded-lg bg-sky-950/20 border border-sky-800/40 text-sky-300 text-xs leading-relaxed">
                 La catégorie <strong className="text-white">« {categoryToReassign.name} »</strong> contient{' '}
                 <strong className="text-white font-mono tabular-nums">{categoryToReassign.productCount} produit(s)</strong> rattaché(s).
                 Pour éviter tout produit orphelin dans votre boutique, veuillez choisir une catégorie de destination.

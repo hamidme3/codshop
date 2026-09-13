@@ -65,12 +65,12 @@ function LoginContent() {
       {/* Top Header / Language Bar */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md px-4 flex items-center justify-between mb-8">
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black text-lg shadow-lg shadow-amber-500/20">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500 text-zinc-950 flex items-center justify-center font-black text-lg shadow-lg shadow-emerald-500/20">
             C
           </div>
           <div>
             <span className="font-black text-xl text-white tracking-tight">CODShop</span>
-            <span className="block text-[10px] text-amber-400 font-mono font-bold tracking-wider uppercase">Morocco E-Commerce</span>
+            <span className="block text-[10px] text-emerald-400 font-mono font-bold tracking-wider uppercase">Morocco E-Commerce</span>
           </div>
         </Link>
         <LanguageToggle />
@@ -89,10 +89,10 @@ function LoginContent() {
           </div>
 
           {/* Quick Demo Credentials Autofill Banner */}
-          <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3">
+          <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3">
             <div className="space-y-0.5 text-xs">
-              <span className="font-bold text-amber-300 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="font-bold text-emerald-300 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 Compte Démo Immédiat
               </span>
               <p className="text-[11px] text-slate-400 font-mono">admin@ottavio.ma</p>
@@ -100,7 +100,7 @@ function LoginContent() {
             <button
               type="button"
               onClick={handleFillDemo}
-              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition-colors shrink-0 shadow-md shadow-amber-500/10"
+              className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-xs transition-colors shrink-0 shadow-md shadow-emerald-500/10"
             >
               {t.auth.demoButton}
             </button>
@@ -131,7 +131,7 @@ function LoginContent() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="nom@boutique.ma"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
                 />
               </div>
             </div>
@@ -151,7 +151,7 @@ function LoginContent() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
                 />
                 <button
                   type="button"
@@ -167,7 +167,7 @@ function LoginContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:bg-amber-500/50 text-slate-950 font-black text-sm transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+              className="w-full mt-2 py-3.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:bg-emerald-500/50 text-zinc-950 font-black text-sm transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -189,7 +189,7 @@ function LoginContent() {
                 className="w-full py-3 px-4 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-2"
               >
                 <span>🇲🇦</span>
-                <span className="text-amber-400 font-bold">Connexion Express par SMS</span>
+                <span className="text-sky-400 font-bold">Connexion Express par SMS</span>
                 <span className="text-[10px] text-slate-500 font-normal">(Sans mot de passe)</span>
               </Link>
             </div>
@@ -202,7 +202,7 @@ function LoginContent() {
             </p>
             <Link
               href="/register-store"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
             >
               <Store className="w-3.5 h-3.5" />
               <span>{t.auth.registerStore}</span>

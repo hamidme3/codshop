@@ -101,7 +101,7 @@ function MiniThemeMockup({ theme }: { theme: ThemeConfig }) {
       {/* Mini COD Trust Bar */}
       <div className="flex items-center justify-between text-[7px] text-slate-500 px-1 pt-0.5 border-t border-black/5">
         <span className="flex items-center gap-0.5">
-          <Truck className="w-2 h-2 text-amber-500" />
+          <Truck className="w-2 h-2 text-sky-400" />
           <span>Livraison 24h</span>
         </span>
         <span className="flex items-center gap-0.5">
@@ -208,7 +208,7 @@ function ThemeGalleryContent() {
             <span className="text-[11px] text-zinc-400 font-mono">25 Thèmes Benchmarkés</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-            <Palette className="w-6 h-6 text-amber-400" />
+            <Palette className="w-6 h-6 text-emerald-400" />
             {language === 'ar' ? 'معرض القوالب الاحترافية (25 قالب)' : language === 'en' ? 'Theme Gallery (25 Benchmarked Themes)' : 'Galerie de Thèmes E-Commerce (25 Thèmes)'}
           </h1>
           <p className="mt-1 text-xs text-zinc-400 max-w-3xl">
@@ -225,14 +225,14 @@ function ThemeGalleryContent() {
             href={`/admin/builder?store=${storeSlug}`}
             className="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white text-xs font-medium flex items-center gap-2 border border-zinc-800 transition shadow-sm"
           >
-            <Sliders className="w-3.5 h-3.5 text-amber-400" />
+            <Sliders className="w-3.5 h-3.5 text-emerald-400" />
             <span>{language === 'ar' ? 'مُصمم الصفحات المرئي' : language === 'en' ? 'Visual Page Builder' : 'Page Builder Visuel'}</span>
           </Link>
           <a
             href={`/?store=${storeSlug}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-bold flex items-center gap-2 transition shadow-sm cursor-pointer"
+            className="px-3.5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 text-xs font-bold flex items-center gap-2 transition shadow-sm cursor-pointer shadow-emerald-500/20"
           >
             <span>{language === 'ar' ? 'معاينة المتجر المباشر' : language === 'en' ? 'View Live Store' : 'Voir Storefront en Direct'}</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -266,7 +266,7 @@ function ThemeGalleryContent() {
       )}
 
       {/* Active Theme Hero Card */}
-      <div className="relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-[#121215] p-6 shadow-xl">
+      <div className="relative overflow-hidden rounded-2xl border border-slate-800/80 bg-[#13171c] p-6 shadow-xl bento-card">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
             <div className="w-48 shrink-0">
@@ -275,7 +275,7 @@ function ThemeGalleryContent() {
 
             <div className="space-y-2.5">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                   {language === 'ar' ? 'القالب المفعّل حالياً' : language === 'en' ? 'Currently Active Theme' : 'Thème Actuellement Actif'}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-zinc-900 text-zinc-300 border border-zinc-800">
@@ -331,7 +331,7 @@ function ThemeGalleryContent() {
               href={`/admin/builder?store=${storeSlug}`}
               className="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-medium flex items-center gap-2 border border-zinc-800 transition"
             >
-              <Sliders className="w-3.5 h-3.5 text-amber-400" />
+              <Sliders className="w-3.5 h-3.5 text-emerald-400" />
               <span>Personnaliser dans Page Builder</span>
             </Link>
             <a
@@ -364,7 +364,7 @@ function ThemeGalleryContent() {
               }
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-xs font-mono text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 transition"
+              className="w-full pl-10 pr-4 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-xs font-mono text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 transition"
             />
           </div>
 
@@ -384,8 +384,8 @@ function ThemeGalleryContent() {
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer ${
                   isSelected
-                    ? 'bg-amber-500 text-zinc-950 font-bold shadow-xs'
-                    : 'bg-[#121215] hover:bg-zinc-800 text-zinc-300 border border-zinc-800/80'
+                    ? 'bg-emerald-500 text-zinc-950 font-bold shadow-xs'
+                    : 'bg-[#13171c] hover:bg-slate-800 text-zinc-300 border border-slate-800/80'
                 }`}
               >
                 <span>{label}</span>
@@ -404,10 +404,10 @@ function ThemeGalleryContent() {
           return (
             <div
               key={theme.id}
-              className={`flex flex-col rounded-2xl border transition-all duration-200 overflow-hidden bg-[#121215] hover:border-zinc-700/80 ${
+              className={`flex flex-col rounded-2xl border transition-all duration-200 overflow-hidden bg-[#13171c] hover:border-slate-700/80 bento-card ${
                 isActive
-                  ? 'border-amber-500 ring-2 ring-amber-500/30 shadow-md shadow-amber-500/10'
-                  : 'border-zinc-800/80'
+                  ? 'border-emerald-500 ring-2 ring-emerald-500/30 shadow-md shadow-emerald-500/10'
+                  : 'border-slate-800/80'
               }`}
             >
               {/* Card Header Preview Mockup */}
@@ -421,7 +421,7 @@ function ThemeGalleryContent() {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-900 text-amber-400 border border-amber-400/20">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-900 text-emerald-400 border border-emerald-400/20">
                           {theme.sourceInspiration}
                         </span>
                         <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-zinc-950 text-zinc-300 border border-zinc-800">
@@ -468,7 +468,7 @@ function ThemeGalleryContent() {
                   <div className="space-y-1 pt-1">
                     {theme.trustPills.slice(0, 2).map((pill, idx) => (
                       <div key={idx} className="flex items-center gap-1.5 text-zinc-400 text-[11px]">
-                        <div className="w-1 h-1 rounded-full bg-amber-400 shrink-0" />
+                        <div className="w-1 h-1 rounded-full bg-emerald-400 shrink-0" />
                         <span className="text-zinc-300 font-medium">{pill.title}</span>
                         <span className="text-zinc-500">— {pill.subtitle}</span>
                       </div>
@@ -490,7 +490,7 @@ function ThemeGalleryContent() {
                     <button
                       onClick={() => handleActivateTheme(theme)}
                       disabled={isLoading}
-                      className="flex-1 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-xs disabled:opacity-50 cursor-pointer"
+                      className="flex-1 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-xs disabled:opacity-50 cursor-pointer shadow-emerald-500/20"
                     >
                       {isLoading ? (
                         <>
@@ -508,13 +508,14 @@ function ThemeGalleryContent() {
 
                   {/* Direct Storefront Preview with theme override */}
                   <a
-                    href={`/?store=${storeSlug}&theme=${theme.id}`}
+                    href={`/?theme=${theme.id}&store=${storeSlug}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 text-xs transition cursor-pointer"
-                    title="Aperçu direct de ce thème dans un nouvel onglet"
+                    className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white text-xs font-medium flex items-center gap-1.5 border border-zinc-800 transition cursor-pointer"
+                    title={`Tester le thème ${theme.name} en direct`}
                   >
-                    <ExternalLink className="w-4 h-4" />
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Aperçu</span>
                   </a>
                 </div>
               </div>
@@ -532,7 +533,7 @@ export default function AdminThemesPage() {
       fallback={
         <div className="p-8 flex items-center justify-center min-h-[400px]">
           <div className="flex items-center gap-3 text-slate-400 text-sm">
-            <RefreshCw className="w-5 h-5 animate-spin text-amber-500" />
+            <RefreshCw className="w-5 h-5 animate-spin text-emerald-500" />
             <span>Chargement de la galerie de thèmes...</span>
           </div>
         </div>

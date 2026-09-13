@@ -53,18 +53,18 @@ export default function MilestoneWidget() {
   const { totalSalesMad, currentTier, nextTier, progressPercent, remainingToNext, tiers } = data;
 
   return (
-    <div className="p-5 rounded-2xl bg-[#121215] border border-zinc-800/80 shadow-sm space-y-5">
+    <div className="p-5 rounded-2xl bg-[#13171c] border border-slate-800/70 shadow-sm space-y-5 bento-card">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="p-1 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span className="p-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <Award className="w-4 h-4" />
             </span>
             <h2 className="text-sm font-black text-white tracking-tight">
               Paliers de Croissance & Volume d&apos;Affaires
             </h2>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
               {currentTier ? currentTier.label : 'Nouveau Vendeur'}
             </span>
           </div>
@@ -73,17 +73,17 @@ export default function MilestoneWidget() {
           </p>
         </div>
 
-        <div className="flex items-center gap-4 bg-[#09090b] px-3.5 py-2 rounded-xl border border-zinc-800 text-xs">
+        <div className="flex items-center gap-4 bg-[#0c0f12] px-3.5 py-2 rounded-xl border border-slate-800 text-xs">
           <div>
             <p className="text-[10px] uppercase font-bold text-zinc-500">Volume Consolidé</p>
             <p className="text-base font-black text-white tabular-nums font-mono">
               {totalSalesMad.toLocaleString('fr-MA')} <span className="text-xs text-zinc-400 font-sans">DH</span>
             </p>
           </div>
-          <div className="h-7 w-px bg-zinc-800" />
+          <div className="h-7 w-px bg-slate-800" />
           <div>
             <p className="text-[10px] uppercase font-bold text-zinc-500">Prochain Palier</p>
-            <p className="text-xs font-bold text-amber-400 font-mono tabular-nums">
+            <p className="text-xs font-bold text-sky-400 font-mono tabular-nums">
               {nextTier.label} ({nextTier.thresholdMad.toLocaleString('fr-MA')} DH)
             </p>
           </div>
@@ -101,10 +101,10 @@ export default function MilestoneWidget() {
               key={tier.key}
               className={`p-3 rounded-xl border transition-all flex flex-col justify-between space-y-2 ${
                 isCurrent
-                  ? 'bg-amber-500/5 border-amber-500/50 shadow-sm'
+                  ? 'bg-emerald-500/10 border-emerald-500/50 shadow-sm shadow-emerald-500/10'
                   : isUnlocked
-                  ? 'bg-[#18181b] border-zinc-700/60'
-                  : 'bg-[#09090b]/40 border-zinc-800/60 opacity-50'
+                  ? 'bg-[#181e25] border-slate-700/60'
+                  : 'bg-[#0c0f12]/50 border-slate-800/60 opacity-50'
               }`}
             >
               <div className="flex items-center justify-between">
@@ -121,7 +121,7 @@ export default function MilestoneWidget() {
               </div>
 
               {isCurrent ? (
-                <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500 text-zinc-950 text-center uppercase">
+                <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500 text-zinc-950 text-center uppercase">
                   Actuel
                 </span>
               ) : isUnlocked ? (
@@ -142,17 +142,17 @@ export default function MilestoneWidget() {
       <div className="space-y-1.5 pt-1">
         <div className="flex items-center justify-between text-xs font-semibold">
           <span className="text-zinc-400 flex items-center gap-1.5">
-            <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
+            <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
             <span>Progression vers l&apos;échelon</span>
-            <strong className="text-amber-400">{nextTier.label}</strong>
+            <strong className="text-sky-400">{nextTier.label}</strong>
           </span>
-          <span className="font-mono text-amber-400 font-black tabular-nums">{progressPercent}%</span>
+          <span className="font-mono text-emerald-400 font-black tabular-nums">{progressPercent}%</span>
         </div>
 
-        <div className="h-2 w-full rounded-full bg-zinc-950 border border-zinc-800 overflow-hidden">
+        <div className="h-2 w-full rounded-full bg-slate-950 border border-slate-800 overflow-hidden">
           <div
             style={{ width: `${progressPercent}%` }}
-            className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-500"
+            className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-sky-400 transition-all duration-500"
           />
         </div>
 

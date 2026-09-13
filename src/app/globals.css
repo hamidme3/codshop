@@ -271,9 +271,9 @@ h1 {
   contain-intrinsic-size: 300px 400px;
 }
 
-/* ── 2026 Enterprise Admin Design System (Linear x Stripe Standard) ── */
+/* ── 2026 Enterprise Admin Design System (Linear x Stripe Standard - Palette B) ── */
 .admin-shell {
-  background-color: #09090b;
+  background-color: #0c0f12;
   color: #f4f4f5;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
@@ -283,15 +283,22 @@ h1 {
   font-feature-settings: "tnum";
 }
 
-/* Precision micro-surfaces */
+/* Precision micro-surfaces & Bento Cards */
 .admin-surface {
-  background-color: #121215;
-  border: 1px solid rgba(39, 39, 42, 0.8);
+  background-color: #13171c;
+  border: 1px solid rgba(30, 41, 59, 0.7);
 }
 
 .admin-surface-subtle {
-  background-color: #18181b;
-  border: 1px solid rgba(39, 39, 42, 0.6);
+  background-color: #181e25;
+  border: 1px solid rgba(30, 41, 59, 0.6);
+}
+
+.bento-card {
+  background-color: #13171c;
+  border: 1px solid rgba(30, 41, 59, 0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+  border-radius: 1rem;
 }
 
 /* Linear-style data table */
@@ -302,9 +309,9 @@ h1 {
 }
 
 .admin-table th {
-  background-color: #0d0d10;
-  border-bottom: 1px solid rgba(39, 39, 42, 0.9);
-  color: #a1a1aa;
+  background-color: #0f1317;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.85);
+  color: #94a3b8;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -313,13 +320,13 @@ h1 {
 }
 
 .admin-table td {
-  border-bottom: 1px solid rgba(39, 39, 42, 0.45);
+  border-bottom: 1px solid rgba(30, 41, 59, 0.45);
   padding: 0.625rem 0.875rem;
   font-size: 0.8125rem;
 }
 
 .admin-table tr:hover td {
-  background-color: rgba(24, 24, 27, 0.5);
+  background-color: rgba(24, 30, 37, 0.6);
 }
 
 /* Smooth micro-scrollbars */
@@ -331,11 +338,11 @@ h1 {
   background: transparent;
 }
 .admin-scrollbar::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: #1e293b;
   border-radius: 9999px;
 }
 .admin-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: #334155;
 }
 
 /* Zero horizontal overflow & mobile safe areas */
@@ -367,11 +374,11 @@ h1 {
   justify-content: center;
 }
 
-/* Strict 6-Stage Moroccan COD Pipeline Semantic Tokens */
+/* Strict 6-Stage Moroccan COD Pipeline Semantic Tokens (Palette B - Sky Blue replaces Orange) */
 .stage-pill-new {
   color: #d4d4d8;
-  background-color: rgba(39, 39, 42, 0.7);
-  border: 1px solid rgba(63, 63, 70, 0.6);
+  background-color: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(51, 65, 85, 0.6);
 }
 .stage-pill-to_confirm {
   color: #7dd3fc;
@@ -384,9 +391,9 @@ h1 {
   border: 1px solid rgba(6, 182, 212, 0.4);
 }
 .stage-pill-shipped {
-  color: #fcd34d;
-  background-color: rgba(69, 26, 3, 0.45);
-  border: 1px solid rgba(217, 119, 6, 0.4);
+  color: #7dd3fc;
+  background-color: rgba(12, 74, 110, 0.45);
+  border: 1px solid rgba(14, 165, 233, 0.45);
 }
 .stage-pill-delivered {
   color: #6ee7b7;

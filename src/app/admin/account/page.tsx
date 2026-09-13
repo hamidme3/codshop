@@ -146,7 +146,7 @@ export default function AccountProfilePage() {
             <span className="text-[11px] text-zinc-400 font-mono">Administration Marchand</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-            <User className="w-5 h-5 text-amber-400" /> Paramètres du Compte Marchand
+            <User className="w-5 h-5 text-emerald-400" /> Paramètres du Compte Marchand
           </h1>
           <p className="text-xs text-zinc-400 mt-1">
             Gérez vos informations personnelles, adresse fiscale de facturation et identifiants d&apos;accès.
@@ -191,9 +191,9 @@ export default function AccountProfilePage() {
       {/* Grid: Profile & Address */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Personal Details */}
-        <div className="bg-[#121215] border border-zinc-800/80 rounded-2xl p-6 space-y-4 shadow-sm hover:border-zinc-700/80 transition-colors">
+        <div className="bg-[#13171c] border border-slate-800/70 bento-card rounded-2xl p-6 space-y-4 shadow-sm hover:border-slate-700/80 transition-colors">
           <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
-            <User className="w-4 h-4 text-amber-400" />
+            <User className="w-4 h-4 text-emerald-400" />
             <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200">Informations Personnelles</h3>
           </div>
 
@@ -205,7 +205,7 @@ export default function AccountProfilePage() {
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
               <div>
@@ -214,7 +214,7 @@ export default function AccountProfilePage() {
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
             </div>
@@ -241,7 +241,7 @@ export default function AccountProfilePage() {
                   placeholder="+212 6 XX XX XX XX"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 font-mono"
+                  className="w-full pl-8 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 font-mono"
                 />
               </div>
             </div>
@@ -253,7 +253,7 @@ export default function AccountProfilePage() {
                 <select
                   value={preferredLocale}
                   onChange={(e) => setPreferredLocale(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 cursor-pointer"
+                  className="w-full pl-8 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
                 >
                   <option value="fr">Français</option>
                   <option value="ar">العربية (RTL)</option>
@@ -266,7 +266,7 @@ export default function AccountProfilePage() {
               <button
                 type="submit"
                 disabled={savingProfile}
-                className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-zinc-950 rounded-lg text-xs font-semibold transition cursor-pointer shadow-xs"
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 rounded-lg text-xs font-semibold transition cursor-pointer shadow-sm shadow-emerald-500/20"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>{savingProfile ? 'Enregistrement...' : 'Enregistrer les modifications'}</span>
@@ -276,7 +276,7 @@ export default function AccountProfilePage() {
         </div>
 
         {/* Company & Billing Address */}
-        <div className="bg-[#121215] border border-zinc-800/80 rounded-2xl p-6 space-y-4 shadow-sm hover:border-zinc-700/80 transition-colors">
+        <div className="bg-[#13171c] border border-slate-800/70 bento-card rounded-2xl p-6 space-y-4 shadow-sm hover:border-slate-700/80 transition-colors">
           <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
             <MapPin className="w-4 h-4 text-emerald-400" />
             <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200">Adresse Fiscale de Facturation</h3>
@@ -290,7 +290,7 @@ export default function AccountProfilePage() {
                 placeholder="Ex: 45 Boulevard d'Anfa, Étage 3"
                 value={firstLine}
                 onChange={(e) => setFirstLine(e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
+                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
 
@@ -302,7 +302,7 @@ export default function AccountProfilePage() {
                   placeholder="Casablanca"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
               <div>
@@ -312,7 +312,7 @@ export default function AccountProfilePage() {
                   placeholder="20000"
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 font-mono"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 font-mono"
                 />
               </div>
             </div>
@@ -322,7 +322,7 @@ export default function AccountProfilePage() {
               <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 cursor-pointer"
+                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
               >
                 <option value="MA">Maroc (MA)</option>
                 <option value="FR">France (FR)</option>
@@ -346,7 +346,7 @@ export default function AccountProfilePage() {
       </div>
 
       {/* Change Password Card */}
-      <div className="bg-[#121215] border border-zinc-800/80 rounded-2xl p-6 space-y-4 shadow-sm hover:border-zinc-700/80 transition-colors">
+      <div className="bg-[#13171c] border border-slate-800/70 bento-card rounded-2xl p-6 space-y-4 shadow-sm hover:border-slate-700/80 transition-colors">
         <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
           <Lock className="w-4 h-4 text-blue-400" />
           <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200">Changer le Mot de Passe</h3>
@@ -361,7 +361,7 @@ export default function AccountProfilePage() {
               placeholder="••••••••"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
+              className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
 
@@ -374,7 +374,7 @@ export default function AccountProfilePage() {
                 placeholder="Au moins 6 caractères"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
+                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
             <div>
@@ -385,7 +385,7 @@ export default function AccountProfilePage() {
                 placeholder="Retapez le mot de passe"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
+                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
           </div>

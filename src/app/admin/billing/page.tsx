@@ -31,19 +31,19 @@ function BillingContent() {
           >
             <ArrowLeft className="w-4 h-4" /> Retour au Page Builder ({storeSlug})
           </Link>
-          <div className="text-xs font-mono text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/30">
+          <div className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30">
             Boutique : {storeSlug}.codshop.vipone.site
           </div>
         </div>
 
         {/* Trial Status Header */}
-        <div className="bg-gradient-to-r from-amber-500/20 via-slate-900 to-slate-900 border border-amber-500/30 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="bg-gradient-to-r from-emerald-500/15 via-slate-900 to-slate-900 border border-emerald-500/30 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-2 text-center sm:text-left">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold uppercase">
-              <Clock className="w-3.5 h-3.5 text-amber-400" /> Essai Gratuit Actif
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold uppercase">
+              <Clock className="w-3.5 h-3.5 text-emerald-400" /> Essai Gratuit Actif
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
-              Il vous reste <span className="text-amber-400">14 jours</span> d&apos;essai gratuit
+              Il vous reste <span className="text-emerald-400">14 jours</span> d&apos;essai gratuit
             </h1>
             <p className="text-slate-400 text-xs sm:text-sm max-w-lg">
               Toutes les fonctionnalités Pro sont débloquées. Choisissez votre forfait dès maintenant pour assurer la continuité de vos ventes sans interruption.
@@ -67,7 +67,7 @@ function BillingContent() {
             </p>
             <Link
               href={`/admin/builder?store=${storeSlug}`}
-              className="inline-flex items-center gap-2 bg-amber-500 text-slate-950 font-bold px-6 py-3 rounded-xl text-sm hover:bg-amber-400 transition-colors"
+              className="inline-flex items-center gap-2 bg-emerald-500 text-slate-950 font-bold px-6 py-3 rounded-xl text-sm hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20 cursor-pointer"
             >
               Retourner à ma boutique <ArrowRight className="w-4 h-4" />
             </Link>
@@ -81,7 +81,7 @@ function BillingContent() {
                 onClick={() => setSelectedPlan('starter')}
                 className={`p-6 rounded-2xl border cursor-pointer transition-all ${
                   selectedPlan === 'starter'
-                    ? 'border-amber-500 bg-slate-900 shadow-xl shadow-amber-500/10'
+                    ? 'border-emerald-500 bg-slate-900 shadow-xl shadow-emerald-500/10'
                     : 'border-slate-800 bg-slate-900/50 hover:border-slate-700'
                 }`}
               >
@@ -104,25 +104,25 @@ function BillingContent() {
                 onClick={() => setSelectedPlan('pro')}
                 className={`p-6 rounded-2xl border relative cursor-pointer transition-all ${
                   selectedPlan === 'pro'
-                    ? 'border-amber-500 bg-slate-900 shadow-xl shadow-amber-500/20 ring-1 ring-amber-500'
+                    ? 'border-emerald-500 bg-slate-900 shadow-xl shadow-emerald-500/20 ring-1 ring-emerald-500'
                     : 'border-slate-800 bg-slate-900/50 hover:border-slate-700'
                 }`}
               >
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-[10px] uppercase tracking-wider flex items-center gap-1">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black text-[10px] uppercase tracking-wider flex items-center gap-1 shadow-md shadow-emerald-500/20">
                   <Sparkles className="w-3 h-3 fill-current" /> Le Plus Populaire
                 </div>
-                <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">Vendeur Pro</div>
+                <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Vendeur Pro</div>
                 <div className="mt-2 flex items-baseline gap-1">
                   <span className="text-3xl font-extrabold text-white">399</span>
                   <span className="text-xs text-slate-400">DH / mois</span>
                 </div>
                 <p className="text-xs text-slate-400 mt-2">Pour scaler vos campagnes TikTok & Facebook.</p>
                 <ul className="mt-6 space-y-3 text-xs text-slate-300">
-                  <li className="flex items-center gap-2 font-semibold text-white"><Check className="w-4 h-4 text-amber-400 shrink-0" /> Page Builder Visuel Complet</li>
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-400 shrink-0" /> Blocs Urgence & Vidéos Avis</li>
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-400 shrink-0" /> Expédition Ozon Express & SendIt</li>
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-400 shrink-0" /> Jusqu&apos;à 1 000 commandes/mois</li>
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-400 shrink-0" /> Nom de domaine personnalisé (.ma)</li>
+                  <li className="flex items-center gap-2 font-semibold text-white"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Page Builder Visuel Complet</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Blocs Urgence & Vidéos Avis</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Expédition Ozon Express & SendIt</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Jusqu&apos;à 1 000 commandes/mois</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Nom de domaine personnalisé (.ma)</li>
                 </ul>
               </div>
 
@@ -131,7 +131,7 @@ function BillingContent() {
                 onClick={() => setSelectedPlan('scale')}
                 className={`p-6 rounded-2xl border cursor-pointer transition-all ${
                   selectedPlan === 'scale'
-                    ? 'border-amber-500 bg-slate-900 shadow-xl shadow-amber-500/10'
+                    ? 'border-emerald-500 bg-slate-900 shadow-xl shadow-emerald-500/10'
                     : 'border-slate-800 bg-slate-900/50 hover:border-slate-700'
                 }`}
               >
@@ -158,13 +158,13 @@ function BillingContent() {
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('card')}
-                  className={`p-4 rounded-xl border text-left flex items-center gap-3 transition-colors ${
+                  className={`p-4 rounded-xl border text-left flex items-center gap-3 transition-colors cursor-pointer ${
                     paymentMethod === 'card'
-                      ? 'border-amber-500 bg-amber-500/10 text-white'
+                      ? 'border-emerald-500 bg-emerald-500/10 text-white'
                       : 'border-slate-800 bg-slate-950 text-slate-400'
                   }`}
                 >
-                  <CreditCard className="w-5 h-5 text-amber-400 shrink-0" />
+                  <CreditCard className="w-5 h-5 text-emerald-400 shrink-0" />
                   <div>
                     <div className="font-bold text-xs">Carte Bancaire Marocaine / CMI</div>
                     <div className="text-[11px] text-slate-400">Attijari, BCP, CIH, BMCE... Débit après 14 jours</div>
@@ -174,13 +174,13 @@ function BillingContent() {
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('virement')}
-                  className={`p-4 rounded-xl border text-left flex items-center gap-3 transition-colors ${
+                  className={`p-4 rounded-xl border text-left flex items-center gap-3 transition-colors cursor-pointer ${
                     paymentMethod === 'virement'
-                      ? 'border-amber-500 bg-amber-500/10 text-white'
+                      ? 'border-emerald-500 bg-emerald-500/10 text-white'
                       : 'border-slate-800 bg-slate-950 text-slate-400'
                   }`}
                 >
-                  <Building2 className="w-5 h-5 text-amber-400 shrink-0" />
+                  <Building2 className="w-5 h-5 text-emerald-400 shrink-0" />
                   <div>
                     <div className="font-bold text-xs">Virement Bancaire / Cash Plus / Wafacash</div>
                     <div className="text-[11px] text-slate-400">Paiement manuel en agence ou application</div>
@@ -190,7 +190,7 @@ function BillingContent() {
 
               {paymentMethod === 'virement' && (
                 <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-1 font-mono">
-                  <div className="text-amber-400 font-bold">RIB Bancaire pour Virement :</div>
+                  <div className="text-emerald-400 font-bold">RIB Bancaire pour Virement :</div>
                   <div>Banque : Attijariwafa Bank</div>
                   <div>Titulaire : CODSHOP MAROC SARL</div>
                   <div>RIB : 007 780 0001234567890123 45</div>
@@ -201,7 +201,7 @@ function BillingContent() {
             {/* Subscribe Action */}
             <button
               onClick={handleSubscribe}
-              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black py-4 px-6 rounded-xl shadow-xl shadow-amber-500/20 flex items-center justify-center gap-3 text-sm uppercase tracking-wider transition-all hover:scale-[1.01]"
+              className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-4 px-6 rounded-xl shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-3 text-sm uppercase tracking-wider transition-all hover:scale-[1.01] cursor-pointer"
             >
               <Zap className="w-5 h-5" />
               Confirmer l&apos;Abonnement {selectedPlan.toUpperCase()} (0 DH aujourd&apos;hui — Début après l&apos;essai)

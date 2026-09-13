@@ -183,7 +183,7 @@ export default function IdentityPage() {
       {/* Title */}
       <div className="space-y-1">
         <div className="flex items-center gap-2.5">
-          <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             <ShieldCheck className="w-5 h-5" />
           </span>
           <h1 className="text-2xl font-black text-white tracking-tight">
@@ -209,20 +209,20 @@ export default function IdentityPage() {
       )}
 
       {status === 'pending' && (
-        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold flex items-center gap-3">
-          <Clock className="w-5 h-5 shrink-0 text-amber-400 animate-pulse" />
+        <div className="p-4 rounded-2xl bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-semibold flex items-center gap-3">
+          <Clock className="w-5 h-5 shrink-0 text-sky-400 animate-pulse" />
           <div>
-            <p className="font-bold">Dossier en cours d examen ⏳</p>
-            <p className="text-[11px] text-amber-500 mt-0.5">
-              Vos documents ont été transmis à l équipe conformité CODShop. Traitement sous 24h à 48h ouvrables.
+            <p className="font-bold">Dossier en cours d&apos;examen ⏳</p>
+            <p className="text-[11px] text-sky-300 mt-0.5">
+              Vos documents ont été transmis à l&apos;équipe conformité CODShop. Traitement sous 24h à 48h ouvrables.
             </p>
           </div>
         </div>
       )}
 
       {status === 'draft' && (
-        <div className="p-4 rounded-2xl bg-[#121215] border border-zinc-800 text-zinc-300 text-xs font-semibold flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 text-amber-400" />
+        <div className="p-4 rounded-2xl bg-[#13171c] border border-slate-800/70 bento-card text-zinc-300 text-xs font-semibold flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0 text-sky-400" />
           <div>
             <p className="font-bold text-white">Dossier Non Soumis</p>
             <p className="text-[11px] text-zinc-400 mt-0.5">
@@ -248,7 +248,7 @@ export default function IdentityPage() {
       {/* Main Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Step 1: Legal Entity Type */}
-        <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+        <div className="p-6 rounded-3xl bg-[#13171c] border border-slate-800/70 bento-card space-y-4">
           <h2 className="text-sm font-black uppercase tracking-wider text-slate-400">
             1. Forme Juridique de votre Activité
           </h2>
@@ -258,19 +258,19 @@ export default function IdentityPage() {
               type="button"
               disabled={isLocked}
               onClick={() => setEntityType('auto_entrepreneur')}
-              className={`p-4 rounded-2xl border text-left transition-all flex items-start gap-3.5 ${
+              className={`p-4 rounded-2xl border text-left transition-all flex items-start gap-3.5 cursor-pointer ${
                 entityType === 'auto_entrepreneur'
-                  ? 'bg-amber-500/10 border-amber-500/40 text-white'
+                  ? 'bg-emerald-500/10 border-emerald-500/40 text-white'
                   : 'bg-slate-950/40 border-slate-800 text-slate-400 hover:border-slate-700'
               }`}
             >
-              <div className="p-2.5 rounded-xl bg-slate-800 text-amber-400 shrink-0">
+              <div className="p-2.5 rounded-xl bg-slate-800 text-emerald-400 shrink-0">
                 <UserCheck className="w-5 h-5" />
               </div>
               <div>
                 <p className="font-bold text-xs text-white">Auto-Entrepreneur Marocain</p>
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  Personne physique immatriculée au Registre National de l Auto-Entrepreneur.
+                  Personne physique immatriculée au Registre National de l&apos;Auto-Entrepreneur.
                 </p>
               </div>
             </button>
@@ -279,13 +279,13 @@ export default function IdentityPage() {
               type="button"
               disabled={isLocked}
               onClick={() => setEntityType('sarl')}
-              className={`p-4 rounded-2xl border text-left transition-all flex items-start gap-3.5 ${
+              className={`p-4 rounded-2xl border text-left transition-all flex items-start gap-3.5 cursor-pointer ${
                 entityType === 'sarl'
-                  ? 'bg-amber-500/10 border-amber-500/40 text-white'
+                  ? 'bg-emerald-500/10 border-emerald-500/40 text-white'
                   : 'bg-slate-950/40 border-slate-800 text-slate-400 hover:border-slate-700'
               }`}
             >
-              <div className="p-2.5 rounded-xl bg-slate-800 text-amber-400 shrink-0">
+              <div className="p-2.5 rounded-xl bg-slate-800 text-emerald-400 shrink-0">
                 <Building2 className="w-5 h-5" />
               </div>
               <div>
@@ -299,7 +299,7 @@ export default function IdentityPage() {
         </div>
 
         {/* Step 2: Legal Identifiers */}
-        <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+        <div className="p-6 rounded-3xl bg-[#13171c] border border-slate-800/70 bento-card space-y-4">
           <h2 className="text-sm font-black uppercase tracking-wider text-slate-400">
             2. Identifiants Fiscaux & Réglementaires
           </h2>
@@ -308,7 +308,7 @@ export default function IdentityPage() {
             {entityType === 'sarl' && (
               <>
                 <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-xs font-bold text-slate-300">Raison Sociale (Nom de l entreprise)</label>
+                  <label className="text-xs font-bold text-slate-300">Raison Sociale (Nom de l&apos;entreprise)</label>
                   <input
                     type="text"
                     disabled={isLocked}
@@ -316,7 +316,7 @@ export default function IdentityPage() {
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-amber-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-emerald-500"
                   />
                 </div>
 
@@ -329,7 +329,7 @@ export default function IdentityPage() {
                     value={iceNumber}
                     onChange={(e) => setIceNumber(e.target.value)}
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-amber-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-emerald-500"
                   />
                 </div>
 
@@ -342,7 +342,7 @@ export default function IdentityPage() {
                     value={taxId}
                     onChange={(e) => setTaxId(e.target.value)}
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-amber-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-emerald-500"
                   />
                 </div>
 
@@ -355,7 +355,7 @@ export default function IdentityPage() {
                     value={rcNumber}
                     onChange={(e) => setRcNumber(e.target.value)}
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-amber-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-emerald-500"
                   />
                 </div>
 
@@ -368,7 +368,7 @@ export default function IdentityPage() {
                     value={rcCity}
                     onChange={(e) => setRcCity(e.target.value)}
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-amber-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-emerald-500"
                   />
                 </div>
               </>
@@ -387,19 +387,19 @@ export default function IdentityPage() {
                 value={cinNumber}
                 onChange={(e) => setCinNumber(e.target.value.toUpperCase())}
                 required
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-amber-400"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-emerald-500"
               />
             </div>
           </div>
         </div>
 
         {/* Step 3: Banking Details for COD Payouts */}
-        <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+        <div className="p-6 rounded-3xl bg-[#13171c] border border-slate-800/70 bento-card space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-black uppercase tracking-wider text-slate-400">
               3. Coordonnées Bancaires Marocaines (Virements COD)
             </h2>
-            <Landmark className="w-4 h-4 text-amber-400" />
+            <Landmark className="w-4 h-4 text-emerald-400" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -409,7 +409,7 @@ export default function IdentityPage() {
                 disabled={isLocked}
                 value={bankName}
                 onChange={(e) => setBankName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-amber-400"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-emerald-500"
               >
                 {MOROCCAN_BANKS.map((b) => (
                   <option key={b} value={b}>{b}</option>
@@ -418,7 +418,7 @@ export default function IdentityPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300">Relevé d Identité Bancaire (RIB - 24 chiffres)</label>
+              <label className="text-xs font-bold text-slate-300">Relevé d&apos;Identité Bancaire (RIB - 24 chiffres)</label>
               <input
                 type="text"
                 disabled={isLocked}
@@ -426,14 +426,14 @@ export default function IdentityPage() {
                 value={bankRib}
                 onChange={(e) => setBankRib(e.target.value)}
                 required
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-amber-400 font-mono text-xs outline-none focus:border-amber-400"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-emerald-400 font-mono text-xs outline-none focus:border-emerald-500"
               />
             </div>
           </div>
         </div>
 
         {/* Step 4: Documents Upload */}
-        <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+        <div className="p-6 rounded-3xl bg-[#13171c] border border-slate-800/70 bento-card space-y-4">
           <h2 className="text-sm font-black uppercase tracking-wider text-slate-400">
             4. Pièces Justificatives Obligatoires
           </h2>
@@ -445,10 +445,10 @@ export default function IdentityPage() {
                 <span className="text-xs font-bold text-white">CIN (Face Avant)</span>
                 {documentUrls['cin_front'] && <Check className="w-4 h-4 text-emerald-400" />}
               </div>
-              <p className="text-[11px] text-slate-400">Carte nationale d identité lisible.</p>
+              <p className="text-[11px] text-slate-400">Carte nationale d&apos;identité lisible.</p>
               
               {!isLocked && (
-                <label className="cursor-pointer flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold transition-colors">
+                <label className="cursor-pointer flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-bold transition-colors">
                   <Upload className="w-3.5 h-3.5" />
                   <span>{uploadingDoc === 'cin_front' ? 'Téléversement...' : documentUrls['cin_front'] ? 'Remplacer' : 'Choisir fichier'}</span>
                   <input
@@ -470,7 +470,7 @@ export default function IdentityPage() {
               <p className="text-[11px] text-slate-400">Verso de la CIN avec adresse.</p>
               
               {!isLocked && (
-                <label className="cursor-pointer flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold transition-colors">
+                <label className="cursor-pointer flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-bold transition-colors">
                   <Upload className="w-3.5 h-3.5" />
                   <span>{uploadingDoc === 'cin_back' ? 'Téléversement...' : documentUrls['cin_back'] ? 'Remplacer' : 'Choisir fichier'}</span>
                   <input
@@ -498,7 +498,7 @@ export default function IdentityPage() {
               </p>
               
               {!isLocked && (
-                <label className="cursor-pointer flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold transition-colors">
+                <label className="cursor-pointer flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-bold transition-colors">
                   <Upload className="w-3.5 h-3.5" />
                   <span>{uploadingDoc === 'legal_proof' ? 'Téléversement...' : documentUrls['legal_proof'] ? 'Remplacer' : 'Choisir fichier'}</span>
                   <input
@@ -520,7 +520,7 @@ export default function IdentityPage() {
               type="button"
               onClick={handleSaveDraft}
               disabled={submitting}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors cursor-pointer"
             >
               <Save className="w-4 h-4" /> Enregistrer le brouillon
             </button>
@@ -528,7 +528,7 @@ export default function IdentityPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition-colors shadow-lg shadow-amber-500/10"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-xs transition-colors shadow-lg shadow-emerald-500/10 cursor-pointer"
             >
               {submitting ? 'Transmission...' : (
                 <>Soumettre pour vérification <ArrowRight className="w-4 h-4" /></>

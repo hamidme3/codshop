@@ -37,7 +37,7 @@ const DEPARTMENT_LABELS: Record<string, string> = {
 
 const STATUS_LABELS: Record<string, { label: string; badge: string }> = {
   open: { label: 'Ouvert', badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  in_progress: { label: 'En cours de traitement', badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+  in_progress: { label: 'En cours de traitement', badge: 'bg-sky-500/10 text-sky-400 border-sky-500/20' },
   waiting_merchant: { label: 'En attente de votre réponse', badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
   closed: { label: 'Résolu / Clôturé', badge: 'bg-slate-500/10 text-slate-400 border-slate-500/20' },
 };

@@ -31,7 +31,7 @@ function LogisticsContent() {
       {/* Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-3">
-          <Truck className="w-8 h-8 text-amber-400" /> Intégration Transporteurs & Villes
+          <Truck className="w-8 h-8 text-emerald-400" /> Intégration Transporteurs & Villes
         </h1>
         <p className="text-slate-400 text-xs sm:text-sm mt-1">
           Connectez vos comptes Ozon Express & SendIt pour l&apos;expédition en 1 clic et la génération des étiquettes codes-barres A6.
@@ -40,10 +40,10 @@ function LogisticsContent() {
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* Ozon Express Integration Box */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+        <div className="bg-[#13171c] border border-slate-800/70 bento-card rounded-2xl p-6 space-y-4 shadow-sm">
           <div className="flex items-center justify-between pb-3 border-b border-slate-800">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-black">
+              <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-black">
                 OZ
               </div>
               <div>
@@ -63,7 +63,7 @@ function LogisticsContent() {
                 type="password"
                 value={ozonApiKey}
                 onChange={(e) => setOzonApiKey(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-mono"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-mono focus:border-emerald-500 focus:outline-none"
               />
             </div>
 
@@ -78,14 +78,14 @@ function LogisticsContent() {
                 type="checkbox"
                 checked={ozonAutoDispatch}
                 onChange={(e) => setOzonAutoDispatch(e.target.checked)}
-                className="w-5 h-5 accent-amber-500 rounded cursor-pointer"
+                className="w-5 h-5 accent-emerald-500 rounded cursor-pointer"
               />
             </div>
           </div>
         </div>
 
         {/* SendIt Integration Box */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+        <div className="bg-[#13171c] border border-slate-800/70 bento-card rounded-2xl p-6 space-y-4 shadow-sm">
           <div className="flex items-center justify-between pb-3 border-b border-slate-800">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-black">
@@ -109,17 +109,17 @@ function LogisticsContent() {
                 value={sendItApiKey}
                 onChange={(e) => setSendItApiKey(e.target.value)}
                 placeholder="sendit_sec_..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-mono"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-mono focus:border-emerald-500 focus:outline-none"
               />
             </div>
           </div>
         </div>
 
         {/* Moroccan City Shipping Fees Grid */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+        <div className="bg-[#13171c] border border-slate-800/70 bento-card rounded-2xl p-6 space-y-4 shadow-sm">
           <div className="flex items-center justify-between pb-3 border-b border-slate-800">
             <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-amber-400" />
+              <MapPin className="w-5 h-5 text-sky-400" />
               <h2 className="text-base font-extrabold text-white">Frais de Livraison Facturés aux Clients</h2>
             </div>
             <div className="text-xs text-slate-400">Calcul automatique sur le bon de commande</div>
@@ -132,7 +132,7 @@ function LogisticsContent() {
                 type="number"
                 value={casaFee}
                 onChange={(e) => setCasaFee(Number(e.target.value))}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-bold"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-bold focus:border-emerald-500 focus:outline-none"
               />
             </div>
 
@@ -142,7 +142,7 @@ function LogisticsContent() {
                 type="number"
                 value={rabatFee}
                 onChange={(e) => setRabatFee(Number(e.target.value))}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-bold"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-bold focus:border-emerald-500 focus:outline-none"
               />
             </div>
 
@@ -152,7 +152,7 @@ function LogisticsContent() {
                 type="number"
                 value={otherCitiesFee}
                 onChange={(e) => setOtherCitiesFee(Number(e.target.value))}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-bold"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-bold focus:border-emerald-500 focus:outline-none"
               />
             </div>
           </div>
@@ -166,7 +166,7 @@ function LogisticsContent() {
                 type="number"
                 value={freeShippingThreshold}
                 onChange={(e) => setFreeShippingThreshold(Number(e.target.value))}
-                className="w-48 bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-bold text-xs"
+                className="w-48 bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-bold text-xs focus:border-emerald-500 focus:outline-none"
               />
               <span className="text-xs text-slate-400">
                 Toute commande supérieure à ce montant bénéficie de la livraison offerte (0 DH).
@@ -178,9 +178,9 @@ function LogisticsContent() {
         {/* Submit */}
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black py-4 px-6 rounded-xl shadow-xl shadow-amber-500/20 text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+          className="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black py-4 px-6 rounded-xl shadow-lg shadow-emerald-500/20 text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
         >
-          {saved ? <Check className="w-5 h-5 text-emerald-950" /> : <Settings className="w-5 h-5" />}
+          {saved ? <Check className="w-5 h-5" /> : <Settings className="w-5 h-5" />}
           {saved ? 'Paramètres Enregistrés !' : 'Enregistrer la Configuration Logistique'}
         </button>
       </form>

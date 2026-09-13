@@ -54,7 +54,7 @@ export default function SecurityPage() {
       {/* Page Title */}
       <div className="space-y-1">
         <div className="flex items-center gap-2.5">
-          <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             <Shield className="w-5 h-5" />
           </span>
           <h1 className="text-2xl font-black text-white tracking-tight">
@@ -74,7 +74,7 @@ export default function SecurityPage() {
 
       {/* Security Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="p-5 rounded-2xl bg-[#121215] border border-zinc-800/80 space-y-3">
+        <div className="p-5 rounded-2xl bg-[#13171c] border border-slate-800/80 space-y-3 bento-card">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-zinc-200">Mot de Passe Marchand</span>
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -86,16 +86,16 @@ export default function SecurityPage() {
           </p>
           <button
             onClick={() => alert('Formulaire de mise à jour du mot de passe (Phase 2).')}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold transition-colors"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-colors cursor-pointer"
           >
-            <Key className="w-3.5 h-3.5 text-amber-400" /> Modifier le mot de passe
+            <Key className="w-3.5 h-3.5 text-emerald-400" /> Modifier le mot de passe
           </button>
         </div>
 
-        <div className="p-5 rounded-2xl bg-[#121215] border border-zinc-800/80 space-y-3">
+        <div className="p-5 rounded-2xl bg-[#13171c] border border-slate-800/80 space-y-3 bento-card">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-zinc-200">Authentification à Deux Facteurs (2FA)</span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">
               Recommandé
             </span>
           </div>
@@ -104,7 +104,7 @@ export default function SecurityPage() {
           </p>
           <button
             onClick={() => alert('Module 2FA TOTP QR Code (Phase 2).')}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold transition-colors"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-bold transition-colors cursor-pointer"
           >
             <Shield className="w-3.5 h-3.5" /> Activer l authentification 2FA
           </button>
@@ -112,7 +112,7 @@ export default function SecurityPage() {
       </div>
 
       {/* Active Sessions List */}
-      <div className="p-6 rounded-3xl bg-[#121215] border border-zinc-800/80 space-y-4">
+      <div className="p-6 rounded-3xl bg-[#13171c] border border-slate-800/80 space-y-4 bento-card">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-base font-bold text-white">Appareils & Sessions Connectées</h2>
@@ -134,14 +134,14 @@ export default function SecurityPage() {
             sessions.map((sess, idx) => (
               <div
                 key={sess.id}
-                className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="p-4 rounded-2xl bg-[#0c0f12] border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-300 shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-zinc-300 shrink-0">
                     {sess.os.toLowerCase().includes('mac') || sess.os.toLowerCase().includes('windows') ? (
-                      <Laptop className="w-5 h-5 text-amber-400" />
+                      <Laptop className="w-5 h-5 text-emerald-400" />
                     ) : (
-                      <Smartphone className="w-5 h-5 text-amber-400" />
+                      <Smartphone className="w-5 h-5 text-emerald-400" />
                     )}
                   </div>
                   <div>

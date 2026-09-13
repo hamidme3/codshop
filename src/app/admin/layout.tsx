@@ -139,13 +139,13 @@ function AdminNav({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex font-sans admin-shell selection:bg-amber-500/20 selection:text-amber-200">
+    <div className="min-h-screen bg-[#0c0f12] text-zinc-100 flex font-sans admin-shell selection:bg-emerald-500/20 selection:text-emerald-200">
       {/* Desktop Enterprise Sidebar */}
-      <aside aria-label="Admin Navigation" className="hidden lg:flex w-64 flex-col bg-[#0d0d10] border-r border-zinc-800/80 shrink-0">
+      <aside aria-label="Admin Navigation" className="hidden lg:flex w-64 flex-col bg-[#101418] border-r border-slate-800/70 shrink-0">
         {/* Brand Header */}
-        <div className="h-14 px-5 flex items-center justify-between border-b border-zinc-800/80">
+        <div className="h-14 px-5 flex items-center justify-between border-b border-slate-800/70">
           <Link href={`/admin?store=${storeSlug}`} className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-amber-500 text-zinc-950 flex items-center justify-center font-black text-xs shadow-sm">
+            <div className="w-7 h-7 rounded-lg bg-emerald-500 text-zinc-950 flex items-center justify-center font-black text-xs shadow-sm shadow-emerald-500/20">
               C
             </div>
             <div className="flex flex-col">
@@ -153,20 +153,20 @@ function AdminNav({ children }: { children: React.ReactNode }) {
               <span className="text-[9px] font-mono text-zinc-500 tracking-wider">ENTERPRISE 2026</span>
             </div>
           </Link>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-800/80 text-[10px] font-mono text-zinc-300 border border-zinc-700/60">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-800/80 text-[10px] font-mono text-emerald-400 border border-emerald-500/20">
             <span>PRO</span>
           </div>
         </div>
 
         {/* Store Profile & Switcher Box */}
-        <div className="p-3.5 border-b border-zinc-800/80 bg-[#0a0a0c] space-y-2">
+        <div className="p-3.5 border-b border-slate-800/70 bg-[#0e1216] space-y-2">
           <div className="flex items-center justify-between text-[11px]">
             <span className="text-zinc-400 font-medium">{t.common.activeStore}</span>
             <a
               href={`/?store=${storeSlug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1 font-semibold"
+              className="text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-semibold"
             >
               <span>{t.common.liveStorefront}</span>
               <ExternalLink className="w-3 h-3" />
@@ -177,7 +177,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center justify-between pt-0.5 text-[10px] text-zinc-500 font-medium">
             <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3 text-amber-500/80" />
+              <Clock className="w-3 h-3 text-sky-400" />
               <span>14 j restants (Essai)</span>
             </div>
             <span className="text-emerald-400 flex items-center gap-1">
@@ -207,19 +207,19 @@ function AdminNav({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors group ${
                       isActive
-                        ? 'bg-zinc-800/90 text-white font-bold border-l-2 border-amber-500 shadow-sm'
-                        : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 font-medium'
+                        ? 'bg-emerald-500/10 text-white font-bold border-l-2 border-emerald-500 shadow-sm'
+                        : 'text-zinc-400 hover:text-zinc-200 hover:bg-slate-800/40 font-medium'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
                       <Icon className={`w-4 h-4 shrink-0 transition-colors ${
-                        isActive ? 'text-amber-400' : 'text-zinc-500 group-hover:text-zinc-300'
+                        isActive ? 'text-emerald-400' : 'text-zinc-500 group-hover:text-zinc-300'
                       }`} />
                       <span className="truncate">{item.label}</span>
                     </div>
 
                     {item.badge && (
-                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                         {item.badge}
                       </span>
                     )}
@@ -231,7 +231,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* User Profile & Footer Actions */}
-        <div className="p-3 border-t border-zinc-800/80 bg-[#0a0a0c] space-y-2">
+        <div className="p-3 border-t border-slate-800/70 bg-[#0e1216] space-y-2">
           <div className="flex items-center justify-between px-1 text-xs">
             <div className="truncate pr-2">
               <p className="font-bold text-white text-xs truncate">
@@ -255,7 +255,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
       {/* Main Content Area with Sticky Header */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Desktop Sticky Header */}
-        <header className="hidden lg:flex h-14 bg-[#0d0d10] border-b border-zinc-800/80 px-6 items-center justify-between sticky top-0 z-30">
+        <header className="hidden lg:flex h-14 bg-[#101418] border-b border-slate-800/70 px-6 items-center justify-between sticky top-0 z-30">
           {/* Breadcrumbs */}
           <div className="flex items-center gap-2 text-xs font-medium text-zinc-400">
             <Link href={`/admin?store=${storeSlug}`} className="hover:text-zinc-200 transition-colors">
@@ -270,11 +270,11 @@ function AdminNav({ children }: { children: React.ReactNode }) {
             {/* Command Search Trigger */}
             <button
               onClick={() => setShowCommandModal(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 transition-colors cursor-pointer"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-zinc-400 hover:text-zinc-200 hover:border-slate-700 transition-colors cursor-pointer"
             >
               <Search className="w-3.5 h-3.5 text-zinc-500" />
               <span>Rechercher...</span>
-              <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 text-[10px] font-mono text-zinc-400 border border-zinc-700">⌘K</kbd>
+              <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-mono text-zinc-400 border border-slate-700">⌘K</kbd>
             </button>
 
             {/* Direct Storefront Link */}
@@ -282,7 +282,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
               href={`/?store=${storeSlug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 hover:text-amber-400 hover:border-zinc-700 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-zinc-300 hover:text-emerald-400 hover:border-slate-700 transition-colors"
             >
               <span>Boutique</span>
               <ExternalLink className="w-3 h-3 text-zinc-500" />
@@ -300,10 +300,10 @@ function AdminNav({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Mobile Header */}
-        <header className="lg:hidden h-14 bg-[#0d0d10]/95 backdrop-blur-md border-b border-zinc-800/80 px-3 sm:px-4 flex items-center justify-between sticky top-0 z-30">
+        <header className="lg:hidden h-14 bg-[#101418]/95 backdrop-blur-md border-b border-slate-800/70 px-3 sm:px-4 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-2 min-w-0">
             <Link href={`/admin?store=${storeSlug}`} className="font-extrabold text-white text-xs sm:text-sm flex items-center gap-2 shrink-0">
-              <div className="w-6 h-6 rounded-lg bg-amber-500 text-zinc-950 flex items-center justify-center font-black text-xs shadow-sm">
+              <div className="w-6 h-6 rounded-lg bg-emerald-500 text-zinc-950 flex items-center justify-center font-black text-xs shadow-sm shadow-emerald-500/20">
                 C
               </div>
               <span className="truncate max-w-[90px] sm:max-w-[140px]">{storeSlug}</span>
@@ -319,7 +319,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
             <button
               onClick={() => setShowCommandModal(true)}
               aria-label="Rechercher"
-              className="touch-target p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-colors"
+              className="touch-target p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-slate-800/80 transition-colors"
               title="Rechercher (⌘K)"
             >
               <Search className="w-4 h-4 text-zinc-400" />
@@ -331,7 +331,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Voir la boutique"
-              className="touch-target p-2 rounded-lg text-zinc-400 hover:text-amber-400 hover:bg-zinc-800/80 transition-colors"
+              className="touch-target p-2 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-slate-800/80 transition-colors"
               title="Voir la boutique"
             >
               <ExternalLink className="w-4 h-4" />
@@ -342,7 +342,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
             <button
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Menu principal"
-              className="touch-target p-2 text-zinc-400 hover:text-white hover:bg-zinc-800/80 rounded-lg transition-colors"
+              className="touch-target p-2 text-zinc-400 hover:text-white hover:bg-slate-800/80 rounded-lg transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -361,16 +361,16 @@ function AdminNav({ children }: { children: React.ReactNode }) {
             {/* Slide-out Panel */}
             <aside 
               aria-label="Mobile Menu Navigation"
-              className="relative z-10 w-72 max-w-[85vw] h-full bg-[#0d0d10] border-r border-zinc-800/90 shadow-2xl flex flex-col animate-in slide-in-from-left duration-200"
+              className="relative z-10 w-72 max-w-[85vw] h-full bg-[#101418] border-r border-slate-800/70 shadow-2xl flex flex-col animate-in slide-in-from-left duration-200"
             >
               {/* Drawer Top Header */}
-              <div className="h-14 px-4 flex items-center justify-between border-b border-zinc-800/80 bg-[#0a0a0c]">
+              <div className="h-14 px-4 flex items-center justify-between border-b border-slate-800/70 bg-[#0e1216]">
                 <Link 
                   href={`/admin?store=${storeSlug}`} 
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-2"
                 >
-                  <div className="w-6 h-6 rounded-lg bg-amber-500 text-zinc-950 flex items-center justify-center font-black text-xs">
+                  <div className="w-6 h-6 rounded-lg bg-emerald-500 text-zinc-950 flex items-center justify-center font-black text-xs shadow-sm shadow-emerald-500/20">
                     C
                   </div>
                   <div className="flex flex-col">
@@ -380,7 +380,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
                 </Link>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="touch-target p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
+                  className="touch-target p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-slate-800"
                   aria-label="Fermer le menu"
                 >
                   <X className="w-4 h-4" />
@@ -388,7 +388,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
               </div>
 
               {/* Store Switcher in Mobile Drawer */}
-              <div className="p-3 border-b border-zinc-800/80 bg-[#0a0a0c] space-y-2">
+              <div className="p-3 border-b border-slate-800/70 bg-[#0e1216] space-y-2">
                 <StoreSwitcher currentSlug={storeSlug} />
               </div>
 
@@ -412,16 +412,16 @@ function AdminNav({ children }: { children: React.ReactNode }) {
                           onClick={() => setMobileMenuOpen(false)}
                           className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors min-h-[40px] ${
                             isActive
-                              ? 'bg-zinc-800/90 text-white font-bold border-l-2 border-amber-500'
-                              : 'text-zinc-300 hover:text-white hover:bg-zinc-800/60'
+                              ? 'bg-emerald-500/10 text-white font-bold border-l-2 border-emerald-500'
+                              : 'text-zinc-300 hover:text-white hover:bg-slate-800/60'
                           }`}
                         >
                           <div className="flex items-center gap-2.5">
-                            <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-amber-400' : 'text-zinc-400'}`} />
+                            <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-400' : 'text-zinc-400'}`} />
                             <span className="truncate">{item.label}</span>
                           </div>
                           {item.badge && (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                               {item.badge}
                             </span>
                           )}
@@ -433,7 +433,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
               </div>
 
               {/* Drawer Bottom Profile & Logout */}
-              <div className="p-3 border-t border-zinc-800/80 bg-[#0a0a0c] space-y-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
+              <div className="p-3 border-t border-slate-800/70 bg-[#0e1216] space-y-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
                 <div className="flex items-center justify-between px-1 text-xs">
                   <div className="truncate pr-2">
                     <p className="font-bold text-white text-xs truncate">
@@ -464,16 +464,16 @@ function AdminNav({ children }: { children: React.ReactNode }) {
         {/* Mobile Bottom Thumb Quick-Action Bar */}
         <nav 
           aria-label="Barre de navigation rapide mobile" 
-          className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0d0d10]/95 backdrop-blur-md border-t border-zinc-800/80 px-2 pt-1 pb-[max(0.4rem,env(safe-area-inset-bottom,0px))] flex items-center justify-around shadow-2xl"
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#101418]/95 backdrop-blur-md border-t border-slate-800/70 px-2 pt-1 pb-[max(0.4rem,env(safe-area-inset-bottom,0px))] flex items-center justify-around shadow-2xl"
         >
           {/* 1. Dashboard Overview */}
           <Link
             href={`/admin?store=${storeSlug}`}
             className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium transition-colors ${
-              pathname === '/admin' ? 'text-amber-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              pathname === '/admin' ? 'text-emerald-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <LayoutDashboard className={`w-4 h-4 mb-0.5 ${pathname === '/admin' ? 'text-amber-400' : 'text-zinc-400'}`} />
+            <LayoutDashboard className={`w-4 h-4 mb-0.5 ${pathname === '/admin' ? 'text-emerald-400' : 'text-zinc-400'}`} />
             <span>Aperçu</span>
           </Link>
 
@@ -481,10 +481,10 @@ function AdminNav({ children }: { children: React.ReactNode }) {
           <Link
             href={`/admin/orders?store=${storeSlug}`}
             className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium transition-colors ${
-              pathname.startsWith('/admin/orders') ? 'text-amber-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              pathname.startsWith('/admin/orders') ? 'text-emerald-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <ShoppingBag className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/orders') ? 'text-amber-400' : 'text-zinc-400'}`} />
+            <ShoppingBag className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/orders') ? 'text-emerald-400' : 'text-zinc-400'}`} />
             <span>Commandes</span>
           </Link>
 
@@ -492,10 +492,10 @@ function AdminNav({ children }: { children: React.ReactNode }) {
           <Link
             href={`/admin/products?store=${storeSlug}`}
             className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium transition-colors ${
-              pathname.startsWith('/admin/products') ? 'text-amber-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              pathname.startsWith('/admin/products') ? 'text-emerald-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <Package className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/products') ? 'text-amber-400' : 'text-zinc-400'}`} />
+            <Package className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/products') ? 'text-emerald-400' : 'text-zinc-400'}`} />
             <span>Produits</span>
           </Link>
 
@@ -503,10 +503,10 @@ function AdminNav({ children }: { children: React.ReactNode }) {
           <Link
             href={`/admin/customers?store=${storeSlug}`}
             className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium transition-colors ${
-              pathname.startsWith('/admin/customers') ? 'text-amber-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              pathname.startsWith('/admin/customers') ? 'text-emerald-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <Users className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/customers') ? 'text-amber-400' : 'text-zinc-400'}`} />
+            <Users className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/customers') ? 'text-emerald-400' : 'text-zinc-400'}`} />
             <span>Clients</span>
           </Link>
 
@@ -560,7 +560,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
                     className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-zinc-300 hover:text-white hover:bg-zinc-800/80 transition-colors text-left group"
                   >
                     <div className="flex items-center gap-2.5">
-                      <item.icon className="w-4 h-4 text-zinc-500 group-hover:text-amber-400" />
+                      <item.icon className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400" />
                       <span className="font-semibold">{item.label}</span>
                     </div>
                     <ArrowRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-300" />
@@ -569,7 +569,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
               )}
             </div>
 
-            <div className="px-4 py-2 bg-zinc-950 border-t border-zinc-800/80 text-[11px] text-zinc-500 flex items-center justify-between">
+            <div className="px-4 py-2 bg-slate-950 border-t border-slate-800/80 text-[11px] text-zinc-500 flex items-center justify-between">
               <span>Navigation express CODShop</span>
               <span className="font-mono">Entrée ↵ pour ouvrir</span>
             </div>
@@ -582,7 +582,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#09090b] text-white flex items-center justify-center">Chargement Admin...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#0c0f12] text-white flex items-center justify-center">Chargement Admin...</div>}>
       <LanguageProvider>
         <AdminNav>{children}</AdminNav>
       </LanguageProvider>

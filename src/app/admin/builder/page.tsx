@@ -276,9 +276,9 @@ function BuilderContent() {
         <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-1">
           <button
             onClick={() => setViewport('mobile')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
               viewport === 'mobile'
-                ? 'bg-amber-500 text-slate-950'
+                ? 'bg-emerald-500 text-zinc-950'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -286,9 +286,9 @@ function BuilderContent() {
           </button>
           <button
             onClick={() => setViewport('desktop')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
               viewport === 'desktop'
-                ? 'bg-amber-500 text-slate-950'
+                ? 'bg-emerald-500 text-zinc-950'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -309,11 +309,11 @@ function BuilderContent() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs shadow-lg shadow-amber-500/20 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black px-4 py-2 rounded-xl text-xs shadow-lg shadow-emerald-500/20 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             {savedSuccess ? (
               <>
-                <Check className="w-4 h-4 text-emerald-950" /> Publié dans PostgreSQL !
+                <Check className="w-4 h-4 text-zinc-950" /> Publié dans PostgreSQL !
               </>
             ) : (
               <>
@@ -332,9 +332,9 @@ function BuilderContent() {
           <div className="flex border-b border-slate-800 bg-slate-950/50">
             <button
               onClick={() => setActiveTab('sections')}
-              className={`flex-1 py-3 text-xs font-bold flex items-center justify-center gap-1.5 border-b-2 transition-colors ${
+              className={`flex-1 py-3 text-xs font-bold flex items-center justify-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
                 activeTab === 'sections'
-                  ? 'border-amber-400 text-amber-400 bg-slate-900'
+                  ? 'border-emerald-400 text-emerald-400 bg-slate-900'
                   : 'border-transparent text-slate-400 hover:text-white'
               }`}
             >
@@ -342,9 +342,9 @@ function BuilderContent() {
             </button>
             <button
               onClick={() => setActiveTab('settings')}
-              className={`flex-1 py-3 text-xs font-bold flex items-center justify-center gap-1.5 border-b-2 transition-colors ${
+              className={`flex-1 py-3 text-xs font-bold flex items-center justify-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
                 activeTab === 'settings'
-                  ? 'border-amber-400 text-amber-400 bg-slate-900'
+                  ? 'border-emerald-400 text-emerald-400 bg-slate-900'
                   : 'border-transparent text-slate-400 hover:text-white'
               }`}
             >
@@ -352,9 +352,9 @@ function BuilderContent() {
             </button>
             <button
               onClick={() => setActiveTab('theme')}
-              className={`flex-1 py-3 text-xs font-bold flex items-center justify-center gap-1.5 border-b-2 transition-colors ${
+              className={`flex-1 py-3 text-xs font-bold flex items-center justify-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
                 activeTab === 'theme'
-                  ? 'border-amber-400 text-amber-400 bg-slate-900'
+                  ? 'border-emerald-400 text-emerald-400 bg-slate-900'
                   : 'border-transparent text-slate-400 hover:text-white'
               }`}
             >
@@ -370,7 +370,7 @@ function BuilderContent() {
                   <span>Ordre d&apos;affichage des blocs</span>
                   <button
                     onClick={() => setShowAddModal(true)}
-                    className="flex items-center gap-1 text-amber-400 font-bold hover:underline"
+                    className="flex items-center gap-1 text-emerald-400 font-bold hover:underline cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" /> Ajouter
                   </button>
@@ -384,7 +384,7 @@ function BuilderContent() {
                         key={sec.id}
                         className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
                           isSelected
-                            ? 'bg-amber-500/10 border-amber-500 text-white'
+                            ? 'bg-emerald-500/10 border-emerald-500 text-white'
                             : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'
                         }`}
                       >
@@ -443,7 +443,7 @@ function BuilderContent() {
 
                 <button
                   onClick={() => setShowAddModal(true)}
-                  className="w-full py-3 rounded-xl border border-dashed border-slate-700 hover:border-amber-400 text-slate-400 hover:text-amber-400 text-xs font-bold flex items-center justify-center gap-2 transition-colors mt-4 cursor-pointer"
+                  className="w-full py-3 rounded-xl border border-dashed border-slate-700 hover:border-emerald-400 text-slate-400 hover:text-emerald-400 text-xs font-bold flex items-center justify-center gap-2 transition-colors mt-4 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" /> Ajouter un bloc de conversion marocain
                 </button>
@@ -456,7 +456,7 @@ function BuilderContent() {
                 {selectedSection ? (
                   <>
                     <div className="pb-2 border-b border-slate-800">
-                      <div className="text-[10px] font-mono uppercase text-amber-400">Modifier le bloc sélectionné :</div>
+                      <div className="text-[10px] font-mono uppercase text-emerald-400">Modifier le bloc sélectionné :</div>
                       <div className="text-sm font-bold text-white capitalize">{selectedSection.type.replace(/_/g, ' ')}</div>
                     </div>
 
@@ -680,7 +680,7 @@ function BuilderContent() {
                     <label className="block text-slate-300 font-bold uppercase tracking-wider text-[11px]">
                       1. Catalogue des 25 Thèmes E-Commerce :
                     </label>
-                    <span className="text-[10px] font-mono text-amber-400 font-semibold">
+                    <span className="text-[10px] font-mono text-emerald-400 font-semibold">
                       {Object.keys(THEME_PRESETS).length} Thèmes Disponibles
                     </span>
                   </div>
@@ -702,9 +702,9 @@ function BuilderContent() {
                         key={cat.id}
                         type="button"
                         onClick={() => setThemeCategory(cat.id)}
-                        className={`px-2 py-0.5 rounded-full whitespace-nowrap transition ${
+                        className={`px-2 py-0.5 rounded-full whitespace-nowrap transition cursor-pointer ${
                           themeCategory === cat.id
-                            ? 'bg-amber-500 text-slate-950 font-bold'
+                            ? 'bg-emerald-500 text-zinc-950 font-bold'
                             : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
                         }`}
                       >
@@ -726,13 +726,13 @@ function BuilderContent() {
                             onClick={() => applyPreset(key)}
                             className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                               isActive
-                                ? 'border-amber-500 bg-amber-500/10 ring-1 ring-amber-500 text-white'
+                                ? 'border-emerald-500 bg-emerald-500/10 ring-1 ring-emerald-500 text-white'
                                 : 'border-slate-800 bg-slate-950/60 text-slate-300 hover:border-slate-700'
                             }`}
                           >
                             <div>
                               <div className="flex items-center justify-between gap-1 mb-1">
-                                <span className="text-[9px] font-bold text-amber-400 truncate">{preset.badge}</span>
+                                <span className="text-[9px] font-bold text-emerald-400 truncate">{preset.badge}</span>
                                 <span className="text-[8px] font-mono px-1 rounded bg-slate-800 text-slate-300 shrink-0">
                                   {preset.sourceInspiration.split(' ')[0]}
                                 </span>
@@ -817,7 +817,7 @@ function BuilderContent() {
                         onClick={() => setThemeConfig({ ...themeConfig, buttonRadius: opt.id as any })}
                         className={`py-2 px-1 text-[11px] font-bold rounded-xl border text-center transition-colors cursor-pointer ${
                           themeConfig.buttonRadius === opt.id
-                            ? 'border-amber-500 bg-amber-500/20 text-amber-300'
+                            ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300'
                             : 'border-slate-800 bg-slate-950 text-slate-400 hover:text-white'
                         }`}
                       >
@@ -844,7 +844,7 @@ function BuilderContent() {
                         onClick={() => setThemeConfig({ ...themeConfig, fontFamily: opt.id as any })}
                         className={`py-2 px-1 text-[11px] font-bold rounded-xl border text-center transition-colors cursor-pointer ${
                           themeConfig.fontFamily === opt.id
-                            ? 'border-amber-500 bg-amber-500/20 text-amber-300'
+                            ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300'
                             : 'border-slate-800 bg-slate-950 text-slate-400 hover:text-white'
                         }`}
                       >
@@ -861,8 +861,8 @@ function BuilderContent() {
                     <button
                       type="button"
                       onClick={() => setThemeConfig({ ...themeConfig, showAnnouncement: !themeConfig.showAnnouncement })}
-                      className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors ${
-                        themeConfig.showAnnouncement ? 'bg-amber-500 justify-end' : 'bg-slate-800 justify-start'
+                      className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
+                        themeConfig.showAnnouncement ? 'bg-emerald-500 justify-end' : 'bg-slate-800 justify-start'
                       }`}
                     >
                       <span className="bg-slate-950 w-4 h-4 rounded-full shadow-md" />
@@ -922,7 +922,7 @@ function BuilderContent() {
                     setActiveTab('settings');
                   }}
                   className={`relative cursor-pointer transition-all ${
-                    sec.id === selectedSectionId ? 'ring-2 ring-amber-500 ring-offset-2 ring-offset-slate-950' : ''
+                    sec.id === selectedSectionId ? 'ring-2 ring-emerald-500 ring-offset-2 ring-offset-slate-950' : ''
                   }`}
                 >
                   <DynamicSectionRenderer section={sec} themeConfig={themeConfig} />
@@ -944,7 +944,7 @@ function BuilderContent() {
               </div>
               <button 
                 onClick={() => setShowAddModal(false)} 
-                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center font-bold"
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -953,9 +953,9 @@ function BuilderContent() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[65vh] overflow-y-auto pr-1">
               <button
                 onClick={() => addSection('hero_banner')}
-                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-emerald-400 transition-colors cursor-pointer group"
               >
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <div className="font-bold text-white text-xs">Hero Banner</div>
@@ -964,7 +964,7 @@ function BuilderContent() {
 
               <button
                 onClick={() => addSection('cod_checkout')}
-                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-emerald-400 transition-colors cursor-pointer group"
               >
                 <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                   <ShoppingBag className="w-4 h-4" />
@@ -975,7 +975,7 @@ function BuilderContent() {
 
               <button
                 onClick={() => addSection('urgency_timer')}
-                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-emerald-400 transition-colors cursor-pointer group"
               >
                 <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                   <Flame className="w-4 h-4" />
@@ -986,7 +986,7 @@ function BuilderContent() {
 
               <button
                 onClick={() => addSection('features_grid')}
-                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-emerald-400 transition-colors cursor-pointer group"
               >
                 <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                   <ShieldCheck className="w-4 h-4" />
@@ -997,7 +997,7 @@ function BuilderContent() {
 
               <button
                 onClick={() => addSection('video_showcase')}
-                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-emerald-400 transition-colors cursor-pointer group"
               >
                 <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                   <Video className="w-4 h-4" />
@@ -1008,9 +1008,9 @@ function BuilderContent() {
 
               <button
                 onClick={() => addSection('testimonials_carousel')}
-                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-emerald-400 transition-colors cursor-pointer group"
               >
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                   <Star className="w-4 h-4" />
                 </div>
                 <div className="font-bold text-white text-xs">Avis Clients Marocains</div>
@@ -1019,7 +1019,7 @@ function BuilderContent() {
 
               <button
                 onClick={() => addSection('faq_accordion')}
-                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-emerald-400 transition-colors cursor-pointer group"
               >
                 <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                   <HelpCircle className="w-4 h-4" />
@@ -1030,7 +1030,7 @@ function BuilderContent() {
 
               <button
                 onClick={() => addSection('whatsapp_floating_bar')}
-                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-emerald-400 transition-colors cursor-pointer group"
               >
                 <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                   <MessageCircle className="w-4 h-4" />
@@ -1041,9 +1041,9 @@ function BuilderContent() {
 
               <button
                 onClick={() => addSection('announcement_bar')}
-                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+                className="p-3.5 rounded-2xl border border-slate-800 bg-slate-950 text-left hover:border-emerald-400 transition-colors cursor-pointer group"
               >
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                   <Tag className="w-4 h-4" />
                 </div>
                 <div className="font-bold text-white text-xs">Bandeau Promo</div>

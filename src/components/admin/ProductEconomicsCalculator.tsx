@@ -141,7 +141,7 @@ export const ProductEconomicsCalculator: React.FC<ProductEconomicsCalculatorProp
               economics.health.level === 'green'
                 ? 'text-emerald-400'
                 : economics.health.level === 'amber'
-                ? 'text-amber-400'
+                ? 'text-sky-400'
                 : 'text-rose-400'
             }`}
           >
@@ -290,14 +290,14 @@ export const ProductEconomicsCalculator: React.FC<ProductEconomicsCalculatorProp
               economics.health.level === 'green'
                 ? 'bg-emerald-950/20 border-emerald-800/40 text-emerald-300'
                 : economics.health.level === 'amber'
-                ? 'bg-amber-950/20 border-amber-800/40 text-amber-300'
+                ? 'bg-sky-950/20 border-sky-800/40 text-sky-300'
                 : 'bg-rose-950/20 border-rose-800/40 text-rose-300'
             }`}
           >
             {economics.health.level === 'green' ? (
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
             ) : (
-              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <AlertTriangle className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
             )}
             <div>
               <div className="font-semibold">{economics.health.description}</div>
@@ -308,16 +308,9 @@ export const ProductEconomicsCalculator: React.FC<ProductEconomicsCalculatorProp
             </div>
           </div>
 
-          {/* Moroccan Quantity Pack Upsell Engine */}
-          <div className="space-y-2.5">
+          {/* Moroccan Quantity Pack Upsell Simulator */}
+          <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-200">
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                <span>Simulateur d'Upsell Quantity Packs (Duo -100 DH & Trio -200 DH)</span>
-              </div>
-              <div className="text-[10px] text-zinc-400 font-mono">
-                Optimisation Panier Moyen (AOV)
-              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -389,11 +382,11 @@ export const ProductEconomicsCalculator: React.FC<ProductEconomicsCalculatorProp
               </div>
 
               {/* Pack Trio Card */}
-              <div className="p-3.5 rounded-lg bg-amber-950/20 border border-amber-800/40 flex flex-col justify-between">
+              <div className="p-3.5 rounded-lg bg-sky-950/20 border border-sky-800/40 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-amber-200">Pack Trio (3 Unités)</span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-medium">
+                    <span className="text-xs font-semibold text-sky-200">Pack Trio (3 Unités)</span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 font-medium">
                       + Cadeau Offert
                     </span>
                   </div>
@@ -403,21 +396,21 @@ export const ProductEconomicsCalculator: React.FC<ProductEconomicsCalculatorProp
                       {sellingPrice * 3} MAD
                     </span>
                   </div>
-                  <div className="text-[10px] text-amber-300 font-medium mt-1">
+                  <div className="text-[10px] text-sky-300 font-medium mt-1">
                     Porte-clés Cuir Artisanal Offert + Livr. Gratuite
                   </div>
                 </div>
 
-                <div className="mt-3 pt-2.5 border-t border-amber-800/30 space-y-1">
+                <div className="mt-3 pt-2.5 border-t border-sky-800/30 space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span className="text-amber-300">Bénéfice Net :</span>
+                    <span className="text-sky-300">Bénéfice Net :</span>
                     <span className="font-mono tabular-nums font-bold text-emerald-400">
                       +{packs.trio.netProfitMAD} MAD
                     </span>
                   </div>
-                  <div className="flex justify-between text-[10px] text-amber-300/80">
+                  <div className="flex justify-between text-[10px] text-sky-300/80">
                     <span>Impact Profit vs Solo :</span>
-                    <span className="font-mono font-bold text-amber-300">
+                    <span className="font-mono font-bold text-sky-300">
                       +{packs.trio.profitMultiplierVsSolo}x plus de cash
                     </span>
                   </div>

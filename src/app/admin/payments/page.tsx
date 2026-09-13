@@ -25,7 +25,7 @@ function PaymentsContent() {
       {/* Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-3">
-          <CreditCard className="w-8 h-8 text-amber-400" /> Passerelles & Méthodes de Paiement
+          <CreditCard className="w-8 h-8 text-emerald-400" /> Passerelles & Méthodes de Paiement
         </h1>
         <p className="text-slate-400 text-xs sm:text-sm mt-1">
           Activez et configurez le paiement en espèces à la livraison, les virements bancaires et le paiement en ligne par carte CMI.
@@ -33,8 +33,8 @@ function PaymentsContent() {
       </div>
 
       {/* Moroccan Payment Culture Alert */}
-      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 text-xs text-slate-300">
-        <ShieldCheck className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+      <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-3 text-xs text-slate-300">
+        <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
         <div>
           <strong className="text-white">Recommandation Maroc :</strong> Plus de 95% des transactions e-commerce au Maroc se font par <strong>Paiement à la livraison (Cash on Delivery)</strong>. Nous vous recommandons de toujours laisser le COD activé pour maximiser vos conversions publicitaires.
         </div>
@@ -50,7 +50,7 @@ function PaymentsContent() {
               key={gw.id}
               className={`p-6 rounded-2xl border transition-all space-y-4 ${
                 isActive
-                  ? 'bg-slate-900 border-amber-500/50 shadow-lg shadow-amber-500/5'
+                  ? 'bg-slate-900 border-emerald-500/50 shadow-lg shadow-emerald-500/5'
                   : 'bg-slate-900/50 border-slate-800 opacity-75'
               }`}
             >
@@ -58,7 +58,7 @@ function PaymentsContent() {
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                     gw.type === 'cod' ? 'bg-emerald-500/10 text-emerald-400' :
-                    gw.type === 'virement' ? 'bg-amber-500/10 text-amber-400' :
+                    gw.type === 'virement' ? 'bg-sky-500/10 text-sky-400' :
                     gw.type === 'card' ? 'bg-cyan-500/10 text-cyan-400' : 'bg-purple-500/10 text-purple-400'
                   }`}>
                     {gw.type === 'cod' && <Banknote className="w-5 h-5" />}
@@ -85,7 +85,7 @@ function PaymentsContent() {
                 <button
                   type="button"
                   onClick={() => setEditingGw(gw)}
-                  className="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1"
+                  className="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer"
                 >
                   <Settings className="w-3.5 h-3.5" /> Réglages
                 </button>
@@ -93,10 +93,10 @@ function PaymentsContent() {
                 <button
                   type="button"
                   onClick={() => handleToggle(gw.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                     isActive
                       ? 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                      : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/10'
+                      : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-md shadow-emerald-500/10'
                   }`}
                 >
                   {isActive ? 'Désactiver' : 'Activer'}
@@ -184,7 +184,7 @@ function PaymentsContent() {
                   alert('Réglages de paiement sauvegardés !');
                   setEditingGw(null);
                 }}
-                className="flex-1 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400"
+                className="flex-1 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 cursor-pointer shadow-md shadow-emerald-500/10"
               >
                 Enregistrer
               </button>
