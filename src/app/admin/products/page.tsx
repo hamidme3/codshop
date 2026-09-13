@@ -589,7 +589,7 @@ function ProductsContent() {
   };
 
   return (
-    <div className="p-6 sm:p-10 space-y-6 max-w-7xl mx-auto font-sans">
+    <div className="p-4 sm:p-6 md:p-10 space-y-6 max-w-7xl mx-auto font-sans">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-zinc-800/80">
         <div>
@@ -665,9 +665,121 @@ function ProductsContent() {
             </div>
           </div>
 
-          {/* Products Table */}
+          {/* Products Table Container */}
           <div className="bg-[#121215] border border-zinc-800/80 rounded-xl overflow-hidden shadow-sm">
-            <div className="overflow-x-auto admin-scrollbar">
+            {/* Mobile Product Cards Stream (screens < md) */}
+            <div className="block md:hidden divide-y divide-zinc-800/60 p-2 sm:p-3 space-y-3">
+              {filteredProducts.length === 0 ? (
+                <div className="text-center py-10 text-zinc-500 text-xs">
+                  Aucun produit trouvé pour ce filtre.
+                </div>
+              ) : (
+                filteredProducts.map((p) => {
+                  const margin = (p.price ?? 0) - (p.costPrice ?? 0);
+                  const marginPercent = (p.price ?? 0) > 0 ? Math.round((margin / (p.price ?? 1)) * 100) : 0;
+                  const isLowStock = (p.stock ?? 0) <= 5;
+
+                  return (
+                    <div key={`mobile-prod-${p.id}`} className="p-3 rounded-xl bg-[#0d0d10] border border-zinc-800/80 space-y-3">
+                      {/* Top: Image + Title + Category + Status */}
+                      <div className="flex items-start gap-3">
+                        <img
+                          src={p.images?.[0] ?? 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=800&auto=format&fit=crop'}
+                          alt={p.title ?? 'Produit'}
+                          className="w-12 h-12 rounded-lg object-cover bg-zinc-950 border border-zinc-800 shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-1">
+                            <h4 className="font-bold text-white text-xs truncate">{p.title}</h4>
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
+                              Actif
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/60 text-[10px] font-medium truncate">
+                              {p.category}
+                            </span>
+                            <span className="text-[10px] font-mono text-zinc-500 truncate">{p.sku}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Financial Economics Strip */}
+                      <div className="grid grid-cols-3 gap-2 p-2 rounded-lg bg-[#121215] border border-zinc-800/80 text-center">
+                        <div>
+                          <div className="text-[10px] text-zinc-500">Prix Public</div>
+                          <div className="font-mono font-bold text-white text-xs tabular-nums">{p.price} DH</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-zinc-500">Coût Achat</div>
+                          <div className="font-mono font-semibold text-zinc-400 text-xs tabular-nums">{p.costPrice} DH</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-zinc-500">Marge Nette</div>
+                          <div className={`font-mono font-bold text-xs tabular-nums ${
+                            marginPercent >= 35 ? 'text-emerald-400' : marginPercent >= 15 ? 'text-amber-400' : 'text-rose-400'
+                          }`}>
+                            +{margin} DH ({marginPercent}%)
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Stock Adjuster + Actions */}
+                      <div className="flex items-center justify-between pt-1 border-t border-zinc-800/60">
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleAdjustStock(p.id, -1)}
+                            className="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold flex items-center justify-center text-sm transition-colors border border-zinc-700 active:scale-95"
+                            title="Diminuer stock (-1)"
+                          >
+                            -
+                          </button>
+                          <span className="font-mono tabular-nums font-bold text-xs text-white min-w-[50px] text-center">
+                            {p.stock} un.
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleAdjustStock(p.id, 1)}
+                            className="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold flex items-center justify-center text-sm transition-colors border border-zinc-700 active:scale-95"
+                            title="Augmenter stock (+1)"
+                          >
+                            +
+                          </button>
+                          {isLowStock && (
+                            <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] flex items-center gap-0.5">
+                              <AlertTriangle className="w-3 h-3" /> Faible
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditModal(p)}
+                            className="touch-target px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold flex items-center gap-1 transition-colors"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>Modifier</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProduct(p)}
+                            className="touch-target p-2 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-950/40 border border-transparent hover:border-rose-800/40 transition-colors"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Desktop Table (screens >= md) */}
+            <div className="hidden md:block overflow-x-auto admin-scrollbar">
               <table className="w-full text-left text-xs admin-table">
                 <thead>
                   <tr className="border-b border-zinc-800/90 text-zinc-400 bg-[#0d0d10] font-semibold">

@@ -198,7 +198,7 @@ function ThemeGalleryContent() {
   });
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto font-sans">
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto font-sans">
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
         <div>

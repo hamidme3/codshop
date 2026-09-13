@@ -244,25 +244,25 @@ function OrdersContent() {
   const getStatusBadge = (status: OrderStatus) => {
     switch (status) {
       case 'new':
-        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-800 text-zinc-300 border border-zinc-700">Nouvelle</span>;
+        return <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-new font-mono">Nouvelle</span>;
       case 'to_confirm':
-        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">À Confirmer</span>;
+        return <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-to_confirm font-mono">À Confirmer</span>;
       case 'confirmed':
-        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">1. Confirmée</span>;
+        return <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-confirmed font-mono">1. Confirmée</span>;
       case 'shipped':
       case 'shipping':
-        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">2. Expédiée</span>;
+        return <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-shipped font-mono">2. Expédiée</span>;
       case 'delivered':
-        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">3. Livrée</span>;
+        return <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-delivered font-mono">3. Livrée</span>;
       case 'returned':
       case 'canceled':
       default:
-        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">4. Retournée</span>;
+        return <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-returned font-mono">4. Retournée</span>;
     }
   };
 
   return (
-    <div className="p-6 sm:p-10 space-y-6 max-w-7xl mx-auto font-sans relative">
+    <div className="p-4 sm:p-6 md:p-10 space-y-6 max-w-7xl mx-auto font-sans relative">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-5 right-5 z-50 bg-[#121215] border border-emerald-500/40 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-2xl flex items-center gap-2.5 animate-in fade-in slide-in-from-top-3">
@@ -487,7 +487,7 @@ function OrdersContent() {
 
       {/* Bulk Action Bar (Appears when items are selected) */}
       {selectedOrderIds.length > 0 && (
-        <div className="bg-zinc-900/95 backdrop-blur-md border border-zinc-700/80 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-xl animate-in fade-in">
+        <div className="fixed bottom-16 sm:static left-3 right-3 z-40 sm:z-auto bg-zinc-900/95 backdrop-blur-md border border-zinc-700/80 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-2xl animate-in fade-in slide-in-from-bottom-2">
           <div className="flex items-center gap-2.5 text-xs text-zinc-200">
             <span className="min-w-5 h-5 px-1.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-100 font-mono text-[11px] font-bold flex items-center justify-center">
               {selectedOrderIds.length}
@@ -532,9 +532,156 @@ function OrdersContent() {
         </div>
       )}
 
-      {/* Orders Table */}
+      {/* Orders Table Container */}
       <div className="bg-[#121215] border border-zinc-800/80 rounded-xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto admin-scrollbar">
+        {/* Mobile Stream (screens < md) */}
+        <div className="block md:hidden divide-y divide-zinc-800/60 p-2 sm:p-3 space-y-3">
+          {filteredOrders.length === 0 ? (
+            <div className="text-center py-10 text-zinc-500 text-xs">
+              Aucune commande trouvée pour ce filtre.
+            </div>
+          ) : (
+            filteredOrders.map((order) => {
+              const isSelected = selectedOrderIds.includes(order.id);
+              return (
+                <div
+                  key={`mobile-${order.id}`}
+                  className={`p-3 rounded-xl border transition-all space-y-2.5 ${
+                    isSelected
+                      ? 'bg-amber-500/10 border-amber-500/40'
+                      : 'bg-[#0d0d10] border-zinc-800/80'
+                  }`}
+                >
+                  {/* Top row: Checkbox + Order # + Time + Status badge */}
+                  <div className="flex items-center justify-between gap-2 pb-2 border-b border-zinc-800/60">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelectOrder(order.id)}
+                        className="w-4 h-4 accent-amber-500 rounded cursor-pointer shrink-0"
+                      />
+                      <button
+                        onClick={() => setSelectedOrder(order)}
+                        className="font-mono font-bold text-amber-400 text-xs truncate tabular-nums text-left hover:underline"
+                      >
+                        {order.orderNumber}
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-[10px] text-zinc-500 font-mono tabular-nums">
+                        {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      {getStatusBadge(order.status)}
+                    </div>
+                  </div>
+
+                  {/* Customer info & Amount */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-white text-xs truncate">{order.customerName}</div>
+                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                        <a 
+                          href={`tel:${order.phone}`} 
+                          className="text-[11px] font-mono text-zinc-300 hover:text-white tabular-nums underline"
+                        >
+                          {order.phone}
+                        </a>
+                        <span className="text-zinc-600">•</span>
+                        <span className="text-[11px] text-zinc-300 font-medium">{order.city}</span>
+                        {order.deliveryType === 'stopdesk' && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                            Stopdesk
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-zinc-500 truncate mt-0.5">{order.address}</div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <div className="font-mono font-black text-sm text-white tabular-nums">
+                        {order.total} <span className="text-[10px] font-sans text-zinc-400">DH</span>
+                      </div>
+                      <div className="text-[9px] text-zinc-500 font-mono">
+                        Livraison {order.shippingFee} DH
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Items summary */}
+                  <div className="px-2.5 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800/80 text-[11px] text-zinc-300 flex items-center justify-between">
+                    <span className="truncate pr-2">{order.items[0]?.title}</span>
+                    <span className="font-mono text-[10px] text-zinc-400 shrink-0">x{order.items[0]?.quantity}</span>
+                  </div>
+
+                  {/* Action buttons bar */}
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-zinc-800/60">
+                    <a
+                      href={buildWhatsAppLink(order, 'confirmation', storeSlug)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="touch-target px-2.5 py-1.5 rounded-lg bg-emerald-950/50 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/50 text-xs font-bold flex items-center gap-1"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                      <span>WhatsApp</span>
+                    </a>
+
+                    <div className="flex items-center gap-1.5">
+                      {(order.status === 'new' || order.status === 'to_confirm') && (
+                        <button
+                          onClick={() => handleQuickTransition(order.id, 'confirmed')}
+                          className="touch-target px-2.5 py-1.5 rounded-lg bg-cyan-950/60 hover:bg-cyan-900 text-cyan-300 border border-cyan-800/50 text-xs font-bold flex items-center gap-1"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Confirmer</span>
+                        </button>
+                      )}
+
+                      {order.status === 'confirmed' && (
+                        <button
+                          onClick={() => handleQuickDispatch(order.id, 'ozon')}
+                          className="touch-target px-2.5 py-1.5 rounded-lg bg-amber-950/60 hover:bg-amber-900 text-amber-300 border border-amber-800/50 text-xs font-bold flex items-center gap-1"
+                        >
+                          <Truck className="w-3.5 h-3.5" />
+                          <span>Expédier</span>
+                        </button>
+                      )}
+
+                      {(order.status === 'shipped' || order.status === 'shipping') && (
+                        <>
+                          <button
+                            onClick={() => handleQuickTransition(order.id, 'delivered')}
+                            className="touch-target px-2.5 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/50 text-xs font-bold flex items-center gap-1"
+                          >
+                            <DollarSign className="w-3.5 h-3.5" />
+                            <span>Livrée</span>
+                          </button>
+                          <button
+                            onClick={() => handleQuickTransition(order.id, 'returned')}
+                            className="touch-target p-1.5 rounded-lg bg-rose-950/60 hover:bg-rose-900 text-rose-400 border border-rose-800/50"
+                            title="Retour"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                          </button>
+                        </>
+                      )}
+
+                      <button
+                        onClick={() => setSelectedOrder(order)}
+                        className="touch-target px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium"
+                      >
+                        Détails
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Desktop Table (screens >= md) */}
+        <div className="hidden md:block overflow-x-auto admin-scrollbar">
           <table className="w-full text-left text-xs admin-table">
             <thead>
               <tr className="border-b border-zinc-800/90 text-zinc-400 bg-[#0d0d10] font-semibold">
@@ -842,11 +989,11 @@ function OrdersContent() {
       {/* Order Details Drawer / Modal */}
       {selectedOrder && (
         <div 
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 cursor-pointer"
           onClick={() => setSelectedOrder(null)}
         >
           <div 
-            className="bg-[#121215] border border-zinc-800 rounded-xl p-6 max-w-lg w-full space-y-5 shadow-2xl animate-in zoom-in-95 cursor-default"
+            className="bg-[#121215] border border-zinc-800 rounded-2xl p-4 sm:p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto admin-scrollbar space-y-4 sm:space-y-5 shadow-2xl animate-in zoom-in-95 cursor-default"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">

@@ -35,7 +35,7 @@ function OverviewContent() {
   const totalDeliveredMad = analytics.totalRevenueDelivered;
 
   return (
-    <div className="p-6 sm:p-10 space-y-8 max-w-7xl mx-auto font-sans">
+    <div className="p-4 sm:p-6 md:p-10 space-y-6 sm:space-y-8 max-w-7xl mx-auto font-sans">
       {/* Header with Quick Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -222,7 +222,61 @@ function OverviewContent() {
           </Link>
         </div>
 
-        <div className="overflow-x-auto admin-scrollbar">
+        {/* Mobile Recent Orders Cards Stream (screens < md) */}
+        <div className="block md:hidden divide-y divide-zinc-800/60 space-y-2.5">
+          {orders.slice(0, 5).map((order) => {
+            const isConfirmed = order.status === 'confirmed';
+            const isShipped = ['shipped', 'shipping'].includes(order.status);
+            const isDelivered = order.status === 'delivered';
+            const isReturned = ['returned', 'canceled'].includes(order.status);
+
+            return (
+              <div key={`mobile-ov-${order.id}`} className="p-3 rounded-xl bg-[#09090b] border border-zinc-800/80 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono font-bold text-amber-400 text-xs tabular-nums">{order.orderNumber}</span>
+                  {isConfirmed ? (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-confirmed font-mono">1. Confirmée</span>
+                  ) : isShipped ? (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-shipped font-mono">2. Expédiée</span>
+                  ) : isDelivered ? (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-delivered font-mono">3. Livrée</span>
+                  ) : isReturned ? (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-returned font-mono">4. Retournée</span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-to_confirm font-mono">À Confirmer</span>
+                  )}
+                </div>
+
+                <div className="flex items-start justify-between gap-2 text-xs">
+                  <div>
+                    <div className="font-bold text-white">{order.customerName}</div>
+                    <div className="text-zinc-400 text-[11px] font-mono mt-0.5">{order.city} • {order.phone}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-mono font-bold text-white text-sm tabular-nums">{order.total} DH</div>
+                    <div className="text-[10px] text-zinc-500 font-mono">Paiement COD</div>
+                  </div>
+                </div>
+
+                <div className="pt-1.5 border-t border-zinc-800/60 flex items-center justify-between">
+                  <span className="text-[10px] text-zinc-400 truncate max-w-[200px]">
+                    {order.items?.map((i) => `${i.quantity}x ${i.title}`).join(', ') || 'Articles'}
+                  </span>
+                  <Link
+                    href={`/admin/orders?store=${storeSlug}`}
+                    className="touch-target px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold flex items-center gap-1 shrink-0"
+                  >
+                    <span>Gérer</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop Table (screens >= md) */}
+        <div className="hidden md:block overflow-x-auto admin-scrollbar">
           <table className="w-full text-left text-xs admin-table">
             <thead>
               <tr>
@@ -267,23 +321,23 @@ function OverviewContent() {
 
                     <td>
                       {isConfirmed ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold stage-pill-confirmed font-mono">
                           1. Confirmée
                         </span>
                       ) : isShipped ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold stage-pill-shipped font-mono">
                           2. Expédiée
                         </span>
                       ) : isDelivered ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold stage-pill-delivered font-mono">
                           3. Livrée
                         </span>
                       ) : isReturned ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold stage-pill-returned font-mono">
                           4. Retournée
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-800 text-zinc-300 border border-zinc-700">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold stage-pill-to_confirm font-mono">
                           À Confirmer
                         </span>
                       )}

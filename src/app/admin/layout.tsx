@@ -300,62 +300,225 @@ function AdminNav({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Mobile Header */}
-        <header className="lg:hidden h-14 bg-[#0d0d10] border-b border-zinc-800 px-4 flex items-center justify-between sticky top-0 z-30">
-          <Link href={`/admin?store=${storeSlug}`} className="font-extrabold text-white text-sm flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-amber-500 text-zinc-950 flex items-center justify-center font-black text-xs">
-              C
-            </div>
-            <span>{storeSlug}</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <LanguageToggle />
+        <header className="lg:hidden h-14 bg-[#0d0d10]/95 backdrop-blur-md border-b border-zinc-800/80 px-3 sm:px-4 flex items-center justify-between sticky top-0 z-30">
+          <div className="flex items-center gap-2 min-w-0">
+            <Link href={`/admin?store=${storeSlug}`} className="font-extrabold text-white text-xs sm:text-sm flex items-center gap-2 shrink-0">
+              <div className="w-6 h-6 rounded-lg bg-amber-500 text-zinc-950 flex items-center justify-center font-black text-xs shadow-sm">
+                C
+              </div>
+              <span className="truncate max-w-[90px] sm:max-w-[140px]">{storeSlug}</span>
+            </Link>
+            <span className="text-zinc-600 hidden sm:inline">•</span>
+            <span className="hidden sm:inline text-[11px] font-medium text-zinc-400 truncate max-w-[120px]">
+              {currentSection.itemTitle}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Quick ⌘K Search trigger on mobile */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-zinc-400 hover:text-white"
+              onClick={() => setShowCommandModal(true)}
+              aria-label="Rechercher"
+              className="touch-target p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-colors"
+              title="Rechercher (⌘K)"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              <Search className="w-4 h-4 text-zinc-400" />
+            </button>
+
+            {/* Direct Storefront link on mobile */}
+            <a
+              href={`/?store=${storeSlug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Voir la boutique"
+              className="touch-target p-2 rounded-lg text-zinc-400 hover:text-amber-400 hover:bg-zinc-800/80 transition-colors"
+              title="Voir la boutique"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
+
+            <LanguageToggle />
+
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Menu principal"
+              className="touch-target p-2 text-zinc-400 hover:text-white hover:bg-zinc-800/80 rounded-lg transition-colors"
+            >
+              <Menu className="w-5 h-5" />
             </button>
           </div>
         </header>
 
-        {/* Mobile Slide-Over Menu */}
+        {/* Mobile App Slide-Over Drawer with Backdrop Blur */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-[#0d0d10] border-b border-zinc-800 p-4 space-y-4 max-h-[85vh] overflow-y-auto">
-            {navSections.map((sec) => (
-              <div key={sec.title} className="space-y-1">
-                <div className="text-[10px] font-extrabold text-zinc-500 tracking-wider px-2">
-                  {sec.title}
-                </div>
-                {sec.items.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white hover:bg-zinc-800"
-                  >
-                    <item.icon className="w-4 h-4 text-zinc-400" />
-                    <span>{item.label}</span>
-                  </Link>
+          <div className="fixed inset-0 z-50 lg:hidden flex animate-in fade-in duration-200">
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" 
+              onClick={() => setMobileMenuOpen(false)} 
+            />
+
+            {/* Slide-out Panel */}
+            <aside 
+              aria-label="Mobile Menu Navigation"
+              className="relative z-10 w-72 max-w-[85vw] h-full bg-[#0d0d10] border-r border-zinc-800/90 shadow-2xl flex flex-col animate-in slide-in-from-left duration-200"
+            >
+              {/* Drawer Top Header */}
+              <div className="h-14 px-4 flex items-center justify-between border-b border-zinc-800/80 bg-[#0a0a0c]">
+                <Link 
+                  href={`/admin?store=${storeSlug}`} 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2"
+                >
+                  <div className="w-6 h-6 rounded-lg bg-amber-500 text-zinc-950 flex items-center justify-center font-black text-xs">
+                    C
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-extrabold text-white text-xs tracking-tight">CODShop Mobile</span>
+                    <span className="text-[8px] font-mono text-zinc-500 tracking-wider">MAROC ENTERPRISE</span>
+                  </div>
+                </Link>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="touch-target p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
+                  aria-label="Fermer le menu"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Store Switcher in Mobile Drawer */}
+              <div className="p-3 border-b border-zinc-800/80 bg-[#0a0a0c] space-y-2">
+                <StoreSwitcher currentSlug={storeSlug} />
+              </div>
+
+              {/* Scrollable Navigation Sections */}
+              <div className="flex-1 p-3 space-y-4 overflow-y-auto admin-scrollbar">
+                {navSections.map((sec) => (
+                  <div key={sec.title} className="space-y-1">
+                    <div className="text-[10px] font-extrabold text-zinc-500 tracking-wider px-2.5 py-1">
+                      {sec.title}
+                    </div>
+                    {sec.items.map((item) => {
+                      const isActive = item.exact
+                        ? pathname === '/admin'
+                        : pathname.startsWith(item.href.split('?')[0]);
+                      const Icon = item.icon;
+
+                      return (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors min-h-[40px] ${
+                            isActive
+                              ? 'bg-zinc-800/90 text-white font-bold border-l-2 border-amber-500'
+                              : 'text-zinc-300 hover:text-white hover:bg-zinc-800/60'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-amber-400' : 'text-zinc-400'}`} />
+                            <span className="truncate">{item.label}</span>
+                          </div>
+                          {item.badge && (
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                              {item.badge}
+                            </span>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
                 ))}
               </div>
-            ))}
-            <div className="pt-3 border-t border-zinc-800 flex items-center justify-between px-2">
-              <span className="text-xs text-zinc-400 truncate">{currentUser?.email || 'admin@ottavio.ma'}</span>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-1.5 text-xs text-rose-400 font-bold py-1 px-2.5 rounded-lg hover:bg-rose-500/10"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Déconnexion</span>
-              </button>
-            </div>
+
+              {/* Drawer Bottom Profile & Logout */}
+              <div className="p-3 border-t border-zinc-800/80 bg-[#0a0a0c] space-y-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
+                <div className="flex items-center justify-between px-1 text-xs">
+                  <div className="truncate pr-2">
+                    <p className="font-bold text-white text-xs truncate">
+                      {currentUser?.name || 'Marchand COD'}
+                    </p>
+                    <p className="text-[10px] text-zinc-500 font-mono truncate">
+                      {currentUser?.email || 'admin@ottavio.ma'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="touch-target p-2 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors shrink-0"
+                    title="Déconnexion"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </aside>
           </div>
         )}
 
         {/* Main Content Viewport */}
-        <main className="flex-1 overflow-y-auto admin-scrollbar">
+        <main className="flex-1 overflow-y-auto admin-scrollbar pb-20 lg:pb-8 w-full max-w-full">
           {children}
         </main>
+
+        {/* Mobile Bottom Thumb Quick-Action Bar */}
+        <nav 
+          aria-label="Barre de navigation rapide mobile" 
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0d0d10]/95 backdrop-blur-md border-t border-zinc-800/80 px-2 pt-1 pb-[max(0.4rem,env(safe-area-inset-bottom,0px))] flex items-center justify-around shadow-2xl"
+        >
+          {/* 1. Dashboard Overview */}
+          <Link
+            href={`/admin?store=${storeSlug}`}
+            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium transition-colors ${
+              pathname === '/admin' ? 'text-amber-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <LayoutDashboard className={`w-4 h-4 mb-0.5 ${pathname === '/admin' ? 'text-amber-400' : 'text-zinc-400'}`} />
+            <span>Aperçu</span>
+          </Link>
+
+          {/* 2. Orders Pipeline */}
+          <Link
+            href={`/admin/orders?store=${storeSlug}`}
+            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium transition-colors ${
+              pathname.startsWith('/admin/orders') ? 'text-amber-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <ShoppingBag className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/orders') ? 'text-amber-400' : 'text-zinc-400'}`} />
+            <span>Commandes</span>
+          </Link>
+
+          {/* 3. Products Catalog */}
+          <Link
+            href={`/admin/products?store=${storeSlug}`}
+            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium transition-colors ${
+              pathname.startsWith('/admin/products') ? 'text-amber-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Package className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/products') ? 'text-amber-400' : 'text-zinc-400'}`} />
+            <span>Produits</span>
+          </Link>
+
+          {/* 4. Customers & CRM */}
+          <Link
+            href={`/admin/customers?store=${storeSlug}`}
+            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium transition-colors ${
+              pathname.startsWith('/admin/customers') ? 'text-amber-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Users className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/customers') ? 'text-amber-400' : 'text-zinc-400'}`} />
+            <span>Clients</span>
+          </Link>
+
+          {/* 5. Menu Drawer Trigger */}
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium text-zinc-400 hover:text-white transition-colors"
+          >
+            <Menu className="w-4 h-4 mb-0.5 text-zinc-400" />
+            <span>Menu</span>
+          </button>
+        </nav>
       </div>
 
       {/* Quick Search & Command Bar Modal (⌘K) */}
