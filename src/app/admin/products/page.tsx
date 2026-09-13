@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState, Suspense, useEffect } from 'react';
+import React, { useState, Suspense, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
   Package, Plus, Search, Tag, AlertTriangle, 
   Layers, Check, Trash2, Edit3, ArrowUpRight,
   Sparkles, Wand2, Copy, CheckCheck, ShieldCheck, Flame,
   Star, Image as ImageIcon, SlidersHorizontal, ArrowLeft, ArrowRight,
-  Smartphone, Calculator, Clock, Gift, ShoppingBag, X, CheckCircle2, ChevronRight, Eye
+  Smartphone, Calculator, Clock, Gift, ShoppingBag, X, CheckCircle2, ChevronRight, Eye,
+  UploadCloud, Loader2
 } from 'lucide-react';
 import { 
   getProducts, addProduct, updateProduct, deleteProduct, updateProductStock, 
@@ -308,6 +309,14 @@ function ProductsContent() {
   ]);
   const [newAddImageInput, setNewAddImageInput] = useState('');
   const [addBadge, setAddBadge] = useState('100% Cuir Véritable');
+
+  // File Upload State & Refs (Direct Image Upload)
+  const [isUploadingAddImage, setIsUploadingAddImage] = useState(false);
+  const [isUploadingEditImage, setIsUploadingEditImage] = useState(false);
+  const [isDraggingAdd, setIsDraggingAdd] = useState(false);
+  const [isDraggingEdit, setIsDraggingEdit] = useState(false);
+  const addFileInputRef = useRef<HTMLInputElement>(null);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
   const [addDescription, setAddDescription] = useState('Fabriqué à la main par les maîtres artisans maroquiniers de Fès avec du cuir de première qualité.');
   const [addStatus, setAddStatus] = useState<'active' | 'draft'>('active');
 
@@ -453,6 +462,67 @@ function ProductsContent() {
     const updated = removeProductImage(addImages, idx);
     setAddImages(updated);
     if (updated[0]) setImageUrl(updated[0]);
+  };
+
+  // Direct File Upload Handler (Single or Multi-file to /api/upload)
+  const handleUploadFiles = async (files: FileList | File[], mode: 'add' | 'edit') => {
+    if (!files || files.length === 0) return;
+    const fileArray = Array.from(files);
+
+    const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg'];
+    const validFiles = fileArray.filter((file) => {
+      const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+      return validExtensions.includes(ext) && file.size <= 10 * 1024 * 1024;
+    });
+
+    if (validFiles.length === 0) {
+      alert('Veuillez sélectionner des images valides (JPG, PNG, WEBP, GIF, SVG) de moins de 10 Mo chacune.');
+      return;
+    }
+
+    if (mode === 'add') setIsUploadingAddImage(true);
+    else setIsUploadingEditImage(true);
+
+    try {
+      const formData = new FormData();
+      for (const file of validFiles) {
+        formData.append('files', file);
+      }
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.success && Array.isArray(data.urls) && data.urls.length > 0) {
+        if (mode === 'add') {
+          let updated = [...addImages];
+          for (const u of data.urls) {
+            updated = addProductImage(updated, u);
+          }
+          setAddImages(updated);
+          if (updated[0]) setImageUrl(updated[0]);
+          showToast(`✓ ${data.urls.length} photo(s) téléversée(s) avec succès !`);
+        } else {
+          let updated = [...editImages];
+          for (const u of data.urls) {
+            updated = addProductImage(updated, u);
+          }
+          setEditImages(updated);
+          if (updated[0]) setEditImageUrl(updated[0]);
+          showToast(`✓ ${data.urls.length} photo(s) ajoutée(s) à la galerie !`);
+        }
+      } else {
+        alert(data.message || 'Erreur lors du téléversement des images.');
+      }
+    } catch (err: any) {
+      console.error('File upload error:', err);
+      alert('Erreur de connexion lors du téléversement.');
+    } finally {
+      if (mode === 'add') setIsUploadingAddImage(false);
+      else setIsUploadingEditImage(false);
+    }
   };
 
   const handleClearDraft = () => {
@@ -1288,28 +1358,91 @@ function ProductsContent() {
                         </div>
                       )}
 
-                      {/* Add Image URL Input */}
-                      <div className="flex items-center gap-2 pt-1">
+                      {/* Drag & Drop File Upload Dropzone */}
+                      <div
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setIsDraggingAdd(true);
+                        }}
+                        onDragLeave={() => setIsDraggingAdd(false)}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          setIsDraggingAdd(false);
+                          if (e.dataTransfer.files) {
+                            handleUploadFiles(e.dataTransfer.files, 'add');
+                          }
+                        }}
+                        onClick={() => addFileInputRef.current?.click()}
+                        className={`relative flex flex-col items-center justify-center p-4 rounded-xl border-2 border-dashed transition-all cursor-pointer ${
+                          isDraggingAdd
+                            ? 'border-emerald-500 bg-emerald-500/10'
+                            : 'border-zinc-800 hover:border-zinc-700 bg-zinc-950/40 hover:bg-zinc-900/40'
+                        }`}
+                      >
                         <input
-                          type="text"
-                          value={newAddImageInput}
-                          onChange={(e) => setNewAddImageInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleAddImageToAdd();
+                          ref={addFileInputRef}
+                          type="file"
+                          multiple
+                          accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files) {
+                              handleUploadFiles(e.target.files, 'add');
+                              e.target.value = '';
                             }
                           }}
-                          placeholder="Coller l'URL d'une image (https://...)"
-                          className="flex-1 bg-[#0d0d10] border border-zinc-800 rounded-lg px-3 py-2 text-zinc-200 placeholder-zinc-600 text-xs font-mono focus:outline-none focus:border-emerald-500/60"
                         />
-                        <button
-                          type="button"
-                          onClick={() => handleAddImageToAdd()}
-                          className="px-3.5 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700 transition-colors cursor-pointer"
-                        >
-                          + Ajouter
-                        </button>
+                        {isUploadingAddImage ? (
+                          <div className="flex items-center gap-2 text-emerald-400 py-2 text-xs font-medium">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Téléversement et optimisation des photos en cours...</span>
+                          </div>
+                        ) : (
+                          <div className="text-center space-y-1">
+                            <div className="inline-flex p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-emerald-400 mb-0.5">
+                              <UploadCloud className="w-5 h-5" />
+                            </div>
+                            <div className="text-xs text-zinc-300 font-medium">
+                              <span>Glissez vos photos ici ou </span>
+                              <span className="text-emerald-400 underline underline-offset-2 font-semibold">parcourir les fichiers</span>
+                            </div>
+                            <div className="text-[10px] text-zinc-500 font-mono">
+                              JPG, PNG, WEBP, GIF, SVG • Max 10 Mo • Sélection multiple supportée
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Or Paste URL / Presets */}
+                      <div className="space-y-1.5 pt-1">
+                        <div className="flex items-center gap-2">
+                          <div className="h-px flex-1 bg-zinc-800/80" />
+                          <span className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">ou ajouter par URL web</span>
+                          <div className="h-px flex-1 bg-zinc-800/80" />
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={newAddImageInput}
+                            onChange={(e) => setNewAddImageInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddImageToAdd();
+                              }
+                            }}
+                            placeholder="Coller l'URL d'une image (https://...)"
+                            className="flex-1 bg-[#0d0d10] border border-zinc-800 rounded-lg px-3 py-2 text-zinc-200 placeholder-zinc-600 text-xs font-mono focus:outline-none focus:border-emerald-500/60"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleAddImageToAdd()}
+                            className="px-3.5 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700 transition-colors cursor-pointer"
+                          >
+                            + Ajouter
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2158,28 +2291,91 @@ function ProductsContent() {
                   </div>
                 )}
 
-                {/* Add Image URL Input */}
-                <div className="flex items-center gap-1.5 pt-1">
+                {/* Drag & Drop File Upload Dropzone */}
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDraggingEdit(true);
+                  }}
+                  onDragLeave={() => setIsDraggingEdit(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDraggingEdit(false);
+                    if (e.dataTransfer.files) {
+                      handleUploadFiles(e.dataTransfer.files, 'edit');
+                    }
+                  }}
+                  onClick={() => editFileInputRef.current?.click()}
+                  className={`relative flex flex-col items-center justify-center p-4 rounded-xl border-2 border-dashed transition-all cursor-pointer ${
+                    isDraggingEdit
+                      ? 'border-emerald-500 bg-emerald-500/10'
+                      : 'border-zinc-800 hover:border-zinc-700 bg-zinc-950/40 hover:bg-zinc-900/40'
+                  }`}
+                >
                   <input
-                    type="text"
-                    value={newImageInput}
-                    onChange={(e) => setNewImageInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddImage();
+                    ref={editFileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        handleUploadFiles(e.target.files, 'edit');
+                        e.target.value = '';
                       }
                     }}
-                    placeholder="Ajouter une URL d'image (https://...)"
-                    className="flex-1 bg-[#0d0d10] border border-zinc-800 rounded-md px-2.5 py-1.5 text-zinc-200 placeholder-zinc-600 text-xs font-mono"
                   />
-                  <button
-                    type="button"
-                    onClick={handleAddImage}
-                    className="px-3 py-1.5 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700"
-                  >
-                    + Ajouter
-                  </button>
+                  {isUploadingEditImage ? (
+                    <div className="flex items-center gap-2 text-emerald-400 py-2 text-xs font-medium">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Téléversement et optimisation des photos en cours...</span>
+                    </div>
+                  ) : (
+                    <div className="text-center space-y-1">
+                      <div className="inline-flex p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-emerald-400 mb-0.5">
+                        <UploadCloud className="w-5 h-5" />
+                      </div>
+                      <div className="text-xs text-zinc-300 font-medium">
+                        <span>Glissez vos photos ici ou </span>
+                        <span className="text-emerald-400 underline underline-offset-2 font-semibold">parcourir les fichiers</span>
+                      </div>
+                      <div className="text-[10px] text-zinc-500 font-mono">
+                        JPG, PNG, WEBP, GIF, SVG • Max 10 Mo • Sélection multiple supportée
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Or Paste URL / Presets */}
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-zinc-800/80" />
+                    <span className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">ou ajouter par URL web</span>
+                    <div className="h-px flex-1 bg-zinc-800/80" />
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="text"
+                      value={newImageInput}
+                      onChange={(e) => setNewImageInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddImage();
+                        }
+                      }}
+                      placeholder="Ajouter une URL d'image (https://...)"
+                      className="flex-1 bg-[#0d0d10] border border-zinc-800 rounded-md px-2.5 py-1.5 text-zinc-200 placeholder-zinc-600 text-xs font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddImage}
+                      className="px-3 py-1.5 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700"
+                    >
+                      + Ajouter
+                    </button>
+                  </div>
                 </div>
               </div>
 

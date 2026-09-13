@@ -20,6 +20,7 @@ services:
       retries: 5
 
   codshop:
+    image: codshop-codshop:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -36,6 +37,8 @@ services:
       - NEXT_PUBLIC_WILDCARD_DOMAIN=${NEXT_PUBLIC_WILDCARD_DOMAIN:-codshop.vipone.site}
     networks:
       - coolify
+    volumes:
+      - codshop_uploads:/app/public/uploads
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=coolify"
@@ -52,6 +55,7 @@ services:
 
 volumes:
   codshop_pgdata:
+  codshop_uploads:
 
 networks:
   coolify:
