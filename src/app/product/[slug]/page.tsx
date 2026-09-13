@@ -223,8 +223,8 @@ export default function ProductDetailPage() {
                 <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   {activeVariantInfo.stock <= 5
-                    ? `Seulement ${activeVariantInfo.stock} en stock (Dépôt Aïn Sebaâ)`
-                    : 'En stock (Expédié depuis Aïn Sebaâ)'}
+                    ? `Seulement ${activeVariantInfo.stock} en stock (${countryConfig.code === 'MA' ? 'Dépôt Casablanca' : 'Stock Limité'})`
+                    : `En stock (Expédition Express ${countryConfig.inCountryName})`}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-800 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
@@ -391,7 +391,7 @@ export default function ProductDetailPage() {
               <div>
                 <span className="font-bold">Rupture de stock pour cette combinaison :</span>
                 <p className="mt-0.5 text-[11px] text-rose-600 leading-relaxed">
-                  L'article <strong>{activeVariantInfo.label || activeVariantInfo.sku}</strong> est actuellement épuisé dans notre dépôt d'Aïn Sebaâ. Veuillez choisir une autre pointure ou couleur.
+                  L'article <strong>{activeVariantInfo.label || activeVariantInfo.sku}</strong> est actuellement épuisé dans notre entrepôt. Veuillez choisir une autre pointure ou couleur.
                 </p>
               </div>
             </div>

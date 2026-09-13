@@ -230,6 +230,8 @@ export async function getOrders(storeSlug: string): Promise<Order[]> {
       courier: r.courier as Order['courier'],
       trackingNumber: r.trackingNumber || undefined,
       agentNotes: r.agentNotes || undefined,
+      countryCode: (r as any).countryCode || 'MA',
+      currency: (r as any).currency || 'MAD',
     }));
   } catch (err) {
     console.warn('[DbRepo] Error querying orders from DB, fallback to mock:', err);

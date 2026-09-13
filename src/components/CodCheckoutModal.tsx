@@ -280,8 +280,8 @@ export function CodCheckoutModal({
     if (!phoneValidation.isValid) {
       setError(
         lang === 'ar'
-          ? 'يرجى إدخال رقم هاتف مغربي صحيح (مثال: 0612345678)'
-          : phoneValidation.error || 'Veuillez renseigner un numéro de téléphone marocain valide'
+          ? (effectiveCountryCode === 'MA' ? 'يرجى إدخال رقم هاتف مغربي صحيح (مثال: 0612345678)' : `يرجى إدخال رقم هاتف صحيح (${countryConfig.phone.example})`)
+          : phoneValidation.error || `Veuillez renseigner un numéro de téléphone valide (${countryConfig.phone.example})`
       );
       return;
     }
@@ -359,7 +359,7 @@ export function CodCheckoutModal({
         router.push(`/order-success/${data.orderId}?total=${finalTotal}&city=${encodeURIComponent(city)}&store=${encodeURIComponent(effectiveStoreSlug)}`);
       } else {
         if (data.code === 'OUT_OF_STOCK') {
-          setError(`⚠️ RUPTURE DE STOCK (Entrepôt Aïn Sebaâ) : ${data.message || 'Cette variante est en rupture de stock.'}`);
+          setError(`⚠️ RUPTURE DE STOCK : ${data.message || 'Cette variante est en rupture de stock.'}`);
         } else {
           setError(data.message || 'Une erreur est survenue lors de la commande.');
         }
