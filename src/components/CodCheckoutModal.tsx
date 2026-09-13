@@ -891,10 +891,17 @@ Merci de me confirmer la livraison !`;
                       </span>
                     )}
                   </label>
-                  <div className="relative flex items-center">
-                    <span className="absolute left-3 text-xs font-bold text-zinc-500 border-r border-zinc-300 pr-2 pointer-events-none select-none">
-                      {countryConfig.phone.flag} {countryConfig.phone.dialCode}
-                    </span>
+                  <div className={`flex rounded-xl border overflow-hidden transition ${
+                    touched.phone && !phoneValidation.isValid
+                      ? 'border-red-400 bg-red-50/30 ring-1 ring-red-400'
+                      : phoneValidation.isValid
+                      ? 'border-emerald-500 bg-emerald-50/20'
+                      : 'border-zinc-300 bg-zinc-50 focus-within:ring-2 focus-within:ring-zinc-900 focus-within:bg-white'
+                  }`}>
+                    <div className="flex items-center px-3 bg-zinc-100/90 border-r border-zinc-300 text-xs font-bold text-zinc-700 select-none shrink-0 gap-1.5">
+                      <span>{countryConfig.phone.flag}</span>
+                      <span>{countryConfig.phone.dialCode}</span>
+                    </div>
                     <input
                       type="tel"
                       name="tel"
@@ -905,13 +912,7 @@ Merci de me confirmer la livraison !`;
                       onChange={handlePhoneChange}
                       onBlur={() => setTouched((prev) => ({ ...prev, phone: true }))}
                       placeholder={countryConfig.phone.placeholder}
-                      className={`w-full pl-22 pr-3.5 py-2.5 bg-zinc-50 border rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition ${
-                        touched.phone && !phoneValidation.isValid
-                          ? 'border-red-400 bg-red-50/30'
-                          : phoneValidation.isValid
-                          ? 'border-emerald-500 bg-emerald-50/20'
-                          : 'border-zinc-300'
-                      }`}
+                      className="w-full px-3 py-2.5 bg-transparent border-0 text-base sm:text-xs font-medium focus:outline-none text-zinc-900"
                     />
                   </div>
                   {touched.phone && !phoneValidation.isValid ? (
