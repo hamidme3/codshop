@@ -31,6 +31,32 @@ function getCityFromHeaders(request: NextRequest): string | null {
   return normalizeCity(rawCity);
 }
 
+function getCountryFromHeaders(request: NextRequest): string {
+  const queryCountry = request.nextUrl.searchParams.get('country') || request.nextUrl.searchParams.get('geo_country');
+  if (queryCountry && queryCountry.length === 2) return queryCountry.trim().toUpperCase();
+
+  const cfCountry = request.headers.get('cf-ipcountry');
+  const vercelCountry = request.headers.get('x-vercel-ip-country');
+  const customCountry = request.headers.get('x-country-code') || request.headers.get('x-geo-country');
+
+  if (cfCountry && cfCountry !== 'XX' && cfCountry !== 'T1' && cfCountry.length === 2) {
+    return cfCountry.trim().toUpperCase();
+  }
+  if (vercelCountry && vercelCountry.length === 2) {
+    return vercelCountry.trim().toUpperCase();
+  }
+  if (customCountry && customCountry.length === 2) {
+    return customCountry.trim().toUpperCase();
+  }
+
+  const cookieCountry = request.cookies.get('cod_visitor_country')?.value;
+  if (cookieCountry && cookieCountry.length === 2) {
+    return cookieCountry.trim().toUpperCase();
+  }
+
+  return 'MA';
+}
+
 function getAbVariantCookie(request: NextRequest): { variant: 'control' | 'waybill'; anonId?: string } {
   const existing = request.cookies.get('cod_ab_variant')?.value;
   if (existing === 'control' || existing === 'waybill') return { variant: existing };
@@ -100,6 +126,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // --- Geo + A/B Detection (before subdomain logic) ---
+  const detectedCountry = getCountryFromHeaders(request);
   const detectedCity = overrideCity || getCityFromHeaders(request);
   const abInfo = getAbVariantCookie(request);
   const abVariant = (overrideVariant as 'control' | 'waybill') || abInfo.variant;
@@ -108,6 +135,7 @@ export async function middleware(request: NextRequest) {
   
   // Clone headers to pass tenant, geo, and A/B information downstream
   const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-geo-country', detectedCountry);
   if (detectedCity) requestHeaders.set('x-geo-city', detectedCity);
   requestHeaders.set('x-geo-city-final', finalCity);
   requestHeaders.set('x-ab-variant', abVariant);
@@ -183,9 +211,18 @@ export async function middleware(request: NextRequest) {
       });
       response.headers.set('x-store-slug', subdomain);
       response.headers.set('x-geo-city-final', finalCity);
+      response.headers.set('x-geo-country', detectedCountry);
       response.headers.set('x-ab-variant', abVariant);
       response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
       setAbVariantCookie(response, abVariant, anonId);
+      response.cookies.set({
+        name: 'cod_visitor_country',
+        value: detectedCountry,
+        httpOnly: false,
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+        sameSite: 'lax',
+      });
       return response;
     }
   }
@@ -198,8 +235,17 @@ export async function middleware(request: NextRequest) {
   });
   response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
   response.headers.set('x-geo-city-final', finalCity);
+  response.headers.set('x-geo-country', detectedCountry);
   response.headers.set('x-ab-variant', abVariant);
   setAbVariantCookie(response, abVariant, anonId);
+  response.cookies.set({
+    name: 'cod_visitor_country',
+    value: detectedCountry,
+    httpOnly: false,
+    maxAge: 60 * 60 * 24 * 7,
+    path: '/',
+    sameSite: 'lax',
+  });
   return response;
 }
 

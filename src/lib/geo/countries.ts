@@ -535,3 +535,50 @@ export function getCountryDeliveryEstimate(
   };
 }
 
+/**
+ * Detects visitor country on the client side using cookies, search params, or browser timezone.
+ */
+export function detectClientVisitorCountry(defaultCountry: string = 'MA'): string {
+  if (typeof window === 'undefined') return defaultCountry;
+
+  // 1. Check URL query param ?country=SA or ?geo_country=SA
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const qCountry = params.get('country') || params.get('geo_country');
+    if (qCountry && SUPPORTED_COUNTRY_MAP[qCountry.toUpperCase()]) {
+      return qCountry.toUpperCase();
+    }
+  } catch {
+    // Ignore URL parse error
+  }
+
+  // 2. Check cookie set by edge middleware
+  try {
+    const cookieMatch = document.cookie.match(/cod_visitor_country=([A-Za-z]{2})/);
+    if (cookieMatch && SUPPORTED_COUNTRY_MAP[cookieMatch[1].toUpperCase()]) {
+      return cookieMatch[1].toUpperCase();
+    }
+  } catch {
+    // Ignore cookie read error
+  }
+
+  // 3. Fallback to Browser Timezone (0ms, offline)
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (tz.includes('Riyadh')) return 'SA';
+    if (tz.includes('Dubai')) return 'AE';
+    if (tz.includes('Cairo')) return 'EG';
+    if (tz.includes('Algiers')) return 'DZ';
+    if (tz.includes('Dakar')) return 'SN';
+    if (tz.includes('Abidjan')) return 'CI';
+    if (tz.includes('Paris')) return 'FR';
+    if (tz.includes('Madrid')) return 'ES';
+    if (tz.includes('Casablanca')) return 'MA';
+  } catch {
+    // Ignore timezone error
+  }
+
+  return defaultCountry;
+}
+
+

@@ -6,6 +6,7 @@ import {
   validateCountryPhone,
   getCountryDeliveryEstimate,
   formatCountryPrice,
+  detectClientVisitorCountry,
   SUPPORTED_COUNTRY_MAP,
 } from '../src/lib/geo';
 
@@ -174,4 +175,10 @@ describe('Multi-Country Geo Engine & Smart City Selector', () => {
     assert.strictEqual(egEstimate.shippingFee, 50);
     assert.strictEqual(egEstimate.sla, '2 à 3 jours ouvrables');
   });
+
+  it('Visitor Country Detection: graceful fallback to default country in SSR or unknown environments', () => {
+    assert.strictEqual(detectClientVisitorCountry('MA'), 'MA');
+    assert.strictEqual(detectClientVisitorCountry('SA'), 'SA');
+  });
 });
+

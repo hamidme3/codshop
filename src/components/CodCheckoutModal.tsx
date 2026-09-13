@@ -16,6 +16,7 @@ import {
   getCountryConfig,
   getCountryDeliveryEstimate,
   validateCountryPhone,
+  detectClientVisitorCountry,
 } from '@/lib/geo';
 import { useTheme } from '@/context/ThemeContext';
 import {
@@ -77,13 +78,31 @@ export function CodCheckoutModal({
   const { theme, formatMAD, lang } = useTheme();
   const formRef = React.useRef<HTMLFormElement>(null);
 
-  // Multi-country configuration & currency
-  const effectiveCountryCode = useMemo(() => {
-    if (countryCode) return countryCode;
-    return (product as any)?.country || 'MA';
+  // Multi-country configuration & dynamic visitor detection
+  const [activeCountry, setActiveCountry] = useState<string>(countryCode || 'MA');
+
+  // Auto-detect visitor country on client mount if not strictly overridden
+  useEffect(() => {
+    if (!countryCode) {
+      const detected = detectClientVisitorCountry((product as any)?.country || 'MA');
+      setActiveCountry(detected);
+    }
   }, [countryCode, product]);
 
+  const effectiveCountryCode = useMemo(() => {
+    return activeCountry || countryCode || (product as any)?.country || 'MA';
+  }, [activeCountry, countryCode, product]);
+
   const countryConfig = useMemo(() => getCountryConfig(effectiveCountryCode), [effectiveCountryCode]);
+
+  const handleCountrySwitch = (newCountry: string) => {
+    setActiveCountry(newCountry);
+    const newCfg = getCountryConfig(newCountry);
+    setCity(newCfg.popularCities[0] || '');
+    if (typeof document !== 'undefined') {
+      document.cookie = `cod_visitor_country=${newCountry}; path=/; max-age=604800; SameSite=Lax`;
+    }
+  };
 
   // Detect active store slug from prop, search param, or subdomain
   const effectiveStoreSlug = React.useMemo(() => {
@@ -927,6 +946,41 @@ Merci de me confirmer la livraison !`;
                 {/* City & Delivery Mode Selection */}
                 <div className="space-y-2">
                   <div>
+                    {/* Cross-Border Destination Country Strip */}
+                    <div className="flex items-center justify-between gap-1 mb-2 pb-2 border-b border-zinc-200/80">
+                      <span className="text-[11px] font-bold text-zinc-600 flex items-center gap-1">
+                        <span>Destination :</span>
+                        <span className="text-zinc-900 font-extrabold">{countryConfig.name}</span>
+                      </span>
+                      <div className="flex items-center gap-1 overflow-x-auto py-0.5">
+                        {[
+                          { code: 'MA', flag: '🇲🇦', label: 'Maroc' },
+                          { code: 'SA', flag: '🇸🇦', label: 'Arabie S.' },
+                          { code: 'AE', flag: '🇦🇪', label: 'Émirats' },
+                          { code: 'EG', flag: '🇪🇬', label: 'Égypte' },
+                          { code: 'DZ', flag: '🇩🇿', label: 'Algérie' },
+                        ].map((c) => {
+                          const isActive = effectiveCountryCode === c.code;
+                          return (
+                            <button
+                              key={c.code}
+                              type="button"
+                              onClick={() => handleCountrySwitch(c.code)}
+                              className={`px-2 py-0.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition cursor-pointer shrink-0 ${
+                                isActive
+                                  ? 'bg-zinc-900 text-white shadow-xs scale-105'
+                                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900'
+                              }`}
+                              title={c.label}
+                            >
+                              <span>{c.flag}</span>
+                              <span className="text-[10px] font-mono">{c.code}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                     <label className="block text-xs font-bold text-zinc-700 mb-1 flex items-center justify-between">
                       <span>
                         Ville de Livraison <span className="text-red-500">*</span>
