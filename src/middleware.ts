@@ -32,9 +32,17 @@ function getCityFromHeaders(request: NextRequest): string | null {
 }
 
 function getCountryFromHeaders(request: NextRequest): string {
+  // 1. Explicit query parameter override (?country=SA)
   const queryCountry = request.nextUrl.searchParams.get('country') || request.nextUrl.searchParams.get('geo_country');
   if (queryCountry && queryCountry.length === 2) return queryCountry.trim().toUpperCase();
 
+  // 2. Explicit visitor cookie (saved when user chooses a country in the checkout modal)
+  const cookieCountry = request.cookies.get('cod_visitor_country')?.value;
+  if (cookieCountry && cookieCountry.length === 2) {
+    return cookieCountry.trim().toUpperCase();
+  }
+
+  // 3. Edge headers (Cloudflare, Vercel, Custom CDN)
   const cfCountry = request.headers.get('cf-ipcountry');
   const vercelCountry = request.headers.get('x-vercel-ip-country');
   const customCountry = request.headers.get('x-country-code') || request.headers.get('x-geo-country');
@@ -47,11 +55,6 @@ function getCountryFromHeaders(request: NextRequest): string {
   }
   if (customCountry && customCountry.length === 2) {
     return customCountry.trim().toUpperCase();
-  }
-
-  const cookieCountry = request.cookies.get('cod_visitor_country')?.value;
-  if (cookieCountry && cookieCountry.length === 2) {
-    return cookieCountry.trim().toUpperCase();
   }
 
   return 'MA';
