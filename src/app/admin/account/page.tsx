@@ -136,7 +136,7 @@ export default function AccountProfilePage() {
   }
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-16 font-sans">
+    <div className="p-4 sm:p-6 md:p-10 space-y-8 max-w-5xl mx-auto pb-16 font-sans">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
         <div>

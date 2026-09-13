@@ -897,10 +897,10 @@ function OrdersContent() {
                               onClick={() => handleQuickTransition(order.id, 'confirmed')}
                               className={`px-2 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all cursor-pointer ${
                                 order.status === 'confirmed'
-                                  ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/30 ring-1 ring-cyan-400'
+                                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-sm shadow-cyan-500/20'
                                   : ['shipped', 'shipping', 'delivered'].includes(order.status)
-                                  ? 'bg-cyan-950/60 text-cyan-400/70 border border-cyan-800/40'
-                                  : 'bg-slate-800 hover:bg-cyan-600 text-slate-300 hover:text-white font-bold'
+                                  ? 'bg-cyan-950/40 text-cyan-400/60 border border-cyan-900/30'
+                                  : 'bg-[#18181b] hover:bg-cyan-950/40 text-zinc-400 hover:text-cyan-300 border border-zinc-800'
                               }`}
                               title={order.status === 'confirmed' ? 'Statut : Confirmée (Actuel)' : 'Basculer vers : 1. Confirmée'}
                             >
@@ -908,17 +908,17 @@ function OrdersContent() {
                               <span>1. Confirmer</span>
                             </button>
 
-                            <span className="text-slate-600 text-[10px] font-bold">→</span>
+                            <span className="text-zinc-600 text-[10px] font-bold">→</span>
 
                             {/* Switch 2: Shipped Switch */}
                             <button
                               onClick={() => handleQuickDispatch(order.id, order.courier || 'ozon')}
                               className={`px-2 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all cursor-pointer ${
                                 ['shipped', 'shipping'].includes(order.status)
-                                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/30 ring-1 ring-amber-400'
+                                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50 shadow-sm shadow-amber-500/20'
                                   : order.status === 'delivered'
-                                  ? 'bg-amber-950/60 text-amber-400/70 border border-amber-800/40'
-                                  : 'bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-300 font-bold'
+                                  ? 'bg-amber-950/40 text-amber-400/60 border border-amber-900/30'
+                                  : 'bg-[#18181b] hover:bg-amber-950/40 text-zinc-400 hover:text-amber-300 border border-zinc-800'
                               }`}
                               title={['shipped', 'shipping'].includes(order.status) ? 'Statut : Expédiée (Actuel)' : 'Basculer vers : 2. Expédier'}
                             >
@@ -926,15 +926,15 @@ function OrdersContent() {
                               <span>2. Expédier</span>
                             </button>
 
-                            <span className="text-slate-600 text-[10px] font-bold">→</span>
+                            <span className="text-zinc-600 text-[10px] font-bold">→</span>
 
                             {/* Switch 3: Delivered Switch */}
                             <button
                               onClick={() => handleQuickTransition(order.id, 'delivered')}
                               className={`px-2 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all cursor-pointer ${
                                 order.status === 'delivered'
-                                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30 ring-1 ring-emerald-400 font-black'
-                                  : 'bg-slate-800 hover:bg-emerald-600 hover:text-white text-slate-300 font-bold'
+                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-sm shadow-emerald-500/20 font-black'
+                                  : 'bg-[#18181b] hover:bg-emerald-950/40 text-zinc-400 hover:text-emerald-300 border border-zinc-800'
                               }`}
                               title={order.status === 'delivered' ? 'Statut : Livrée & Encaissée (Actuel)' : 'Basculer vers : 3. Livrée (Encaissée)'}
                             >
@@ -942,15 +942,15 @@ function OrdersContent() {
                               <span>3. Livrée</span>
                             </button>
 
-                            <span className="text-slate-700 text-[10px] font-bold mx-0.5">|</span>
+                            <span className="text-zinc-700 text-[10px] font-bold mx-0.5">|</span>
 
                             {/* Switch 4: Retournée (Replaces both Annuler & Retour) */}
                             <button
                               onClick={() => handleQuickTransition(order.id, order.status === 'returned' || order.status === 'canceled' ? 'new' : 'returned')}
                               className={`px-2 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all cursor-pointer ${
                                 order.status === 'returned' || order.status === 'canceled'
-                                  ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30 ring-1 ring-rose-400 font-black'
-                                  : 'bg-slate-800 hover:bg-rose-600 hover:text-white text-slate-400 font-bold'
+                                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/50 shadow-sm shadow-rose-500/20 font-black'
+                                  : 'bg-[#18181b] hover:bg-rose-950/40 text-zinc-400 hover:text-rose-300 border border-zinc-800'
                               }`}
                               title={
                                 order.status === 'returned' || order.status === 'canceled'

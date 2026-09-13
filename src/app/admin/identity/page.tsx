@@ -179,7 +179,7 @@ export default function IdentityPage() {
   const isLocked = status === 'pending' || status === 'verified';
 
   return (
-    <div className="p-6 sm:p-10 space-y-8 max-w-5xl mx-auto font-sans">
+    <div className="p-4 sm:p-6 md:p-10 space-y-8 max-w-5xl mx-auto font-sans">
       {/* Title */}
       <div className="space-y-1">
         <div className="flex items-center gap-2.5">
@@ -190,7 +190,7 @@ export default function IdentityPage() {
             Conformité & Identité Marchande (KYC Maroc)
           </h1>
         </div>
-        <p className="text-xs sm:text-sm text-slate-400">
+        <p className="text-xs sm:text-sm text-zinc-400">
           Vérification légale conforme aux directives Bank Al-Maghrib pour les virements bancaires COD.
         </p>
       </div>
@@ -221,11 +221,11 @@ export default function IdentityPage() {
       )}
 
       {status === 'draft' && (
-        <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold flex items-center gap-3">
+        <div className="p-4 rounded-2xl bg-[#121215] border border-zinc-800 text-zinc-300 text-xs font-semibold flex items-center gap-3">
           <AlertCircle className="w-5 h-5 shrink-0 text-amber-400" />
           <div>
             <p className="font-bold text-white">Dossier Non Soumis</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[11px] text-zinc-400 mt-0.5">
               Veuillez renseigner votre statut (Auto-Entrepreneur ou SARL) et téléverser vos pièces justificatives.
             </p>
           </div>

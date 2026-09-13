@@ -50,7 +50,7 @@ export default function SecurityPage() {
   };
 
   return (
-    <div className="p-6 sm:p-10 space-y-8 max-w-5xl mx-auto font-sans">
+    <div className="p-4 sm:p-6 md:p-10 space-y-8 max-w-5xl mx-auto font-sans">
       {/* Page Title */}
       <div className="space-y-1">
         <div className="flex items-center gap-2.5">
@@ -61,7 +61,7 @@ export default function SecurityPage() {
             Sécurité du Compte & Sessions Actives
           </h1>
         </div>
-        <p className="text-xs sm:text-sm text-slate-400">
+        <p className="text-xs sm:text-sm text-zinc-400">
           Surveillez les appareils connectés à votre compte marchand et révoquez les accès suspects.
         </p>
       </div>
@@ -74,32 +74,32 @@ export default function SecurityPage() {
 
       {/* Security Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+        <div className="p-5 rounded-2xl bg-[#121215] border border-zinc-800/80 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-300">Mot de Passe Marchand</span>
+            <span className="text-xs font-bold text-zinc-200">Mot de Passe Marchand</span>
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               Protégé (Bcrypt)
             </span>
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-zinc-400">
             Votre compte est protégé par un chiffrement fort. Vous pouvez mettre à jour votre mot de passe à tout moment.
           </p>
           <button
             onClick={() => alert('Formulaire de mise à jour du mot de passe (Phase 2).')}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-colors"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold transition-colors"
           >
             <Key className="w-3.5 h-3.5 text-amber-400" /> Modifier le mot de passe
           </button>
         </div>
 
-        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+        <div className="p-5 rounded-2xl bg-[#121215] border border-zinc-800/80 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-300">Authentification à Deux Facteurs (2FA)</span>
+            <span className="text-xs font-bold text-zinc-200">Authentification à Deux Facteurs (2FA)</span>
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
               Recommandé
             </span>
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-zinc-400">
             Sécurisez vos paiements et vos commandes COD en activant la vérification par application TOTP (Google Authenticator).
           </p>
           <button
@@ -112,32 +112,32 @@ export default function SecurityPage() {
       </div>
 
       {/* Active Sessions List */}
-      <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+      <div className="p-6 rounded-3xl bg-[#121215] border border-zinc-800/80 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-base font-bold text-white">Appareils & Sessions Connectées</h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-zinc-400 mt-0.5">
               Historique des connexions récentes avec localisation IP.
             </p>
           </div>
-          <span className="text-xs font-mono text-slate-500">
+          <span className="text-xs font-mono text-zinc-500">
             {sessions.length} session(s)
           </span>
         </div>
 
         <div className="space-y-3">
           {loading ? (
-            <div className="p-8 text-center text-xs text-slate-500">Chargement des sessions...</div>
+            <div className="p-8 text-center text-xs text-zinc-500">Chargement des sessions...</div>
           ) : sessions.length === 0 ? (
-            <div className="p-8 text-center text-xs text-slate-500">Aucune session active trouvée.</div>
+            <div className="p-8 text-center text-xs text-zinc-500">Aucune session active trouvée.</div>
           ) : (
             sessions.map((sess, idx) => (
               <div
                 key={sess.id}
-                className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-300 shrink-0">
                     {sess.os.toLowerCase().includes('mac') || sess.os.toLowerCase().includes('windows') ? (
                       <Laptop className="w-5 h-5 text-amber-400" />
                     ) : (

@@ -348,6 +348,9 @@ h1 {
 
 /* Mobile ergonomics — 16px base input font to prevent iOS Safari auto-zoom */
 @media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea,
   .admin-shell input:not([type="checkbox"]):not([type="radio"]),
   .admin-shell select,
   .admin-shell textarea {
