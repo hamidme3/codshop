@@ -469,7 +469,7 @@ function OrdersContent() {
       </div>
 
       {/* Filter Tabs with Live Counts */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-800/80 text-xs">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 border-b border-slate-800/80 text-xs no-scrollbar">
         {[
           { id: 'all', label: `Toutes (${orders.length})` },
           { id: 'new', label: `Nouvelles (${newCount})` },
@@ -481,7 +481,7 @@ function OrdersContent() {
           <button
             key={tab.id}
             onClick={() => setActiveFilter(tab.id)}
-            className={`px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap transition-colors ${
+            className={`shrink-0 px-3.5 py-1.5 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer ${
               activeFilter === tab.id
                 ? 'bg-slate-800 text-white border border-slate-700/80 shadow-sm font-bold'
                 : 'text-zinc-400 hover:text-white hover:bg-slate-800/50'
@@ -493,14 +493,14 @@ function OrdersContent() {
       </div>
 
       {/* 1-Click Status Export Toolbar (Direct filtered exports) */}
-      <div className="flex items-center justify-between gap-2 p-2.5 bg-[#13171c] border border-slate-800/70 rounded-xl text-xs overflow-x-auto bento-card">
+      <div className="flex items-center justify-between gap-2 p-2.5 bg-[#13171c] border border-slate-800/70 rounded-xl text-xs overflow-x-auto bento-card no-scrollbar">
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 pl-1">
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 pl-1 shrink-0">
             <Download className="w-3.5 h-3.5 text-emerald-400" /> Export 1-Clic :
           </span>
           <button
             onClick={() => handleExportByStatus('confirmed')}
-            className="px-3 py-1.5 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-800/50 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+            className="shrink-0 px-3 py-1.5 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-800/50 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
             title="Télécharger immédiatement toutes les commandes confirmées prêtes pour expédition"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
@@ -509,7 +509,7 @@ function OrdersContent() {
           </button>
           <button
             onClick={() => handleExportByStatus('shipped')}
-            className="px-3 py-1.5 rounded-lg bg-sky-950/40 hover:bg-sky-900/60 border border-sky-800/50 text-sky-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+            className="shrink-0 px-3 py-1.5 rounded-lg bg-sky-950/40 hover:bg-sky-900/60 border border-sky-800/50 text-sky-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
             title="Télécharger immédiatement toutes les commandes expédiées en cours de livraison"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
@@ -518,7 +518,7 @@ function OrdersContent() {
           </button>
           <button
             onClick={() => handleExportByStatus('delivered')}
-            className="px-3 py-1.5 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/50 text-emerald-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+            className="shrink-0 px-3 py-1.5 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/50 text-emerald-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
             title="Télécharger immédiatement toutes les commandes livrées et encaissées (CRBT)"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -527,7 +527,7 @@ function OrdersContent() {
           </button>
           <button
             onClick={() => handleExportByStatus('returned')}
-            className="px-3 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 text-rose-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+            className="shrink-0 px-3 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 text-rose-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
             title="Télécharger immédiatement toutes les commandes retournées ou refusées pour rapprochement transporteur"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>

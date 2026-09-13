@@ -1025,11 +1025,11 @@ function ProductsContent() {
             )}
 
             {/* Segmented Tab Navigation Bar */}
-            <div className="flex items-center gap-1 p-2 bg-[#09090b] border-b border-zinc-800/80 overflow-x-auto admin-scrollbar">
+            <div className="flex items-center gap-1 p-2 bg-[#09090b] border-b border-zinc-800/80 overflow-x-auto admin-scrollbar no-scrollbar">
               <button
                 type="button"
                 onClick={() => setAddModalTab('general')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                   addModalTab === 'general'
                     ? 'bg-zinc-800 text-white font-semibold shadow-xs'
                     : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
@@ -1041,7 +1041,7 @@ function ProductsContent() {
               <button
                 type="button"
                 onClick={() => setAddModalTab('pricing')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                   addModalTab === 'pricing'
                     ? 'bg-zinc-800 text-white font-semibold shadow-xs'
                     : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
@@ -1053,7 +1053,7 @@ function ProductsContent() {
               <button
                 type="button"
                 onClick={() => setAddModalTab('variants')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                   addModalTab === 'variants'
                     ? 'bg-zinc-800 text-white font-semibold shadow-xs'
                     : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
@@ -1065,7 +1065,7 @@ function ProductsContent() {
               <button
                 type="button"
                 onClick={() => setAddModalTab('packs')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                   addModalTab === 'packs'
                     ? 'bg-zinc-800 text-white font-semibold shadow-xs'
                     : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
@@ -1077,7 +1077,7 @@ function ProductsContent() {
               <button
                 type="button"
                 onClick={() => setAddModalTab('preview')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                   addModalTab === 'preview'
                     ? 'bg-zinc-800 text-white font-semibold shadow-xs'
                     : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'

@@ -374,7 +374,7 @@ function ThemeGalleryContent() {
         </div>
 
         {/* Category Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 admin-scrollbar">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 admin-scrollbar no-scrollbar">
           {CATEGORIES.map((cat) => {
             const isSelected = selectedCategory === cat.id;
             const label = language === 'ar' ? cat.labelAr : language === 'en' ? cat.labelEn : cat.labelFr;
@@ -382,7 +382,7 @@ function ThemeGalleryContent() {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer ${
+                className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer ${
                   isSelected
                     ? 'bg-emerald-500 text-zinc-950 font-bold shadow-xs'
                     : 'bg-[#13171c] hover:bg-slate-800 text-zinc-300 border border-slate-800/80'

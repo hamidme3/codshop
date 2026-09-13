@@ -227,14 +227,14 @@ export default function SupportDeskPage() {
         {/* Toolbar */}
         <div className="p-4 border-b border-slate-800 flex flex-col md:flex-row gap-4 items-center justify-between">
           {/* Filters */}
-          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
+          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto no-scrollbar">
             {['all', 'open', 'in_progress', 'waiting_merchant', 'closed'].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilterStatus(status)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition whitespace-nowrap ${
+                className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition whitespace-nowrap cursor-pointer ${
                   filterStatus === status
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800'
                 }`}
               >

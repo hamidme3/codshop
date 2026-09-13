@@ -233,7 +233,7 @@ function CustomersContent() {
 
       {/* Tabs & Search */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-1 p-1 bg-[#121215] border border-zinc-800/80 rounded-lg overflow-x-auto admin-scrollbar text-xs">
+        <div className="flex items-center gap-1 p-1 bg-[#121215] border border-zinc-800/80 rounded-lg overflow-x-auto admin-scrollbar no-scrollbar text-xs">
           {[
             { id: 'all', label: `Tous (${totalCustomersCount})` },
             { id: 'confirmed', label: `1. Confirmés (${confirmedPipelineCount})` },
@@ -245,7 +245,7 @@ function CustomersContent() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-3 py-1.5 rounded-md font-medium whitespace-nowrap transition-colors ${
+              className={`shrink-0 px-3 py-1.5 rounded-md font-medium whitespace-nowrap transition-colors cursor-pointer ${
                 activeTab === tab.id
                   ? 'bg-zinc-800 text-white font-semibold shadow-sm'
                   : 'text-zinc-400 hover:text-zinc-200'

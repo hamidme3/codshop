@@ -330,6 +330,14 @@ h1 {
 }
 
 /* Smooth micro-scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .admin-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
