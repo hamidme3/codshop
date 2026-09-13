@@ -6,12 +6,22 @@ import {
   ShoppingBag, Search, Phone, MessageCircle, Truck, 
   CheckCircle2, Clock, Download, Check, X, DollarSign,
   RotateCcw, FileSpreadsheet, ChevronDown, ChevronUp, AlertCircle, Trash2, Copy,
-  Columns, Layers
+  Columns, Layers, Printer
 } from 'lucide-react';
 import { getOrders, updateOrderStatus, deleteOrder, Order, OrderStatus } from '@/lib/backoffice';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { buildWhatsAppLink, WhatsAppTemplateType } from '@/lib/whatsapp-templates';
-import { exportCourierManifest, CourierKey, ShippingCourier } from '@/lib/courier-manifest';
+import { 
+  buildWhatsAppLink, 
+  WhatsAppTemplateType, 
+  getCourierManifestWhatsAppText, 
+  buildManifestWhatsAppLink 
+} from '@/lib/whatsapp-templates';
+import { 
+  exportCourierManifest, 
+  generateBonDeRamassageHtml, 
+  CourierKey, 
+  ShippingCourier 
+} from '@/lib/courier-manifest';
 
 function OrdersContent() {
   const searchParams = useSearchParams();
@@ -30,6 +40,29 @@ function OrdersContent() {
   const [activeWaOrderId, setActiveWaOrderId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Manifest & Dispatch Modal State (Option 1 + WhatsApp Share)
+  const [manifestModal, setManifestModal] = useState<{
+    isOpen: boolean;
+    label: string;
+    filterKey: 'confirmed' | 'shipped' | 'delivered' | 'returned' | 'current' | 'selected';
+    orders: Order[];
+    courier: CourierKey;
+    driverPhone: string;
+    autoShip: boolean;
+    showPreviewText: boolean;
+    copied: boolean;
+  }>({
+    isOpen: false,
+    label: '',
+    filterKey: 'confirmed',
+    orders: [],
+    courier: 'ozon',
+    driverPhone: '',
+    autoShip: false,
+    showPreviewText: false,
+    copied: false,
+  });
+
   // Global Escape key dismiss listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -37,6 +70,7 @@ function OrdersContent() {
         setSelectedOrder(null);
         setIsExportOpen(false);
         setActiveWaOrderId(null);
+        setManifestModal((prev) => ({ ...prev, isOpen: false }));
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -201,8 +235,20 @@ function OrdersContent() {
     }
   };
 
-  // 1-Click Filtered Export for Confirmed, Shipped, Delivered, Returned, or Current View
-  const handleExportByStatus = (statusFilter: 'confirmed' | 'shipped' | 'delivered' | 'returned' | 'current', courier: CourierKey = 'standard') => {
+  const courierNames: Record<CourierKey, string> = {
+    standard: 'Standard Universel',
+    ozon: 'Ozon Express',
+    sendit: 'Sendit Maroc',
+    cathedis: 'Cathedis',
+    amana: 'Amana Poste Maroc',
+    manual: 'Livraison Interne / Manuel',
+  };
+
+  // Open Manifest & WhatsApp Dispatch Modal (Option 1 + WhatsApp Share)
+  const handleOpenManifestModal = (
+    statusFilter: 'confirmed' | 'shipped' | 'delivered' | 'returned' | 'current' | 'selected',
+    preferredCourier: CourierKey = 'ozon'
+  ) => {
     let ordersToExport: Order[] = [];
     let label = '';
 
@@ -218,6 +264,9 @@ function OrdersContent() {
     } else if (statusFilter === 'returned') {
       ordersToExport = orders.filter((o) => ['returned', 'canceled'].includes(o.status));
       label = 'Commandes Retournées (Refus / Retours)';
+    } else if (statusFilter === 'selected') {
+      ordersToExport = orders.filter((o) => selectedOrderIds.includes(o.id));
+      label = `Sélection (${ordersToExport.length} commandes)`;
     } else {
       ordersToExport = selectedOrderIds.length > 0
         ? orders.filter((o) => selectedOrderIds.includes(o.id))
@@ -230,38 +279,36 @@ function OrdersContent() {
       return;
     }
 
-    const result = exportCourierManifest(courier, ordersToExport, `${storeSlug}_${statusFilter}`);
-    const blob = new Blob([result.content], { type: result.mimeType });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = result.filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
+    setManifestModal({
+      isOpen: true,
+      label,
+      filterKey: statusFilter,
+      orders: ordersToExport,
+      courier: preferredCourier,
+      driverPhone: '',
+      autoShip: statusFilter === 'confirmed' || ordersToExport.some((o) => o.status === 'confirmed'),
+      showPreviewText: false,
+      copied: false,
+    });
     setIsExportOpen(false);
-    showToast(`Export ${label} téléchargé (${result.orderCount} commandes - Total: ${result.totalCrbt} DH)`);
   };
 
-  // Export Manifest Engine (CSV download)
-  const handleExportManifest = (courier: CourierKey = 'standard') => {
-    let ordersToExport: Order[] = [];
-    if (selectedOrderIds.length > 0) {
-      ordersToExport = orders.filter((o) => selectedOrderIds.includes(o.id));
-    } else if (activeFilter === 'all' || activeFilter === 'new') {
-      ordersToExport = orders.filter((o) => ['confirmed', 'shipped', 'shipping'].includes(o.status));
-    } else {
-      ordersToExport = filteredOrders.filter((o) => !['canceled', 'returned'].includes(o.status));
-    }
+  // 1-Click Filtered Export opens the Manifest & WhatsApp Dispatch Modal
+  const handleExportByStatus = (statusFilter: 'confirmed' | 'shipped' | 'delivered' | 'returned' | 'current', courier: CourierKey = 'ozon') => {
+    handleOpenManifestModal(statusFilter, courier);
+  };
 
-    if (ordersToExport.length === 0) {
-      showToast(`Aucune commande prête pour expédition (${courier.toUpperCase()}).`);
-      return;
-    }
+  // Specific courier triggers open the Manifest & WhatsApp Dispatch Modal
+  const handleExportManifest = (courier: CourierKey = 'ozon') => {
+    handleOpenManifestModal(selectedOrderIds.length > 0 ? 'selected' : 'current', courier);
+  };
 
-    const result = exportCourierManifest(courier, ordersToExport, `${storeSlug}_manifest`);
+  // Deliberate CSV file download action triggered from the modal
+  const handleExecuteDownload = () => {
+    const { courier, orders: ordersToExport, filterKey, autoShip } = manifestModal;
+    if (ordersToExport.length === 0) return;
+
+    const result = exportCourierManifest(courier, ordersToExport, `${storeSlug}_${filterKey}`);
     const blob = new Blob([result.content], { type: result.mimeType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -272,8 +319,79 @@ function OrdersContent() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    setIsExportOpen(false);
-    showToast(`Manifeste ${courier.toUpperCase()} téléchargé (${result.orderCount} commandes - ${result.totalCrbt} DH)`);
+    if (autoShip) {
+      const confirmedOrders = ordersToExport.filter((o) => o.status === 'confirmed');
+      if (confirmedOrders.length > 0) {
+        confirmedOrders.forEach((o) => {
+          const prefix = courier === 'standard' ? 'EXP' : courier.toUpperCase();
+          const tracking = o.trackingNumber || `${prefix}-MA-${Math.floor(100000 + Math.random() * 900000)}`;
+          updateOrderStatus(o.id, 'shipped', tracking, courier === 'standard' ? 'ozon' : (courier as ShippingCourier));
+        });
+        setOrders([...getOrders(storeSlug)]);
+        showToast(`${confirmedOrders.length} commande(s) passée(s) en « Expédiée » avec tracking !`);
+      }
+    }
+
+    showToast(`Bordereau ${courier.toUpperCase()} téléchargé (${result.orderCount} colis - ${result.totalCrbt} DH)`);
+    setManifestModal((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const manifestTotalCrbt = useMemo(() => {
+    return manifestModal.orders.reduce((sum, o) => sum + (o.total || 0), 0);
+  }, [manifestModal.orders]);
+
+  const manifestCitiesSummary = useMemo(() => {
+    const cityCounts: Record<string, number> = {};
+    manifestModal.orders.forEach((o) => {
+      const c = o.city || 'Maroc';
+      cityCounts[c] = (cityCounts[c] || 0) + 1;
+    });
+    return Object.entries(cityCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([city, count]) => `${city} (${count})`)
+      .slice(0, 3)
+      .join(', ');
+  }, [manifestModal.orders]);
+
+  const manifestWhatsAppText = useMemo(() => {
+    if (!manifestModal.isOpen || manifestModal.orders.length === 0) return '';
+    return getCourierManifestWhatsAppText(
+      manifestModal.orders,
+      storeSlug,
+      courierNames[manifestModal.courier] || 'Transporteur'
+    );
+  }, [manifestModal.isOpen, manifestModal.orders, manifestModal.courier, storeSlug]);
+
+  const handleCopyWhatsAppManifest = async () => {
+    try {
+      await navigator.clipboard.writeText(manifestWhatsAppText);
+      setManifestModal((prev) => ({ ...prev, copied: true }));
+      showToast('Listing WhatsApp copié dans le presse-papier !');
+      setTimeout(() => setManifestModal((prev) => ({ ...prev, copied: false })), 3000);
+    } catch {
+      showToast('Impossible de copier dans le presse-papier.');
+    }
+  };
+
+  const handleSendWhatsAppManifest = () => {
+    const link = buildManifestWhatsAppLink(manifestModal.driverPhone, manifestWhatsAppText);
+    window.open(link, '_blank');
+  };
+
+  const handlePrintBonDeRamassage = () => {
+    const html = generateBonDeRamassageHtml(
+      `BDR-${storeSlug.toUpperCase()}-${Date.now().toString().slice(-4)}`,
+      manifestModal.orders,
+      storeSlug,
+      courierNames[manifestModal.courier] || 'Transporteur'
+    );
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+    }
   };
 
   // Copy Tracking Number State
@@ -1408,6 +1526,242 @@ function OrdersContent() {
               >
                 Fermer
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Manifest & WhatsApp Dispatch Modal (Option 1 + WhatsApp Share) */}
+      {manifestModal.isOpen && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 cursor-pointer"
+          onClick={() => setManifestModal((prev) => ({ ...prev, isOpen: false }))}
+        >
+          <div
+            className="bg-[#13171c] border border-slate-800 rounded-2xl p-4 sm:p-6 max-w-2xl w-full max-h-[92vh] overflow-y-auto admin-scrollbar space-y-4 sm:space-y-5 shadow-2xl animate-in zoom-in-95 cursor-default bento-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                  <FileSpreadsheet className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-mono font-bold text-white tracking-tight flex items-center gap-2">
+                    Bordereau & Manifeste d&apos;Expédition
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    {manifestModal.label} • <strong className="text-white font-mono">{manifestModal.orders.length}</strong> colis •{' '}
+                    <strong className="text-emerald-400 font-mono">
+                      {manifestTotalCrbt.toLocaleString('fr-MA')} DH
+                    </strong>{' '}
+                    CRBT
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setManifestModal((prev) => ({ ...prev, isOpen: false }))}
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Top KPI Cards */}
+            <div className="grid grid-cols-3 gap-2.5">
+              <div className="bg-[#0c0f12] border border-slate-800/80 rounded-xl p-3">
+                <span className="text-[10px] uppercase font-bold text-zinc-500">Volume</span>
+                <div className="text-base font-black font-mono text-white mt-0.5">
+                  {manifestModal.orders.length} colis
+                </div>
+              </div>
+              <div className="bg-[#0c0f12] border border-slate-800/80 rounded-xl p-3">
+                <span className="text-[10px] uppercase font-bold text-zinc-500">Total CRBT</span>
+                <div className="text-base font-black font-mono text-emerald-400 mt-0.5">
+                  {manifestTotalCrbt.toLocaleString('fr-MA')} DH
+                </div>
+              </div>
+              <div className="bg-[#0c0f12] border border-slate-800/80 rounded-xl p-3">
+                <span className="text-[10px] uppercase font-bold text-zinc-500">Destinations</span>
+                <div className="text-xs font-semibold text-zinc-300 truncate mt-1" title={manifestCitiesSummary}>
+                  {manifestCitiesSummary || 'Maroc'}
+                </div>
+              </div>
+            </div>
+
+            {/* 1. Courier Format Selector */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider">
+                1. Choisir le format de bordereau / transporteur
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {[
+                  { id: 'ozon', name: 'Ozon Express', badge: 'CRBT Direct', icon: Truck },
+                  { id: 'sendit', name: 'Sendit Maroc', badge: 'Rabat & Casa', icon: Truck },
+                  { id: 'cathedis', name: 'Cathedis', badge: 'National 48h', icon: Truck },
+                  { id: 'amana', name: 'Amana Poste', badge: 'Poste Maroc', icon: Truck },
+                  { id: 'standard', name: 'Standard CSV', badge: 'Excel UTF-8', icon: FileSpreadsheet },
+                ].map((c) => {
+                  const isSelected = manifestModal.courier === c.id;
+                  const IconComp = c.icon;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setManifestModal((prev) => ({ ...prev, courier: c.id as CourierKey }))}
+                      className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                        isSelected
+                          ? 'bg-emerald-500/10 border-emerald-500 text-white ring-1 ring-emerald-500/30'
+                          : 'bg-[#0c0f12] border-slate-800 text-zinc-400 hover:text-zinc-200 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <IconComp className={`w-3.5 h-3.5 ${isSelected ? 'text-emerald-400' : 'text-zinc-500'}`} />
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-800/80 text-zinc-400">
+                          {c.badge}
+                        </span>
+                      </div>
+                      <span className="text-xs font-bold mt-2">{c.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 2. WhatsApp Courier Dispatch Card */}
+            <div className="bg-[#0c0f12] border border-emerald-950/40 rounded-xl p-3.5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400">
+                    <MessageCircle className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white">2. Partager le bordereau sur WhatsApp</h4>
+                    <p className="text-[11px] text-zinc-400">Transmettez le listing directement au chauffeur ou à l&apos;agence sans fichier lourd.</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setManifestModal((prev) => ({ ...prev, showPreviewText: !prev.showPreviewText }))}
+                  className="text-[11px] text-zinc-400 hover:text-white underline cursor-pointer"
+                >
+                  {manifestModal.showPreviewText ? 'Masquer texte' : 'Voir le texte'}
+                </button>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="relative flex-1">
+                  <Phone className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-500" />
+                  <input
+                    type="tel"
+                    value={manifestModal.driverPhone}
+                    onChange={(e) => setManifestModal((prev) => ({ ...prev, driverPhone: e.target.value }))}
+                    placeholder="N° WhatsApp du livreur (ex: 0661234567) ou laisser vide"
+                    className="w-full bg-[#13171c] border border-slate-800 rounded-lg pl-8 pr-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleSendWhatsAppManifest}
+                    className="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer"
+                    title="Ouvrir WhatsApp avec le listing pré-rempli"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>Envoyer sur WhatsApp</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyWhatsAppManifest}
+                    className={`px-3 py-2 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer ${
+                      manifestModal.copied
+                        ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300'
+                        : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-zinc-300 hover:text-white'
+                    }`}
+                    title="Copier le listing formaté dans le presse-papier"
+                  >
+                    {manifestModal.copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{manifestModal.copied ? 'Copié !' : 'Copier'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {manifestModal.showPreviewText && (
+                <div className="p-2.5 bg-[#13171c] border border-slate-800/80 rounded-lg text-[11px] font-mono text-zinc-300 whitespace-pre-wrap max-h-40 overflow-y-auto admin-scrollbar">
+                  {manifestWhatsAppText}
+                </div>
+              )}
+            </div>
+
+            {/* 3. Fulfillment Automation Toggle */}
+            {manifestModal.orders.some((o) => o.status === 'confirmed') && (
+              <label className="flex items-center gap-2.5 p-3 rounded-xl bg-[#0c0f12] border border-slate-800/80 text-xs text-zinc-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={manifestModal.autoShip}
+                  onChange={(e) => setManifestModal((prev) => ({ ...prev, autoShip: e.target.checked }))}
+                  className="w-4 h-4 rounded border-slate-700 accent-emerald-500 cursor-pointer"
+                />
+                <div>
+                  <span className="font-semibold text-white">
+                    Passer automatiquement les {manifestModal.orders.filter((o) => o.status === 'confirmed').length} commande(s) confirmée(s) en « Expédiées »
+                  </span>
+                  <p className="text-[11px] text-zinc-500">
+                    Génère les numéros de suivi {manifestModal.courier.toUpperCase()} et met à jour le stock en temps réel.
+                  </p>
+                </div>
+              </label>
+            )}
+
+            {/* 4. Mini Orders Table Preview */}
+            <div className="border border-slate-800 rounded-xl overflow-hidden">
+              <div className="px-3 py-2 bg-[#0c0f12] border-b border-slate-800 text-[11px] font-bold text-zinc-400 flex items-center justify-between">
+                <span>Colis inclus dans ce bordereau ({manifestModal.orders.length})</span>
+                <span className="text-zinc-500 text-[10px]">Aperçu avant téléchargement</span>
+              </div>
+              <div className="max-h-36 overflow-y-auto admin-scrollbar divide-y divide-slate-800/60 text-xs">
+                {manifestModal.orders.map((o) => (
+                  <div key={o.id} className="p-2.5 flex items-center justify-between hover:bg-slate-800/20">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-mono font-bold text-white text-xs">{o.orderNumber}</span>
+                      <span className="text-zinc-300 truncate">{o.customerName}</span>
+                      <span className="text-zinc-500 text-[11px]">({o.city})</span>
+                    </div>
+                    <span className="font-mono font-bold text-emerald-400 whitespace-nowrap">{o.total} DH</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Modal Footer Actions */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-3 border-t border-slate-800/80">
+              <button
+                type="button"
+                onClick={handlePrintBonDeRamassage}
+                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5 text-sky-400" />
+                <span>Imprimer Bon de Ramassage A4</span>
+              </button>
+
+              <div className="flex items-center gap-2 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setManifestModal((prev) => ({ ...prev, isOpen: false }))}
+                  className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 font-medium text-xs transition cursor-pointer"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExecuteDownload}
+                  className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-xs flex items-center justify-center gap-2 transition shadow-md shadow-emerald-500/20 cursor-pointer"
+                >
+                  <Download className="w-4 h-4 text-zinc-950" />
+                  <span>Télécharger le Fichier (.csv)</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

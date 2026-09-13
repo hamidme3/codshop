@@ -548,6 +548,42 @@ STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS, 12/12 CHROME MCP ADMIN S
 
 3. PRODUCTION DEPLOYMENT & SYNC:
 - Coolify Docker Container: `codshop-app` running at `http://172.18.1.13:3000` (Rebuilt and Healthy).
+=== ROUND 15: Interactive Manifest Export Modal & WhatsApp Driver Sharing (Zero Accidental Downloads) ===
+
+DATE: 2026-09-13
+STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS, 14/14 TEST SUITES PASS)
+
+1. INTERACTIVE EXPORT MODAL & WHATSAPP DRIVER INTEGRATION:
+- Problem Resolved:
+  * Previously, the "1-Click Export" buttons triggered an immediate browser `.csv` download upon tapping (`<a>.click()`), causing accidental file downloads on mobile/desktop without order or carrier verification.
+- Interactive Manifest & Courier Dispatch Modal (`src/app/admin/orders/page.tsx`):
+  * Replaced all immediate download triggers (top CSV export dropdown, 1-Click Status Export bar, bulk selection bar) with `handleOpenManifestModal(statusFilter, preferredCourier)`.
+  * Modal provides deliberate confirmation: shows batch volume, total CRBT cash to collect in MAD, and order breakdown before any action.
+  * Carrier Format Picker: Allows instant switching between all 5 Moroccan logistics formats:
+    1. Standard COD CSV (with Windows Excel UTF-8 BOM `\uFEFF`)
+    2. Ozon Express (`Code_Envoi_Ref`, `Ouvrir_Colis`, `Prix_CRBT`)
+    3. Sendit Maroc (`Destinataire`, `Tel`, `Ville`, `Montant_COD`)
+    4. Cathedis (`Reference_Colis`, `Nom_Client`, `Frais_Livraison`)
+    5. Amana Poste Maroc (`Numero_Envoi`, `Nom_Complet`, `Montant_CRBT`)
+  * Deliberate Export Execution: File download only begins when the merchant explicitly clicks `Télécharger le CSV [Transporteur]`.
+- Direct WhatsApp Courier Dispatch (`src/lib/whatsapp-templates.ts`):
+  * Added `getCourierManifestWhatsAppText(orders, storeName, courierName)` generating a structured parcel manifest in French/Darija with order numbers, customer names, normalized Moroccan phones, destination cities, items, and CRBT amounts.
+  * Added `buildManifestWhatsAppLink(phone, text)` supporting both direct driver delivery (`https://wa.me/212...`) and contact picker mode.
+  * Interactive WhatsApp Sharing Card: features an input for the driver's phone number, 1-tap `Envoyer sur WhatsApp` CTA, 1-click clipboard copy (`Copier le texte`), and an expandable live preview accordion.
+- Printable A4 "Bon de Ramassage":
+  * Direct print trigger in the modal opening a formatted pickup handover slip (`generateBonDeRamassageHtml`) for the courier driver to sign upon parcel collection.
+- Automated Fulfillment Option:
+  * Added "Marquer automatiquement ces commandes comme Expédiées" toggle. When checked upon download or WhatsApp share, orders transition atomically to `shipped`, receive auto-generated courier tracking numbers (`OZON-MA-...`, `SND-MA-...`, `CTH-MA-...`, `AMN-MA-...`), and reserve stock.
+
+2. VERIFICATION & ZERO-REGRESSION ASSURANCE:
+- TypeScript Compilation: `npx tsc --noEmit` PASSED with 0 ERRORS.
+- Automated Test Suites: 14/14 PASSED (100% success rate including new `tests/manifest-whatsapp-export.test.ts` covering WhatsApp text templates, wa.me URL encoding, all 5 courier manifests with UTF-8 BOM, Bon de Ramassage HTML, and auto-advance status transitions).
+- Chrome MCP Visual Evidence:
+  * `manifest_export_modal_whatsapp.png`: Full interactive modal with summary KPIs, carrier selector, driver WhatsApp card, and order preview.
+  * `manifest_export_modal_whatsapp_expanded.png`: Expanded live WhatsApp text preview.
+
+3. PRODUCTION DEPLOYMENT & SYNC:
+- Coolify Docker Container: `codshop-app` rebuilt and healthy at `http://172.18.1.13:3000`.
 - Live Production Domain: `https://codshop.vipone.site` (HTTP 200 via Cloudflare and Traefik).
 - Git Repository: Synchronized with `origin/main`.
 

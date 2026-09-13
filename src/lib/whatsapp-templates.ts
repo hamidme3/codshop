@@ -149,3 +149,51 @@ export function buildWhatsAppLink(
   const message = getDarijaMessage(order, template, storeName);
   return `https://wa.me/${phoneNormalized}?text=${encodeURIComponent(message)}`;
 }
+
+/**
+ * Generate structured WhatsApp text for a Courier/Driver Manifest (Bon de Ramassage)
+ */
+export function getCourierManifestWhatsAppText(
+  orders: Order[],
+  storeName: string = 'Boutique',
+  courierName: string = 'Transporteur'
+): string {
+  const dateStr = new Date().toLocaleDateString('fr-MA', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+  const totalCrbt = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+
+  const lines: string[] = [
+    `📦 *BON DE RAMASSAGE — ${storeName.toUpperCase()}*`,
+    `🚚 Transporteur : *${courierName}*`,
+    `📅 Date : ${dateStr}`,
+    `📊 Volume : *${orders.length} colis*`,
+    `💰 Total CRBT à encaisser : *${totalCrbt.toLocaleString('fr-MA')} DH*`,
+    ``,
+    `📋 *DÉTAIL DES COLIS :*`,
+  ];
+
+  orders.forEach((o, idx) => {
+    const phone = formatCourierPhone(o.phone);
+    const items = formatOrderItemsSummary(o, { includeSku: false });
+    lines.push(`${idx + 1}. *#${o.orderNumber || o.id}* — ${o.customerName || 'Client'} (${phone})`);
+    lines.push(`   📍 ${o.city || 'Maroc'}${o.address ? ` — ${o.address}` : ''}`);
+    lines.push(`   📦 ${items}`);
+    lines.push(`   💵 CRBT : *${o.total || 0} DH*`);
+    lines.push(``);
+  });
+
+  lines.push(`Merci de confirmer la prise en charge des colis.`);
+  return lines.join('\n');
+}
+
+/**
+ * Generate wa.me link for sending Courier/Driver Manifest
+ */
+export function buildManifestWhatsAppLink(phone: string, text: string): string {
+  const cleanPhone = phone ? sanitizeMoroccanPhone(phone).international : '';
+  const encoded = encodeURIComponent(text);
+  return cleanPhone ? `https://wa.me/${cleanPhone}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+}
