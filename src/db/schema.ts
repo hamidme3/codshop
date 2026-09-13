@@ -13,6 +13,7 @@ export const stores = pgTable(
     subdomain: text('subdomain').notNull().unique(),
     customDomain: text('custom_domain'), // e.g. "boutique.ma"
     currency: text('currency').default('MAD').notNull(),
+    country: text('country').default('MA').notNull(), // 'MA' | 'SA' | 'AE' | 'EG' | 'DZ' | 'SN' | 'CI'
     planTier: text('plan_tier').default('starter').notNull(), // 'starter' | 'pro' | 'scale'
     isWaybillEnabled: boolean('is_waybill_enabled').default(false).notNull(), // A/B: "Bon de Livraison" waybill skin
     trialEndsAt: timestamp('trial_ends_at').notNull(),

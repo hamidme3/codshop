@@ -50,6 +50,7 @@ export async function getStoreBySlug(slug: string) {
       slug: mockStore.slug,
       name: mockStore.name,
       currency: 'MAD',
+      country: 'MA',
       planTier: mockStore.plan,
       status: mockStore.status,
       isWaybillEnabled: false,

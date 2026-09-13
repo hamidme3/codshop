@@ -12,6 +12,11 @@ import {
   validateAddress,
   FREE_SHIPPING_THRESHOLD,
 } from '@/lib/moroccanCities';
+import {
+  getCountryConfig,
+  getCountryDeliveryEstimate,
+  validateCountryPhone,
+} from '@/lib/geo';
 import { useTheme } from '@/context/ThemeContext';
 import {
   X,
@@ -38,6 +43,7 @@ interface CodCheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   storeSlug?: string;
+  countryCode?: string; // e.g. 'MA' | 'SA' | 'AE' | 'EG' | 'DZ' | 'SN' | 'CI'
   initialQuantity?: number;
   initialVariant?: string;
   initialSku?: string;
@@ -58,17 +64,26 @@ export function CodCheckoutModal({
   isOpen,
   onClose,
   storeSlug,
+  countryCode,
   initialQuantity = 1,
   initialVariant,
   initialSku,
   initialColor,
   initialSize,
-  initialCity = 'Casablanca',
+  initialCity,
   isWaybill: waybillOverride,
 }: CodCheckoutModalProps) {
   const router = useRouter();
   const { theme, formatMAD, lang } = useTheme();
   const formRef = React.useRef<HTMLFormElement>(null);
+
+  // Multi-country configuration & currency
+  const effectiveCountryCode = useMemo(() => {
+    if (countryCode) return countryCode;
+    return (product as any)?.country || 'MA';
+  }, [countryCode, product]);
+
+  const countryConfig = useMemo(() => getCountryConfig(effectiveCountryCode), [effectiveCountryCode]);
 
   // Detect active store slug from prop, search param, or subdomain
   const effectiveStoreSlug = React.useMemo(() => {
@@ -111,7 +126,7 @@ export function CodCheckoutModal({
   // Form State
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
-  const [city, setCity] = useState(initialCity);
+  const [city, setCity] = useState(initialCity || countryConfig.popularCities[0] || 'Casablanca');
   const [address, setAddress] = useState('');
   const [deliveryType, setDeliveryType] = useState<'home' | 'stopdesk'>('home');
   const [agencyName, setAgencyName] = useState('');
@@ -126,6 +141,12 @@ export function CodCheckoutModal({
   const [selectedTier, setSelectedTier] = useState<QuantityTier>(
     tiers.find((t) => t.quantity === initialQuantity) || tiers[0]
   );
+
+  // Country-aware price formatter
+  const formatPrice = (amount: number) => {
+    if (effectiveCountryCode === 'MA') return formatMAD(amount);
+    return `${amount} ${countryConfig.currency.symbol}`;
+  };
 
   // Track InitiateCheckout on pixel channels when modal is opened
   useEffect(() => {
@@ -149,7 +170,10 @@ export function CodCheckoutModal({
   });
 
   const nameValidation = useMemo(() => validateCustomerName(fullName), [fullName]);
-  const phoneValidation = useMemo(() => validateMoroccanPhone(phone), [phone]);
+  const phoneValidation = useMemo(
+    () => validateCountryPhone(phone, effectiveCountryCode),
+    [phone, effectiveCountryCode]
+  );
   const addressValidation = useMemo(() => validateAddress(address), [address]);
 
   // Read A/B cookie on mount (client-side only)
@@ -180,17 +204,19 @@ export function CodCheckoutModal({
       }
       if (initialCity) {
         setCity(initialCity);
+      } else if (!city) {
+        setCity(countryConfig.popularCities[0] || 'Casablanca');
       }
     }
-  }, [isOpen, initialQuantity, initialVariant, initialSku, initialColor, initialSize, initialCity, tiers]);
+  }, [isOpen, initialQuantity, initialVariant, initialSku, initialColor, initialSize, initialCity, tiers, countryConfig]);
 
-  // Moroccan Delivery Estimate helper
+  // Universal Delivery Estimate helper (country-aware with dynamic SLA & guaranteed flat fee fallback)
   const deliveryEstimate = useMemo(
-    () => getDeliveryDateEstimate(city, selectedTier.totalPrice),
-    [city, selectedTier.totalPrice]
+    () => getCountryDeliveryEstimate(effectiveCountryCode, city, selectedTier.totalPrice),
+    [effectiveCountryCode, city, selectedTier.totalPrice]
   );
 
-  // Moroccan COD Upsell Economics: Pack Duo (2+ units) OR Stopdesk/Agence pickup gets Free Shipping!
+  // COD Upsell Economics: Pack Duo (2+ units) OR Stopdesk/Agence pickup gets Free Shipping!
   const isFreeShipping = selectedTier.quantity >= 2 || selectedTier.freeDelivery || deliveryType === 'stopdesk' || deliveryEstimate.isFree;
   const effectiveShippingFee = isFreeShipping ? 0 : deliveryEstimate.shippingFee;
   const finalTotal = selectedTier.totalPrice + effectiveShippingFee;
@@ -867,7 +893,7 @@ Merci de me confirmer la livraison !`;
                   </label>
                   <div className="relative flex items-center">
                     <span className="absolute left-3 text-xs font-bold text-zinc-500 border-r border-zinc-300 pr-2 pointer-events-none select-none">
-                      🇲🇦 +212
+                      {countryConfig.phone.flag} {countryConfig.phone.dialCode}
                     </span>
                     <input
                       type="tel"
@@ -878,8 +904,8 @@ Merci de me confirmer la livraison !`;
                       value={phone}
                       onChange={handlePhoneChange}
                       onBlur={() => setTouched((prev) => ({ ...prev, phone: true }))}
-                      placeholder="06 12 34 56 78"
-                      className={`w-full pl-20 pr-3.5 py-2.5 bg-zinc-50 border rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition ${
+                      placeholder={countryConfig.phone.placeholder}
+                      className={`w-full pl-22 pr-3.5 py-2.5 bg-zinc-50 border rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition ${
                         touched.phone && !phoneValidation.isValid
                           ? 'border-red-400 bg-red-50/30'
                           : phoneValidation.isValid
@@ -892,7 +918,7 @@ Merci de me confirmer la livraison !`;
                     <p className="text-[10px] text-red-500 mt-1 font-medium">{phoneValidation.error}</p>
                   ) : (
                     <p className="text-[10px] text-zinc-500 mt-1 font-normal">
-                      Format : 06 12 34 56 78 (10 chiffres). Le livreur vous contactera avant le passage.
+                      Format : {countryConfig.phone.example}. Le livreur vous contactera avant le passage.
                     </p>
                   )}
                 </div>
@@ -900,42 +926,80 @@ Merci de me confirmer la livraison !`;
                 {/* City & Delivery Mode Selection */}
                 <div className="space-y-2">
                   <div>
-                    <label className="block text-xs font-bold text-zinc-700 mb-1">
-                      Ville de Livraison <span className="text-red-500">*</span>
+                    <label className="block text-xs font-bold text-zinc-700 mb-1 flex items-center justify-between">
+                      <span>
+                        Ville de Livraison <span className="text-red-500">*</span>
+                      </span>
+                      <span className="text-[10px] text-zinc-400 font-normal">
+                        1-Tap ou tapez librement
+                      </span>
                     </label>
 
-                    {/* Popular Moroccan Cities Quick-Chips with accessible touch targets */}
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {POPULAR_CITIES.map((cityName) => (
-                        <button
-                          key={cityName}
-                          type="button"
-                          onClick={() => setCity(cityName)}
-                          className={`text-xs px-3 py-1.5 min-h-[38px] rounded-lg border font-semibold transition-all cursor-pointer ${
-                            city.toLowerCase() === cityName.toLowerCase()
-                              ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
-                              : 'bg-zinc-100 text-zinc-700 border-zinc-200 hover:bg-zinc-200'
-                          }`}
-                        >
-                          {cityName}
-                        </button>
-                      ))}
+                    {/* Popular Country Cities Quick-Chips with accessible touch targets */}
+                    {countryConfig.popularCities && countryConfig.popularCities.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        {countryConfig.popularCities.map((cityName) => (
+                          <button
+                            key={cityName}
+                            type="button"
+                            onClick={() => setCity(cityName)}
+                            className={`text-xs px-3 py-1.5 min-h-[38px] rounded-lg border font-semibold transition-all cursor-pointer ${
+                              city.trim().toLowerCase() === cityName.toLowerCase()
+                                ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
+                                : 'bg-zinc-100 text-zinc-700 border-zinc-200 hover:bg-zinc-200'
+                            }`}
+                          >
+                            {cityName}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Smart Autocomplete with Free-Text Freedom: Type or pick ANY city */}
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
+                        <MapPin className="w-4 h-4" />
+                      </div>
+                      <input
+                        type="text"
+                        name="city"
+                        id="checkout-city-input"
+                        list="checkout-city-datalist"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        placeholder={`Tapez ou choisissez votre ville (ex: ${countryConfig.popularCities[0] || 'Casablanca'})...`}
+                        required
+                        className="w-full pl-9 pr-3 py-2.5 bg-zinc-50 border border-zinc-300 rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition"
+                        autoComplete="address-level2"
+                      />
+                      <datalist id="checkout-city-datalist">
+                        {countryConfig.knownCities.map((c) => (
+                          <option key={c.id || c.name} value={c.name}>
+                            {c.nameAr ? `${c.name} (${c.nameAr})` : c.name}
+                          </option>
+                        ))}
+                      </datalist>
                     </div>
 
-                    <select
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-300 rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition cursor-pointer"
-                    >
-                      {MOROCCAN_CITIES.map((c) => (
-                        <option key={c.id} value={c.name}>
-                          {c.name} ({c.nameAr}) — {c.deliverySla}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="text-[10px] text-zinc-500 mt-1 font-normal">
-                      Délais et frais calculés automatiquement selon la ville choisie.
-                    </p>
+                    <div className="flex items-center justify-between text-[11px] text-zinc-500 mt-1.5 font-normal">
+                      <span>
+                        {city.trim() ? (
+                          <span className="text-emerald-700 font-medium flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
+                            {deliveryEstimate.sla}
+                          </span>
+                        ) : (
+                          'Délais et frais calculés automatiquement selon la ville.'
+                        )}
+                      </span>
+                      <span className="font-semibold text-zinc-700 text-right">
+                        {effectiveShippingFee === 0 || isFreeShipping ? (
+                          <span className="text-emerald-600 font-bold">Livraison Gratuite</span>
+                        ) : (
+                          `${effectiveShippingFee} ${countryConfig.currency.symbol}`
+                        )}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Delivery Mode Choice: Home vs Stopdesk / Agence (Positioned above estimate) */}
@@ -1086,7 +1150,7 @@ Merci de me confirmer la livraison !`;
                   <span>
                     Sous-total ({selectedTier.quantity} {selectedTier.quantity > 1 ? 'articles' : 'article'}) :
                   </span>
-                  <span className="font-semibold text-zinc-800">{formatMAD(selectedTier.totalPrice)}</span>
+                  <span className="font-semibold text-zinc-800">{formatPrice(selectedTier.totalPrice)}</span>
                 </div>
                 <div className="flex justify-between text-zinc-600">
                   <span>Frais de livraison ({city}) :</span>
@@ -1096,7 +1160,7 @@ Merci de me confirmer la livraison !`;
                         GRATUITE {selectedTier.quantity >= 2 ? '(Pack Duo 🎉)' : (deliveryType === 'stopdesk' ? '(Point Relais 🏢)' : '')}
                       </span>
                     ) : (
-                      formatMAD(effectiveShippingFee)
+                      formatPrice(effectiveShippingFee)
                     )}
                   </span>
                 </div>
@@ -1107,12 +1171,12 @@ Merci de me confirmer la livraison !`;
                       <Gift className="w-3.5 h-3.5 text-purple-600" />
                       <span>Cadeau Exclusif Trio :</span>
                     </span>
-                    <span className="font-bold text-purple-800">OFFERT (0 DH 🎁)</span>
+                    <span className="font-bold text-purple-800">OFFERT (0 {countryConfig.currency.symbol} 🎁)</span>
                   </div>
                 )}
                 <div className="pt-2 border-t border-zinc-200 flex justify-between items-center text-sm font-bold">
                   <span className="text-zinc-900">Total à payer à la livraison :</span>
-                  <span className="text-base font-black text-emerald-700">{formatMAD(finalTotal)}</span>
+                  <span className="text-base font-black text-emerald-700">{formatPrice(finalTotal)}</span>
                 </div>
               </div>
 
@@ -1146,7 +1210,7 @@ Merci de me confirmer la livraison !`;
                   ) : (
                     <>
                       <Check className="w-4 h-4 stroke-[3]" />
-                      <span>Confirmer la Commande — {formatMAD(finalTotal)}</span>
+                      <span>Confirmer la Commande — {formatPrice(finalTotal)}</span>
                     </>
                   )}
                 </button>

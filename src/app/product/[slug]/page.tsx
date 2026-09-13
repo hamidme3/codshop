@@ -688,6 +688,8 @@ export default function ProductDetailPage() {
         product={product}
         isOpen={showCheckoutModal}
         onClose={() => setShowCheckoutModal(false)}
+        storeSlug={(product as any)?.storeSlug}
+        countryCode={(product as any)?.country || 'MA'}
         initialQuantity={selectedQuantity}
         initialVariant={activeVariantInfo.label}
         initialSku={activeVariantInfo.sku}
