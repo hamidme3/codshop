@@ -290,6 +290,8 @@ export const SUPPORTED_COUNTRY_MAP: Record<string, CountryConfig> = {
   FR: COUNTRY_FR,
 };
 
+export const SUPPORTED_COUNTRIES: CountryConfig[] = Object.values(SUPPORTED_COUNTRY_MAP);
+
 /**
  * Returns the CountryConfig for a given country code.
  * Guaranteed to return a valid config (falls back to Morocco MA).

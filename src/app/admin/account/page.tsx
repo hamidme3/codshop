@@ -6,6 +6,7 @@ import {
   User, Mail, Phone, MapPin, Lock, Save, CheckCircle2, 
   AlertCircle, Shield, KeyRound, ExternalLink, Globe
 } from 'lucide-react';
+import { SUPPORTED_COUNTRIES } from '@/lib/geo';
 
 export default function AccountProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -324,10 +325,11 @@ export default function AccountProfilePage() {
                 onChange={(e) => setCountry(e.target.value)}
                 className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
               >
-                <option value="MA">Maroc (MA)</option>
-                <option value="FR">France (FR)</option>
-                <option value="ES">Espagne (ES)</option>
-                <option value="AE">Émirats Arabes Unis (AE)</option>
+                {SUPPORTED_COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.phone.flag} {c.name} ({c.code}) — {c.currency.code}
+                  </option>
+                ))}
               </select>
             </div>
 
