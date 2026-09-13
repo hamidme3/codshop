@@ -13,9 +13,24 @@ const http = require('http');
 const CHROMIUM_PATH = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser';
 const BASE_URL = process.env.BASE_URL || 'http://172.18.1.13:3000';
 const SCREENSHOT_DIR = path.join('/tmp', 'codshop-chrome-audit');
+const ARTIFACT_DIR = process.env.ARTIFACT_DIR || '/home/ubuntu/.gemini/antigravity-cli/brain/8cbbd821-8248-4e7c-ad20-f0b589eb40a9';
 
 if (!fs.existsSync(SCREENSHOT_DIR)) {
   fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
+}
+if (!fs.existsSync(ARTIFACT_DIR)) {
+  fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
+}
+
+async function capture(page, name) {
+  const tmpPath = path.join(SCREENSHOT_DIR, name);
+  const artPath = path.join(ARTIFACT_DIR, name);
+  await page.screenshot({ path: tmpPath });
+  try {
+    fs.copyFileSync(tmpPath, artPath);
+  } catch (e) {
+    // ignore copy error
+  }
 }
 
 async function loginAdmin() {
@@ -464,15 +479,10 @@ async function auditInteractiveCrud(browser, sessionToken) {
     console.log(`  [${isCatCreated ? 'PASS' : 'FAIL'}] Create Category | "Miels & Terroir Atlas" present in DOM`);
     results.push({ name: 'Create Category', pass: isCatCreated });
 
-    // 4. Test Category Deletion Safety Guard
-    console.log('  4. Testing Category Deletion Safety Guard (prevent deleting category with products)...');
-    let alertMessage = '';
-    page.on('dialog', async (dialog) => {
-      alertMessage = dialog.message();
-      await dialog.dismiss();
-    });
-
-    // Try deleting "Maroquinerie & Cuir"
+    // 4. Test Category Deletion Safety Guard & Reassign Modal
+    console.log('  4. Testing Category Deletion Safety Guard (Reassign & Delete safeguards)...');
+    
+    // Try deleting "Maroquinerie & Cuir" (which contains active products)
     await page.evaluate(() => {
       const cards = Array.from(document.querySelectorAll('[data-category-card], div.p-5, div.p-4'));
       const maroCard = cards.find((c) => c.innerText.includes('Maroquinerie & Cuir'));
@@ -482,10 +492,24 @@ async function auditInteractiveCrud(browser, sessionToken) {
       }
     });
 
-    await new Promise((r) => setTimeout(r, 500));
-    const safetyPassed = alertMessage.includes('contient encore') || alertMessage.includes('produit');
-    console.log(`  [${safetyPassed ? 'PASS' : 'FAIL'}] Safety Guard | Message: "${alertMessage.slice(0, 35)}..."`);
-    results.push({ name: 'Category Deletion Safety Guard', pass: safetyPassed });
+    await new Promise((r) => setTimeout(r, 600));
+    await capture(page, 'crud-category-reassign-modal.png');
+
+    const isReassignModalOpen = await page.evaluate(() => {
+      const text = document.body.innerText;
+      return text.includes('Réassigner les Produits') && text.includes('Pour éviter tout produit orphelin');
+    });
+
+    // Dismiss reassign modal by clicking "Annuler"
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const cancelBtn = btns.find((b) => b.innerText.trim() === 'Annuler' && b.closest('form'));
+      if (cancelBtn) cancelBtn.click();
+    });
+    await new Promise((r) => setTimeout(r, 400));
+
+    console.log(`  [${isReassignModalOpen ? 'PASS' : 'FAIL'}] Safety Guard | Reassign Modal opened with anti-orphan safeguards`);
+    results.push({ name: 'Category Deletion Reassign Guard', pass: isReassignModalOpen });
 
     // 5. Test Deleting the Empty Category
     console.log('  5. Testing Deletion of Empty Category...');
@@ -504,7 +528,7 @@ async function auditInteractiveCrud(browser, sessionToken) {
     });
 
     await new Promise((r) => setTimeout(r, 800));
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'crud-category-deleted.png') });
+    await capture(page, 'crud-category-deleted.png');
 
     const isCatDeleted = await page.evaluate(() => {
       const cards = Array.from(document.querySelectorAll('[data-category-card], div.p-5, div.p-4'));
@@ -535,10 +559,139 @@ async function auditInteractiveCrud(browser, sessionToken) {
     });
 
     await new Promise((r) => setTimeout(r, 500));
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'crud-product-stock-adjusted.png') });
+    await capture(page, 'crud-product-stock-adjusted.png');
 
     console.log(`  [${hasActionsCol ? 'PASS' : 'FAIL'}] Products Table Actions Column & Quick Stock Adjuster`);
     results.push({ name: 'Products Actions Column', pass: hasActionsCol });
+
+    // 6a. Test 5-Tab Add Product Command Modal (Linear x Stripe x Shopify Polaris standard)
+    console.log('  6a. Testing 5-Tab Add Product Command Modal & Multi-Attribute Variant Matrix...');
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const addBtn = btns.find((b) => b.innerText.includes('Ajouter un Produit'));
+      if (addBtn) addBtn.click();
+    });
+
+    await new Promise((r) => setTimeout(r, 600));
+    await capture(page, 'crud-add-product-tab1-media.png');
+
+    const isAddModalOpen = await page.evaluate(() => {
+      return document.body.innerText.includes('Ajouter un Nouveau Produit') &&
+             document.body.innerText.includes('1. Général & Médias') &&
+             document.body.innerText.includes('2. Tarification & Marge COD') &&
+             document.body.innerText.includes('3. Variantes & Matrice SKU');
+    });
+
+    // In Tab 1: Fill title and click image preset
+    await page.waitForSelector('input[placeholder*="Sacoche Cuir"]', { timeout: 5000 });
+    await page.type('input[placeholder*="Sacoche Cuir"]', 'Babouches Royales Cuir Fès');
+
+    await page.evaluate(() => {
+      const presetBtns = Array.from(document.querySelectorAll('button'));
+      const maroPreset = presetBtns.find((b) => b.innerText.includes('+ Maroquinerie'));
+      if (maroPreset) maroPreset.click();
+    });
+
+    await new Promise((r) => setTimeout(r, 500));
+    await capture(page, 'crud-add-product-tab1-filled.png');
+
+    // Click Tab 2: Pricing & COD Economics
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const tab2 = btns.find((b) => b.innerText.includes('2. Tarification'));
+      if (tab2) tab2.click();
+    });
+    await new Promise((r) => setTimeout(r, 500));
+    await capture(page, 'crud-add-product-tab2-economics.png');
+
+    const hasEconomicsCalculated = await page.evaluate(() => {
+      const text = document.body.innerText;
+      return text.includes('Marge Brute') && text.includes('DH') && text.includes('Marge Nette');
+    });
+
+    // Click Tab 3: Variants & SKU Matrix
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const tab3 = btns.find((b) => b.innerText.includes('3. Variantes'));
+      if (tab3) tab3.click();
+    });
+    await new Promise((r) => setTimeout(r, 500));
+
+    // Toggle switch to enable variant matrix
+    await page.evaluate(() => {
+      const switchBtn = document.querySelector('button[role="switch"]');
+      if (switchBtn) switchBtn.click();
+    });
+    await new Promise((r) => setTimeout(r, 400));
+
+    // Fill colors and sizes using page.type
+    await page.waitForSelector('input[placeholder*="Noir Ébène"]', { timeout: 5000 });
+    await page.type('input[placeholder*="Noir Ébène"]', 'Noir Ébène, Camel');
+    await page.waitForSelector('input[placeholder*="40, 41"]', { timeout: 5000 });
+    await page.type('input[placeholder*="40, 41"]', '40, 41, 42');
+
+    // Click generate matrix
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const genBtn = btns.find((b) => b.innerText.includes('Générer Matrice'));
+      if (genBtn) genBtn.click();
+    });
+    await new Promise((r) => setTimeout(r, 600));
+
+    // Batch fill stock to 25
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const batchBtn = btns.find((b) => b.innerText.includes('Appliquer'));
+      if (batchBtn) batchBtn.click();
+    });
+    await new Promise((r) => setTimeout(r, 500));
+    await capture(page, 'crud-add-product-tab3-variants.png');
+
+    const hasVariantsGenerated = await page.evaluate(() => {
+      const text = document.body.innerText;
+      return text.includes('Variantes Définies') || text.includes('Stock Total') || text.includes('BABOUCHE');
+    });
+
+    // Click Tab 4: Packs Upsell
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const tab4 = btns.find((b) => b.innerText.includes('4. Packs Upsell'));
+      if (tab4) tab4.click();
+    });
+    await new Promise((r) => setTimeout(r, 500));
+    await capture(page, 'crud-add-product-tab4-packs.png');
+
+    // Click Tab 5: Mobile Preview
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const tab5 = btns.find((b) => b.innerText.includes('5. Aperçu Mobile'));
+      if (tab5) tab5.click();
+    });
+    await new Promise((r) => setTimeout(r, 600));
+    await capture(page, 'crud-add-product-tab5-mobile-preview.png');
+
+    const hasMobileMockup = await page.evaluate(() => {
+      return document.body.innerText.includes('09:41') &&
+             (document.body.innerText.includes('Vérifiez votre colis') || document.body.innerText.includes('Garantie'));
+    });
+
+    // Submit and Create Product
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const saveBtn = btns.find((b) => b.innerText.includes('Enregistrer le Produit'));
+      if (saveBtn) saveBtn.click();
+    });
+    await new Promise((r) => setTimeout(r, 1200));
+    await capture(page, 'crud-add-product-created.png');
+
+    const isProductCreated = await page.evaluate(() => {
+      return document.body.innerText.includes('Babouches Royales Cuir Fès');
+    });
+
+    console.log(`    Validation metrics: modal=${isAddModalOpen}, economics=${hasEconomicsCalculated}, variants=${hasVariantsGenerated}, mobile=${hasMobileMockup}, created=${isProductCreated}`);
+    const addProductPass = isAddModalOpen && hasEconomicsCalculated && hasVariantsGenerated && hasMobileMockup && isProductCreated;
+    console.log(`  [${addProductPass ? 'PASS' : 'FAIL'}] 5-Tab Add Product Modal | Variants Matrix & Unit Economics Verified`);
+    results.push({ name: '5-Tab Add Product Flow', pass: addProductPass });
 
     // 6b. Test Product Edit Modal & Variant Manager
     console.log('  6b. Testing Product Edit Modal & Variant Management...');
@@ -548,7 +701,7 @@ async function auditInteractiveCrud(browser, sessionToken) {
     });
 
     await new Promise((r) => setTimeout(r, 600));
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'crud-product-edit-modal.png') });
+    await capture(page, 'crud-product-edit-modal.png');
 
     const isEditModalOpen = await page.evaluate(() => {
       const headings = Array.from(document.querySelectorAll('h3'));
@@ -590,7 +743,7 @@ async function auditInteractiveCrud(browser, sessionToken) {
     });
 
     await new Promise((r) => setTimeout(r, 500));
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'crud-orders-bulk-bar.png') });
+    await capture(page, 'crud-orders-bulk-bar.png');
 
     const hasBulkDeleteBtn = await page.evaluate(() => {
       const btns = Array.from(document.querySelectorAll('button'));
@@ -607,7 +760,7 @@ async function auditInteractiveCrud(browser, sessionToken) {
     });
 
     await new Promise((r) => setTimeout(r, 600));
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'crud-order-drawer-actions.png') });
+    await capture(page, 'crud-order-drawer-actions.png');
 
     const hasDrawerDeleteBtn = await page.evaluate(() => {
       const btns = Array.from(document.querySelectorAll('button'));
@@ -652,7 +805,7 @@ async function auditInteractiveCrud(browser, sessionToken) {
     });
 
     await new Promise((r) => setTimeout(r, 800));
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'customer-drawer-timeline-notes.png') });
+    await capture(page, 'customer-drawer-timeline-notes.png');
 
     const hasSavedNoteFeedback = await page.evaluate(() => {
       return document.body.innerText.includes('Note enregistrée') || document.body.innerText.includes('Enregistré');
@@ -694,7 +847,7 @@ async function auditInteractiveCrud(browser, sessionToken) {
     });
     await new Promise((r) => setTimeout(r, 1000));
 
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'admin-ads-2column-pings.png') });
+    await capture(page, 'admin-ads-2column-pings.png');
 
     const hasPingResponse = await page.evaluate(() => {
       const text = document.body.innerText;
@@ -709,7 +862,7 @@ async function auditInteractiveCrud(browser, sessionToken) {
     console.log('  10. Verifying /admin/themes Obsidian Polish & Gallery...');
     await page.goto(`${BASE_URL}/admin/themes?store=ottavio`, { waitUntil: 'networkidle2', timeout: 25000 });
     await new Promise((r) => setTimeout(r, 500));
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'admin-themes-gallery.png') });
+    await capture(page, 'admin-themes-gallery.png');
     console.log('  [PASS] /admin/themes | Obsidian 25-Theme Gallery Verified');
     results.push({ name: 'Themes Gallery Polish', pass: true });
 
@@ -717,7 +870,7 @@ async function auditInteractiveCrud(browser, sessionToken) {
     console.log('  11. Verifying /admin/account Settings Obsidian Polish...');
     await page.goto(`${BASE_URL}/admin/account`, { waitUntil: 'networkidle2', timeout: 25000 });
     await new Promise((r) => setTimeout(r, 500));
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'admin-account-settings.png') });
+    await capture(page, 'admin-account-settings.png');
     console.log('  [PASS] /admin/account | Obsidian Account & Billing Settings Verified');
     results.push({ name: 'Account Settings Polish', pass: true });
 

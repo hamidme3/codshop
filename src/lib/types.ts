@@ -57,6 +57,8 @@ export interface ProductVariantItem {
   sku?: string;
   image?: string;
   price?: number;
+  comparePrice?: number;
+  costPrice?: number;
 }
 
 export interface Product {
@@ -72,6 +74,12 @@ export interface Product {
   images: string[];
   variants: ProductVariantItem[];
   status: 'active' | 'draft';
+  badge?: string;
+  packDuoPrice?: number;
+  packDuoFreeShipping?: boolean;
+  packTrioPrice?: number;
+  packTrioGift?: string;
+  description?: string;
 }
 
 export interface Category {
@@ -79,6 +87,8 @@ export interface Category {
   name: string;
   slug: string;
   productCount: number;
+  icon?: string;
+  description?: string;
 }
 
 export interface CustomerOrderSummary {

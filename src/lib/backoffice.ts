@@ -21,6 +21,7 @@ export {
   getCategories,
   addCategory,
   deleteCategory,
+  reassignAndDeleteCategory,
   getCustomers,
   updateCustomerNotes,
   getPaymentGateways,
@@ -28,6 +29,35 @@ export {
   checkInventory,
   decrementInventory,
 } from './mocks';
+
+export {
+  normalizeSkuToken,
+  deriveBaseSkuPrefix,
+  cartesianProduct,
+  generateVariantMatrix,
+  batchFillStock,
+  computeTotalStock,
+  setPrimaryImage,
+  reorderImages,
+  addProductImage,
+  removeProductImage,
+  MOROCCAN_PRODUCT_IMAGE_PRESETS,
+} from './variant-matrix';
+export type { MatrixGenerationConfig, ImagePreset } from './variant-matrix';
+
+export {
+  calculateUnitEconomics,
+  calculateQuantityPackEconomics,
+  getMarginHealth,
+  calculateDailyProfit,
+  MOROCCAN_COD_DEFAULTS,
+} from './moroccan-cod-economics';
+export type {
+  CodEconomicsInputs,
+  UnitEconomicsResult,
+  QuantityPackEconomics,
+  HealthEvaluation,
+} from './moroccan-cod-economics';
 
 import { getOrders } from './mocks';
 

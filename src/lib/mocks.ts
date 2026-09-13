@@ -199,10 +199,10 @@ export let PRODUCTS: Product[] = [
 
 // ── Seed Categories ─────────────────────────────────────────────
 export let CATEGORIES: Category[] = [
-  { id: 'cat_1', name: 'Maroquinerie & Cuir', slug: 'maroquinerie', productCount: 2 },
-  { id: 'cat_2', name: 'Accessoires', slug: 'accessoires', productCount: 1 },
-  { id: 'cat_3', name: 'Chaussures & Babouches', slug: 'chaussures', productCount: 1 },
-  { id: 'cat_4', name: 'Tenues & Caftans', slug: 'caftans', productCount: 0 },
+  { id: 'cat_1', name: 'Maroquinerie & Cuir', slug: 'maroquinerie', icon: '🧳', description: 'Sacs, sacoches et maroquinerie artisanale.', productCount: 2 },
+  { id: 'cat_2', name: 'Accessoires', slug: 'accessoires', icon: '⚡', description: 'Portefeuilles, pochettes et accessoires prestige.', productCount: 1 },
+  { id: 'cat_3', name: 'Chaussures & Babouches', slug: 'chaussures', icon: '👞', description: 'Souliers habillés et babouches marocaines de luxe.', productCount: 1 },
+  { id: 'cat_4', name: 'Tenues & Caftans', slug: 'caftans', icon: '👘', description: 'Gandoras, djellabas et caftans traditionnels.', productCount: 0 },
 ];
 
 // ── Seed Customers ──────────────────────────────────────────────
@@ -622,6 +622,12 @@ export function updateProduct(productId: string, updates: Partial<Product>): Pro
   if (updates.variants !== undefined) prod.variants = updates.variants;
   if (updates.sku !== undefined) prod.sku = updates.sku.trim();
   if (updates.status !== undefined) prod.status = updates.status;
+  if (updates.badge !== undefined) prod.badge = updates.badge;
+  if (updates.packDuoPrice !== undefined) prod.packDuoPrice = updates.packDuoPrice;
+  if (updates.packDuoFreeShipping !== undefined) prod.packDuoFreeShipping = updates.packDuoFreeShipping;
+  if (updates.packTrioPrice !== undefined) prod.packTrioPrice = updates.packTrioPrice;
+  if (updates.packTrioGift !== undefined) prod.packTrioGift = updates.packTrioGift;
+  if (updates.description !== undefined) prod.description = updates.description;
 
   return { ...prod };
 }
@@ -643,7 +649,7 @@ export function getCategories(storeSlug: string = 'ottavio'): Category[] {
   });
 }
 
-export function addCategory(category: { name: string; slug?: string }): Category {
+export function addCategory(category: { name: string; slug?: string; icon?: string; description?: string }): Category {
   const trimmedName = category.name.trim();
   if (!trimmedName) throw new Error('Le nom de la catégorie est obligatoire.');
   const slug = (category.slug?.trim() || trimmedName)
@@ -657,6 +663,8 @@ export function addCategory(category: { name: string; slug?: string }): Category
     (c) => c.slug === slug || c.name.toLowerCase().trim() === trimmedName.toLowerCase()
   );
   if (existing) {
+    if (category.icon) existing.icon = category.icon;
+    if (category.description) existing.description = category.description;
     return existing;
   }
 
@@ -664,6 +672,8 @@ export function addCategory(category: { name: string; slug?: string }): Category
     id: `cat_${Date.now()}`,
     name: trimmedName,
     slug: slug || `cat-${Date.now()}`,
+    icon: category.icon || '🏷️',
+    description: category.description || '',
     productCount: 0,
   };
   CATEGORIES.push(newCat);
@@ -689,6 +699,39 @@ export function deleteCategory(idOrSlug: string, storeSlug: string = 'ottavio'):
 
   CATEGORIES = CATEGORIES.filter((c) => c.id !== cat.id);
   return { success: true };
+}
+
+/** Reassign products from a source category to a target category and delete the source category */
+export function reassignAndDeleteCategory(
+  sourceIdOrSlug: string,
+  targetCategoryNameOrSlug: string,
+  storeSlug: string = 'ottavio'
+): { success: boolean; reallocatedCount: number; error?: string } {
+  const sourceCat = CATEGORIES.find((c) => c.id === sourceIdOrSlug || c.slug === sourceIdOrSlug);
+  if (!sourceCat) return { success: false, reallocatedCount: 0, error: 'Catégorie source introuvable.' };
+
+  const targetCat = CATEGORIES.find(
+    (c) => c.id === targetCategoryNameOrSlug || c.slug === targetCategoryNameOrSlug || c.name.toLowerCase().trim() === targetCategoryNameOrSlug.toLowerCase().trim()
+  );
+  if (!targetCat) return { success: false, reallocatedCount: 0, error: 'Catégorie cible introuvable.' };
+
+  if (targetCat.id === sourceCat.id) {
+    return { success: false, reallocatedCount: 0, error: 'La catégorie cible ne peut pas être identique à la catégorie source.' };
+  }
+
+  let reallocatedCount = 0;
+  for (const prod of PRODUCTS) {
+    if (!storeSlug || prod.storeSlug === storeSlug) {
+      const pCat = (prod.category || '').toLowerCase().trim();
+      if (pCat === sourceCat.name.toLowerCase().trim() || pCat === sourceCat.slug.toLowerCase().trim()) {
+        prod.category = targetCat.name;
+        reallocatedCount++;
+      }
+    }
+  }
+
+  CATEGORIES = CATEGORIES.filter((c) => c.id !== sourceCat.id);
+  return { success: true, reallocatedCount };
 }
 
 export function deleteOrder(orderId: string, storeSlug: string = 'ottavio'): boolean {
