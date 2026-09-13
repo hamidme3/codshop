@@ -445,7 +445,7 @@ Merci de me confirmer la livraison !`;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
-      <div className={`relative w-full max-w-lg my-auto bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col ${
+      <div className={`relative w-full max-w-lg my-auto bg-white ${theme.styleTokens.cardRadius || 'rounded-2xl'} shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col ${
         isWaybill ? 'border-2 border-dashed border-zinc-400 bg-amber-50/10' : 'border border-zinc-200'
       }`}>
         {/* BORDEREAU EXPRESS / STANDARD HEADER */}
@@ -488,16 +488,19 @@ Merci de me confirmer la livraison !`;
             </div>
           </div>
         ) : (
-          <div className="bg-gradient-to-r from-zinc-900 via-zinc-900 to-zinc-800 text-white p-3.5 sm:p-4 flex items-center justify-between">
+          <div
+            className="text-white p-3.5 sm:p-4 flex items-center justify-between transition-colors"
+            style={{ backgroundColor: theme.colors.primary }}
+          >
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
                 <ShieldCheck className="w-5 h-5 text-emerald-400" />
               </div>
               <div className="min-w-0">
                 <h3 className="font-bold text-xs sm:text-sm tracking-tight truncate">
                   Formulaire de Commande Rapide
                 </h3>
-                <p className="text-[10px] sm:text-[11px] text-zinc-300 truncate">
+                <p className="text-[10px] sm:text-[11px] text-white/80 truncate">
                   Paiement 100% en espèces à la livraison (COD)
                 </p>
               </div>
@@ -506,7 +509,7 @@ Merci de me confirmer la livraison !`;
               type="button"
               onClick={onClose}
               aria-label="Fermer"
-              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-zinc-400 hover:text-white hover:bg-zinc-700/60 transition cursor-pointer shrink-0"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-white/70 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
             >
               <X className="w-5 h-5" />
             </button>
@@ -534,11 +537,10 @@ Merci de me confirmer la livraison !`;
               }`}
             >
               <span
-                className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-black transition-colors ${
-                  step > 1
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'bg-zinc-900 text-white shadow-xs'
-                }`}
+                className="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-black transition-colors text-white shadow-xs"
+                style={{
+                  backgroundColor: step > 1 ? '#059669' : theme.colors.primary,
+                }}
               >
                 {step > 1 ? <Check className="w-3 h-3 stroke-[3]" /> : '1'}
               </span>
@@ -548,8 +550,11 @@ Merci de me confirmer la livraison !`;
             {/* Connecting Bar */}
             <div className="flex-1 mx-2 sm:mx-3 h-1 bg-zinc-200 rounded-full overflow-hidden">
               <div
-                className="h-full bg-emerald-600 transition-all duration-300"
-                style={{ width: step === 2 ? '100%' : '50%' }}
+                className="h-full transition-all duration-300"
+                style={{
+                  width: step === 2 ? '100%' : '50%',
+                  backgroundColor: theme.colors.primary,
+                }}
               />
             </div>
 
@@ -562,9 +567,11 @@ Merci de me confirmer la livraison !`;
               }`}
             >
               <span
-                className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-black transition-colors ${
-                  step === 2 ? 'bg-zinc-900 text-white shadow-xs' : 'bg-zinc-200 text-zinc-500'
-                }`}
+                className="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] font-black transition-colors shadow-xs"
+                style={{
+                  backgroundColor: step === 2 ? theme.colors.primary : '#e4e4e7',
+                  color: step === 2 ? '#ffffff' : '#71717a',
+                }}
               >
                 2
               </span>

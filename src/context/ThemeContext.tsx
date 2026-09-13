@@ -46,12 +46,28 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const theme = useMemo(() => THEMES[themeId] || THEMES.luxury, [themeId]);
 
-  // Sync data-theme attribute on documentElement for dark mode tokens and scrollbars
+  // Sync data-theme attribute and CSS custom properties on documentElement for dark mode tokens and scrollbars
   useEffect(() => {
     if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', themeId);
+      const root = document.documentElement;
+      root.setAttribute('data-theme', themeId);
+      root.style.setProperty('--theme-primary', theme.colors.primary);
+      root.style.setProperty('--theme-primary-hover', theme.colors.primaryHover);
+      root.style.setProperty('--theme-accent', theme.colors.accent);
+      root.style.setProperty('--theme-accent-hover', theme.colors.accentHover);
+      root.style.setProperty('--theme-bg-page', theme.colors.bgPage);
+      root.style.setProperty('--theme-card-bg', theme.colors.cardBg);
+      root.style.setProperty('--theme-border', theme.colors.border);
+      root.style.setProperty('--theme-border-strong', theme.colors.borderStrong);
+      root.style.setProperty('--theme-shadow-color', theme.colors.shadowColor);
+      root.style.setProperty('--theme-text-primary', theme.colors.textPrimary);
+      root.style.setProperty('--theme-text-secondary', theme.colors.textSecondary);
+      root.style.setProperty('--theme-badge-bg', theme.colors.badgeBg);
+      root.style.setProperty('--theme-badge-text', theme.colors.badgeText);
+      root.style.setProperty('--theme-announcement-bg', theme.announcementBg);
+      root.style.setProperty('--theme-announcement-text', (theme as any).announcementTextColor || '#0f172a');
     }
-  }, [themeId]);
+  }, [themeId, theme]);
 
   // Sync lang dir/lang on mount + changes
   useEffect(() => {
@@ -142,14 +158,31 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     [theme]
   );
 
-  const isDark = theme.id === 'fitness' || theme.id === 'cyberpunk';
+  const isDark = useMemo(() => {
+    if (theme.id === 'fitness' || theme.id === 'cyberpunk') return true;
+    try {
+      const hex = theme.colors.bgPage.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16) / 255;
+      const g = parseInt(hex.substring(2, 4), 16) / 255;
+      const b = parseInt(hex.substring(4, 6), 16) / 255;
+      const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      return lum < 0.25;
+    } catch {
+      return false;
+    }
+  }, [theme]);
 
   return (
     <ThemeContext.Provider value={{ themeId, theme, setThemeId, lang, setLang, formatMAD }}>
       <div
         data-theme={themeId}
         suppressHydrationWarning
-        style={{ ...styleVars, colorScheme: isDark ? 'dark' : 'light' } as React.CSSProperties}
+        style={{
+          ...styleVars,
+          backgroundColor: 'var(--theme-bg-page)',
+          color: 'var(--theme-text-primary)',
+          colorScheme: isDark ? 'dark' : 'light',
+        } as React.CSSProperties}
         className={`min-h-screen ${mounted ? 'transition-[background-color,color,border-color] duration-[var(--motion-base)]' : ''} ${theme.typography.fontFamily === 'serif' ? 'font-serif' : theme.typography.fontFamily === 'monospace' ? 'font-mono' : 'font-sans'}`}
       >
         {children}
