@@ -22,6 +22,18 @@ export interface CountryPhone {
   digitsLength: number | number[]; // e.g. 9 or 10
 }
 
+export interface CountryHubSla {
+  hubName: string;
+  hubSla: string;
+  nationalName: string;
+  nationalSla: string;
+}
+
+export interface CountryInspectionBadge {
+  fr: string;
+  ar: string;
+}
+
 export interface CountryConfig {
   code: string;
   name: string;
@@ -33,4 +45,12 @@ export interface CountryConfig {
   freeShippingThreshold: number;
   popularCities: string[];
   knownCities: CountryCityItem[];
+  hubSla: CountryHubSla;
+  inspectionBadge: CountryInspectionBadge;
+  inCountryName?: string;
+  addressPlaceholder?: string;
+  agencyPlaceholder?: string;
+  pickupPartnerText?: string;
+  defaultHubCity?: string;
+  courierPartners?: string[];
 }

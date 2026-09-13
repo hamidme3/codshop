@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createOrder, getOrderByNumber, getStoreBySlug } from '@/lib/db-repository';
 import { validateAndNormalizeMoroccanPhone } from '@/lib/moroccan-phone';
+import { validateCountryPhone, getCountryConfig } from '@/lib/geo';
 import { checkOrderRateLimit } from '@/lib/rate-limiter';
 import { verifyAndRecalculateOrder } from '@/lib/order-pricing';
 import { isValidStoreSlug } from '@/lib/sanitizer';
@@ -100,18 +101,29 @@ export async function POST(req: Request) {
     }
     const storeSlug = store.slug;
 
-    // 3. Moroccan Phone Validation & Normalization (Mobile 06/07, Fixed line 05, +212)
+    // 3. Multi-Country Phone Validation & Normalization
     const rawPhone = body.customerPhone || body.customer?.phone || body.phone || '';
     const source = (body.source === 'whatsapp' ? 'whatsapp' : 'web') as 'web' | 'whatsapp';
     const isPendingWhatsAppLead = source === 'whatsapp' && (!rawPhone || rawPhone.toLowerCase().includes('whatsapp'));
 
+    const orderCountryCode = (
+      body.countryCode ||
+      body.country ||
+      body.customer?.country ||
+      req.headers.get('x-geo-country') ||
+      (store as any)?.country ||
+      'MA'
+    ).toUpperCase();
+
+    const countryConfig = getCountryConfig(orderCountryCode);
+
     const phoneResult = isPendingWhatsAppLead
-      ? { isValid: true, cleanPhone: '0600000000', type: 'mobile' as const }
-      : validateAndNormalizeMoroccanPhone(rawPhone);
+      ? { isValid: true, cleanPhone: orderCountryCode === 'MA' ? '0600000000' : '0500000000', type: 'mobile' as const }
+      : (orderCountryCode === 'MA' ? validateAndNormalizeMoroccanPhone(rawPhone) : validateCountryPhone(rawPhone, orderCountryCode));
 
     if (!phoneResult.isValid) {
       return NextResponse.json(
-        { success: false, message: (phoneResult as any).error || 'Numéro de téléphone marocain invalide (06, 07 ou 05 requis)' },
+        { success: false, message: (phoneResult as any).error || `Numéro de téléphone invalide (${orderCountryCode})` },
         { status: 400 }
       );
     }
@@ -129,7 +141,7 @@ export async function POST(req: Request) {
     }
 
     // 5. Server-Side Price Verification, Exact Tier Pricing Recalculation & Input Sanitization
-    const pricingResult = await verifyAndRecalculateOrder(body, storeSlug);
+    const pricingResult = await verifyAndRecalculateOrder(body, storeSlug, orderCountryCode);
     if (!pricingResult.success) {
       return NextResponse.json(
         { success: false, message: pricingResult.error || 'Erreur de calcul du prix de la commande' },
@@ -223,7 +235,7 @@ export async function POST(req: Request) {
           city: pricingResult.city,
           shippingAddress: pricingResult.address,
           totalPrice: pricingResult.total,
-          currency: 'MAD',
+          currency: countryConfig.currency.code,
           status: 'pending',
           source: 'codshop_storefront',
           items: pricingResult.items.map((i) => ({

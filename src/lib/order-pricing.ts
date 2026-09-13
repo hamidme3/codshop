@@ -10,6 +10,7 @@ import { MOCK_PRODUCTS, QuantityTier, getProductQuantityTiers } from './mockProd
 import { PRODUCTS } from './mocks';
 import { getStoreBySlug as getMockStoreBySlug } from './stores';
 import { MOROCCAN_CITIES, getCityShipping, FREE_SHIPPING_THRESHOLD } from './moroccanCities';
+import { getCountryCityShipping } from './geo';
 import { sanitizeText } from './sanitizer';
 
 export interface CatalogProductResolution {
@@ -229,14 +230,24 @@ export function calculateVerifiedShippingFee(
   subtotal: number,
   totalQuantity: number,
   deliveryType: 'home' | 'stopdesk',
-  tierFreeDelivery: boolean = false
+  tierFreeDelivery: boolean = false,
+  countryCode: string = 'MA'
 ): { shippingFee: number; isFreeShipping: boolean } {
   // 1. Stopdesk / Relais pickup is always free
   if (deliveryType === 'stopdesk' || totalQuantity >= 2 || tierFreeDelivery) {
     return { shippingFee: 0, isFreeShipping: true };
   }
 
-  // 2. Free shipping threshold (400 MAD) nationwide
+  const code = (countryCode || 'MA').toUpperCase();
+  if (code !== 'MA') {
+    const countryShip = getCountryCityShipping(code, cityName, subtotal);
+    return {
+      shippingFee: countryShip.fee,
+      isFreeShipping: countryShip.isFree,
+    };
+  }
+
+  // 2. Free shipping threshold (400 MAD) nationwide in Morocco
   if (subtotal >= FREE_SHIPPING_THRESHOLD && subtotal > 0) {
     return { shippingFee: 0, isFreeShipping: true };
   }
@@ -252,6 +263,7 @@ export function calculateVerifiedShippingFee(
 export interface VerifiedPricingResult {
   success: boolean;
   error?: string;
+  countryCode: string;
   items: Array<{
     id: string;
     title: string;
@@ -281,9 +293,11 @@ export interface VerifiedPricingResult {
  */
 export async function verifyAndRecalculateOrder(
   body: any,
-  storeSlug: string = 'default-store'
+  storeSlug: string = 'default-store',
+  overrideCountryCode?: string
 ): Promise<VerifiedPricingResult> {
   const safeStoreSlug = storeSlug || body?.storeSlug || 'default-store';
+  const orderCountryCode = (overrideCountryCode || body?.countryCode || body?.country || 'MA').toUpperCase();
   // 1. Sanitize text fields
   const customerName = sanitizeText(body.customerName || body.customer?.fullName || 'Client Anonyme', 100) || 'Client Anonyme';
   const city = sanitizeText(body.customerCity || body.customer?.city || body.city || 'Casablanca', 100) || 'Casablanca';
@@ -346,6 +360,7 @@ export async function verifyAndRecalculateOrder(
     if (!catalogProd) {
       return {
         success: false,
+        countryCode: orderCountryCode,
         error: `Produit introuvable dans le catalogue: ${rawIt.title || rawIt.id || rawIt.slug || 'inconnu'}`,
         items: [],
         subtotal: 0,
@@ -383,7 +398,14 @@ export async function verifyAndRecalculateOrder(
   }
 
   // 4. Recalculate shipping fee strictly server-side
-  const shippingResult = calculateVerifiedShippingFee(city, computedSubtotal, totalQuantity, deliveryType, hasTierFreeDelivery);
+  const shippingResult = calculateVerifiedShippingFee(
+    city,
+    computedSubtotal,
+    totalQuantity,
+    deliveryType,
+    hasTierFreeDelivery,
+    orderCountryCode
+  );
   const computedShippingFee = shippingResult.shippingFee;
   const computedTotal = computedSubtotal + computedShippingFee;
 
@@ -406,6 +428,7 @@ export async function verifyAndRecalculateOrder(
 
   return {
     success: true,
+    countryCode: orderCountryCode,
     items: verifiedItems,
     subtotal: computedSubtotal,
     shippingFee: computedShippingFee,

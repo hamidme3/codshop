@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import confetti from 'canvas-confetti';
-import { CheckCircle2, PhoneCall, Truck, Banknote, MessageCircle, ArrowLeft, User, MapPin } from 'lucide-react';
+import { CheckCircle2, PackageCheck, PhoneCall, Truck, Banknote, MessageCircle, ArrowLeft, User, MapPin } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
+import { detectClientVisitorCountry, getCountryConfig } from '@/lib/geo';
 import { fetchAndInitPixels, trackPurchase } from '@/lib/pixel-tracker';
 
 interface OrderSuccessClientProps {
@@ -11,7 +12,11 @@ interface OrderSuccessClientProps {
   customerName: string;
   city: string;
   total: number | null;
-  items?: { id?: string; title: string; quantity: number; price: number; variant?: string }[];
+  items?: Array<{
+    title: string;
+    quantity: number;
+    price: number;
+  }>;
 }
 
 export default function OrderSuccessClient({
@@ -21,7 +26,15 @@ export default function OrderSuccessClient({
   total,
   items = [],
 }: OrderSuccessClientProps) {
-  const { formatMAD } = useTheme();
+  const { formatMAD, countryCode: contextCountryCode } = useTheme();
+
+  const [visitorCountry, setVisitorCountry] = useState<string>(contextCountryCode || 'MA');
+
+  useEffect(() => {
+    setVisitorCountry(detectClientVisitorCountry(contextCountryCode || 'MA'));
+  }, [contextCountryCode]);
+
+  const countryConfig = useMemo(() => getCountryConfig(visitorCountry), [visitorCountry]);
 
   useEffect(() => {
     // Launch festive Moroccan order celebration confetti
@@ -48,7 +61,7 @@ export default function OrderSuccessClient({
   }, [orderId, total, items, city]);
 
   const whatsAppUrl = `https://wa.me/212661000000?text=${encodeURIComponent(
-    `Salam, je confirme ma commande #${orderId} au nom de ${customerName} (${city}${total ? `, Total: ${total} DH` : ''})`
+    `Salam, je confirme ma commande #${orderId} au nom de ${customerName} (${city}${total ? `, Total: ${formatMAD(total)}` : ''})`
   )}`;
 
   return (
@@ -141,7 +154,7 @@ export default function OrderSuccessClient({
                 <span>Expédition express sous 24h</span>
               </h4>
               <p className="text-[11px] text-zinc-500 mt-0.5">
-                Votre colis est confié à notre transporteur partenaire (Ozon / SendIt) pour acheminement vers {city}.
+                Votre colis est confié à notre transporteur express partenaire pour acheminement vers {city}.
               </p>
             </div>
           </div>
@@ -156,7 +169,7 @@ export default function OrderSuccessClient({
                 <span>Réception & Paiement en espèces</span>
               </h4>
               <p className="text-[11px] text-zinc-500 mt-0.5">
-                Vous vérifiez votre produit directement devant le livreur, puis réglez en dirhams en toute confiance.
+                Vous vérifiez votre produit directement devant le livreur, puis réglez en {countryConfig.currency.symbol} en toute confiance.
               </p>
             </div>
           </div>

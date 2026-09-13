@@ -1,13 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTheme } from '@/context/ThemeContext';
+import { getCountryConfig } from '@/lib/geo';
 import { getProductsByTheme } from '@/lib/mockProducts';
 import { ProductCard } from '@/components/ProductCard';
 import { Award, Sparkles, Zap, ArrowRight, Star, ShieldCheck, Truck } from 'lucide-react';
 
 export default function HomePage() {
-  const { theme, lang } = useTheme();
+  const { theme, lang, countryCode } = useTheme();
+  const countryConfig = useMemo(() => getCountryConfig(countryCode), [countryCode]);
   const products = getProductsByTheme(theme.id);
 
   return (
@@ -68,7 +70,7 @@ export default function HomePage() {
                 }}
               >
                 <Truck className="w-4 h-4 text-emerald-600" />
-                <span>Livraison 24h/48h au Maroc</span>
+                <span>Livraison {countryConfig.defaultSla}</span>
               </div>
             </div>
 
@@ -81,7 +83,7 @@ export default function HomePage() {
               </div>
               <span className="font-bold" style={{ color: 'var(--theme-text-primary)' }}>4.9 / 5</span>
               <span>•</span>
-              <span>Plus de 5 000 clients satisfaits au Maroc</span>
+              <span>Plus de 5 000 clients satisfaits {countryConfig.inCountryName || ''}</span>
             </div>
           </div>
 

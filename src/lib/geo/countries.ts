@@ -33,6 +33,22 @@ export const COUNTRY_MA: CountryConfig = {
   freeShippingThreshold: 400,
   popularCities: ['Casablanca', 'Rabat', 'Marrakech', 'Tanger', 'Fès', 'Agadir'],
   knownCities: MOROCCO_KNOWN_CITIES,
+  hubSla: {
+    hubName: 'Casablanca',
+    hubSla: '24h Express',
+    nationalName: 'Hors Casablanca',
+    nationalSla: '48h Partout au Maroc',
+  },
+  inspectionBadge: {
+    fr: 'Vérifiez votre colis avant de payer',
+    ar: 'عاين سلعتك قبل ما تخلص',
+  },
+  inCountryName: 'au Maroc',
+  addressPlaceholder: 'Ex: Quartier Maârif, Rue Abou Bakr Essedik, Résidence Al Manar Appt 4',
+  agencyPlaceholder: 'Ex: Agence Ozon Maârif, Sendit Agdal, Barid Cash, ou le plus proche',
+  pickupPartnerText: 'Ozon / Sendit / Barid Cash',
+  defaultHubCity: 'Casablanca',
+  courierPartners: ['Ozon Express', 'Sendit', 'Cathedis', 'Amana Poste Maroc'],
 };
 
 // ── Saudi Arabia (SA) ──────────────────────────────────────────
@@ -57,6 +73,16 @@ export const COUNTRY_SA: CountryConfig = {
   defaultSla: '2 à 3 jours ouvrables',
   freeShippingThreshold: 200,
   popularCities: ['Riyadh', 'Jeddah', 'Dammam', 'Mecca', 'Medina', 'Khobar'],
+  hubSla: {
+    hubName: 'Riyad & Djeddah',
+    hubSla: '24h Express',
+    nationalName: 'Reste du Royaume',
+    nationalSla: '48h Express',
+  },
+  inspectionBadge: {
+    fr: 'Vérifiez votre colis avant de payer',
+    ar: 'افحص شحنتك قبل الدفع',
+  },
   knownCities: [
     { id: 'riyadh', name: 'Riyadh', nameAr: 'الرياض', shippingFee: 20, sla: '24h (Demain chez vous)', isMajorHub: true },
     { id: 'jeddah', name: 'Jeddah', nameAr: 'جدة', shippingFee: 20, sla: '24h (Demain chez vous)', isMajorHub: true },
@@ -75,6 +101,12 @@ export const COUNTRY_SA: CountryConfig = {
     { id: 'najran', name: 'Najran', nameAr: 'نجران', shippingFee: 35, sla: '3 à 4 jours' },
     { id: 'jizan', name: 'Jizan', nameAr: 'جيزان', shippingFee: 35, sla: '3 à 4 jours' },
   ],
+  inCountryName: 'en Arabie Saoudite',
+  addressPlaceholder: 'Ex: Quartier Al Olaya, Rue King Fahd, Immeuble Al Nakheel Appt 12',
+  agencyPlaceholder: 'Ex: Agence SMSA Olaya, Aramex Malaz, SPL Poste, ou la plus proche',
+  pickupPartnerText: 'SMSA Express / SPL / Aramex',
+  defaultHubCity: 'Riyadh',
+  courierPartners: ['SMSA Express', 'SPL Poste', 'Aramex KSA'],
 };
 
 // ── United Arab Emirates (AE) ──────────────────────────────────
@@ -99,6 +131,16 @@ export const COUNTRY_AE: CountryConfig = {
   defaultSla: '24h à 48h partout aux EAU',
   freeShippingThreshold: 150,
   popularCities: ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Ras Al Khaimah', 'Al Ain'],
+  hubSla: {
+    hubName: 'Dubaï & Abu Dhabi',
+    hubSla: '24h Express',
+    nationalName: 'Autres Émirats',
+    nationalSla: '24h à 48h',
+  },
+  inspectionBadge: {
+    fr: 'Inspectez votre colis avant de payer',
+    ar: 'عاين طلبيتك قبل الدفع',
+  },
   knownCities: [
     { id: 'dubai', name: 'Dubai', nameAr: 'دبي', shippingFee: 15, sla: '24h (Demain chez vous)', isMajorHub: true },
     { id: 'abu_dhabi', name: 'Abu Dhabi', nameAr: 'أبو ظبي', shippingFee: 15, sla: '24h (Demain chez vous)', isMajorHub: true },
@@ -109,6 +151,12 @@ export const COUNTRY_AE: CountryConfig = {
     { id: 'fujairah', name: 'Fujairah', nameAr: 'الفجيرة', shippingFee: 25, sla: '48h' },
     { id: 'umm_al_quwain', name: 'Umm Al Quwain', nameAr: 'أم القيوين', shippingFee: 20, sla: '24h à 48h' },
   ],
+  inCountryName: 'aux Émirats',
+  addressPlaceholder: 'Ex: Al Barsha 1, Street 14, Building Oasis Apt 204, Dubai',
+  agencyPlaceholder: 'Ex: Agence Aramex Deira, Emirates Post, ou la plus proche',
+  pickupPartnerText: 'Aramex / Emirates Post',
+  defaultHubCity: 'Dubai',
+  courierPartners: ['Aramex UAE', 'Emirates Post', 'Fetchr'],
 };
 
 // ── Egypt (EG) ─────────────────────────────────────────────────
@@ -133,6 +181,16 @@ export const COUNTRY_EG: CountryConfig = {
   defaultSla: '2 à 3 jours ouvrables',
   freeShippingThreshold: 500,
   popularCities: ['Cairo', 'Alexandria', 'Giza', 'Mansoura', 'Tanta', 'Port Said'],
+  hubSla: {
+    hubName: 'Le Caire & Alexandrie',
+    hubSla: '24h Express',
+    nationalName: 'Toutes les Provinces',
+    nationalSla: '48h à 72h',
+  },
+  inspectionBadge: {
+    fr: 'Vérifiez votre colis avant de payer',
+    ar: 'عاين أوردرك قبل الاستلام',
+  },
   knownCities: [
     { id: 'cairo', name: 'Cairo', nameAr: 'القاهرة', shippingFee: 40, sla: '24h à 48h', isMajorHub: true },
     { id: 'giza', name: 'Giza', nameAr: 'الجيزة', shippingFee: 40, sla: '24h à 48h', isMajorHub: true },
@@ -146,6 +204,12 @@ export const COUNTRY_EG: CountryConfig = {
     { id: 'sohag', name: 'Sohag', nameAr: 'سوهاج', shippingFee: 65, sla: '3 à 4 jours' },
     { id: 'zagazig', name: 'Zagazig', nameAr: 'الزقازيق', shippingFee: 50, sla: '48h' },
   ],
+  inCountryName: 'en Égypte',
+  addressPlaceholder: 'Ex: Nasr City, Rue Abbas El Akkad, Immeuble 12 Appt 4, Le Caire',
+  agencyPlaceholder: 'Ex: Agence Bosta Nasr City, Mylerz Maadi, ou la plus proche',
+  pickupPartnerText: 'Bosta / Mylerz / Aramex',
+  defaultHubCity: 'Cairo',
+  courierPartners: ['Bosta', 'Mylerz', 'Aramex Egypt'],
 };
 
 // ── Algeria (DZ) ───────────────────────────────────────────────
@@ -170,6 +234,16 @@ export const COUNTRY_DZ: CountryConfig = {
   defaultSla: '2 à 4 jours selon la wilaya',
   freeShippingThreshold: 6000,
   popularCities: ['Alger', 'Oran', 'Constantine', 'Sétif', 'Batna', 'Blida'],
+  hubSla: {
+    hubName: 'Alger & Oran',
+    hubSla: '24h Express',
+    nationalName: '58 Wilayas',
+    nationalSla: '48h à 72h',
+  },
+  inspectionBadge: {
+    fr: 'Vérifiez votre colis avant de payer',
+    ar: 'شوف سلعتك قبل ما تخلص',
+  },
   knownCities: [
     { id: 'alger', name: 'Alger (16)', nameAr: 'الجزائر العاصمة', shippingFee: 400, sla: '24h à 48h', isMajorHub: true },
     { id: 'oran', name: 'Oran (31)', nameAr: 'وهران', shippingFee: 500, sla: '48h', isMajorHub: true },
@@ -180,6 +254,12 @@ export const COUNTRY_DZ: CountryConfig = {
     { id: 'annaba', name: 'Annaba (23)', nameAr: 'عنابة', shippingFee: 600, sla: '48h à 72h' },
     { id: 'tlemcen', name: 'Tlemcen (13)', nameAr: 'تلمسان', shippingFee: 650, sla: '3 à 4 jours' },
   ],
+  inCountryName: 'en Algérie',
+  addressPlaceholder: 'Ex: 14 Rue Didouche Mourad, Alger Centre, Apt 3',
+  agencyPlaceholder: 'Ex: Agence Yalidine Bab Ezzouar, Zimou Express, ou la plus proche',
+  pickupPartnerText: 'Yalidine Express / Zimou',
+  defaultHubCity: 'Alger',
+  courierPartners: ['Yalidine Express', 'Zimou Express', 'EMS Algérie'],
 };
 
 // ── Senegal (SN) ───────────────────────────────────────────────
@@ -204,6 +284,16 @@ export const COUNTRY_SN: CountryConfig = {
   defaultSla: '24h à 48h',
   freeShippingThreshold: 25000,
   popularCities: ['Dakar', 'Touba', 'Thiès', 'Kaolack', 'Saint-Louis', 'Ziguinchor'],
+  hubSla: {
+    hubName: 'Dakar',
+    hubSla: '24h Express',
+    nationalName: 'Régions',
+    nationalSla: '48h à 72h',
+  },
+  inspectionBadge: {
+    fr: 'Vérifiez votre colis avant de payer',
+    ar: 'Vérifiez votre colis avant de payer',
+  },
   knownCities: [
     { id: 'dakar', name: 'Dakar', shippingFee: 1500, sla: '24h (Demain chez vous)', isMajorHub: true },
     { id: 'thies', name: 'Thiès', shippingFee: 2000, sla: '24h à 48h', isMajorHub: true },
@@ -212,6 +302,12 @@ export const COUNTRY_SN: CountryConfig = {
     { id: 'kaolack', name: 'Kaolack', shippingFee: 2500, sla: '48h' },
     { id: 'ziguinchor', name: 'Ziguinchor', shippingFee: 3500, sla: '72h' },
   ],
+  inCountryName: 'au Sénégal',
+  addressPlaceholder: 'Ex: Plateau, Rue Felix Faure, Immeuble Horizon, Dakar',
+  agencyPlaceholder: 'Ex: Agence Colis Express Plateau, La Poste SN, ou la plus proche',
+  pickupPartnerText: 'Colis Express / La Poste SN',
+  defaultHubCity: 'Dakar',
+  courierPartners: ['Colis Express Dakar', 'La Poste SN'],
 };
 
 // ── Côte d'Ivoire (CI) ─────────────────────────────────────────
@@ -236,6 +332,16 @@ export const COUNTRY_CI: CountryConfig = {
   defaultSla: '24h à 48h',
   freeShippingThreshold: 25000,
   popularCities: ['Abidjan', 'Bouaké', 'Daloa', 'Yamoussoukro', 'San-Pédro', 'Korhogo'],
+  hubSla: {
+    hubName: 'Abidjan',
+    hubSla: '24h Express',
+    nationalName: 'Intérieur du Pays',
+    nationalSla: '48h à 72h',
+  },
+  inspectionBadge: {
+    fr: 'Vérifiez votre colis avant de payer',
+    ar: 'Vérifiez votre colis avant de payer',
+  },
   knownCities: [
     { id: 'abidjan', name: 'Abidjan', shippingFee: 1500, sla: '24h (Demain chez vous)', isMajorHub: true },
     { id: 'yamoussoukro', name: 'Yamoussoukro', shippingFee: 2500, sla: '48h', isMajorHub: true },
@@ -244,6 +350,12 @@ export const COUNTRY_CI: CountryConfig = {
     { id: 'daloa', name: 'Daloa', shippingFee: 3000, sla: '48h' },
     { id: 'korhogo', name: 'Korhogo', shippingFee: 3500, sla: '72h' },
   ],
+  inCountryName: "en Côte d'Ivoire",
+  addressPlaceholder: 'Ex: Cocody Angré 8ème Tranche, Résidence Perle, Abidjan',
+  agencyPlaceholder: 'Ex: Agence Flash Cocody, Chronopost Marcory, ou la plus proche',
+  pickupPartnerText: 'Flash Livraison / Chronopost CI',
+  defaultHubCity: 'Abidjan',
+  courierPartners: ['Flash Livraison Abidjan', 'Chronopost CI'],
 };
 
 // ── France (FR) Fallback ───────────────────────────────────────
@@ -268,6 +380,16 @@ export const COUNTRY_FR: CountryConfig = {
   defaultSla: '48h Colissimo',
   freeShippingThreshold: 50,
   popularCities: ['Paris', 'Lyon', 'Marseille', 'Toulouse', 'Bordeaux', 'Lille'],
+  hubSla: {
+    hubName: 'Île-de-France',
+    hubSla: '24h Express',
+    nationalName: 'Toute la France',
+    nationalSla: '48h Colissimo',
+  },
+  inspectionBadge: {
+    fr: 'Vérifiez votre colis avant de payer',
+    ar: 'Vérifiez votre colis avant de payer',
+  },
   knownCities: [
     { id: 'paris', name: 'Paris', shippingFee: 4, sla: '24h à 48h', isMajorHub: true },
     { id: 'lyon', name: 'Lyon', shippingFee: 5, sla: '48h', isMajorHub: true },
@@ -276,6 +398,23 @@ export const COUNTRY_FR: CountryConfig = {
     { id: 'bordeaux', name: 'Bordeaux', shippingFee: 5, sla: '48h' },
     { id: 'lille', name: 'Lille', shippingFee: 5, sla: '48h' },
   ],
+  inCountryName: 'en France',
+  addressPlaceholder: 'Ex: 14 Rue de la Paix, Bâtiment B, 75002 Paris',
+  agencyPlaceholder: 'Ex: Point Relais Mondial Relay, Relais Colis, ou le plus proche',
+  pickupPartnerText: 'Mondial Relay / Relais Colis',
+  defaultHubCity: 'Paris',
+  courierPartners: ['Colissimo', 'Mondial Relay', 'Chronopost'],
+};
+
+export const DEFAULT_COUNTRY_HUBS: Record<string, string> = {
+  MA: 'Casablanca',
+  SA: 'Riyadh',
+  AE: 'Dubai',
+  EG: 'Cairo',
+  DZ: 'Alger',
+  SN: 'Dakar',
+  CI: 'Abidjan',
+  FR: 'Paris',
 };
 
 // ── Registry Map ───────────────────────────────────────────────
@@ -368,15 +507,20 @@ export function getCountryCityShipping(
 }
 
 /**
- * Formats currency amount based on country rules.
+ * Formats currency amount based on country rules and language.
  */
-export function formatCountryPrice(amount: number, countryCode?: string): string {
+export function formatCountryPrice(amount: number, countryCode?: string, lang: 'fr' | 'ar' = 'fr'): string {
   const config = getCountryConfig(countryCode);
   const safeAmount = Number.isFinite(amount) ? amount : 0;
-  if (config.currency.position === 'before') {
-    return `${config.currency.symbol} ${safeAmount}`;
+  const s = safeAmount.toLocaleString('fr-FR');
+  const symbol = lang === 'ar' ? config.currency.symbolAr : config.currency.symbol;
+  if (lang === 'ar') {
+    return `\u2068${s}\u2069 ${symbol}`;
   }
-  return `${safeAmount} ${config.currency.symbol}`;
+  if (config.currency.position === 'before') {
+    return `${symbol} ${s}`;
+  }
+  return `${s} ${symbol}`;
 }
 
 import { getDeliveryDateEstimate, validateMoroccanPhone } from '../moroccanCities';
@@ -583,4 +727,31 @@ export function detectClientVisitorCountry(defaultCountry: string = 'MA'): strin
   return defaultCountry;
 }
 
+/**
+ * Normalizes any international phone number for WhatsApp wa.me links.
+ * Automatically injects the country dial code if only national digits were provided.
+ */
+export function normalizePhoneForWhatsApp(phone?: string | null, countryCode: string = 'MA'): string {
+  if (!phone) return '';
+  const digits = String(phone).replace(/\D/g, '');
+  if (!digits) return '';
 
+  const cfg = getCountryConfig(countryCode);
+  const dialDigits = cfg.phone.dialCode.replace(/\D/g, ''); // e.g. "966", "212", "20"
+
+  // Already prefixed with dial code
+  if (digits.startsWith(dialDigits)) {
+    return digits;
+  }
+  // Dial code with leading 00
+  if (digits.startsWith('00' + dialDigits)) {
+    return digits.slice(2);
+  }
+  // Local number with trunk 0 (e.g. 05x, 06x)
+  if (digits.startsWith('0')) {
+    return dialDigits + digits.slice(1);
+  }
+
+  // Local number without 0
+  return dialDigits + digits;
+}

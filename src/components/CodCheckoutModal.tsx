@@ -81,10 +81,10 @@ export function CodCheckoutModal({
   // Multi-country configuration & dynamic visitor detection
   const [activeCountry, setActiveCountry] = useState<string>(countryCode || 'MA');
 
-  // Auto-detect visitor country on client mount if not strictly overridden
+  // Auto-detect visitor country on client mount (respecting cookies, URL params, or browser timezone)
   useEffect(() => {
-    if (!countryCode) {
-      const detected = detectClientVisitorCountry((product as any)?.country || 'MA');
+    const detected = detectClientVisitorCountry(countryCode || (product as any)?.country || 'MA');
+    if (detected && detected !== activeCountry) {
       setActiveCountry(detected);
     }
   }, [countryCode, product]);
@@ -124,12 +124,12 @@ export function CodCheckoutModal({
 
   // Stable waybill serial number (initialized deterministically to prevent hydration mismatch)
   const [waybillNumber, setWaybillNumber] = useState(
-    `MA-${product.id.slice(0, 4).toUpperCase()}-1088`
+    `${effectiveCountryCode}-${product.id.slice(0, 4).toUpperCase()}-1088`
   );
   useEffect(() => {
     const rand = Math.floor(1000 + Math.random() * 9000);
-    setWaybillNumber(`MA-${product.id.slice(0, 4).toUpperCase()}-${rand}`);
-  }, [product.id]);
+    setWaybillNumber(`${effectiveCountryCode}-${product.id.slice(0, 4).toUpperCase()}-${rand}`);
+  }, [product.id, effectiveCountryCode]);
 
   // A/B: detect waybill variant from cookie (set by middleware). Default: standard modal.
   const [isWaybill, setIsWaybill] = useState(false);
@@ -329,6 +329,8 @@ export function CodCheckoutModal({
         shippingFee: effectiveShippingFee,
         total: finalTotal,
         abVariant: isWaybill ? 'waybill' : 'control',
+        countryCode: effectiveCountryCode,
+        country: effectiveCountryCode,
         deliveryType,
         agencyName: deliveryType === 'stopdesk' ? (agencyName.trim() || `Agence principale ${city}`) : undefined,
         source: 'web',
@@ -406,6 +408,8 @@ export function CodCheckoutModal({
           shippingFee: effectiveShippingFee,
           total: finalTotal,
           abVariant: isWaybill ? 'waybill' : 'control',
+          countryCode: effectiveCountryCode,
+          country: effectiveCountryCode,
           deliveryType,
           agencyName: deliveryType === 'stopdesk' ? (agencyName.trim() || `Agence principale ${city}`) : undefined,
           source: 'whatsapp',
@@ -431,12 +435,12 @@ export function CodCheckoutModal({
 Je souhaite commander en 1 Clic :
 📦 *Produit :* ${product.title}
 ${selectedSku ? `🏷️ *SKU :* ${selectedSku}\n` : ''}${selectedVariant ? `🎨 *Option :* ${selectedVariant}\n` : ''}${selectedColor ? `🎨 *Couleur :* ${selectedColor}\n` : ''}${selectedSize ? `📏 *Pointure/Taille :* ${selectedSize}\n` : ''}🔢 *Quantité :* ${packText}
-💰 *Total à payer :* ${finalTotal} DH (Paiement Cash à la réception)
-📍 *Ville :* ${city}
-🚚 *Délais :* Casablanca 24h, Hors Casa 48h
+💰 *Total à payer :* ${formatPrice(finalTotal)} (Paiement Cash à la réception)
+📍 *Ville :* ${city || countryConfig.popularCities[0]} (${countryConfig.name})
+🚚 *Délais :* ${deliveryEstimate.sla}
 🚚 *Mode :* ${modeText}
 ${fullName.trim() ? `👤 *Nom complet :* ${fullName.trim()}\n` : ''}${deliveryType === 'home' && address.trim() ? `🏠 *Adresse :* ${address.trim()}\n` : ''}
-✅ *Garantie Royale :* "Vérifiez votre colis avant de payer" (عاين سلعتك قبل ما تخلص)
+✅ *Garantie Royale :* "${countryConfig.inspectionBadge.fr}" (${countryConfig.inspectionBadge.ar})
 Merci de me confirmer la livraison !`;
 
     const url = `https://wa.me/${product.whatsAppDirectNumber}?text=${encodeURIComponent(text)}`;
@@ -1084,7 +1088,7 @@ Merci de me confirmer la livraison !`;
                           <span className={`text-[10px] font-black ${
                             deliveryType === 'home' ? 'text-emerald-300' : 'text-emerald-700'
                           }`}>
-                            {effectiveShippingFee === 0 || isFreeShipping ? 'Gratuit' : `${deliveryEstimate.shippingFee} DH`}
+                            {effectiveShippingFee === 0 || isFreeShipping ? 'Gratuit' : formatPrice(deliveryEstimate.shippingFee)}
                           </span>
                         </div>
                         <span className={`text-[10px] mt-1 ${deliveryType === 'home' ? 'text-zinc-300' : 'text-zinc-500'}`}>
@@ -1107,17 +1111,17 @@ Merci de me confirmer la livraison !`;
                         <div className="flex items-center justify-between gap-1 font-bold text-xs text-emerald-800">
                           <span>🏢 Point Relais</span>
                           <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">
-                            0 DH
+                            Gratuit
                           </span>
                         </div>
                         <span className="text-[10px] mt-1 text-emerald-700">
-                          En agence (Ozon / Sendit)
+                          En agence / Point Relais
                         </span>
                       </button>
                     </div>
                   </div>
 
-                  {/* Dynamic Moroccan Delivery Estimate Card */}
+                  {/* Dynamic Delivery Estimate Card */}
                   <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 rounded-xl text-xs flex items-start gap-2.5">
                     <Truck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div className="min-w-0 flex-1">
@@ -1128,12 +1132,12 @@ Merci de me confirmer la livraison !`;
                             : `Livraison estimée : ${deliveryEstimate.formattedEstimate}`}
                         </span>
                         <span className="font-black text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded text-[10px]">
-                          {effectiveShippingFee === 0 ? 'GRATUITE' : `${effectiveShippingFee} DH`}
+                          {effectiveShippingFee === 0 ? 'GRATUITE' : formatPrice(effectiveShippingFee)}
                         </span>
                       </div>
                       <p className="text-[10px] text-emerald-800 mt-0.5">
                         {deliveryType === 'stopdesk'
-                          ? `Colis conservé 48h à l'agence partenaire (Ozon/Sendit/Cash Plus) • SMS dès réception`
+                          ? `Colis conservé 48h à l'agence partenaire (${countryConfig.pickupPartnerText || 'Express'}) • SMS dès réception`
                           : `Délai ${deliveryEstimate.sla} • Paiement cash lors de la remise en main propre`}
                       </p>
                     </div>
@@ -1165,7 +1169,7 @@ Merci de me confirmer la livraison !`;
                         if (!touched.address) setTouched((prev) => ({ ...prev, address: true }));
                       }}
                       onBlur={() => setTouched((prev) => ({ ...prev, address: true }))}
-                      placeholder="Ex: Quartier Maârif, Rue Abou Bakr Essedik, Résidence Al Manar Appt 4"
+                      placeholder={countryConfig.addressPlaceholder || "Ex: Quartier Maârif, Rue Abou Bakr Essedik, Résidence Al Manar Appt 4"}
                       className={`w-full px-3.5 py-2 bg-zinc-50 border rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition ${
                         touched.address && !addressValidation.isValid
                           ? 'border-red-400 bg-red-50/30'
@@ -1196,7 +1200,7 @@ Merci de me confirmer la livraison !`;
                       type="text"
                       value={agencyName}
                       onChange={(e) => setAgencyName(e.target.value)}
-                      placeholder="Ex: Agence Ozon Maârif, Sendit Agdal, Barid Cash, ou le plus proche"
+                      placeholder={countryConfig.agencyPlaceholder || "Ex: Agence Ozon Maârif, Sendit Agdal, Barid Cash, ou le plus proche"}
                       className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-300 rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition"
                     />
                     <p className="text-[10px] text-zinc-500 mt-1 font-normal">

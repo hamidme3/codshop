@@ -4,6 +4,7 @@
  */
 
 import { Order } from './types';
+import { normalizePhoneForWhatsApp } from './geo';
 
 export type WhatsAppTemplateType = 'confirmation' | 'unreachable' | 'gps_request' | 'shipped';
 
@@ -143,9 +144,11 @@ export function getDarijaMessage(
 export function buildWhatsAppLink(
   order: Order,
   template: WhatsAppTemplateType = 'confirmation',
-  storeName: string = 'CODShop'
+  storeName: string = 'CODShop',
+  countryCode: string = 'MA'
 ): string {
-  const phoneNormalized = normalizeMoroccanPhone(order.phone);
+  const code = ((order as any)?.country || (order as any)?.countryCode || countryCode || 'MA').toUpperCase();
+  const phoneNormalized = code === 'MA' ? normalizeMoroccanPhone(order.phone) : normalizePhoneForWhatsApp(order.phone, code);
   const message = getDarijaMessage(order, template, storeName);
   return `https://wa.me/${phoneNormalized}?text=${encodeURIComponent(message)}`;
 }

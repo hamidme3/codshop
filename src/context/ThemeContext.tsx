@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useMemo, useTransition } from 'react';
 import { ThemeId, THEMES, ThemeConfig } from '@/lib/themes';
+import { detectClientVisitorCountry, formatCountryPrice } from '@/lib/geo';
 
 interface ThemeContextType {
   themeId: ThemeId;
@@ -9,6 +10,9 @@ interface ThemeContextType {
   setThemeId: (id: ThemeId) => void;
   lang: 'fr' | 'ar';
   setLang: (l: 'fr' | 'ar') => void;
+  countryCode: string;
+  setCountryCode: (c: string) => void;
+  formatPrice: (amount: number, overrideCountry?: string) => string;
   formatMAD: (amount: number) => string;
 }
 
@@ -17,6 +21,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [themeId, setThemeIdState] = useState<ThemeId>('luxury');
   const [lang, setLangState] = useState<'fr' | 'ar'>('fr');
+  const [countryCode, setCountryCodeState] = useState<string>('MA');
   const [mounted, setMounted] = useState(false);
   const [, startTransition] = useTransition();
 
@@ -39,6 +44,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (savedLang && (savedLang === 'fr' || savedLang === 'ar')) {
         setLangState(savedLang);
       }
+
+      const detectedCountry = detectClientVisitorCountry('MA');
+      if (detectedCountry) setCountryCodeState(detectedCountry);
     } catch {
       // Guard against SSR/storage access issues
     }
@@ -130,10 +138,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   };
 
+  const setCountryCode = (c: string) => {
+    const upper = c.trim().toUpperCase();
+    setCountryCodeState(upper);
+    try {
+      if (typeof document !== 'undefined') {
+        document.cookie = `cod_visitor_country=${upper}; path=/; max-age=604800; SameSite=Lax`;
+      }
+    } catch {}
+  };
+
+  const formatPrice = (amount: number, overrideCountry?: string) => {
+    return formatCountryPrice(amount, overrideCountry || countryCode, lang);
+  };
+
   const formatMAD = (amount: number) => {
-    if (!Number.isFinite(amount) || amount < 0) amount = 0;
-    const s = amount.toLocaleString('fr-FR');
-    return lang === 'ar' ? `\u2068${s}\u2069 \u062f.\u0645.` : `${s} DH`;
+    return formatPrice(amount, countryCode);
   };
 
   const styleVars = useMemo(
@@ -173,7 +193,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   return (
-    <ThemeContext.Provider value={{ themeId, theme, setThemeId, lang, setLang, formatMAD }}>
+    <ThemeContext.Provider value={{ themeId, theme, setThemeId, lang, setLang, countryCode, setCountryCode, formatPrice, formatMAD }}>
       <div
         data-theme={themeId}
         suppressHydrationWarning

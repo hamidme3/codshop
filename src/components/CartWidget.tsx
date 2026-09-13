@@ -13,7 +13,7 @@ export interface CartItem {
 }
 
 export function CartWidget() {
-  const { theme } = useTheme();
+  const { theme, formatPrice } = useTheme();
   const [items, setItems] = useState<CartItem[]>([]);
   const [open, setOpen] = useState(false);
 
@@ -66,7 +66,7 @@ export function CartWidget() {
                     <img src={i.image} alt={i.title} className="w-14 h-14 rounded-lg object-cover bg-zinc-200 shrink-0" />
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-xs truncate">{i.title}</div>
-                      <div className="text-xs text-zinc-500">{i.qty} × {i.price} DH</div>
+                      <div className="text-xs text-zinc-500">{i.qty} × {formatPrice(i.price)}</div>
                       <div className="flex items-center gap-2 mt-1">
                         <button onClick={() => setItems(items.map(x => x.id === i.id ? { ...x, qty: Math.max(1, x.qty - 1) } : x))} aria-label="Moins" className="w-5 h-5 rounded-full bg-white border border-zinc-300 flex items-center justify-center text-xs hover:border-zinc-400"><Minus className="w-3 h-3" /></button>
                         <span className="text-xs font-bold w-4 text-center">{i.qty}</span>
@@ -80,7 +80,7 @@ export function CartWidget() {
             </div>
             {items.length > 0 && (
               <div className="p-3 border-t border-zinc-200 bg-zinc-50 space-y-2">
-                <div className="flex items-center justify-between text-sm font-bold text-zinc-900"><span>Total</span><span>{total} DH</span></div>
+                <div className="flex items-center justify-between text-sm font-bold text-zinc-900"><span>Total</span><span>{formatPrice(total)}</span></div>
                 <a href="/" className="block w-full py-3 text-center text-white font-black text-sm rounded-xl shadow-lg" style={{ backgroundColor: theme.colors?.primary || '#f59e0b' }}>
                   Passer la commande (COD)
                 </a>

@@ -3,7 +3,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import { getProductBySlug, getProductQuantityTiers, getProductVariantInfo } from '@/lib/mockProducts';
-import { getDeliveryDateEstimate, FREE_SHIPPING_THRESHOLD } from '@/lib/moroccanCities';
+import { getDeliveryDateEstimate } from '@/lib/moroccanCities';
+import { getCountryConfig, getCountryDeliveryEstimate, detectClientVisitorCountry } from '@/lib/geo';
 import { CountdownTimer } from '@/components/CountdownTimer';
 import { useTheme } from '@/context/ThemeContext';
 import {
@@ -28,7 +29,23 @@ export default function ProductDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
   const product = getProductBySlug(slug);
-  const { formatMAD, theme } = useTheme();
+  const { formatMAD, formatPrice, theme, countryCode: contextCountryCode } = useTheme();
+
+  // Multi-country visitor detection
+  const [visitorCountry, setVisitorCountry] = useState<string>(
+    (product as any)?.country || contextCountryCode || 'MA'
+  );
+
+  useEffect(() => {
+    const detected = detectClientVisitorCountry(
+      (product as any)?.country || contextCountryCode || 'MA'
+    );
+    if (detected && detected !== visitorCountry) {
+      setVisitorCountry(detected);
+    }
+  }, [product, contextCountryCode, visitorCountry]);
+
+  const countryConfig = useMemo(() => getCountryConfig(visitorCountry), [visitorCountry]);
 
   // Initialize and track ViewContent across ad platforms
   useEffect(() => {
@@ -87,8 +104,8 @@ export default function ProductDetailPage() {
   );
 
   const deliveryEstimate = useMemo(
-    () => (product ? getDeliveryDateEstimate('Casablanca', activeTier?.totalPrice ?? product.price) : null),
-    [product, activeTier]
+    () => (product ? getCountryDeliveryEstimate(visitorCountry, countryConfig.popularCities[0] || 'Casablanca', activeTier?.totalPrice ?? product.price) : null),
+    [product, visitorCountry, countryConfig, activeTier]
   );
 
   if (!product) {
@@ -152,7 +169,7 @@ export default function ProductDetailPage() {
                 -{discountPercent}% OFF
               </span>
               <span className="bg-emerald-600 text-white font-bold text-xs px-2.5 py-1 rounded-md shadow-sm">
-                Paiement Cash • Inspection autorisée (عاين سلعتك)
+                Paiement Cash • {countryConfig.inspectionBadge.fr} ({countryConfig.inspectionBadge.ar})
               </span>
             </div>
           </div>
@@ -447,10 +464,10 @@ export default function ProductDetailPage() {
 
                         {/* Badges: Free delivery + Free gift */}
                         <div className="flex flex-wrap gap-1 mt-2">
-                          {(tier.freeDelivery || tier.quantity >= 2 || tier.totalPrice >= FREE_SHIPPING_THRESHOLD) ? (
+                          {(tier.freeDelivery || tier.quantity >= 2 || tier.totalPrice >= countryConfig.freeShippingThreshold) ? (
                             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100/90 px-1.5 py-0.5 rounded">
                               <Truck className="w-3 h-3 text-emerald-700 shrink-0" />
-                              Livraison Gratuite 24h
+                              Livraison Gratuite ({countryConfig.hubSla.hubSla})
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 text-[10px] font-medium text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded">
@@ -506,8 +523,8 @@ export default function ProductDetailPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="font-black text-xs sm:text-sm text-emerald-950 flex items-center gap-1.5 flex-wrap">
-                  <span>Garantie Sérénité : "Vérifiez votre colis avant de payer"</span>
-                  <span className="text-[11px] font-bold text-emerald-700">(عاين سلعتك قبل ما تخلص)</span>
+                  <span>Garantie Sérénité : "{countryConfig.inspectionBadge.fr}"</span>
+                  <span className="text-[11px] font-bold text-emerald-700">({countryConfig.inspectionBadge.ar})</span>
                 </div>
                 <p className="text-[11px] text-emerald-900/90 mt-0.5 leading-relaxed">
                   Ouvrez le carton et vérifiez vos articles <strong>devant le livreur</strong> avant de régler en espèces. Zéro avance demandée, 100% sans risque.
@@ -519,15 +536,15 @@ export default function ProductDetailPage() {
               <div className="flex items-center gap-1.5 bg-white/90 p-2 rounded-xl border border-emerald-100 shadow-xs">
                 <Zap className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                 <div className="truncate">
-                  <span className="font-bold text-zinc-900">Casablanca :</span>{' '}
-                  <span className="text-emerald-700 font-semibold">24h Express</span>
+                  <span className="font-bold text-zinc-900">{countryConfig.hubSla.hubName} :</span>{' '}
+                  <span className="text-emerald-700 font-semibold">{countryConfig.hubSla.hubSla}</span>
                 </div>
               </div>
               <div className="flex items-center gap-1.5 bg-white/90 p-2 rounded-xl border border-emerald-100 shadow-xs">
                 <Truck className="w-4 h-4 text-emerald-600 shrink-0" />
                 <div className="truncate">
-                  <span className="font-bold text-zinc-900">Hors Casa :</span>{' '}
-                  <span className="text-emerald-700 font-semibold">48h Partout au Maroc</span>
+                  <span className="font-bold text-zinc-900">{countryConfig.hubSla.nationalName} :</span>{' '}
+                  <span className="text-emerald-700 font-semibold">{countryConfig.hubSla.nationalSla}</span>
                 </div>
               </div>
             </div>
@@ -577,7 +594,7 @@ export default function ProductDetailPage() {
 
             <a
               href={`https://wa.me/${product.whatsAppDirectNumber}?text=${encodeURIComponent(
-                `Salam, je souhaite commander : ${product?.title ?? 'ce produit'}\n🏷️ Réf/SKU : ${activeVariantInfo.sku}\n${selectedColor ? `🎨 Couleur : ${selectedColor}\n` : ''}${selectedSize ? `📏 Pointure : ${selectedSize}\n` : ''}${selectedVariant && !selectedColor && !selectedSize ? `📦 Option : ${selectedVariant}\n` : ''}💰 Total : ${formatMAD(activeTier?.totalPrice ?? product?.price ?? 0)} (${activeTier?.label ?? 'Standard'})\nPaiement Cash à la Livraison au Maroc. Merci !`
+                `Salam, je souhaite commander : ${product?.title ?? 'ce produit'}\n🏷️ Réf/SKU : ${activeVariantInfo.sku}\n${selectedColor ? `🎨 Couleur : ${selectedColor}\n` : ''}${selectedSize ? `📏 Pointure : ${selectedSize}\n` : ''}${selectedVariant && !selectedColor && !selectedSize ? `📦 Option : ${selectedVariant}\n` : ''}💰 Total : ${formatMAD(activeTier?.totalPrice ?? product?.price ?? 0)} (${activeTier?.label ?? 'Standard'})\nPaiement Cash à la Livraison (${countryConfig.name}). Merci !`
               )}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -597,7 +614,7 @@ export default function ProductDetailPage() {
             </div>
             <div className="flex items-center gap-2 text-zinc-700">
               <Truck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span><strong>Casa 24h</strong>, Hors Casa 48h</span>
+              <span><strong>{countryConfig.hubSla.hubName}</strong>, {countryConfig.hubSla.nationalName}</span>
             </div>
             <div className="flex items-center gap-2 text-zinc-700">
               <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
@@ -651,15 +668,15 @@ export default function ProductDetailPage() {
             <div className="flex items-center gap-1.5 mt-0.5">
               <span
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black ${
-                  activeTier?.freeDelivery || (activeTier?.quantity ?? 1) >= 2 || (activeTier?.totalPrice ?? 0) >= FREE_SHIPPING_THRESHOLD
+                  activeTier?.freeDelivery || (activeTier?.quantity ?? 1) >= 2 || (activeTier?.totalPrice ?? 0) >= countryConfig.freeShippingThreshold
                     ? 'bg-emerald-100 text-emerald-800'
                     : 'bg-zinc-100 text-zinc-700'
                 }`}
               >
                 <Truck className="w-3 h-3 stroke-[2.5]" />
-                {activeTier?.freeDelivery || (activeTier?.quantity ?? 1) >= 2 || (activeTier?.totalPrice ?? 0) >= FREE_SHIPPING_THRESHOLD
-                  ? 'Livraison Gratuite 24h'
-                  : 'Livraison 24h/48h COD'}
+                {activeTier?.freeDelivery || (activeTier?.quantity ?? 1) >= 2 || (activeTier?.totalPrice ?? 0) >= countryConfig.freeShippingThreshold
+                  ? `Livraison Gratuite (${countryConfig.hubSla.hubSla})`
+                  : 'Livraison Express COD'}
               </span>
               {activeTier?.freeGift && (
                 <span className="bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded text-[9px] font-black">
@@ -689,7 +706,7 @@ export default function ProductDetailPage() {
         isOpen={showCheckoutModal}
         onClose={() => setShowCheckoutModal(false)}
         storeSlug={(product as any)?.storeSlug}
-        countryCode={(product as any)?.country || 'MA'}
+        countryCode={visitorCountry}
         initialQuantity={selectedQuantity}
         initialVariant={activeVariantInfo.label}
         initialSku={activeVariantInfo.sku}

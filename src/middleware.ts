@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { DEFAULT_COUNTRY_HUBS } from '@/lib/geo';
 
 // Valid Moroccan cities for geo whitelisting (covers >70% e-commerce volume)
 const VALID_MOROCCAN_CITIES = new Set([
@@ -134,7 +135,8 @@ export async function middleware(request: NextRequest) {
   const abInfo = getAbVariantCookie(request);
   const abVariant = (overrideVariant as 'control' | 'waybill') || abInfo.variant;
   const anonId = abInfo.anonId;
-  const finalCity = detectedCity || 'Casablanca'; // default hub
+  const defaultHubCity = DEFAULT_COUNTRY_HUBS[detectedCountry] || 'Casablanca';
+  const finalCity = detectedCity || defaultHubCity;
   
   // Clone headers to pass tenant, geo, and A/B information downstream
   const requestHeaders = new Headers(request.headers);
