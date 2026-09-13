@@ -11,9 +11,11 @@ import {
 } from 'lucide-react';
 import { getCustomers, updateCustomerNotes, Customer, OrderStatus } from '@/lib/backoffice';
 import { normalizeMoroccanPhone } from '@/lib/whatsapp-templates';
+import { normalizePhoneForWhatsApp, COUNTRIES } from '@/lib/geo';
 
 function getContextualWhatsAppUrl(customer: Customer, storeSlug: string): string {
-  const waPhone = normalizeMoroccanPhone(customer.phone);
+  const countryCode = ((customer.recentOrders?.[0] as any)?.countryCode || (customer as any)?.country || 'MA').toUpperCase();
+  const waPhone = countryCode === 'MA' ? normalizeMoroccanPhone(customer.phone) : normalizePhoneForWhatsApp(customer.phone, countryCode);
 
   const storeName = storeSlug.toUpperCase();
   const orderNum = customer.lastOrderNumber || 'votre commande';
@@ -21,21 +23,64 @@ function getContextualWhatsAppUrl(customer: Customer, storeSlug: string): string
   const status = customer.lastOrderStatus;
   const courier = customer.recentOrders?.[0]?.courier || 'transporteur';
   const tracking = customer.lastTrackingNumber;
+  const curr = customer.recentOrders?.[0]?.currency || (COUNTRIES[countryCode] || COUNTRIES.MA).currency.symbol;
 
   let message = '';
 
-  if (status === 'confirmed') {
-    message = `Salam ${customer.name}, m3ak la boutique ${storeName}. Votre commande ${orderNum} de ${totalVal} DH est bien confirmée ! Notre équipe prépare actuellement votre colis pour expédition rapide à ${customer.city}.`;
-  } else if (status === 'shipped' || status === 'shipping') {
-    const trackingTxt = tracking ? ` (N° Suivi : ${tracking})` : '';
-    message = `Salam ${customer.name}, votre colis ${orderNum} est expédié avec ${courier.toUpperCase()}${trackingTxt}. Le livreur va vous contacter très prochainement. Merci de bien vouloir préparer ${totalVal} DH en espèces à la livraison.`;
-  } else if (status === 'delivered') {
-    message = `Salam ${customer.name}, merci pour votre confiance ! Votre commande ${orderNum} a bien été livrée. Pour vous remercier de votre fidélité chez ${storeName}, profitez de -15% sur votre prochaine commande avec le code : VIP15 !`;
-  } else if (status === 'returned' || status === 'canceled') {
-    message = `Salam ${customer.name}, nous avons constaté que votre commande ${orderNum} n'a pas pu vous être remise par le livreur à ${customer.city} (Colis retourné). Souhaitez-vous reprogrammer votre livraison à une autre date ?`;
+  if (countryCode === 'SA' || countryCode === 'AE') {
+    if (status === 'confirmed') {
+      message = `السلام عليكم ورحمة الله وبركاته يا ${customer.name} 👋، معك متجر ${storeName}. تم تأكيد طلبكم ${orderNum} بقيمة ${totalVal} ${curr} بنجاح! نقوم حالياً بتجهيز الشحنة لإرسالها إليكم في ${customer.city}.`;
+    } else if (status === 'shipped' || status === 'shipping') {
+      const trackingTxt = tracking ? ` (رقم التتبع: ${tracking})` : '';
+      message = `السلام عليكم يا ${customer.name} 👋، تم شحن طلبكم ${orderNum} مع ${courier.toUpperCase()}${trackingTxt}. سيتواصل معكم مندوب التوصيل قريباً. يرجى تجهيز ${totalVal} ${curr} نقداً عند الاستلام.`;
+    } else if (status === 'delivered') {
+      message = `السلام عليكم يا ${customer.name} 👋، شكراً لثقتكم بنا! تم تسليم طلبكم ${orderNum} بنجاح. يسعدنا تقديم خصم 15% على طلبكم القادم بكود: VIP15!`;
+    } else if (status === 'returned' || status === 'canceled') {
+      message = `السلام عليكم يا ${customer.name} 👋، تعذر على المندوب تسليم طلبكم ${orderNum} في ${customer.city}. هل ترغبون بإعادة جدولة موعد التسليم في وقت مناسب؟`;
+    } else {
+      message = `السلام عليكم يا ${customer.name} 👋، معك متجر ${storeName}. تلقينا طلبكم ${orderNum} بقيمة ${totalVal} ${curr}. هل تؤكدون شحن الطلب إلى عنوانكم في ${customer.city}؟`;
+    }
+  } else if (countryCode === 'EG') {
+    if (status === 'confirmed') {
+      message = `أهلاً بحضرتك يا ${customer.name} 👋، معاك متجر ${storeName}. أوردرك ${orderNum} بقيمة ${totalVal} ${curr} تم تأكيده بنجاح! وجاري تجهيزه للشحن إلى ${customer.city}.`;
+    } else if (status === 'shipped' || status === 'shipping') {
+      const trackingTxt = tracking ? ` (رقم البوليصة: ${tracking})` : '';
+      message = `أهلاً بحضرتك يا ${customer.name} 👋، أوردرك ${orderNum} خرج مع المندوب دلوقتي عبر ${courier.toUpperCase()}${trackingTxt}. المندوب هيتصل بحضرتك قريباً. يرجى تجهيز ${totalVal} ${curr} كاش عند الاستلام.`;
+    } else if (status === 'delivered') {
+      message = `أهلاً بحضرتك يا ${customer.name} 👋، شكراً لثقتك فينا! أوردرك ${orderNum} وصل بسلامة. هدية لحضرتك خصم 15% على الأوردر القادم بكود: VIP15!`;
+    } else if (status === 'returned' || status === 'canceled') {
+      message = `أهلاً بحضرتك يا ${customer.name} 👋، المندوب لم يتمكن من تسليم أوردرك ${orderNum} في ${customer.city}. تحب نحدد معاد تاني مناسب لحضرتك؟`;
+    } else {
+      message = `أهلاً بحضرتك يا ${customer.name} 👋، معاك متجر ${storeName}. استلمنا أوردرك ${orderNum} بقيمة ${totalVal} ${curr}. تحب نؤكد الشحن لعنوانك في ${customer.city}؟`;
+    }
+  } else if (countryCode === 'FR' || countryCode === 'SN' || countryCode === 'CI') {
+    if (status === 'confirmed') {
+      message = `Bonjour ${customer.name} 👋, de la part de la boutique ${storeName}. Votre commande ${orderNum} d'un montant de ${totalVal} ${curr} est bien confirmée ! Notre équipe prépare votre colis pour expédition à ${customer.city}.`;
+    } else if (status === 'shipped' || status === 'shipping') {
+      const trackingTxt = tracking ? ` (N° Suivi : ${tracking})` : '';
+      message = `Bonjour ${customer.name} 👋, votre colis ${orderNum} est expédié avec ${courier.toUpperCase()}${trackingTxt}. Le livreur va vous contacter très prochainement. Merci de préparer ${totalVal} ${curr} à la livraison.`;
+    } else if (status === 'delivered') {
+      message = `Bonjour ${customer.name} 👋, merci pour votre confiance ! Votre commande ${orderNum} a bien été livrée. Profitez de -15% sur votre prochain achat avec le code : VIP15 !`;
+    } else if (status === 'returned' || status === 'canceled') {
+      message = `Bonjour ${customer.name} 👋, nous avons constaté que votre commande ${orderNum} n'a pas pu vous être remise à ${customer.city}. Souhaitez-vous reprogrammer votre livraison ?`;
+    } else {
+      message = `Bonjour ${customer.name} 👋, de la part de la boutique ${storeName}. Nous avons bien reçu votre commande ${orderNum} d'un montant de ${totalVal} ${curr}. Confirmez-vous l'envoi à votre adresse à ${customer.city} ?`;
+    }
   } else {
-    // new / to_confirm
-    message = `Salam ${customer.name}, m3ak la boutique ${storeName}. Nous avons bien reçu votre commande ${orderNum} d'un montant de ${totalVal} DH. Confirmez-vous l'envoi à votre adresse à ${customer.city} ?`;
+    // Morocco / Algeria / Default Darija
+    if (status === 'confirmed') {
+      message = `Salam ${customer.name}, m3ak la boutique ${storeName}. Votre commande ${orderNum} de ${totalVal} ${curr} est bien confirmée ! Notre équipe prépare actuellement votre colis pour expédition rapide à ${customer.city}.`;
+    } else if (status === 'shipped' || status === 'shipping') {
+      const trackingTxt = tracking ? ` (N° Suivi : ${tracking})` : '';
+      message = `Salam ${customer.name}, votre colis ${orderNum} est expédié avec ${courier.toUpperCase()}${trackingTxt}. Le livreur va vous contacter très prochainement. Merci de bien vouloir préparer ${totalVal} ${curr} en espèces à la livraison.`;
+    } else if (status === 'delivered') {
+      message = `Salam ${customer.name}, merci pour votre confiance ! Votre commande ${orderNum} a bien été livrée. Pour vous remercier de votre fidélité chez ${storeName}, profitez de -15% sur votre prochaine commande avec le code : VIP15 !`;
+    } else if (status === 'returned' || status === 'canceled') {
+      message = `Salam ${customer.name}, nous avons constaté que votre commande ${orderNum} n'a pas pu vous être remise par le livreur à ${customer.city} (Colis retourné). Souhaitez-vous reprogrammer votre livraison à une autre date ?`;
+    } else {
+      // new / to_confirm
+      message = `Salam ${customer.name}, m3ak la boutique ${storeName}. Nous avons bien reçu votre commande ${orderNum} d'un montant de ${totalVal} ${curr}. Confirmez-vous l'envoi à votre adresse à ${customer.city} ?`;
+    }
   }
 
   return `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`;

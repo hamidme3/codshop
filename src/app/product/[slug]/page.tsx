@@ -90,8 +90,8 @@ export default function ProductDetailPage() {
   }, [activeVariantInfo?.image, product?.images]);
 
   const quantityTiers = useMemo(
-    () => (product ? getProductQuantityTiers(product) : []),
-    [product]
+    () => (product ? getProductQuantityTiers(product, visitorCountry) : []),
+    [product, visitorCountry]
   );
   const [selectedQuantity, setSelectedQuantity] = useState(
     product?.quantityTiers?.[0]?.quantity || 1
@@ -248,16 +248,16 @@ export default function ProductDetailPage() {
               <div className="text-xs text-zinc-500">Prix Spécial Promotionnel :</div>
               <div className="flex items-baseline gap-3 mt-0.5">
                 <span className="text-3xl font-black text-zinc-950">
-                  {formatMAD(product?.price ?? 0)}
+                  {formatPrice(product?.price ?? 0, visitorCountry)}
                 </span>
                 <span className="text-sm line-through text-zinc-400 font-semibold">
-                  {formatMAD(product?.originalPrice ?? 0)}
+                  {formatPrice(product?.originalPrice ?? 0, visitorCountry)}
                 </span>
               </div>
             </div>
             <div className="text-right">
               <span className="inline-block px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold">
-                Économisez {formatMAD(Math.max(0, (product?.originalPrice ?? 0) - (product?.price ?? 0)))}
+                Économisez {formatPrice(Math.max(0, (product?.originalPrice ?? 0) - (product?.price ?? 0)), visitorCountry)}
               </span>
             </div>
           </div>
@@ -486,11 +486,11 @@ export default function ProductDetailPage() {
                       <div className="mt-2.5 pt-2 border-t border-zinc-200/70 flex items-baseline justify-between gap-1">
                         <div>
                           <span className="font-black text-sm sm:text-base text-zinc-950">
-                            {formatMAD(tier.totalPrice)}
+                            {formatPrice(tier.totalPrice, visitorCountry)}
                           </span>
                           {tier.quantity > 1 && (
                             <span className="text-[10px] text-zinc-500 font-medium ml-1">
-                              ({formatMAD(tier.unitPrice)}/u)
+                              ({formatPrice(tier.unitPrice, visitorCountry)}/u)
                             </span>
                           )}
                         </div>
@@ -594,7 +594,7 @@ export default function ProductDetailPage() {
 
             <a
               href={`https://wa.me/${product.whatsAppDirectNumber}?text=${encodeURIComponent(
-                `Salam, je souhaite commander : ${product?.title ?? 'ce produit'}\n🏷️ Réf/SKU : ${activeVariantInfo.sku}\n${selectedColor ? `🎨 Couleur : ${selectedColor}\n` : ''}${selectedSize ? `📏 Pointure : ${selectedSize}\n` : ''}${selectedVariant && !selectedColor && !selectedSize ? `📦 Option : ${selectedVariant}\n` : ''}💰 Total : ${formatMAD(activeTier?.totalPrice ?? product?.price ?? 0)} (${activeTier?.label ?? 'Standard'})\nPaiement Cash à la Livraison (${countryConfig.name}). Merci !`
+                `${['SA', 'AE', 'EG', 'DZ', 'MA'].includes(visitorCountry) ? 'Salam' : 'Bonjour'}, je souhaite commander : ${product?.title ?? 'ce produit'}\n🏷️ Réf/SKU : ${activeVariantInfo.sku}\n${selectedColor ? `🎨 Couleur : ${selectedColor}\n` : ''}${selectedSize ? `📏 Pointure : ${selectedSize}\n` : ''}${selectedVariant && !selectedColor && !selectedSize ? `📦 Option : ${selectedVariant}\n` : ''}💰 Total : ${formatPrice(activeTier?.totalPrice ?? product?.price ?? 0, visitorCountry)} (${activeTier?.label ?? 'Standard'})\nPaiement Cash à la Livraison (${countryConfig.name}). Merci !`
               )}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -657,11 +657,11 @@ export default function ProductDetailPage() {
                 className="text-lg font-black tracking-tight"
                 style={{ color: 'var(--theme-text-primary)' }}
               >
-                {formatMAD(activeTier?.totalPrice ?? product.price)}
+                {formatPrice(activeTier?.totalPrice ?? product.price, visitorCountry)}
               </span>
               {product.originalPrice > product.price && (
                 <span className="text-xs line-through text-zinc-400 font-semibold truncate">
-                  {formatMAD(Math.round((product.originalPrice / product.price) * (activeTier?.totalPrice ?? product.price)))}
+                  {formatPrice(Math.round((product.originalPrice / product.price) * (activeTier?.totalPrice ?? product.price)), visitorCountry)}
                 </span>
               )}
             </div>

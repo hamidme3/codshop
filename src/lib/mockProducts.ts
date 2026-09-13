@@ -1,4 +1,5 @@
 import { ThemeId } from './themes';
+import { COUNTRIES } from './geo/countries';
 
 export interface ProductVariant {
   id: string;
@@ -419,13 +420,14 @@ export const MOCK_PRODUCTS: Product[] = [
   },
 ];
 
-export function getProductQuantityTiers(product: Product): QuantityTier[] {
+export function getProductQuantityTiers(product: Product, countryCode: string = 'MA'): QuantityTier[] {
   if (product.quantityTiers && product.quantityTiers.length >= 3) {
     return product.quantityTiers;
   }
   const base = product.price;
   const duoUnit = Math.round(base * 0.85);
   const trioUnit = Math.round(base * 0.75);
+  const curr = (COUNTRIES[countryCode?.toUpperCase()] || COUNTRIES.MA).currency.symbol;
   return [
     {
       quantity: 1,
@@ -439,7 +441,7 @@ export function getProductQuantityTiers(product: Product): QuantityTier[] {
       label: 'Pack 2 : Duo (2 Pièces)',
       unitPrice: duoUnit,
       totalPrice: duoUnit * 2,
-      savingsBadge: `Économisez ${base * 2 - duoUnit * 2} DH`,
+      savingsBadge: `Économisez ${base * 2 - duoUnit * 2} ${curr}`,
       isPopular: true,
       freeDelivery: true,
       badge: '🔥 Le Plus Populaire (الأكثر طلباً)',
@@ -449,7 +451,7 @@ export function getProductQuantityTiers(product: Product): QuantityTier[] {
       label: 'Pack 3 : Trio VIP (3 Pièces)',
       unitPrice: trioUnit,
       totalPrice: trioUnit * 3,
-      savingsBadge: `Économisez ${base * 3 - trioUnit * 3} DH + Cadeau 🎁`,
+      savingsBadge: `Économisez ${base * 3 - trioUnit * 3} ${curr} + Cadeau 🎁`,
       freeDelivery: true,
       freeGift: 'Cadeau surprise exclusif offert 🎁',
       badge: '💎 Meilleure Valeur (أفضل توفير)',

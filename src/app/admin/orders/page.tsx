@@ -893,10 +893,10 @@ function OrdersContent() {
 
                     <div className="text-right shrink-0">
                       <div className="font-mono font-black text-sm text-white tabular-nums">
-                        {order.total} <span className="text-[10px] font-sans text-zinc-400">DH</span>
+                        {order.total} <span className="text-[10px] font-sans text-zinc-400">{order.currency || 'DH'}</span>
                       </div>
                       <div className="text-[9px] text-zinc-500 font-mono">
-                        Livraison {order.shippingFee} DH
+                        Livraison {order.shippingFee} {order.currency || 'DH'}
                       </div>
                     </div>
                   </div>
@@ -1187,6 +1187,11 @@ function OrdersContent() {
                         <td className="py-2.5 px-3">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="font-semibold text-zinc-200">{order.city}</span>
+                            {order.countryCode && order.countryCode !== 'MA' && (
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                                {order.countryCode}
+                              </span>
+                            )}
                             {order.deliveryType === 'stopdesk' && (
                               <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/30">
                                 🏢 Stopdesk
@@ -1224,8 +1229,8 @@ function OrdersContent() {
                         </td>
 
                         <td className="py-2.5 px-3">
-                          <div className="font-extrabold text-white text-sm font-mono tabular-nums">{order.total} DH</div>
-                          <div className="text-[10px] text-zinc-400 font-mono">Livraison : {order.shippingFee} DH</div>
+                          <div className="font-extrabold text-white text-sm font-mono tabular-nums">{order.total} {order.currency || 'DH'}</div>
+                          <div className="text-[10px] text-zinc-400 font-mono">Livraison : {order.shippingFee} {order.currency || 'DH'}</div>
                         </td>
 
                         <td className="py-2.5 px-3">
@@ -1459,7 +1464,14 @@ function OrdersContent() {
                 </div>
                 <div>
                   <div className="text-zinc-400 text-[11px] mb-0.5">Destination</div>
-                  <div className="font-semibold text-white text-sm">{selectedOrder.city}</div>
+                  <div className="font-semibold text-white text-sm flex items-center gap-1.5">
+                    <span>{selectedOrder.city}</span>
+                    {selectedOrder.countryCode && selectedOrder.countryCode !== 'MA' && (
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                        {selectedOrder.countryCode}
+                      </span>
+                    )}
+                  </div>
                   <div className="text-zinc-400 text-xs line-clamp-2">{selectedOrder.address}</div>
                 </div>
               </div>
@@ -1553,12 +1565,12 @@ function OrdersContent() {
                         {item.size && <span className="text-cyan-400 font-medium">• Taille: {item.size}</span>}
                       </div>
                     </div>
-                    <span className="font-mono tabular-nums font-semibold text-sm text-zinc-100">{item.price * item.quantity} MAD</span>
+                    <span className="font-mono tabular-nums font-semibold text-sm text-zinc-100">{item.price * item.quantity} {selectedOrder.currency || 'MAD'}</span>
                   </div>
                 ))}
                 <div className="border-t border-zinc-800/80 pt-2 flex justify-between items-center font-medium text-zinc-200 text-xs">
                   <span>Total à encaisser (COD) :</span>
-                  <span className="text-white font-mono tabular-nums font-bold text-sm">{selectedOrder.total} MAD</span>
+                  <span className="text-white font-mono tabular-nums font-bold text-sm">{selectedOrder.total} {selectedOrder.currency || 'MAD'}</span>
                 </div>
               </div>
 
@@ -1805,7 +1817,7 @@ function OrdersContent() {
                       <span className="text-zinc-300 truncate">{o.customerName}</span>
                       <span className="text-zinc-500 text-[11px]">({o.city})</span>
                     </div>
-                    <span className="font-mono font-bold text-emerald-400 whitespace-nowrap">{o.total} DH</span>
+                    <span className="font-mono font-bold text-emerald-400 whitespace-nowrap">{o.total} {o.currency || 'DH'}</span>
                   </div>
                 ))}
               </div>

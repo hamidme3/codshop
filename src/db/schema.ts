@@ -83,6 +83,8 @@ export const orders = pgTable(
     deliveryType: text('delivery_type').default('home').notNull(), // 'home' | 'stopdesk'
     agencyName: text('agency_name'), // Pickup branch name if stopdesk (e.g. "Agence Ozon Bernoussi")
     source: text('source').default('web').notNull(), // 'web' | 'whatsapp'
+    countryCode: text('country_code').default('MA').notNull(), // e.g. "MA", "SA", "AE", "EG", "DZ"
+    currency: text('currency').default('MAD').notNull(), // e.g. "MAD", "SAR", "AED", "EGP"
     confirmedAt: timestamp('confirmed_at'),
     shippedAt: timestamp('shipped_at'),
     deliveredAt: timestamp('delivered_at'),

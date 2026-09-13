@@ -193,6 +193,8 @@ export async function POST(req: Request) {
         deliveryType: pricingResult.deliveryType,
         agencyName: pricingResult.agencyName || undefined,
         source,
+        countryCode: orderCountryCode,
+        currency: countryConfig.currency.code,
       });
     } catch (orderErr: any) {
       const errMsg = orderErr?.message || '';

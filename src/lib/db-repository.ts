@@ -252,6 +252,8 @@ export async function createOrder(data: {
   deliveryType?: 'home' | 'stopdesk';
   agencyName?: string;
   source?: 'web' | 'whatsapp';
+  countryCode?: string;
+  currency?: string;
 }) {
   const db = getDb();
   const orderNumber = `CMD-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -320,6 +322,8 @@ export async function createOrder(data: {
   const cleanSubtotal = Math.max(0, Math.floor(Number(data.subtotal) || 0));
   const cleanShippingFee = Math.max(0, Math.floor(Number(data.shippingFee) || 0));
   const cleanTotal = cleanSubtotal + cleanShippingFee;
+  const cleanCountryCode = (data.countryCode || 'MA').toUpperCase();
+  const cleanCurrency = (data.currency || 'MAD').toUpperCase();
 
   if (!db) {
     const newOrder = {
@@ -339,6 +343,8 @@ export async function createOrder(data: {
       deliveryType: data.deliveryType || 'home',
       agencyName: cleanAgencyName || undefined,
       source: data.source || 'web',
+      countryCode: cleanCountryCode,
+      currency: cleanCurrency,
       status: 'new' as const,
       createdAt: new Date().toISOString(),
     };
@@ -398,6 +404,8 @@ export async function createOrder(data: {
       deliveryType: data.deliveryType || 'home',
       agencyName: cleanAgencyName,
       source: data.source || 'web',
+      countryCode: cleanCountryCode,
+      currency: cleanCurrency,
     }).returning();
 
     // Auto-update or create Customer in CRM
@@ -422,6 +430,8 @@ export async function createOrder(data: {
         deliveryType: newOrder.deliveryType as any,
         agencyName: newOrder.agencyName || undefined,
         source: newOrder.source as any,
+        countryCode: newOrder.countryCode || cleanCountryCode,
+        currency: newOrder.currency || cleanCurrency,
         status: 'new' as const,
         createdAt: new Date().toISOString(),
       };

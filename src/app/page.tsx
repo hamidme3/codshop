@@ -45,7 +45,7 @@ export default function HomePage() {
               className="text-sm sm:text-base max-w-xl mx-auto lg:mx-0"
               style={{ color: 'var(--theme-text-secondary)' }}
             >
-              {theme.heroSubheadline || theme.tagline}
+              {theme.heroSubheadline ? theme.heroSubheadline.replace(/au Maroc/gi, countryConfig.inCountryName || 'au Maroc') : theme.tagline}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start pt-2">
@@ -132,7 +132,9 @@ export default function HomePage() {
               </div>
               <div>
                 <h4 className="font-bold text-xs" style={{ color: 'var(--theme-text-primary)' }}>{pill.title}</h4>
-                <p className="text-[11px]" style={{ color: 'var(--theme-text-secondary)' }}>{pill.subtitle}</p>
+                <p className="text-[11px]" style={{ color: 'var(--theme-text-secondary)' }}>
+                  {pill.subtitle.replace(/au Maroc/gi, countryConfig.inCountryName || 'au Maroc')}
+                </p>
               </div>
             </div>
           ))}

@@ -430,6 +430,7 @@ export const SUPPORTED_COUNTRY_MAP: Record<string, CountryConfig> = {
 };
 
 export const SUPPORTED_COUNTRIES: CountryConfig[] = Object.values(SUPPORTED_COUNTRY_MAP);
+export const COUNTRIES = SUPPORTED_COUNTRY_MAP;
 
 /**
  * Returns the CountryConfig for a given country code.

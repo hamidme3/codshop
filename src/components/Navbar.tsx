@@ -1,11 +1,24 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTheme } from '@/context/ThemeContext';
+import { getCountryConfig } from '@/lib/geo';
 import { MessageCircle, ShieldCheck } from 'lucide-react';
 
 export function Navbar() {
-  const { theme } = useTheme();
+  const { theme, countryCode } = useTheme();
+  const countryConfig = useMemo(() => getCountryConfig(countryCode || 'MA'), [countryCode]);
+
+  const announcement = useMemo(() => {
+    let text = theme.announcementText || '';
+    if (countryConfig.code !== 'MA') {
+      text = text
+        .replace(/🇲🇦/g, countryConfig.phone.flag)
+        .replace(/au Maroc/gi, countryConfig.inCountryName || 'au Maroc')
+        .replace(/(?:dès\s+)?(?:350|400)\s*DH/gi, `dès ${countryConfig.freeShippingThreshold} ${countryConfig.currency.symbol}`);
+    }
+    return text;
+  }, [theme.announcementText, countryConfig]);
 
   return (
     <header
@@ -15,18 +28,18 @@ export function Navbar() {
         backgroundColor: 'color-mix(in oklch, var(--theme-card-bg) 95%, transparent)',
       }}
     >
-      {/* Top Moroccan Promo Ticker */}
+      {/* Top Country-Aware Promo Ticker */}
       <div
         className="announcement-bar text-[11px] leading-tight py-1.5 px-4 text-center font-medium shadow-xs line-clamp-2"
         style={{
           backgroundColor: theme.announcementBg || theme.colors.primary,
           color: theme.announcementTextColor || 'var(--theme-announcement-text)',
         }}
-        title={theme.announcementText}
+        title={announcement}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 min-w-0">
-          <span aria-hidden="true">🇲🇦</span>
-          <span className="truncate sm:whitespace-nowrap">{theme.announcementText}</span>
+          <span aria-hidden="true">{countryConfig.phone.flag}</span>
+          <span className="truncate sm:whitespace-nowrap">{announcement}</span>
         </div>
       </div>
 

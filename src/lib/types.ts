@@ -42,6 +42,8 @@ export interface Order {
   deliveryType?: 'home' | 'stopdesk';
   agencyName?: string;
   source?: 'web' | 'whatsapp';
+  countryCode?: string;
+  currency?: string;
   confirmedAt?: string;
   shippedAt?: string;
   deliveredAt?: string;
@@ -100,6 +102,8 @@ export interface CustomerOrderSummary {
   itemsSummary: string;
   courier?: string;
   trackingNumber?: string;
+  countryCode?: string;
+  currency?: string;
 }
 
 export interface Customer {

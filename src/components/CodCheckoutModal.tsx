@@ -149,7 +149,7 @@ export function CodCheckoutModal({
   const [address, setAddress] = useState('');
   const [deliveryType, setDeliveryType] = useState<'home' | 'stopdesk'>('home');
   const [agencyName, setAgencyName] = useState('');
-  const tiers = useMemo(() => getProductQuantityTiers(product), [product]);
+  const tiers = useMemo(() => getProductQuantityTiers(product, effectiveCountryCode), [product, effectiveCountryCode]);
   const [selectedVariant, setSelectedVariant] = useState(
     initialVariant || (product.variants?.options.find((o) => o.inStock)?.name ?? '')
   );
@@ -627,10 +627,10 @@ Merci de me confirmer la livraison !`;
                     </div>
                   )}
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="font-black text-sm text-emerald-700">{formatMAD(selectedTier.totalPrice)}</span>
+                    <span className="font-black text-sm text-emerald-700">{formatPrice(selectedTier.totalPrice)}</span>
                     {product.originalPrice > product.price && (
                       <span className="line-through text-xs text-zinc-400">
-                        {formatMAD(Math.round((product.originalPrice / product.price) * selectedTier.totalPrice))}
+                        {formatPrice(Math.round((product.originalPrice / product.price) * selectedTier.totalPrice))}
                       </span>
                     )}
                   </div>
@@ -721,11 +721,11 @@ Merci de me confirmer la livraison !`;
                           </div>
                           <div className="text-right shrink-0">
                             <div className="font-black text-xs sm:text-sm text-zinc-900">
-                              {formatMAD(tier.totalPrice)}
+                              {formatPrice(tier.totalPrice)}
                             </div>
                             {tier.quantity > 1 && (
                               <div className="text-[10px] text-zinc-400">
-                                {formatMAD(tier.unitPrice)} / u
+                                {formatPrice(tier.unitPrice)} / u
                               </div>
                             )}
                           </div>
@@ -787,7 +787,7 @@ Merci de me confirmer la livraison !`;
                   {isFreeShipping ? (
                     <div className="text-[10px] font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
                       <Sparkles className="w-3 h-3 text-emerald-600" />
-                      <span>Livraison 100% Gratuite au Maroc (Pack Offert !)</span>
+                      <span>Livraison 100% Gratuite {countryConfig.inCountryName} (Pack Offert !)</span>
                     </div>
                   ) : (
                     <div className="text-[10px] text-zinc-500 mt-0.5 font-medium">
@@ -796,7 +796,7 @@ Merci de me confirmer la livraison !`;
                   )}
                 </div>
                 <div className="text-right">
-                  <div className="font-black text-base text-zinc-900">{formatMAD(selectedTier.totalPrice)}</div>
+                  <div className="font-black text-base text-zinc-900">{formatPrice(selectedTier.totalPrice)}</div>
                 </div>
               </div>
 
@@ -846,7 +846,7 @@ Merci de me confirmer la livraison !`;
                     <div className="font-bold text-xs text-zinc-900 truncate">{product.title}</div>
                     <div className="text-[11px] text-zinc-600 truncate">
                       {selectedTier.label} {selectedVariant ? `• ${selectedVariant}` : ''} {selectedSku ? `[SKU: ${selectedSku}]` : ''} —{' '}
-                      <span className="font-bold text-emerald-700">{formatMAD(selectedTier.totalPrice)}</span>
+                      <span className="font-bold text-emerald-700">{formatPrice(selectedTier.totalPrice)}</span>
                     </div>
                   </div>
                 </div>
