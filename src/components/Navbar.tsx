@@ -3,10 +3,12 @@
 import React, { useMemo } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { getCountryConfig } from '@/lib/geo';
-import { MessageCircle, ShieldCheck } from 'lucide-react';
+import { MessageCircle, ShieldCheck, ShoppingBag, Compass } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
 
 export function Navbar() {
   const { theme, countryCode } = useTheme();
+  const { totalCount, openCart } = useCart();
   const countryConfig = useMemo(() => getCountryConfig(countryCode || 'MA'), [countryCode]);
 
   const announcement = useMemo(() => {
@@ -43,7 +45,7 @@ export function Navbar() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 min-w-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4 min-w-0">
         {/* Logo / Store Name */}
         <a
           href="/"
@@ -63,7 +65,7 @@ export function Navbar() {
               {theme.name.toUpperCase()}
             </div>
             <div
-              className="text-[10px] -mt-1 font-medium tracking-wide truncate max-w-[200px] sm:max-w-xs"
+              className="text-[10px] -mt-1 font-medium tracking-wide truncate max-w-[150px] sm:max-w-xs"
               style={{ color: 'var(--theme-text-secondary)' }}
             >
               {theme.tagline}
@@ -71,29 +73,82 @@ export function Navbar() {
           </div>
         </a>
 
+        {/* Central Storefront Navigation Links */}
+        <nav className="hidden md:flex items-center gap-1.5 font-bold text-xs" aria-label="Navigation principale">
+          <a
+            href="/"
+            className="px-3 py-1.5 rounded-lg transition hover:bg-black/5"
+            style={{ color: 'var(--theme-text-primary)' }}
+          >
+            Accueil
+          </a>
+          <a
+            href="/catalog"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition hover:bg-black/5"
+            style={{ color: 'var(--theme-text-primary)' }}
+          >
+            <Compass className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} />
+            <span>Catalogue & Collections</span>
+            <span
+              className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded"
+              style={{
+                backgroundColor: theme.colors.badgeBg,
+                color: theme.colors.badgeText,
+              }}
+            >
+              Boutique
+            </span>
+          </a>
+        </nav>
+
         {/* Header Right Actions */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <a
             href="https://wa.me/212661000000?text=Salam,%20j'ai%20une%20question%20sur%20vos%20produits"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold hover:bg-emerald-100 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold hover:bg-emerald-100 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
           >
             <MessageCircle className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
             <span>Assistance WhatsApp</span>
           </a>
 
-          <div
-            className="hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg font-medium border"
+          {/* Quick Mobile Catalog Icon Link */}
+          <a
+            href="/catalog"
+            className="md:hidden p-2 rounded-xl border flex items-center justify-center transition shadow-xs"
             style={{
-              color: 'var(--theme-text-secondary)',
-              backgroundColor: 'color-mix(in oklch, var(--theme-border) 30%, var(--theme-card-bg))',
+              backgroundColor: 'var(--theme-card-bg)',
               borderColor: 'var(--theme-border)',
+              color: 'var(--theme-text-primary)',
+            }}
+            aria-label="Voir le catalogue"
+          >
+            <Compass className="w-4 h-4" />
+          </a>
+
+          {/* Global Reactive Cart Drawer Button */}
+          <button
+            type="button"
+            onClick={openCart}
+            aria-label={`Panier (${totalCount} articles)`}
+            className="relative px-2.5 py-2 sm:px-3 sm:py-2 rounded-xl border flex items-center gap-2 font-bold text-xs transition shadow-xs cursor-pointer hover:opacity-95"
+            style={{
+              backgroundColor: 'var(--theme-card-bg)',
+              borderColor: 'var(--theme-border)',
+              color: 'var(--theme-text-primary)',
             }}
           >
-            <ShieldCheck className="w-4 h-4 text-emerald-600" aria-hidden="true" />
-            <span className="hidden md:inline">Garantie Qualité 100%</span>
-          </div>
+            <ShoppingBag className="w-4 h-4" style={{ color: theme.colors.primary }} />
+            <span className="hidden sm:inline">Panier</span>
+            {totalCount > 0 ? (
+              <span className="bg-emerald-600 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center animate-in zoom-in">
+                {totalCount}
+              </span>
+            ) : (
+              <span className="text-[10px] opacity-60 font-normal">(0)</span>
+            )}
+          </button>
         </div>
       </div>
     </header>

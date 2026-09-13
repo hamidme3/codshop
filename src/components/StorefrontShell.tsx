@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { ThemeSelectorBar } from '@/components/ThemeSelectorBar';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { CartDrawer } from '@/components/CartDrawer';
 
 export function StorefrontShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '';
@@ -23,6 +24,7 @@ export function StorefrontShell({ children }: { children: React.ReactNode }) {
       </div>
       <main className="min-w-0">{children}</main>
       <Footer />
+      <CartDrawer />
     </>
   );
 }

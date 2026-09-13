@@ -284,6 +284,114 @@ async function auditCheckout(browser) {
   };
 }
 
+async function auditCatalogAndCart(browser) {
+  console.log('\n=== SUITE 6: CATALOG BROWSE & CART DRAWER LIVE BROWSING ===');
+  const page = await browser.newPage();
+  const pageErrors = [];
+  page.on('pageerror', (err) => pageErrors.push(err.toString()));
+
+  const catalogUrl = `${BASE_URL}/catalog?store=ottavio`;
+  console.log(`  Navigating to catalog: ${catalogUrl}`);
+  const resp = await page.goto(catalogUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+  const status = resp ? resp.status() : 200;
+
+  // 1. Verify Catalog Title and Product Cards Count
+  const catalogTitle = await page.evaluate(() => document.querySelector('h1')?.innerText || '');
+  const productCount = await page.evaluate(() => document.querySelectorAll('.card-root').length);
+  console.log(`  Catalog Header: "${catalogTitle}" | Displayed Products: ${productCount}`);
+
+  await capture(page, 'catalog-desktop.png');
+
+  // 2. Test Category Filter Switch (e.g. click "Terroir & Miels")
+  console.log('  Testing Category Filter button click...');
+  await page.evaluate(() => {
+    const btns = Array.from(document.querySelectorAll('button'));
+    const culinaryBtn = btns.find(b => b.innerText.includes('Terroir') || b.innerText.includes('Miels'));
+    if (culinaryBtn) culinaryBtn.click();
+  });
+  await new Promise(r => setTimeout(r, 600));
+
+  const filteredCount = await page.evaluate(() => document.querySelectorAll('.card-root').length);
+  console.log(`  Filtered Category Count: ${filteredCount}`);
+
+  // Reset filter back to all
+  await page.evaluate(() => {
+    const btns = Array.from(document.querySelectorAll('button'));
+    const allBtn = btns.find(b => b.innerText.includes('Tous'));
+    if (allBtn) allBtn.click();
+  });
+  await new Promise(r => setTimeout(r, 500));
+
+  // 3. Click "+ Panier" (Add to Cart) on first product card
+  console.log('  Clicking "+ Panier" button to add item to cart...');
+  await page.evaluate(() => {
+    const cardAddBtn = document.querySelector('.card-root button[title="Ajouter au panier"]');
+    if (cardAddBtn) cardAddBtn.click();
+  });
+
+  await new Promise(r => setTimeout(r, 1000));
+
+  // 4. Verify Slide-Over Cart Drawer is Open
+  const isDrawerOpen = await page.evaluate(() => {
+    const dialog = document.querySelector('[role="dialog"][aria-label="Mon Panier"]');
+    return !!dialog;
+  });
+  console.log(`  Cart Drawer Opened: ${isDrawerOpen}`);
+
+  const cartSummary = await page.evaluate(() => {
+    const dialog = document.querySelector('[role="dialog"]');
+    if (!dialog) return null;
+    return dialog.innerText.slice(0, 300);
+  });
+  console.log(`  Cart Drawer Summary: ${cartSummary ? cartSummary.replace(/\n+/g, ' | ').slice(0, 120) : 'None'}`);
+
+  await capture(page, 'cart-drawer-open.png');
+
+  // 5. Test Quantity Increment in Cart Drawer
+  console.log('  Testing Quantity Increment (+) in Cart Drawer...');
+  await page.evaluate(() => {
+    const plusBtn = document.querySelector('[role="dialog"] button[aria-label="Augmenter la quantité"]');
+    if (plusBtn) plusBtn.click();
+  });
+  await new Promise(r => setTimeout(r, 600));
+
+  const cartCountAfterPlus = await page.evaluate(() => {
+    const countEl = document.querySelector('[role="dialog"] span.font-bold.w-6');
+    return countEl ? countEl.innerText : null;
+  });
+  console.log(`  Cart Item Quantity after Increment: ${cartCountAfterPlus}`);
+
+  // 6. Test Multi-Item COD Checkout step
+  console.log('  Clicking "Passer la Commande (COD)" in Drawer...');
+  await page.evaluate(() => {
+    const checkoutBtn = Array.from(document.querySelectorAll('[role="dialog"] button')).find(b => (b.innerText || '').includes('Passer la Commande'));
+    if (checkoutBtn) checkoutBtn.click();
+  });
+  await new Promise(r => setTimeout(r, 800));
+
+  const isCheckoutMode = await page.evaluate(() => {
+    const form = document.querySelector('[role="dialog"] form');
+    return !!form;
+  });
+  console.log(`  Cart Drawer switched to COD Checkout Form: ${isCheckoutMode}`);
+
+  await capture(page, 'cart-drawer-checkout-step.png');
+
+  const pass = status === 200 && productCount >= 6 && isDrawerOpen && pageErrors.length === 0;
+  console.log(`  [${pass ? 'PASS' : 'FAIL'}] Catalog Browse & Cart Drawer | Errors: ${pageErrors.length}`);
+
+  await page.close();
+  return {
+    status,
+    productCount,
+    isDrawerOpen,
+    cartCountAfterPlus,
+    isCheckoutMode,
+    pageErrors,
+    pass,
+  };
+}
+
 async function auditAdmin(browser, sessionToken) {
   console.log('\n=== SUITE 3: MERCHANT BACKOFFICE LIVE BROWSING ===');
   const page = await browser.newPage();
@@ -933,6 +1041,10 @@ async function main() {
     } else {
       console.warn('Skipping Interactive CRUD suite: No session token');
     }
+  }
+
+  if (suite === 'all' || suite === 'catalog' || suite === 'cart') {
+    report.catalog = await auditCatalogAndCart(browser);
   }
 
   await browser.close();

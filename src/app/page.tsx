@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { getCountryConfig } from '@/lib/geo';
-import { getProductsByTheme } from '@/lib/mockProducts';
+import { getProductsByTheme, MOCK_PRODUCTS } from '@/lib/mockProducts';
 import { ProductCard } from '@/components/ProductCard';
 import { Award, Sparkles, Zap, ArrowRight, Star, ShieldCheck, Truck } from 'lucide-react';
 
@@ -152,15 +152,55 @@ export default function HomePage() {
               Nos Meilleures Ventes du Moment
             </h2>
           </div>
-          <span className="text-xs font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
-            {products.length} {products.length > 1 ? 'produits disponibles' : 'produit disponible'}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
+              {products.length} {products.length > 1 ? 'produits disponibles' : 'produit disponible'}
+            </span>
+            <a
+              href="/catalog"
+              className="text-xs font-bold flex items-center gap-1 hover:opacity-80 px-2.5 py-1 rounded-lg border transition"
+              style={{
+                color: 'var(--theme-text-primary)',
+                borderColor: 'var(--theme-border)',
+                backgroundColor: 'var(--theme-card-bg)',
+              }}
+            >
+              <span>Voir tout ({MOCK_PRODUCTS.length})</span>
+              <ArrowRight className="w-3 h-3" />
+            </a>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
+        </div>
+
+        {/* View Full Catalog Callout */}
+        <div
+          className="p-4 rounded-2xl border text-center flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs"
+          style={{
+            backgroundColor: 'var(--theme-card-bg)',
+            borderColor: 'var(--theme-border)',
+          }}
+        >
+          <div className="text-left">
+            <h4 className="text-xs font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+              Envie d'explorer plus d'articles ?
+            </h4>
+            <p className="text-[11px]" style={{ color: 'var(--theme-text-secondary)' }}>
+              Découvrez l'ensemble de notre catalogue avec filtres par catégorie, budget et recherche directe.
+            </p>
+          </div>
+          <a
+            href="/catalog"
+            className="px-4 py-2 text-white font-bold text-xs rounded-xl shadow-xs shrink-0 flex items-center gap-1.5 transition hover:opacity-90"
+            style={{ backgroundColor: theme.colors.primary }}
+          >
+            <span>Accéder au Catalogue Complet</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </a>
         </div>
       </section>
 

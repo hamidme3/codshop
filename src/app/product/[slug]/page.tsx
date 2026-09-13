@@ -20,9 +20,11 @@ import {
   PackageCheck,
   Zap,
   AlertCircle,
+  ShoppingBag,
 } from 'lucide-react';
 import { CodCheckoutModal } from '@/components/CodCheckoutModal';
 import { CartWidget } from '@/components/CartWidget';
+import { useCart } from '@/context/CartContext';
 import { fetchAndInitPixels, trackViewContent } from '@/lib/pixel-tracker';
 
 export default function ProductDetailPage() {
@@ -30,6 +32,7 @@ export default function ProductDetailPage() {
   const slug = params?.slug as string;
   const product = getProductBySlug(slug);
   const { formatMAD, formatPrice, theme, countryCode: contextCountryCode } = useTheme();
+  const { addItem } = useCart();
 
   // Multi-country visitor detection
   const [visitorCountry, setVisitorCountry] = useState<string>(
@@ -592,6 +595,33 @@ export default function ProductDetailPage() {
               )}
             </button>
 
+            {/* Add to Cart Secondary CTA */}
+            <button
+              type="button"
+              disabled={!activeVariantInfo.inStock}
+              onClick={() => {
+                addItem({
+                  productId: product.id,
+                  slug: product.slug,
+                  title: product.title,
+                  price: activeTier?.totalPrice ? Math.round(activeTier.totalPrice / selectedQuantity) : product.price,
+                  originalPrice: product.originalPrice,
+                  image: activeVariantInfo.image || product.images[0],
+                  quantity: selectedQuantity,
+                  color: selectedColor || undefined,
+                  size: selectedSize || undefined,
+                  variant: activeVariantInfo.label !== 'Standard' ? activeVariantInfo.label : undefined,
+                  sku: activeVariantInfo.sku,
+                });
+              }}
+              className={`w-full py-3.5 px-6 border-2 border-zinc-900 text-zinc-900 font-black text-sm rounded-2xl hover:bg-zinc-900 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-white shadow-xs`}
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span>
+                Ajouter au Panier ({selectedQuantity} {selectedQuantity > 1 ? 'articles' : 'article'})
+              </span>
+            </button>
+
             <a
               href={`https://wa.me/${product.whatsAppDirectNumber}?text=${encodeURIComponent(
                 `${['SA', 'AE', 'EG', 'DZ', 'MA'].includes(visitorCountry) ? 'Salam' : 'Bonjour'}, je souhaite commander : ${product?.title ?? 'ce produit'}\n🏷️ Réf/SKU : ${activeVariantInfo.sku}\n${selectedColor ? `🎨 Couleur : ${selectedColor}\n` : ''}${selectedSize ? `📏 Pointure : ${selectedSize}\n` : ''}${selectedVariant && !selectedColor && !selectedSize ? `📦 Option : ${selectedVariant}\n` : ''}💰 Total : ${formatPrice(activeTier?.totalPrice ?? product?.price ?? 0, visitorCountry)} (${activeTier?.label ?? 'Standard'})\nPaiement Cash à la Livraison (${countryConfig.name}). Merci !`
@@ -686,18 +716,45 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Right: High-Converting CTA Button */}
-          <button
-            type="button"
-            disabled={!activeVariantInfo.inStock}
-            onClick={() => setShowCheckoutModal(true)}
-            className={`py-3 px-4 sm:px-5 text-white font-black text-xs sm:text-sm tracking-tight shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0 min-h-[48px] ${theme.styleTokens.buttonRadius}`}
-            style={{ backgroundColor: activeVariantInfo.inStock ? theme.colors.primary : '#6b7280' }}
-            aria-label="Acheter maintenant - Paiement à la livraison"
-          >
-            <span>{activeVariantInfo.inStock ? 'Acheter Maintenant' : 'Épuisé'}</span>
-            {activeVariantInfo.inStock && <ArrowRight className="w-4 h-4 stroke-[3]" />}
-          </button>
+          {/* Right: High-Converting CTA Buttons */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              disabled={!activeVariantInfo.inStock}
+              onClick={() => {
+                addItem({
+                  productId: product.id,
+                  slug: product.slug,
+                  title: product.title,
+                  price: activeTier?.totalPrice ? Math.round(activeTier.totalPrice / selectedQuantity) : product.price,
+                  originalPrice: product.originalPrice,
+                  image: activeVariantInfo.image || product.images[0],
+                  quantity: selectedQuantity,
+                  color: selectedColor || undefined,
+                  size: selectedSize || undefined,
+                  variant: activeVariantInfo.label !== 'Standard' ? activeVariantInfo.label : undefined,
+                  sku: activeVariantInfo.sku,
+                });
+              }}
+              className="p-3 border border-zinc-300 text-zinc-900 bg-white rounded-xl text-xs font-bold transition flex items-center justify-center min-h-[48px] cursor-pointer shadow-xs active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="Ajouter au panier"
+              title="Ajouter au panier"
+            >
+              <ShoppingBag className="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              disabled={!activeVariantInfo.inStock}
+              onClick={() => setShowCheckoutModal(true)}
+              className={`py-3 px-3.5 sm:px-5 text-white font-black text-xs sm:text-sm tracking-tight shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] ${theme.styleTokens.buttonRadius}`}
+              style={{ backgroundColor: activeVariantInfo.inStock ? theme.colors.primary : '#6b7280' }}
+              aria-label="Acheter maintenant - Paiement à la livraison"
+            >
+              <span>{activeVariantInfo.inStock ? 'Acheter' : 'Épuisé'}</span>
+              {activeVariantInfo.inStock && <ArrowRight className="w-3.5 h-3.5 stroke-[3]" />}
+            </button>
+          </div>
         </div>
       </div>
 

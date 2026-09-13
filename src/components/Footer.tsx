@@ -82,6 +82,37 @@ export function Footer() {
         </div>
       </div>
 
+      {/* Footer Navigation Links */}
+      <div className="border-b py-6" style={{ borderColor: 'var(--theme-border)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-4 text-xs">
+          <div className="flex flex-wrap items-center gap-4 font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+            <a href="/" className="hover:underline">
+              Accueil
+            </a>
+            <span>•</span>
+            <a href="/catalog" className="hover:underline flex items-center gap-1 font-bold" style={{ color: theme.colors.primary }}>
+              Catalogue Complet
+            </a>
+            <span>•</span>
+            <a href="/catalog" className="hover:underline" style={{ color: 'var(--theme-text-secondary)' }}>
+              Maroquinerie & Chaussures
+            </a>
+            <span>•</span>
+            <a href="/catalog" className="hover:underline" style={{ color: 'var(--theme-text-secondary)' }}>
+              Terroir & Miels d'Atlas
+            </a>
+            <span>•</span>
+            <a href="/catalog" className="hover:underline" style={{ color: 'var(--theme-text-secondary)' }}>
+              High-Tech & Son
+            </a>
+          </div>
+
+          <div className="text-[11px] font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
+            Paiement Cash • Vérification avant de payer
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
         <div className="flex items-center gap-2" style={{ color: 'var(--theme-text-secondary)' }}>
           <span aria-hidden="true">🇲🇦</span>

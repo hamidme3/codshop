@@ -582,9 +582,69 @@ STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS, 14/14 TEST SUITES PASS)
   * `manifest_export_modal_whatsapp.png`: Full interactive modal with summary KPIs, carrier selector, driver WhatsApp card, and order preview.
   * `manifest_export_modal_whatsapp_expanded.png`: Expanded live WhatsApp text preview.
 
+=== ROUND 16: Global Cart System, Theme-Aware Dedicated Catalog Page, & 100% Storefront Production Readiness ===
+
+DATE: 2026-09-13
+STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS, 15/15 AUTOMATED TEST SUITES PASS, CHROME LIVE BROWSING SUITES PASS)
+
+1. FULL STOREFRONT ARCHITECTURE & DEFECT RESOLUTION:
+- Global Reactive Cart Engine (`src/context/CartContext.tsx` & `src/app/layout.tsx`):
+  * Built universal `CartProvider` managing `items`, `addItem`, `removeItem`, `updateQuantity`, `clearCart`, `totalCount`, `subtotal`, and drawer state.
+  * Hydration-safe `localStorage` and `sessionStorage` synchronization with SSR guards.
+  * Normalized composite IDs (`${productId}-${color}-${size}-${variant}`) supporting variant-level multi-item carts.
+- Slide-Over Cart Drawer & Multi-Item COD Checkout (`src/components/CartDrawer.tsx` & `src/components/StorefrontShell.tsx`):
+  * Slide-over drawer with backdrop blur, smooth slide-in, ESC key dismissal, and body scroll locking.
+  * Real-time item rows with product thumbnails, variants, quantity steppers (`-` / `+`), and trash triggers.
+  * Moroccan COD Free Shipping Progress Bar (dynamically tracks progress toward the 400 DH / 2-item nationwide free delivery threshold).
+  * Authentic Moroccan trust badges ("Paiement 100% à la livraison", "Vérification du colis avant paiement").
+  * Integrated In-Drawer Multi-Item COD Checkout form collecting customer name, normalized phone, city (with popular quick-chips), address, and Home vs Stopdesk delivery mode.
+  * Submits multi-item orders directly to `POST /api/order`, clears the cart on success, and smoothly redirects to `/order-success/[orderNumber]`.
+- Storefront Navigation Elevation (`src/components/Navbar.tsx` & `src/components/Footer.tsx`):
+  * Added "Catalogue & Collections" navigation link pointing to `/catalog` with boutique badge.
+  * Integrated global reactive Cart Drawer trigger button with live pulse badge displaying real-time article count.
+  * Added mobile-friendly quick catalog and cart access icons.
+  * Added footer navigation links to catalog and primary product categories.
+- Dual Conversion CTAs on Product Pages & Cards (`ProductCard.tsx` & `product/[slug]/page.tsx`):
+  * Product Cards now feature both primary 1-Tap "Commander" (opens waybill COD modal) and "+ Panier" (adds to cart and triggers drawer).
+  * Product Detail page now features both primary "Acheter Maintenant — Paiement à la Livraison" and secondary "Ajouter au Panier (X articles)" reflecting chosen quantity tiers and variants.
+  * Sticky mobile bottom buy bar updated with dual CTAs (compact "+ Panier" icon button + "Acheter" button).
+  * Replaced orphaned `CartWidget.tsx` with a reactive drawer trigger.
+- Dedicated Theme-Aware Catalog Page (`src/app/catalog/page.tsx`):
+  * Route: `/catalog` inheriting 100% of the active theme tokens (`--theme-primary`, `--theme-card-bg`, font scale, button radius, badge styling, and localized currency).
+  * Live faceted category pills (Tous, Maroquinerie, Beauté, High-Tech, Terroir & Miels, Sport & Fitness, Maison & Artisanat).
+  * Instant client-side keyword search bar (title, description, SKU).
+  * Price budget filters (< 250 DH, 250-400 DH, > 400 DH) and in-stock only toggle.
+  * Sort dropdown (Populaire, Prix croissant, Prix décroissant, Meilleures notes).
+  * Clean empty state with 1-click filter reset.
+- Catalog Product Coverage Expansion (`src/lib/mockProducts.ts`):
+  * Expanded `MOCK_PRODUCTS` to 10 authentic products across 7 theme niches:
+    1. Souliers Richelieu Cousu Goodyear (Luxury)
+    2. Sac Voyage Weekender Cuir (Luxury)
+    3. Élixir Huile d'Argan & Or (Beauty)
+    4. Masque Argile Ghassoul & Rose (Beauty)
+    5. Montre Connectée AMOLED Ultra Pro (Tech)
+    6. Écouteurs TWS ANC Réduction de Bruit (Tech)
+    7. Miel d'Euphorbe Sauvage (Dagmouss) du Haut Atlas (Culinary / Terroir)
+    8. Coffret Premium Barbe & Soin Argan Bio (Streetwear / Mode)
+    9. Ensemble Sport Compression & Maintien Pro (Fitness / Sport)
+    10. Tajine Traditionnel en Terre Cuite Émaillée de Safi (Kitchen / Artisanat)
+  * Updated `getProductsByTheme` so all 25 themes map to authentic merchandise matching their visual brand identity.
+
+2. VERIFICATION & REPRODUCIBLE ASSURANCE:
+- TypeScript Compilation: `npx tsc --noEmit` PASSED with 0 ERRORS.
+- Next.js Production Build: `npm run build` PASSED (66/66 routes prerendered including `/catalog`).
+- Automated Test Suites: 15/15 PASSED (100% success rate across `cart-catalog-experience`, `challenger-qa`, `saas-pipeline`, `security-phone`, `security-pricing-sanitization`, `cro-storefront-mobile`, `crm-pipeline-sync`, `category-crud-mutation`, `order-pipeline-4stage`, `pixels-tracking`, `admin-mobile-responsive`, `variant-matrix`, `moroccan-cod-economics`, `multi-country-theme-audit`, `manifest-whatsapp-export`).
+- Chrome Live Browsing Verification:
+  * Suite 1 (Themes): 25/25 Themes PASSED (HTTP 200, 0 errors).
+  * Suite 2 (Checkout): 1-Tap COD Modal -> Order Success PASSED.
+  * Suite 3 (Admin): All 12 Backoffice Sections PASSED (HTTP 200, 0 errors).
+  * Suite 6 (Catalog & Cart): `/catalog` browse -> category filter -> "+ Panier" -> Cart Drawer -> quantity increase (+) -> multi-item checkout form PASSED (HTTP 200, 0 errors).
+
 3. PRODUCTION DEPLOYMENT & SYNC:
-- Coolify Docker Container: `codshop-app` rebuilt and healthy at `http://172.18.1.13:3000`.
+- Coolify Docker Container: `codshop-app` running healthy at `http://172.18.1.13:3000` (Rebuilt with image `codshop-codshop:latest`).
 - Live Production Domain: `https://codshop.vipone.site` (HTTP 200 via Cloudflare and Traefik).
+- Live Catalog Endpoint: `https://codshop.vipone.site/catalog` (HTTP 200).
 - Git Repository: Synchronized with `origin/main`.
 
 <!-- GOAL_COMPLETE -->
+

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { CartProvider } from "@/context/CartContext";
 import { StorefrontShell } from "@/components/StorefrontShell";
 import { Inter, Playfair_Display, JetBrains_Mono, Cairo } from "next/font/google";
 
@@ -64,7 +65,9 @@ export default function RootLayout({
     <html lang="fr" suppressHydrationWarning className={`${inter.variable} ${playfair.variable} ${jetbrains.variable} ${cairo.variable}`}>
       <body className="antialiased" suppressHydrationWarning>
         <ThemeProvider>
-          <StorefrontShell>{children}</StorefrontShell>
+          <CartProvider>
+            <StorefrontShell>{children}</StorefrontShell>
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>

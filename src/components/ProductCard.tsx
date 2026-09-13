@@ -4,11 +4,13 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Product } from '@/lib/mockProducts';
 import { useTheme } from '@/context/ThemeContext';
-import { Star, ShieldCheck, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
+import { Star, ShieldCheck, ShoppingCart, Plus } from 'lucide-react';
 import { CodCheckoutModal } from './CodCheckoutModal';
 
 export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const { theme, formatMAD } = useTheme();
+  const { addItem } = useCart();
   const [showModal, setShowModal] = useState(false);
 
   const discountPercent = useMemo(() => {
@@ -134,17 +136,42 @@ export function ProductCard({ product, priority = false }: { product: Product; p
               </span>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setShowModal(true)}
-              aria-haspopup="dialog"
-              aria-controls={`checkout-${product.slug}`}
-              className={`btn-primary w-full py-2.5 px-3 text-white text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-primary)] focus-visible:ring-offset-2 transition-opacity duration-[var(--motion-base)] ${theme.styleTokens.buttonRadius}`}
-              style={{ backgroundColor: 'var(--theme-primary)' }}
-            >
-              <ShoppingCart className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Commander Maintenant</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowModal(true)}
+                aria-haspopup="dialog"
+                aria-controls={`checkout-${product.slug}`}
+                className={`btn-primary flex-1 py-2.5 px-3 text-white text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-primary)] focus-visible:ring-offset-2 transition-opacity duration-[var(--motion-base)] ${theme.styleTokens.buttonRadius}`}
+                style={{ backgroundColor: 'var(--theme-primary)' }}
+              >
+                <ShoppingCart className="w-3.5 h-3.5" aria-hidden="true" />
+                <span className="truncate">Commander</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addItem({
+                    productId: product.id,
+                    slug: product.slug,
+                    title: product.title,
+                    price: product.price,
+                    originalPrice: product.originalPrice,
+                    image: product.images[0],
+                    quantity: 1,
+                    sku: product.sku,
+                  });
+                }}
+                aria-label={`Ajouter ${product.title} au panier`}
+                className={`py-2.5 px-3 border border-zinc-300 hover:border-zinc-800 text-zinc-800 bg-white hover:bg-zinc-50 text-xs font-bold transition flex items-center justify-center gap-1 shrink-0 cursor-pointer shadow-xs ${theme.styleTokens.buttonRadius}`}
+                title="Ajouter au panier"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Panier</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

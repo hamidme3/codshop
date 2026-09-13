@@ -418,6 +418,136 @@ export const MOCK_PRODUCTS: Product[] = [
     ],
     whatsAppDirectNumber: '212661000000',
   },
+  // 7. TERROIR & CULINARY — Miel d'Euphorbe Pur du Haut Atlas
+  {
+    id: 'culinary-1',
+    slug: 'miel-euphorbe-pur-daghmous-atlas',
+    sku: 'TERR-MIEL-DAGH',
+    theme: 'culinary',
+    title: 'Miel d’Euphorbe Sauvage (Dagmouss) du Haut Atlas',
+    titleAr: 'عسل الدغموس الحر الأصيل من جبال الأطلس المغربي',
+    tagline: 'Récolte artisanale de Souss-Massa, 100% pur, non pasteurisé & certifié',
+    price: 290,
+    originalPrice: 450,
+    rating: 4.9,
+    reviewCount: 234,
+    stockLeft: 18,
+    images: [
+      'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=800&q=80',
+    ],
+    description: 'Le miel de Dagmouss est réputé au Maroc pour sa saveur unique piquante en gorge et ses vertus thérapeutiques ancestrales contre les coups de froid et maux d’hiver.',
+    features: [
+      '100% pur & naturel récolté dans la région d’Aït Baha',
+      'Non chauffé, non pasteurisé pour préserver ses enzymes actives',
+      'Pot hermétique en verre avec cuillère en bois d’olivier offerte',
+    ],
+    quantityTiers: [
+      { quantity: 1, label: 'Pack 1 : 1 Pot 500g', unitPrice: 290, totalPrice: 290, freeDelivery: false },
+      { quantity: 2, label: 'Pack 2 : Duo Santé 2 × 500g', unitPrice: 249, totalPrice: 498, savingsBadge: 'Économisez 82 DH', isPopular: true, freeDelivery: true, badge: '🔥 Pack Familial Populaire (الأكثر طلباً)' },
+      { quantity: 3, label: 'Pack 3 : Trio Curatif (3 Pots + Cuillère)', unitPrice: 220, totalPrice: 660, savingsBadge: 'Économisez 210 DH + Cadeau 🎁', freeDelivery: true, freeGift: 'Cuillère à miel artisanale en bois d’olivier', badge: '💎 Meilleur Prix' },
+    ],
+    whatsAppDirectNumber: '212661000000',
+  },
+  // 8. STREETWEAR & MODE — Coffret Soin Barbe & Argan Bio
+  {
+    id: 'street-1',
+    slug: 'coffret-soin-barbe-huile-argan-cedre',
+    sku: 'STR-BEARD-KIT',
+    theme: 'streetwear',
+    title: 'Coffret Premium Barbe & Soin à l’Argan et Cèdre de l’Atlas',
+    titleAr: 'مجموعة العناية باللحية الفاخرة بزيت الأركان المغربي',
+    tagline: 'Huile pure pressée à froid, baume sculptant et peigne en bois de poirier',
+    price: 249,
+    originalPrice: 390,
+    rating: 4.8,
+    reviewCount: 97,
+    stockLeft: 22,
+    images: [
+      'https://images.unsplash.com/photo-1621607512214-68297480165e?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80',
+    ],
+    description: 'Le rituel de soin masculin marocain par excellence. Formule 100% bio enrichie en huile d’argan pure de Taroudant et essence de cèdre de l’Atlas.',
+    features: [
+      'Huile à barbe 50ml nourrissante anti-démangeaisons',
+      'Baume fixateur naturel 60g au beurre de karité et cire d’abeille',
+      'Peigne antistatique en bois de poirier gravé au laser',
+    ],
+    quantityTiers: [
+      { quantity: 1, label: 'Pack 1 : Le Coffret Essentiel', unitPrice: 249, totalPrice: 249, freeDelivery: false },
+      { quantity: 2, label: 'Pack 2 : Duo Grooming (2 Coffrets)', unitPrice: 219, totalPrice: 438, savingsBadge: 'Économisez 60 DH', isPopular: true, freeDelivery: true, badge: '🔥 Pack Populaire Préféré' },
+      { quantity: 3, label: 'Pack 3 : Trio Barber Pro', unitPrice: 189, totalPrice: 567, savingsBadge: 'Économisez 180 DH + Cire Offerte 🎁', freeDelivery: true, freeGift: 'Cire coiffante mate 50ml offerte', badge: '💎 Meilleure Valeur' },
+    ],
+    whatsAppDirectNumber: '212661000000',
+  },
+  // 9. FITNESS & SPORT — Ensemble Compression Thermique Pro
+  {
+    id: 'fit-1',
+    slug: 'ensemble-fitness-compression-thermique',
+    sku: 'FIT-COMP-SET',
+    theme: 'fitness',
+    title: 'Ensemble Sport Compression & Maintien Musculaire Pro',
+    titleAr: 'طقم رياضي رجالي ضاغط عالي الأداء للتداريب',
+    tagline: 'Tissu respirant Dry-Fit, coutures plates anti-frottements, maintien optimal',
+    price: 349,
+    originalPrice: 520,
+    rating: 4.8,
+    reviewCount: 162,
+    stockLeft: 31,
+    images: [
+      'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=800&q=80',
+    ],
+    description: 'Optimisez vos performances et votre récupération. Conçu en polyamide élasthanne technique avec technologie de compression ciblée favorisant le retour veineux.',
+    features: [
+      'Tissu thermo-régulateur respirant avec séchage express',
+      'Bande élastique antidérapante à la taille pour un maintien parfait',
+      'Résistant aux lavages répétés et aux étirements intensifs',
+    ],
+    sizes: [
+      { id: 'm', name: 'M (65-75 kg)', inStock: true },
+      { id: 'l', name: 'L (75-85 kg)', inStock: true },
+      { id: 'xl', name: 'XL (85-95 kg)', inStock: true },
+      { id: 'xxl', name: 'XXL (95-105 kg)', inStock: true },
+    ],
+    quantityTiers: [
+      { quantity: 1, label: 'Pack 1 : Ensemble Complet (Haut + Bas)', unitPrice: 349, totalPrice: 349, freeDelivery: false },
+      { quantity: 2, label: 'Pack 2 : Duo 2 Ensembles (Noir + Gris)', unitPrice: 299, totalPrice: 598, savingsBadge: 'Économisez 100 DH', isPopular: true, freeDelivery: true, badge: '🔥 Le Plus Populaire (الأكثر طلباً)' },
+      { quantity: 3, label: 'Pack 3 : Trio Athlète (3 Ensembles)', unitPrice: 269, totalPrice: 807, savingsBadge: 'Économisez 240 DH + Gourde Sport 🎁', freeDelivery: true, freeGift: 'Gourde isotherme inox 750ml offerte', badge: '💎 Pack Performance' },
+    ],
+    whatsAppDirectNumber: '212661000000',
+  },
+  // 10. MAISON & ARTISANAT — Tajine en Terre Cuite Émaillée de Safi
+  {
+    id: 'kitchen-1',
+    slug: 'tajine-artisanal-terre-cuite-vernissee',
+    sku: 'HOME-TAJINE-SAF',
+    theme: 'kitchen',
+    title: 'Tajine Traditionnel en Terre Cuite Émaillée de Safi (4-6 pers)',
+    titleAr: 'طاجين مغربي أصيل من طين آسفي الحر المقاوم للحرارة',
+    tagline: 'Façonné à la main, résistant aux hautes chaleurs, cuisson à l’étouffée douce',
+    price: 199,
+    originalPrice: 320,
+    rating: 4.9,
+    reviewCount: 310,
+    stockLeft: 12,
+    images: [
+      'https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?auto=format&fit=crop&w=800&q=80',
+    ],
+    description: 'Le véritable goût du tajine marocain. L’argile réfractaire de Safi cuite à haute température assure une diffusion homogène de la chaleur pour des viandes tendres et fondantes.',
+    features: [
+      'Terre cuite 100% naturelle sans plomb conforme aux normes alimentaires',
+      'Diamètre généreux de 32 cm idéal pour les repas en famille',
+      'Compatible gaz, charbon et four traditionnel',
+    ],
+    quantityTiers: [
+      { quantity: 1, label: 'Pack 1 : 1 Tajine 32cm', unitPrice: 199, totalPrice: 199, freeDelivery: false },
+      { quantity: 2, label: 'Pack 2 : Duo (Grand 32cm + Moyen 26cm)', unitPrice: 179, totalPrice: 358, savingsBadge: 'Économisez 40 DH', isPopular: true, freeDelivery: true, badge: '🔥 Pack Populaire Découverte' },
+      { quantity: 3, label: 'Pack 3 : Trio Cadeau Terroir', unitPrice: 159, totalPrice: 477, savingsBadge: 'Économisez 120 DH + Dessous Plat Liège 🎁', freeDelivery: true, freeGift: 'Dessous de plat en liège et céramique offert', badge: '💎 Meilleure Affaire' },
+    ],
+    whatsAppDirectNumber: '212661000000',
+  },
 ];
 
 export function getProductQuantityTiers(product: Product, countryCode: string = 'MA'): QuantityTier[] {
@@ -467,15 +597,27 @@ export function getProductsByTheme(theme: ThemeId): Product[] {
   const matching = MOCK_PRODUCTS.filter((p) => p.theme === theme);
   if (matching.length > 0) return matching;
 
-  // Smart category fallback so all 25 themes have beautiful product cards
+  // Smart authentic category mapping so all 25 themes have beautiful product cards
   if (['luxury', 'jewelry', 'perfume', 'leather_craft', 'eyewear', 'woodmart'].includes(theme)) {
     return MOCK_PRODUCTS.filter((p) => p.theme === 'luxury');
   }
   if (['beauty', 'botanica', 'babyjoy'].includes(theme)) {
     return MOCK_PRODUCTS.filter((p) => p.theme === 'beauty');
   }
-  if (['tech', 'cyberpunk', 'automotive', 'fitness'].includes(theme)) {
+  if (['tech', 'cyberpunk', 'automotive'].includes(theme)) {
     return MOCK_PRODUCTS.filter((p) => p.theme === 'tech');
+  }
+  if (['culinary', 'coffee_tea'].includes(theme)) {
+    return MOCK_PRODUCTS.filter((p) => p.theme === 'culinary');
+  }
+  if (['fitness'].includes(theme)) {
+    return MOCK_PRODUCTS.filter((p) => p.theme === 'fitness');
+  }
+  if (['kitchen', 'ceramics', 'home' as any].includes(theme)) {
+    return MOCK_PRODUCTS.filter((p) => p.theme === 'kitchen');
+  }
+  if (['streetwear', 'minimal', 'kids_fashion', 'booster', 'shoptimizer', 'flatsome', 'velocity_cod'].includes(theme)) {
+    return MOCK_PRODUCTS.filter((p) => p.theme === 'streetwear' || p.theme === 'luxury');
   }
 
   return MOCK_PRODUCTS;
