@@ -491,6 +491,36 @@ STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS, MULTI-VIEWPORT AUDIT 100
 - Live Production Domain: `https://codshop.vipone.site` (HTTP 200 via Cloudflare and Traefik).
 - Git Repository: Synchronized with `origin/main`.
 
+=== ROUND 13: Telegram Bridge Bidirectional Image Support, Universal 16px Mobile Input Rule, and Semantic Table Row Switches ===
+
+DATE: 2026-09-13
+STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% TEST SUITE PASS, TELEGRAM IMAGE SUITE PASS)
+
+1. SYSTEM & ARCHITECTURAL ENHANCEMENTS:
+- Bidirectional Image Support for Agy Telegram Bridge (`/home/ubuntu/agy-telegram-bridge/bridge.py`):
+  * Inbound Photo & Document Intake: Handles `update.message.photo` (extracts highest-resolution `PhotoSize`) and `update.message.document` with image mime-types (`image/png`, `image/jpeg`, `image/webp`).
+  * Downloads incoming files to `projects/{active_project}/.telegram_images/` and mirrors to global `/home/ubuntu/agy-telegram-bridge/images/`.
+  * Formulates contextual prompt informing Antigravity of image path and instructing visual inspection via `view_file`.
+  * Outbound Image & Artifact Auto-Dispatch: Extracts Markdown image paths (`![alt](path)`), file references, and newly created PNG/JPG/WEBP artifacts from `<appDataDir>/brain/<conversation_id>/` and `/tmp/codshop-chrome-audit/`.
+  * Automatically dispatches up to 5 images as native Telegram photos (`send_photo` <= 10MB) or documents directly to the merchant chat with deduplication guards.
+  * Test Suite: `/home/ubuntu/agy-telegram-bridge/test_image_support.py` passed with 100% success.
+- Universal iOS Safari Ergonomics (`src/app/globals.css`):
+  * Broadened 16px mobile font-size rule to cover all `input:not([type="checkbox"]):not([type="radio"])`, `select`, and `textarea` globally across all screens < 768px, eliminating iOS Safari auto-zoom in modals, dialogs, and portals.
+- Obsidian Surfaces & Padding Normalization (`/admin/orders`, `/admin/account`, `/admin/identity`, `/admin/security`):
+  * Orders table row switches updated to Obsidian `#18181b` with strict 6-stage semantic borders: Confirmed Cyan (`bg-cyan-500/20 text-cyan-300 border-cyan-500/50`), Shipped Amber (`bg-amber-500/20 text-amber-300 border-amber-500/50`), Delivered Emerald (`bg-emerald-500/20 text-emerald-300 border-emerald-500/50`), Returned Rose (`bg-rose-500/20 text-rose-300 border-rose-500/50`).
+  * Account, Identity & Security backoffice pages normalized to `p-4 sm:p-6 md:p-10` padding with `#121215` / `#09090b` obsidian surfaces and `border-zinc-800`.
+
+2. VERIFICATION & ZERO-REGRESSION ASSURANCE:
+- TypeScript Compilation: `npx tsc --noEmit` PASSED with 0 ERRORS.
+- Automated Test Suites: 13/13 PASSED (100% success rate across `admin-mobile-responsive`, `product-category-experience`, `variant-matrix`, `moroccan-cod-economics`, `category-crud-mutation`, `order-pipeline-4stage`, `crm-pipeline-sync`, `saas-pipeline`, `security-phone`, `security-pricing-sanitization`, `challenger-qa`, `cro-storefront-mobile`, `pixels-tracking`).
+- Telegram Bridge Image Suite: `python3 test_image_support.py` PASSED with 100% success.
+
+3. PRODUCTION DEPLOYMENT & SYNC:
+- Coolify Docker Container: `codshop-app` running healthy at `http://172.18.1.13:3000` (Rebuilt and active).
+- Live Production Domain: `https://codshop.vipone.site` (HTTP 200 via Cloudflare and Traefik).
+- Git Repository: Synchronized with `origin/main` (`f33cd07`).
+
 <!-- GOAL_COMPLETE -->
+
 
 
