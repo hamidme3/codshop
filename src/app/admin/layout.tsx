@@ -12,7 +12,9 @@ import {
 } from 'lucide-react';
 import LanguageToggle from '@/components/LanguageToggle';
 import StoreSwitcher from '@/components/admin/StoreSwitcher';
+import AdminThemeToggle from '@/components/admin/AdminThemeToggle';
 import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
+import { AdminThemeProvider } from '@/contexts/AdminThemeContext';
 import { getStorefrontUrl } from '@/lib/store-urls';
 
 interface NavSection {
@@ -141,34 +143,34 @@ function AdminNav({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0f12] text-zinc-100 flex font-sans admin-shell selection:bg-emerald-500/20 selection:text-emerald-200">
-      {/* Desktop Enterprise Sidebar */}
-      <aside aria-label="Admin Navigation" className="hidden lg:flex w-64 flex-col bg-[#101418] border-r border-slate-800/70 shrink-0">
+    <div className="min-h-screen bg-[var(--admin-bg-base)] text-[var(--admin-text-primary)] flex font-sans admin-shell selection:bg-emerald-500/20 selection:text-emerald-700 transition-colors duration-200">
+      {/* Desktop E-Commerce Merchant Sidebar */}
+      <aside aria-label="Admin Navigation" className="hidden lg:flex w-64 flex-col bg-[var(--admin-sidebar-bg)] border-r border-[var(--admin-sidebar-border)] text-slate-300 shrink-0">
         {/* Brand Header */}
-        <div className="h-14 px-5 flex items-center justify-between border-b border-slate-800/70">
-          <Link href={`/admin?store=${storeSlug}`} className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-emerald-500 text-zinc-950 flex items-center justify-center font-black text-xs shadow-sm shadow-emerald-500/20">
-              C
+        <div className="h-14 px-5 flex items-center justify-between border-b border-[var(--admin-sidebar-border)]">
+          <Link href={`/admin?store=${storeSlug}`} className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+              <ShoppingBag className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
-              <span className="font-extrabold text-white text-sm tracking-tight leading-none">CODShop</span>
-              <span className="text-[9px] font-mono text-zinc-500 tracking-wider">ENTERPRISE 2026</span>
+              <span className="font-black text-white text-sm tracking-tight leading-none">CODShop</span>
+              <span className="text-[10px] text-slate-400 font-medium mt-0.5">Suite E-Commerce</span>
             </div>
           </Link>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-800/80 text-[10px] font-mono text-emerald-400 border border-emerald-500/20">
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
             <span>PRO</span>
           </div>
         </div>
 
         {/* Store Profile & Switcher Box */}
-        <div className="p-3.5 border-b border-slate-800/70 bg-[#0e1216] space-y-2">
+        <div className="p-3.5 border-b border-[var(--admin-sidebar-border)] bg-slate-900/60 dark:bg-slate-950/60 space-y-2.5">
           <div className="flex items-center justify-between text-[11px]">
-            <span className="text-zinc-400 font-medium">{t.common.activeStore}</span>
+            <span className="text-slate-400 font-medium">{t.common.activeStore}</span>
             <a
               href={storefrontUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-semibold"
+              className="text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-semibold hover:underline"
             >
               <span>{t.common.liveStorefront}</span>
               <ExternalLink className="w-3 h-3" />
@@ -177,14 +179,14 @@ function AdminNav({ children }: { children: React.ReactNode }) {
 
           <StoreSwitcher currentSlug={storeSlug} />
 
-          <div className="flex items-center justify-between pt-0.5 text-[10px] text-zinc-500 font-medium">
-            <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3 text-sky-400" />
+          <div className="flex items-center justify-between pt-0.5 text-[11px] text-slate-400 font-medium">
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-sky-400" />
               <span>14 j restants (Essai)</span>
             </div>
-            <span className="text-emerald-400 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Casablanca</span>
+            <span className="text-slate-300 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span>Maroc (MAD)</span>
             </span>
           </div>
         </div>
@@ -193,7 +195,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 p-3 space-y-4 overflow-y-auto admin-scrollbar">
           {navSections.map((section) => (
             <div key={section.title} className="space-y-1">
-              <div className="px-2.5 py-1 text-[10px] font-extrabold text-zinc-500 tracking-wider">
+              <div className="px-2.5 py-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase">
                 {section.title}
               </div>
 
@@ -207,21 +209,21 @@ function AdminNav({ children }: { children: React.ReactNode }) {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors group ${
+                    className={`flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors group ${
                       isActive
-                        ? 'bg-emerald-500/10 text-white font-bold border-l-2 border-emerald-500 shadow-sm'
-                        : 'text-zinc-400 hover:text-zinc-200 hover:bg-slate-800/40 font-medium'
+                        ? 'bg-emerald-500/15 text-white font-bold border-l-2 border-emerald-500 shadow-xs'
+                        : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 font-medium'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
                       <Icon className={`w-4 h-4 shrink-0 transition-colors ${
-                        isActive ? 'text-emerald-400' : 'text-zinc-500 group-hover:text-zinc-300'
+                        isActive ? 'text-emerald-400' : 'text-slate-400 group-hover:text-slate-200'
                       }`} />
                       <span className="truncate">{item.label}</span>
                     </div>
 
                     {item.badge && (
-                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                         {item.badge}
                       </span>
                     )}
@@ -233,22 +235,27 @@ function AdminNav({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* User Profile & Footer Actions */}
-        <div className="p-3 border-t border-slate-800/70 bg-[#0e1216] space-y-2">
+        <div className="p-3 border-t border-[var(--admin-sidebar-border)] bg-slate-900/60 dark:bg-slate-950/60 space-y-2">
           <div className="flex items-center justify-between px-1 text-xs">
-            <div className="truncate pr-2">
-              <p className="font-bold text-white text-xs truncate">
-                {currentUser?.name || 'Marchand COD'}
-              </p>
-              <p className="text-[10px] text-zinc-500 font-mono truncate">
-                {currentUser?.email || 'admin@ottavio.ma'}
-              </p>
+            <div className="flex items-center gap-2.5 truncate pr-2">
+              <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+                {(currentUser?.name || 'M')[0].toUpperCase()}
+              </div>
+              <div className="truncate">
+                <p className="font-bold text-white text-xs truncate">
+                  {currentUser?.name || 'Marchand COD'}
+                </p>
+                <p className="text-[11px] text-slate-400 truncate">
+                  {currentUser?.email || 'admin@ottavio.ma'}
+                </p>
+              </div>
             </div>
             <button
               onClick={handleLogout}
               title={t.auth?.logout || 'Déconnexion'}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors shrink-0"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors shrink-0 cursor-pointer"
             >
-              <LogOut className="w-3.5 h-3.5" />
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -257,26 +264,26 @@ function AdminNav({ children }: { children: React.ReactNode }) {
       {/* Main Content Area with Sticky Header */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Desktop Sticky Header */}
-        <header className="hidden lg:flex h-14 bg-[#101418] border-b border-slate-800/70 px-6 items-center justify-between sticky top-0 z-30">
+        <header className="hidden lg:flex h-14 bg-[var(--admin-header-bg)] border-b border-[var(--admin-border)] px-6 items-center justify-between sticky top-0 z-30 transition-colors duration-200 shadow-xs">
           {/* Breadcrumbs */}
-          <div className="flex items-center gap-2 text-xs font-medium text-zinc-400">
-            <Link href={`/admin?store=${storeSlug}`} className="hover:text-zinc-200 transition-colors">
+          <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+            <Link href={`/admin?store=${storeSlug}`} className="font-bold text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
               {storeSlug.toUpperCase()}
             </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
-            <span className="text-zinc-200 font-semibold">{currentSection.itemTitle}</span>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+            <span className="text-slate-700 dark:text-slate-200 font-semibold">{currentSection.itemTitle}</span>
           </div>
 
           {/* Right Controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {/* Command Search Trigger */}
             <button
               onClick={() => setShowCommandModal(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-zinc-400 hover:text-zinc-200 hover:border-slate-700 transition-colors cursor-pointer"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
             >
-              <Search className="w-3.5 h-3.5 text-zinc-500" />
+              <Search className="w-3.5 h-3.5 text-slate-400" />
               <span>Rechercher...</span>
-              <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-mono text-zinc-400 border border-slate-700">⌘K</kbd>
+              <kbd className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 text-[10px] font-sans font-semibold text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-2xs">⌘K</kbd>
             </button>
 
             {/* Direct Storefront Link */}
@@ -284,47 +291,50 @@ function AdminNav({ children }: { children: React.ReactNode }) {
               href={storefrontUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-zinc-300 hover:text-emerald-400 hover:border-slate-700 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
             >
-              <span>Boutique</span>
-              <ExternalLink className="w-3 h-3 text-zinc-500" />
+              <span>Voir la boutique</span>
+              <ExternalLink className="w-3 h-3" />
             </a>
+
+            {/* Light / Dark Mode Toggle */}
+            <AdminThemeToggle />
 
             {/* Language Toggle */}
             <LanguageToggle />
 
-            {/* Online Status Pill */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Opérationnel</span>
+            {/* Store Status Pill */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 text-xs font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span>Boutique en ligne</span>
             </div>
           </div>
         </header>
 
         {/* Mobile Header */}
-        <header className="lg:hidden h-14 bg-[#101418]/95 backdrop-blur-md border-b border-slate-800/70 px-3 sm:px-4 flex items-center justify-between sticky top-0 z-30">
+        <header className="lg:hidden h-14 bg-[var(--admin-header-bg)] border-b border-[var(--admin-border)] px-3 sm:px-4 flex items-center justify-between sticky top-0 z-30 transition-colors duration-200 shadow-xs">
           <div className="flex items-center gap-2 min-w-0">
-            <Link href={`/admin?store=${storeSlug}`} className="font-extrabold text-white text-xs sm:text-sm flex items-center gap-2 shrink-0">
-              <div className="w-6 h-6 rounded-lg bg-emerald-500 text-zinc-950 flex items-center justify-center font-black text-xs shadow-sm shadow-emerald-500/20">
-                C
+            <Link href={`/admin?store=${storeSlug}`} className="font-black text-slate-900 dark:text-white text-xs sm:text-sm flex items-center gap-2 shrink-0">
+              <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
+                <ShoppingBag className="w-3.5 h-3.5" />
               </div>
               <span className="truncate max-w-[90px] sm:max-w-[140px]">{storeSlug}</span>
             </Link>
-            <span className="text-zinc-600 hidden sm:inline">•</span>
-            <span className="hidden sm:inline text-[11px] font-medium text-zinc-400 truncate max-w-[120px]">
+            <span className="text-slate-400 hidden sm:inline">•</span>
+            <span className="hidden sm:inline text-xs font-medium text-slate-600 dark:text-slate-300 truncate max-w-[120px]">
               {currentSection.itemTitle}
             </span>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-1.5">
             {/* Quick ⌘K Search trigger on mobile */}
             <button
               onClick={() => setShowCommandModal(true)}
               aria-label="Rechercher"
-              className="touch-target p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-slate-800/80 transition-colors"
+              className="touch-target p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               title="Rechercher (⌘K)"
             >
-              <Search className="w-4 h-4 text-zinc-400" />
+              <Search className="w-4 h-4" />
             </button>
 
             {/* Direct Storefront link on mobile */}
@@ -333,18 +343,20 @@ function AdminNav({ children }: { children: React.ReactNode }) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Voir la boutique"
-              className="touch-target p-2 rounded-lg text-zinc-400 hover:text-emerald-400 hover:bg-slate-800/80 transition-colors"
+              className="touch-target p-2 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors"
               title="Voir la boutique"
             >
               <ExternalLink className="w-4 h-4" />
             </a>
+
+            <AdminThemeToggle />
 
             <LanguageToggle />
 
             <button
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Menu principal"
-              className="touch-target p-2 text-zinc-400 hover:text-white hover:bg-slate-800/80 rounded-lg transition-colors"
+              className="touch-target p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -584,10 +596,12 @@ function AdminNav({ children }: { children: React.ReactNode }) {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0c0f12] text-white flex items-center justify-center">Chargement Admin...</div>}>
-      <LanguageProvider>
-        <AdminNav>{children}</AdminNav>
-      </LanguageProvider>
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 dark:bg-[#090d16] text-slate-800 dark:text-white flex items-center justify-center">Chargement Admin...</div>}>
+      <AdminThemeProvider>
+        <LanguageProvider>
+          <AdminNav>{children}</AdminNav>
+        </LanguageProvider>
+      </AdminThemeProvider>
     </Suspense>
   );
 }

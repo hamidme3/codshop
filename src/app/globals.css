@@ -271,10 +271,42 @@ h1 {
   contain-intrinsic-size: 300px 400px;
 }
 
-/* ── 2026 Enterprise Admin Design System (Linear x Stripe Standard - Palette B) ── */
+/* ── Modern Shopify Polaris / Stripe E-Commerce Admin Theme ── */
+:root {
+  --admin-bg-base: #f8fafc;
+  --admin-bg-surface: #ffffff;
+  --admin-bg-subtle: #f1f5f9;
+  --admin-sidebar-bg: #0f172a;
+  --admin-sidebar-border: #1e293b;
+  --admin-header-bg: #ffffff;
+  --admin-border: #e2e8f0;
+  --admin-border-subtle: #f1f5f9;
+  --admin-text-primary: #0f172a;
+  --admin-text-secondary: #475569;
+  --admin-text-muted: #94a3b8;
+  --admin-card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+:root[data-admin-theme="dark"],
+[data-admin-theme="dark"],
+.dark {
+  --admin-bg-base: #090d16;
+  --admin-bg-surface: #111827;
+  --admin-bg-subtle: #1f2937;
+  --admin-sidebar-bg: #0b0f19;
+  --admin-sidebar-border: #1f2937;
+  --admin-header-bg: #0f172a;
+  --admin-border: #1f2937;
+  --admin-border-subtle: #1e293b;
+  --admin-text-primary: #f8fafc;
+  --admin-text-secondary: #94a3b8;
+  --admin-text-muted: #64748b;
+  --admin-card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+}
+
 .admin-shell {
-  background-color: #0c0f12;
-  color: #f4f4f5;
+  background-color: var(--admin-bg-base);
+  color: var(--admin-text-primary);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
@@ -285,23 +317,23 @@ h1 {
 
 /* Precision micro-surfaces & Bento Cards */
 .admin-surface {
-  background-color: #13171c;
-  border: 1px solid rgba(30, 41, 59, 0.7);
+  background-color: var(--admin-bg-surface) !important;
+  border-color: var(--admin-border) !important;
 }
 
 .admin-surface-subtle {
-  background-color: #181e25;
-  border: 1px solid rgba(30, 41, 59, 0.6);
+  background-color: var(--admin-bg-subtle) !important;
+  border-color: var(--admin-border-subtle) !important;
 }
 
 .bento-card {
-  background-color: #13171c;
-  border: 1px solid rgba(30, 41, 59, 0.7);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+  background-color: var(--admin-bg-surface) !important;
+  border-color: var(--admin-border) !important;
+  box-shadow: var(--admin-card-shadow);
   border-radius: 1rem;
 }
 
-/* Linear-style data table */
+/* Modern E-Commerce Data Table (Shopify Polaris style) */
 .admin-table {
   border-collapse: separate;
   border-spacing: 0;
@@ -309,9 +341,9 @@ h1 {
 }
 
 .admin-table th {
-  background-color: #0f1317;
-  border-bottom: 1px solid rgba(30, 41, 59, 0.85);
-  color: #94a3b8;
+  background-color: var(--admin-bg-subtle);
+  border-bottom: 1px solid var(--admin-border);
+  color: var(--admin-text-secondary);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -320,13 +352,59 @@ h1 {
 }
 
 .admin-table td {
-  border-bottom: 1px solid rgba(30, 41, 59, 0.45);
+  border-bottom: 1px solid var(--admin-border);
   padding: 0.625rem 0.875rem;
   font-size: 0.8125rem;
+  color: var(--admin-text-primary);
 }
 
 .admin-table tr:hover td {
-  background-color: rgba(24, 30, 37, 0.6);
+  background-color: var(--admin-bg-subtle);
+}
+
+/* Light mode automatic typography mapping for bento cards and admin surfaces */
+:root:not([data-admin-theme="dark"]) .admin-shell .bento-card .text-white,
+:root:not([data-admin-theme="dark"]) .admin-shell .admin-surface .text-white,
+:root:not([data-admin-theme="dark"]) .admin-shell .admin-table .text-white,
+:root:not([data-admin-theme="dark"]) .admin-shell h1.text-white,
+:root:not([data-admin-theme="dark"]) .admin-shell h2.text-white,
+:root:not([data-admin-theme="dark"]) .admin-shell h3.text-white {
+  color: var(--admin-text-primary);
+}
+
+:root:not([data-admin-theme="dark"]) .admin-shell .bento-card .text-zinc-200,
+:root:not([data-admin-theme="dark"]) .admin-shell .admin-surface .text-zinc-200,
+:root:not([data-admin-theme="dark"]) .admin-shell .bento-card .text-zinc-300,
+:root:not([data-admin-theme="dark"]) .admin-shell .admin-surface .text-zinc-300 {
+  color: var(--admin-text-primary);
+}
+
+:root:not([data-admin-theme="dark"]) .admin-shell .bento-card .text-zinc-400,
+:root:not([data-admin-theme="dark"]) .admin-shell .admin-surface .text-zinc-400,
+:root:not([data-admin-theme="dark"]) .admin-shell .admin-table .text-zinc-400 {
+  color: var(--admin-text-secondary);
+}
+
+:root:not([data-admin-theme="dark"]) .admin-shell .bento-card .text-zinc-500,
+:root:not([data-admin-theme="dark"]) .admin-shell .admin-surface .text-zinc-500 {
+  color: var(--admin-text-muted);
+}
+
+:root:not([data-admin-theme="dark"]) .admin-shell .bento-card .bg-\[\#0c0f12\],
+:root:not([data-admin-theme="dark"]) .admin-shell .admin-surface .bg-\[\#0c0f12\],
+:root:not([data-admin-theme="dark"]) .admin-shell .bento-card .bg-\[\#121215\],
+:root:not([data-admin-theme="dark"]) .admin-shell .bento-card .bg-\[\#181e25\],
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#0c0f12\],
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#13171c\] {
+  background-color: var(--admin-bg-subtle) !important;
+  border-color: var(--admin-border) !important;
+}
+
+:root:not([data-admin-theme="dark"]) .admin-shell .border-slate-800,
+:root:not([data-admin-theme="dark"]) .admin-shell .border-slate-800\/70,
+:root:not([data-admin-theme="dark"]) .admin-shell .border-slate-800\/80,
+:root:not([data-admin-theme="dark"]) .admin-shell .border-slate-700 {
+  border-color: var(--admin-border);
 }
 
 /* Smooth micro-scrollbars */
@@ -346,11 +424,15 @@ h1 {
   background: transparent;
 }
 .admin-scrollbar::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
+[data-admin-theme="dark"] .admin-scrollbar::-webkit-scrollbar-thumb,
+.dark .admin-scrollbar::-webkit-scrollbar-thumb {
+  background: #1e293b;
+}
 .admin-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #94a3b8;
 }
 
 /* Zero horizontal overflow & mobile safe areas */
@@ -382,33 +464,71 @@ h1 {
   justify-content: center;
 }
 
-/* Strict 6-Stage Moroccan COD Pipeline Semantic Tokens (Palette B - Sky Blue replaces Orange) */
-.stage-pill-new {
+/* Strict Moroccan COD Pipeline Semantic Tokens — Light Mode (Clean Polaris Pastels) */
+:root:not([data-admin-theme="dark"]) .stage-pill-new {
+  color: #334155;
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+}
+:root:not([data-admin-theme="dark"]) .stage-pill-to_confirm {
+  color: #0369a1;
+  background-color: #e0f2fe;
+  border: 1px solid #bae6fd;
+}
+:root:not([data-admin-theme="dark"]) .stage-pill-confirmed {
+  color: #0e7490;
+  background-color: #cffafe;
+  border: 1px solid #a5f3fc;
+}
+:root:not([data-admin-theme="dark"]) .stage-pill-shipped {
+  color: #0284c7;
+  background-color: #e0f2fe;
+  border: 1px solid #bae6fd;
+}
+:root:not([data-admin-theme="dark"]) .stage-pill-delivered {
+  color: #047857;
+  background-color: #d1fae5;
+  border: 1px solid #a7f3d0;
+}
+:root:not([data-admin-theme="dark"]) .stage-pill-returned {
+  color: #be123c;
+  background-color: #ffe4e6;
+  border: 1px solid #fecdd3;
+}
+
+/* Dark Mode (Stripe Obsidian) */
+:root[data-admin-theme="dark"] .stage-pill-new,
+.dark .stage-pill-new {
   color: #d4d4d8;
   background-color: rgba(30, 41, 59, 0.7);
   border: 1px solid rgba(51, 65, 85, 0.6);
 }
-.stage-pill-to_confirm {
+:root[data-admin-theme="dark"] .stage-pill-to_confirm,
+.dark .stage-pill-to_confirm {
   color: #7dd3fc;
   background-color: rgba(8, 47, 73, 0.45);
   border: 1px solid rgba(14, 116, 144, 0.5);
 }
-.stage-pill-confirmed {
+:root[data-admin-theme="dark"] .stage-pill-confirmed,
+.dark .stage-pill-confirmed {
   color: #67e8f9;
   background-color: rgba(8, 51, 68, 0.45);
   border: 1px solid rgba(6, 182, 212, 0.4);
 }
-.stage-pill-shipped {
+:root[data-admin-theme="dark"] .stage-pill-shipped,
+.dark .stage-pill-shipped {
   color: #7dd3fc;
   background-color: rgba(12, 74, 110, 0.45);
   border: 1px solid rgba(14, 165, 233, 0.45);
 }
-.stage-pill-delivered {
+:root[data-admin-theme="dark"] .stage-pill-delivered,
+.dark .stage-pill-delivered {
   color: #6ee7b7;
   background-color: rgba(6, 78, 59, 0.45);
   border: 1px solid rgba(16, 185, 129, 0.4);
 }
-.stage-pill-returned {
+:root[data-admin-theme="dark"] .stage-pill-returned,
+.dark .stage-pill-returned {
   color: #fda4af;
   background-color: rgba(76, 5, 25, 0.45);
   border: 1px solid rgba(225, 29, 72, 0.4);
