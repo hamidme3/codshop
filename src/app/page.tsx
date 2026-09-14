@@ -9,10 +9,34 @@ import { ProductCard } from '@/components/ProductCard';
 import { Award, Sparkles, Zap, ArrowRight, Star, ShieldCheck, Truck } from 'lucide-react';
 import { UniversalLandingPage } from '@/components/landing/UniversalLandingPage';
 
-function StorefrontHome() {
+function StorefrontHome({ storeSlug }: { storeSlug?: string }) {
   const { theme, lang, countryCode } = useTheme();
   const countryConfig = useMemo(() => getCountryConfig(countryCode), [countryCode]);
-  const products = getProductsByTheme(theme.id);
+  const defaultProducts = useMemo(() => getProductsByTheme(theme.id), [theme.id]);
+  const [storeProducts, setStoreProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const slug = storeSlug || 'storet1';
+    fetch(`/api/products?store=${encodeURIComponent(slug)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+          setStoreProducts(data.products);
+        }
+      })
+      .catch(() => {});
+  }, [storeSlug]);
+
+  // Prepend merchant custom products before theme defaults
+  const products = useMemo(() => {
+    if (storeProducts.length === 0) return defaultProducts;
+    const existingSkus = new Set(storeProducts.map((p) => (p.sku || p.id).toLowerCase()));
+    const existingSlugs = new Set(storeProducts.map((p) => p.slug.toLowerCase()));
+    const remainder = defaultProducts.filter(
+      (p) => !existingSkus.has((p.sku || p.id).toLowerCase()) && !existingSlugs.has(p.slug.toLowerCase())
+    );
+    return [...storeProducts, ...remainder];
+  }, [storeProducts, defaultProducts]);
 
   return (
     <div className="space-y-12 pb-16">
@@ -241,6 +265,7 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const storeParam = searchParams.get('store');
   const [isSubdomain, setIsSubdomain] = useState<boolean>(false);
+  const [detectedStoreSlug, setDetectedStoreSlug] = useState<string>(storeParam || '');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -249,14 +274,20 @@ function HomeContent() {
       const hasSub = (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
                      (host.endsWith('.localhost') && host !== 'localhost');
       setIsSubdomain(hasSub);
+      if (hasSub) {
+        const sub = host.replace(`.${rootDomain}`, '').replace('.localhost', '');
+        setDetectedStoreSlug(sub);
+      } else if (storeParam) {
+        setDetectedStoreSlug(storeParam);
+      }
     }
-  }, []);
+  }, [storeParam]);
 
   // If a merchant store is explicitly loaded via ?store= or via tenant subdomain, render their storefront
   const isMerchantStore = Boolean(storeParam) || isSubdomain;
 
   if (isMerchantStore) {
-    return <StorefrontHome />;
+    return <StorefrontHome storeSlug={detectedStoreSlug || storeParam || undefined} />;
   }
 
   // Otherwise, on the root domain, render the Universal Global Cash-on-Delivery SaaS Platform Landing Page

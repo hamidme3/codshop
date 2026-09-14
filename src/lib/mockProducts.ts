@@ -81,6 +81,55 @@ export interface Product {
 }
 
 export const MOCK_PRODUCTS: Product[] = [
+  // Merchant Added Custom Product (SKU-5567)
+  {
+    id: 'prod_sku_5567',
+    slug: 'sku-5567',
+    sku: 'SKU-5567',
+    theme: 'luxury',
+    title: 'Test product',
+    titleAr: 'حذاء كلاسيكي أنيق',
+    tagline: 'Chaussures & Babouches - Confection Artisanale',
+    price: 299,
+    originalPrice: 499,
+    rating: 5.0,
+    reviewCount: 24,
+    stockLeft: 20,
+    images: [
+      'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
+    ],
+    description: 'Test product. Chaussures d’exception confectionnées selon la noble tradition marocaine. Cuir véritable et semelle confort. Paiement à la livraison après vérification du colis.',
+    features: [
+      'Cuir véritable souple et résistant',
+      'Semelle ergonomique rembourrée',
+      'Paiement à la livraison (COD) partout au Maroc',
+      'Vérifiez votre colis avant de payer (عاين سلعتك)',
+      'Échange facile sous 7 jours',
+    ],
+    sizes: [
+      { id: '40', name: '40', inStock: true },
+      { id: '41', name: '41', inStock: true },
+      { id: '42', name: '42', inStock: true },
+      { id: '43', name: '43', inStock: true },
+    ],
+    variants: {
+      type: 'size',
+      label: 'Pointure (EU)',
+      options: [
+        { id: '40', name: '40', inStock: true, sku: 'SKU-5567-40' },
+        { id: '41', name: '41', inStock: true, sku: 'SKU-5567-41' },
+        { id: '42', name: '42', inStock: true, sku: 'SKU-5567-42' },
+        { id: '43', name: '43', inStock: true, sku: 'SKU-5567-43' },
+      ],
+    },
+    quantityTiers: [
+      { quantity: 1, label: '1 Paire (Standard)', unitPrice: 299, totalPrice: 299, freeDelivery: false },
+      { quantity: 2, label: 'Pack Duo (2 Paires - Économisez 100 DH)', unitPrice: 249, totalPrice: 498, savingsBadge: 'Économisez 100 DH', isPopular: true, freeDelivery: true, badge: '🔥 Le Plus Populaire' },
+      { quantity: 3, label: 'Pack Trio (3 Paires - Cadeau Offert)', unitPrice: 219, totalPrice: 657, savingsBadge: 'Économisez 240 DH + Cadeau Offert 🎁', freeDelivery: true, freeGift: 'Cadeau surprise offert', badge: '💎 Pack Famille' },
+    ],
+    whatsAppDirectNumber: '212600000000',
+  },
   // LUXURY / FASHION — Dual Axis (Color + Size)
   {
     id: 'lux-1',
@@ -590,7 +639,14 @@ export function getProductQuantityTiers(product: Product, countryCode: string = 
 }
 
 export function getProductBySlug(slug: string): Product | undefined {
-  return MOCK_PRODUCTS.find((p) => p.slug === slug);
+  if (!slug) return undefined;
+  const cleanSlug = slug.toLowerCase().trim();
+  return MOCK_PRODUCTS.find((p) => 
+    p.slug.toLowerCase() === cleanSlug || 
+    p.sku.toLowerCase() === cleanSlug || 
+    p.id.toLowerCase() === cleanSlug ||
+    p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === cleanSlug
+  );
 }
 
 export function getProductsByTheme(theme: ThemeId): Product[] {

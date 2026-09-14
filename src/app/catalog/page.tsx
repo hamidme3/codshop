@@ -32,6 +32,7 @@ export default function CatalogPage() {
   const [sortBy, setSortBy] = useState<SortOption>('featured');
   const [inStockOnly, setInStockOnly] = useState(false);
   const [isSubdomain, setIsSubdomain] = useState(false);
+  const [storeProducts, setStoreProducts] = useState<any[]>([]);
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -40,68 +41,114 @@ export default function CatalogPage() {
       const hasSub = (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
                      (host.endsWith('.localhost') && host !== 'localhost');
       setIsSubdomain(hasSub);
+
+      let detected = '';
+      if (hasSub) {
+        detected = host.replace(`.${rootDomain}`, '').replace('.localhost', '');
+      } else {
+        const urlParams = new URLSearchParams(window.location.search);
+        detected = urlParams.get('store') || '';
+      }
+
+      const fetchSlug = detected || 'storet1';
+      fetch(`/api/products?store=${encodeURIComponent(fetchSlug)}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+            setStoreProducts(data.products);
+          }
+        })
+        .catch(() => {});
     }
   }, []);
 
-  // Dynamic Category Definitions based on mock catalog
+  // Merge store products at the top with base catalog
+  const allProducts = useMemo(() => {
+    if (storeProducts.length === 0) return MOCK_PRODUCTS;
+    const existingSkus = new Set(storeProducts.map((p) => (p.sku || p.id).toLowerCase()));
+    const existingSlugs = new Set(storeProducts.map((p) => p.slug.toLowerCase()));
+    const remainder = MOCK_PRODUCTS.filter(
+      (p) => !existingSkus.has((p.sku || p.id).toLowerCase()) && !existingSlugs.has(p.slug.toLowerCase())
+    );
+    return [...storeProducts, ...remainder];
+  }, [storeProducts]);
+
+  // Dynamic Category Definitions based on catalog
   const categories = useMemo(
     () => [
-      { id: 'all', label: 'Tous les produits', count: MOCK_PRODUCTS.length },
+      { id: 'all', label: 'Tous les produits', count: allProducts.length },
       {
         id: 'luxury',
-        label: 'Maroquinerie & Luxe',
-        count: MOCK_PRODUCTS.filter((p) => p.theme === 'luxury').length,
+        label: 'Maroquinerie & Chaussures',
+        count: allProducts.filter(
+          (p) =>
+            p.theme === 'luxury' ||
+            p.tagline?.toLowerCase().includes('chaussure') ||
+            (p as any).category?.toLowerCase().includes('chaussure')
+        ).length,
       },
       {
         id: 'beauty',
         label: 'Beauté & Soins',
-        count: MOCK_PRODUCTS.filter((p) => p.theme === 'beauty').length,
+        count: allProducts.filter((p) => p.theme === 'beauty').length,
       },
       {
         id: 'tech',
         label: 'High-Tech & Son',
-        count: MOCK_PRODUCTS.filter((p) => p.theme === 'tech').length,
+        count: allProducts.filter((p) => p.theme === 'tech').length,
       },
       {
         id: 'culinary',
         label: 'Terroir & Miels',
-        count: MOCK_PRODUCTS.filter((p) => p.theme === 'culinary').length,
+        count: allProducts.filter((p) => p.theme === 'culinary').length,
       },
       {
         id: 'fitness',
         label: 'Sport & Fitness',
-        count: MOCK_PRODUCTS.filter((p) => p.theme === 'fitness').length,
+        count: allProducts.filter((p) => p.theme === 'fitness').length,
       },
       {
         id: 'kitchen',
         label: 'Maison & Artisanat',
-        count: MOCK_PRODUCTS.filter((p) => p.theme === 'kitchen').length,
+        count: allProducts.filter((p) => p.theme === 'kitchen').length,
       },
       {
         id: 'streetwear',
         label: 'Mode & Barbershop',
-        count: MOCK_PRODUCTS.filter((p) => p.theme === 'streetwear').length,
+        count: allProducts.filter((p) => p.theme === 'streetwear').length,
       },
     ],
-    []
+    [allProducts]
   );
 
   // Filter and Sort Logic
   const filteredProducts = useMemo(() => {
-    return MOCK_PRODUCTS.filter((p) => {
+    return allProducts.filter((p) => {
       // 1. Search Query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const matchTitle = p.title.toLowerCase().includes(q);
         const matchTitleAr = p.titleAr ? p.titleAr.includes(q) : false;
-        const matchTagline = p.tagline.toLowerCase().includes(q);
+        const matchTagline = p.tagline ? p.tagline.toLowerCase().includes(q) : false;
         const matchSku = p.sku.toLowerCase().includes(q);
-        if (!matchTitle && !matchTitleAr && !matchTagline && !matchSku) return false;
+        const matchDesc = p.description ? p.description.toLowerCase().includes(q) : false;
+        if (!matchTitle && !matchTitleAr && !matchTagline && !matchSku && !matchDesc) return false;
       }
 
       // 2. Category Filter
-      if (selectedCategory !== 'all' && p.theme !== selectedCategory) {
-        return false;
+      if (selectedCategory !== 'all') {
+        const matchTheme = p.theme === selectedCategory;
+        const matchTagline = p.tagline?.toLowerCase().includes(selectedCategory.toLowerCase());
+        const matchCategory = (p as any).category?.toLowerCase().includes(selectedCategory.toLowerCase());
+        const isLuxuryCategory = selectedCategory === 'luxury' && (
+          p.theme === 'luxury' ||
+          p.tagline?.toLowerCase().includes('chaussure') ||
+          p.tagline?.toLowerCase().includes('babouche') ||
+          (p as any).category?.toLowerCase().includes('chaussure')
+        );
+        if (!matchTheme && !matchTagline && !matchCategory && !isLuxuryCategory) {
+          return false;
+        }
       }
 
       // 3. Price Range Filter (in MAD)
@@ -116,10 +163,10 @@ export default function CatalogPage() {
     }).sort((a, b) => {
       if (sortBy === 'price-asc') return a.price - b.price;
       if (sortBy === 'price-desc') return b.price - a.price;
-      if (sortBy === 'rating') return b.rating - a.rating;
+      if (sortBy === 'rating') return (b.rating || 5) - (a.rating || 5);
       return 0; // 'featured' keeps curated order
     });
-  }, [searchQuery, selectedCategory, selectedPriceRange, inStockOnly, sortBy]);
+  }, [allProducts, searchQuery, selectedCategory, selectedPriceRange, inStockOnly, sortBy]);
 
   const resetFilters = () => {
     setSearchQuery('');

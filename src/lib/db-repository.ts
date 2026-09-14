@@ -3,11 +3,14 @@ import { eq, desc, asc, and, ne } from 'drizzle-orm';
 import type { Order, Product, Customer, CourierName } from './types';
 import {
   ORDERS,
+  PRODUCTS,
   getOrders as getMockOrders,
   getProducts as getMockProducts,
   getCustomers as getMockCustomers,
   syncCustomersFromOrders,
   addProduct as addMockProduct,
+  updateProduct as updateMockProduct,
+  deleteProduct as deleteMockProduct,
   updateOrderStatus as updateMockOrderStatus,
   checkInventory,
   decrementInventory,
@@ -189,6 +192,195 @@ export async function createProduct(data: Omit<Product, 'id'>): Promise<Product>
     console.warn('[DbRepo] Error creating product in DB, fallback to mock:', err);
     return addMockProduct(data);
   }
+}
+
+export async function updateProduct(productId: string, updates: Partial<Product>): Promise<Product | null> {
+  const db = getDb();
+  if (!db) {
+    return updateMockProduct(productId, updates);
+  }
+
+  try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
+    if (isUuid) {
+      const updateData: any = { updatedAt: new Date() };
+      if (updates.title !== undefined) updateData.title = updates.title;
+      if (updates.price !== undefined) updateData.price = Number(updates.price);
+      if (updates.comparePrice !== undefined) updateData.comparePrice = Number(updates.comparePrice);
+      if (updates.costPrice !== undefined) updateData.costPrice = Number(updates.costPrice);
+      if (updates.stock !== undefined) updateData.stock = Number(updates.stock);
+      if (updates.category !== undefined) updateData.category = updates.category;
+      if (updates.status !== undefined) updateData.status = updates.status;
+      if (updates.images !== undefined) updateData.images = updates.images;
+      if (updates.variants !== undefined) updateData.variants = updates.variants;
+
+      const [updated] = await db
+        .update(schema.products)
+        .set(updateData)
+        .where(eq(schema.products.id, productId))
+        .returning();
+
+      if (updated) {
+        updateMockProduct(productId, updates);
+        return {
+          id: updated.id,
+          storeSlug: updates.storeSlug || '',
+          title: updated.title,
+          sku: updated.sku,
+          category: updated.category,
+          price: updated.price,
+          comparePrice: updated.comparePrice || undefined,
+          costPrice: updated.costPrice,
+          stock: updated.stock,
+          images: updated.images,
+          variants: updated.variants,
+          status: updated.status as 'active' | 'draft',
+        };
+      }
+    }
+    return updateMockProduct(productId, updates);
+  } catch (err) {
+    console.warn('[DbRepo] Error updating product in DB:', err);
+    return updateMockProduct(productId, updates);
+  }
+}
+
+export async function deleteProduct(productId: string): Promise<boolean> {
+  const db = getDb();
+  deleteMockProduct(productId);
+  if (!db) return true;
+
+  try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
+    if (isUuid) {
+      await db.delete(schema.products).where(eq(schema.products.id, productId));
+    }
+    return true;
+  } catch (err) {
+    console.warn('[DbRepo] Error deleting product from DB:', err);
+    return true;
+  }
+}
+
+export async function getProductBySlugOrSku(slugOrSku: string): Promise<Product | null> {
+  const db = getDb();
+  const clean = slugOrSku.toLowerCase().trim();
+  if (!db) {
+    const memMatch = PRODUCTS.find(
+      (p: any) =>
+        p.sku?.toLowerCase() === clean ||
+        p.id?.toLowerCase() === clean ||
+        p.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') === clean
+    );
+    return memMatch || null;
+  }
+
+  try {
+    const all = await db.query.products.findMany({
+      limit: 200,
+    });
+    const found = all.find(
+      (r: any) =>
+        r.sku?.toLowerCase() === clean ||
+        r.id?.toLowerCase() === clean ||
+        r.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') === clean
+    );
+    if (found) {
+      return {
+        id: found.id,
+        storeSlug: 'storet1',
+        title: found.title,
+        sku: found.sku,
+        category: found.category,
+        price: found.price,
+        comparePrice: found.comparePrice || undefined,
+        costPrice: found.costPrice,
+        stock: found.stock,
+        images: found.images,
+        variants: found.variants,
+        status: found.status as 'active' | 'draft',
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Converts a database or admin product into the rich Storefront Product model
+ * compatible with ProductCard, CodCheckoutModal, and ProductDetailPage.
+ */
+export function convertDbProductToStorefrontProduct(p: any): any {
+  const baseSlug = (p.sku || p.id || 'product')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+
+  const price = Number(p.price) || 299;
+  const originalPrice = p.comparePrice ? Number(p.comparePrice) : Math.round(price * 1.5);
+  const duoPrice = p.packDuoPrice ? Number(p.packDuoPrice) : Math.max(price, Math.round(price * 2 - 100));
+  const trioPrice = p.packTrioPrice ? Number(p.packTrioPrice) : Math.max(price, Math.round(price * 3 - 200));
+
+  return {
+    id: p.id,
+    slug: p.slug || baseSlug,
+    sku: p.sku || `SKU-${p.id?.slice?.(0, 4) || '0000'}`,
+    theme: p.theme || 'luxury',
+    title: p.title,
+    tagline: p.category || 'Collection Exclusive',
+    price: price,
+    originalPrice: originalPrice,
+    rating: 4.9,
+    reviewCount: 38,
+    stockLeft: p.stock ?? 20,
+    images: Array.isArray(p.images) && p.images.length > 0 ? p.images : ['https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800&auto=format&fit=crop'],
+    description: p.description || `${p.title}. Qualité supérieure confectionnée avec soin. Paiement à la livraison après vérification du colis partout au Maroc.`,
+    features: [
+      'Authenticité et confection premium garantie',
+      'Paiement à la livraison (COD) après inspection du colis',
+      'Livraison express 24h à 48h partout au Royaume',
+      'Échange sous 7 jours sans frais',
+    ],
+    variants: p.variants && p.variants.length > 0 ? {
+      type: 'size',
+      label: 'Options / Pointures',
+      options: p.variants.map((v: any) => ({
+        id: v.sku || v.size || v.color || 'opt',
+        name: [v.color, v.size].filter(Boolean).join(' - ') || v.name || 'Standard',
+        inStock: (v.stock ?? 1) > 0,
+        sku: v.sku || p.sku,
+        stock: v.stock ?? p.stock,
+      })),
+    } : undefined,
+    quantityTiers: [
+      {
+        quantity: 1,
+        label: '1 Pièce (Standard)',
+        unitPrice: price,
+        totalPrice: price,
+      },
+      {
+        quantity: 2,
+        label: 'Pack Duo (Économie + Livraison Gratuite)',
+        unitPrice: Math.round(duoPrice / 2),
+        totalPrice: duoPrice,
+        savingsBadge: `-100 DH`,
+        isPopular: true,
+        freeDelivery: true,
+      },
+      {
+        quantity: 3,
+        label: 'Pack Trio (Maxi Économie + Cadeau Offert)',
+        unitPrice: Math.round(trioPrice / 3),
+        totalPrice: trioPrice,
+        savingsBadge: `-200 DH`,
+        freeDelivery: true,
+        freeGift: 'Cadeau surprise offert',
+      },
+    ],
+    whatsAppDirectNumber: '212600000000',
+  };
 }
 
 // ── Orders Repository ──────────────────────────────────────────

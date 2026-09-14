@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { notFound, useParams } from 'next/navigation';
-import { getProductBySlug, getProductQuantityTiers, getProductVariantInfo } from '@/lib/mockProducts';
+import { Product, getProductBySlug, getProductQuantityTiers, getProductVariantInfo } from '@/lib/mockProducts';
 import { getDeliveryDateEstimate } from '@/lib/moroccanCities';
 import { getCountryConfig, getCountryDeliveryEstimate, detectClientVisitorCountry } from '@/lib/geo';
 import { CountdownTimer } from '@/components/CountdownTimer';
@@ -30,7 +30,35 @@ import { fetchAndInitPixels, trackViewContent } from '@/lib/pixel-tracker';
 export default function ProductDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
-  const product = getProductBySlug(slug);
+  const initialProduct = useMemo(() => getProductBySlug(slug), [slug]);
+  const [product, setProduct] = useState<Product | undefined>(initialProduct);
+  const [loading, setLoading] = useState(!initialProduct);
+
+  useEffect(() => {
+    if (initialProduct) {
+      setProduct(initialProduct);
+      setLoading(false);
+      return;
+    }
+    if (!slug) return;
+    setLoading(true);
+    const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const storeFromUrl = urlParams?.get('store') || '';
+    const host = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+    const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
+    const sub = host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}` ? host.replace(`.${rootDomain}`, '') : '';
+    const storeQuery = storeFromUrl || sub || 'storet1';
+
+    fetch(`/api/products?slug=${encodeURIComponent(slug)}&store=${encodeURIComponent(storeQuery)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.product) {
+          setProduct(data.product as Product);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [slug, initialProduct]);
   const { formatMAD, formatPrice, theme, countryCode: contextCountryCode } = useTheme();
   const { addItem } = useCart();
 
@@ -110,6 +138,22 @@ export default function ProductDetailPage() {
     () => (product ? getCountryDeliveryEstimate(visitorCountry, countryConfig.popularCities[0] || 'Casablanca', activeTier?.totalPrice ?? product.price) : null),
     [product, visitorCountry, countryConfig, activeTier]
   );
+
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto py-20 px-4 animate-pulse space-y-6">
+        <div className="h-8 w-64 bg-slate-200 dark:bg-slate-800 rounded" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="h-96 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
+          <div className="space-y-4">
+            <div className="h-6 w-full bg-slate-200 dark:bg-slate-800 rounded" />
+            <div className="h-10 w-48 bg-slate-200 dark:bg-slate-800 rounded" />
+            <div className="h-40 bg-slate-200 dark:bg-slate-800 rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (

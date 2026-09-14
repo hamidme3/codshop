@@ -130,6 +130,40 @@ export let ORDERS: Order[] = [
 // ── Seed Moroccan Products ──────────────────────────────────────
 export let PRODUCTS: Product[] = [
   {
+    id: 'prod_sku_5567',
+    storeSlug: 'storet1',
+    title: 'Test product',
+    sku: 'SKU-5567',
+    category: 'Chaussures & Babouches',
+    price: 299,
+    comparePrice: 499,
+    costPrice: 90,
+    stock: 20,
+    images: ['https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800&auto=format&fit=crop'],
+    variants: [
+      { size: '41', stock: 10, sku: 'SKU-5567-41' },
+      { size: '42', stock: 10, sku: 'SKU-5567-42' },
+    ],
+    status: 'active',
+  },
+  {
+    id: 'prod_sku_5567_ott',
+    storeSlug: 'ottavio',
+    title: 'Test product',
+    sku: 'SKU-5567',
+    category: 'Chaussures & Babouches',
+    price: 299,
+    comparePrice: 499,
+    costPrice: 90,
+    stock: 20,
+    images: ['https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800&auto=format&fit=crop'],
+    variants: [
+      { size: '41', stock: 10, sku: 'SKU-5567-41' },
+      { size: '42', stock: 10, sku: 'SKU-5567-42' },
+    ],
+    status: 'active',
+  },
+  {
     id: 'prod_1',
     storeSlug: 'ottavio',
     title: 'Sac Cuir Artisanal Marrakech',

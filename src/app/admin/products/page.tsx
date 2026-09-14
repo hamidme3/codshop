@@ -24,13 +24,23 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
 
-  // #16 — re-sync when storeSlug changes
+  // #16 — re-sync when storeSlug changes with live database fetch
   const [products, setProducts] = useState<Product[]>(() => getProducts(storeSlug));
   const [categories, setCategories] = useState<Category[]>(() => getCategories(storeSlug));
-  // #18 — refresh category counts when products change
+
   useEffect(() => {
-    setProducts(getProducts(storeSlug));
+    fetch(`/api/admin/products?store=${encodeURIComponent(storeSlug)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+          setProducts(data.products);
+        } else {
+          setProducts(getProducts(storeSlug));
+        }
+      })
+      .catch(() => setProducts(getProducts(storeSlug)));
   }, [storeSlug]);
+
   useEffect(() => {
     setCategories(getCategories(storeSlug));
   }, [products.length, storeSlug]);
@@ -138,7 +148,10 @@ function ProductsContent() {
   const handleDeleteProduct = (prod: Product) => {
     if (confirm(`Confirmez-vous la suppression du produit "${prod.title}" du catalogue ?`)) {
       deleteProduct(prod.id);
-      setProducts(getProducts(storeSlug));
+      fetch(`/api/admin/products?id=${encodeURIComponent(prod.id)}&store=${encodeURIComponent(storeSlug)}`, {
+        method: 'DELETE',
+      }).catch((err) => console.warn('[Admin Products] Delete error:', err));
+      setProducts((prev) => prev.filter((p) => p.id !== prod.id));
       setCategories(getCategories(storeSlug));
       showToast(`Produit "${prod.title}" retiré du catalogue.`);
     }
@@ -149,7 +162,12 @@ function ProductsContent() {
     if (!prod) return;
     const newStock = Math.max(0, (prod.stock ?? 0) + delta);
     updateProductStock(prodId, newStock);
-    setProducts(getProducts(storeSlug));
+    fetch('/api/admin/products', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: prodId, stock: newStock, storeSlug }),
+    }).catch((err) => console.warn('[Admin Products] Stock adjust error:', err));
+    setProducts((prev) => prev.map((p) => (p.id === prodId ? { ...p, stock: newStock } : p)));
     showToast(`Stock de "${prod.title}" ajusté : ${newStock} unités.`);
   };
 
@@ -626,7 +644,7 @@ function ProductsContent() {
         }))
       : [{ size: 'Unique', stock: Number(stock) || 0 }];
 
-    const newProd = addProduct({
+    const payload = {
       storeSlug,
       title: title.trim(),
       sku: `SKU-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -644,11 +662,26 @@ function ProductsContent() {
       packTrioPrice: packTrioEnabled ? Number(packTrioPrice) : undefined,
       packTrioGift: packTrioEnabled ? packTrioGift : undefined,
       description: addDescription || undefined,
-    });
+    };
 
+    const newProd = addProduct(payload);
     setProducts([newProd, ...products]);
     setCategories(getCategories(storeSlug));
     setShowAddModal(false);
+
+    // Persist to PostgreSQL database asynchronously
+    fetch('/api/admin/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.product) {
+          setProducts((prev) => prev.map((p) => (p.id === newProd.id ? data.product : p)));
+        }
+      })
+      .catch((err) => console.warn('[Admin Products] DB persist notice:', err));
 
     if (typeof window !== 'undefined') {
       localStorage.removeItem(`codshop_add_product_draft_${storeSlug}`);
