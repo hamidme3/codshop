@@ -560,7 +560,7 @@ export const VALID_STATUSES: Order['status'][] = ['new', 'to_confirm', 'confirme
 
 export function updateOrderStatus(orderId: string, status: Order['status'], trackingNumber?: string, courier?: Order['courier']): boolean {
   if (!VALID_STATUSES.includes(status)) return false;
-  const order = ORDERS.find((o) => o.id === orderId);
+  const order = ORDERS.find((o) => o.id === orderId || o.orderNumber === orderId);
   if (!order) return false;
 
   const previousStatus = order.status;
@@ -802,7 +802,7 @@ export function reassignAndDeleteCategory(
 }
 
 export function deleteOrder(orderId: string, storeSlug: string = 'ottavio'): boolean {
-  const index = ORDERS.findIndex((o) => o.id === orderId);
+  const index = ORDERS.findIndex((o) => o.id === orderId || o.orderNumber === orderId);
   if (index === -1) return false;
   const order = ORDERS[index];
 

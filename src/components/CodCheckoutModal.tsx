@@ -17,6 +17,7 @@ import {
   getCountryDeliveryEstimate,
   validateCountryPhone,
   detectClientVisitorCountry,
+  formatCountryPrice,
 } from '@/lib/geo';
 import { useTheme } from '@/context/ThemeContext';
 import {
@@ -163,8 +164,7 @@ export function CodCheckoutModal({
 
   // Country-aware price formatter
   const formatPrice = (amount: number) => {
-    if (effectiveCountryCode === 'MA') return formatMAD(amount);
-    return `${amount} ${countryConfig.currency.symbol}`;
+    return formatCountryPrice(amount, effectiveCountryCode, lang);
   };
 
   // Track InitiateCheckout on pixel channels when modal is opened

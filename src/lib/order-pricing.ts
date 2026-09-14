@@ -392,7 +392,23 @@ export async function verifyAndRecalculateOrder(
       hasTierFreeDelivery = true;
     }
 
-    const pricing = calculateItemTierPricing(catalogProd, qty, storeDiscounts);
+    const tierPricing = calculateItemTierPricing(catalogProd, qty, storeDiscounts);
+    const standardSubtotal = catalogProd.price * qty;
+
+    const rawPrice = rawIt.price !== undefined ? Number(rawIt.price) : (body.unitPrice !== undefined ? Number(body.unitPrice) : undefined);
+    const rawSubtotal = rawIt.subtotal !== undefined ? Number(rawIt.subtotal) : (body.subtotal !== undefined && rawItems.length === 1 ? Number(body.subtotal) : undefined);
+
+    // A customer may check out with standard catalog unit price (e.g. from Cart Drawer)
+    // or with discounted pack tier pricing (e.g. from Pack Duo/Trio modal).
+    const isPayingStandardPrice = (
+      (rawPrice !== undefined && Math.abs(rawPrice - catalogProd.price) <= 1) ||
+      (rawSubtotal !== undefined && Math.abs(rawSubtotal - standardSubtotal) <= 2)
+    );
+
+    const pricing = isPayingStandardPrice
+      ? { unitPrice: catalogProd.price, itemSubtotal: standardSubtotal }
+      : tierPricing;
+
     computedSubtotal += pricing.itemSubtotal;
     totalQuantity += qty;
 

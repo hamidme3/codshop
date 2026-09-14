@@ -232,6 +232,8 @@ export async function POST(req: Request) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderNumber: orderId,
+          storeSlug,
+          store: storeSlug,
           customerName: pricingResult.customerName,
           phone,
           city: pricingResult.city,
