@@ -90,7 +90,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     try {
       const params = new URLSearchParams(window.location.search);
       if (params.get('theme')) return; // URL wins, no fetch
-      const storeSlug = params.get('store');
+      let storeSlug = params.get('store');
+      if (!storeSlug && typeof window !== 'undefined') {
+        const host = window.location.hostname.toLowerCase();
+        const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
+        if (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) {
+          storeSlug = host.replace(`.${rootDomain}`, '');
+        } else if (host.endsWith('.localhost') && host !== 'localhost') {
+          storeSlug = host.replace('.localhost', '');
+        }
+      }
       if (!storeSlug) return;
       const ctrl = new AbortController();
       fetch(`/api/stores/${storeSlug}/theme`, { signal: ctrl.signal })

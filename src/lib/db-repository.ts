@@ -7,6 +7,7 @@ import {
   getOrders as getMockOrders,
   getProducts as getMockProducts,
   getCustomers as getMockCustomers,
+  updateCustomerNotes as updateMockCustomerNotes,
   syncCustomersFromOrders,
   addProduct as addMockProduct,
   updateProduct as updateMockProduct,
@@ -201,8 +202,33 @@ export async function updateProduct(productId: string, updates: Partial<Product>
   }
 
   try {
+    let targetRowId: string | null = null;
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
     if (isUuid) {
+      targetRowId = productId;
+    } else {
+      const cleanTarget = productId.toLowerCase().trim();
+      const cleanSkuPart = cleanTarget.replace(/^prod_/, '');
+      const all = await db.query.products.findMany({ limit: 500 });
+      const matched = all.find((p) => {
+        const pSku = p.sku.toLowerCase();
+        const pId = p.id.toLowerCase();
+        const titleSlug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        return (
+          pId === cleanTarget ||
+          pSku === cleanTarget ||
+          pSku === cleanSkuPart ||
+          cleanTarget.includes(pSku) ||
+          titleSlug === cleanTarget ||
+          titleSlug === cleanSkuPart
+        );
+      });
+      if (matched) {
+        targetRowId = matched.id;
+      }
+    }
+
+    if (targetRowId) {
       const updateData: any = { updatedAt: new Date() };
       if (updates.title !== undefined) updateData.title = updates.title;
       if (updates.price !== undefined) updateData.price = Number(updates.price);
@@ -217,7 +243,7 @@ export async function updateProduct(productId: string, updates: Partial<Product>
       const [updated] = await db
         .update(schema.products)
         .set(updateData)
-        .where(eq(schema.products.id, productId))
+        .where(eq(schema.products.id, targetRowId))
         .returning();
 
       if (updated) {
@@ -251,9 +277,34 @@ export async function deleteProduct(productId: string): Promise<boolean> {
   if (!db) return true;
 
   try {
+    let targetRowId: string | null = null;
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
     if (isUuid) {
-      await db.delete(schema.products).where(eq(schema.products.id, productId));
+      targetRowId = productId;
+    } else {
+      const cleanTarget = productId.toLowerCase().trim();
+      const cleanSkuPart = cleanTarget.replace(/^prod_/, '');
+      const all = await db.query.products.findMany({ limit: 500 });
+      const matched = all.find((p) => {
+        const pSku = p.sku.toLowerCase();
+        const pId = p.id.toLowerCase();
+        const titleSlug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        return (
+          pId === cleanTarget ||
+          pSku === cleanTarget ||
+          pSku === cleanSkuPart ||
+          cleanTarget.includes(pSku) ||
+          titleSlug === cleanTarget ||
+          titleSlug === cleanSkuPart
+        );
+      });
+      if (matched) {
+        targetRowId = matched.id;
+      }
+    }
+
+    if (targetRowId) {
+      await db.delete(schema.products).where(eq(schema.products.id, targetRowId));
     }
     return true;
   } catch (err) {
@@ -550,11 +601,23 @@ export async function createOrder(data: {
   try {
     // Also decrement in Postgres if database is active
     try {
+      const allStoreProds = await db.query.products.findMany({
+        where: eq(schema.products.storeId, store.id),
+      });
       for (const it of cleanItems) {
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(it.id);
-        const prod = await db.query.products.findFirst({
-          where: isUuid ? eq(schema.products.id, it.id) : eq(schema.products.sku, it.id),
-        });
+        const targetSku = (it.sku || it.id || '').trim().toLowerCase();
+        const targetSkuClean = targetSku.replace(/^prod_/, '');
+        const prod = allStoreProds.find(
+          (p) =>
+            (isUuid && p.id === it.id) ||
+            p.sku.toLowerCase() === targetSku ||
+            p.sku.toLowerCase() === targetSkuClean ||
+            targetSku.startsWith(p.sku.toLowerCase()) ||
+            p.sku.toLowerCase().startsWith(targetSku) ||
+            p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSku ||
+            p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSkuClean
+        );
         if (prod) {
           let updatedVariants = prod.variants;
           if (Array.isArray(updatedVariants)) {
@@ -642,6 +705,60 @@ export async function createOrder(data: {
   }
 }
 
+export async function restoreDbProductStock(
+  storeId: string,
+  items: Array<{ id: string; sku?: string; quantity: number; size?: string; color?: string }>
+) {
+  const db = getDb();
+  if (!db || !items || items.length === 0) return;
+
+  try {
+    const storeProducts = await db.query.products.findMany({
+      where: eq(schema.products.storeId, storeId),
+    });
+
+    for (const it of items) {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(it.id);
+      const targetSku = (it.sku || it.id || '').trim().toLowerCase();
+      const targetSkuClean = targetSku.replace(/^prod_/, '');
+      const prod = storeProducts.find(
+        (p) =>
+          (isUuid && p.id === it.id) ||
+          p.sku.toLowerCase() === targetSku ||
+          p.sku.toLowerCase() === targetSkuClean ||
+          targetSku.startsWith(p.sku.toLowerCase()) ||
+          p.sku.toLowerCase().startsWith(targetSku) ||
+          p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSku ||
+          p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSkuClean
+      );
+
+      if (prod) {
+        let updatedVariants = prod.variants;
+        if (Array.isArray(updatedVariants)) {
+          updatedVariants = updatedVariants.map((v) => {
+            const matchColor = it.color ? v.color?.toLowerCase() === it.color.toLowerCase() : true;
+            const matchSize = it.size ? v.size?.toLowerCase() === it.size.toLowerCase() : true;
+            if (matchColor && matchSize) {
+              return { ...v, stock: (v.stock || 0) + it.quantity };
+            }
+            return v;
+          });
+        }
+        await db
+          .update(schema.products)
+          .set({
+            stock: prod.stock + it.quantity,
+            variants: updatedVariants,
+            updatedAt: new Date(),
+          })
+          .where(eq(schema.products.id, prod.id));
+      }
+    }
+  } catch (err) {
+    console.warn('[DbRepo] Non-fatal DB stock restore warning:', err);
+  }
+}
+
 export async function getOrderByNumber(orderNumberOrId: string) {
   const db = getDb();
   if (!db) {
@@ -714,6 +831,88 @@ async function syncCustomerFromOrder(
   } catch (err) {
     console.warn('[DbRepo] Error syncing customer:', err);
   }
+}
+
+// ── Customers Repository ───────────────────────────────────────
+export async function getCustomers(storeSlug: string): Promise<Customer[]> {
+  const db = getDb();
+  if (!db) {
+    return getMockCustomers(storeSlug);
+  }
+
+  try {
+    const store = await getStoreBySlug(storeSlug);
+    if (!store || !('id' in store)) {
+      return getMockCustomers(storeSlug);
+    }
+
+    const dbCusts = await db.query.customers.findMany({
+      where: eq(schema.customers.storeId, store.id),
+      orderBy: [desc(schema.customers.createdAt)],
+    });
+
+    if (dbCusts.length === 0) {
+      return getMockCustomers(storeSlug);
+    }
+
+    // Also fetch store orders to populate recentOrders and delivery stats
+    const storeOrders = await db.query.orders.findMany({
+      where: eq(schema.orders.storeId, store.id),
+      orderBy: [desc(schema.orders.createdAt)],
+    });
+
+    return dbCusts.map((c) => {
+      const custOrders = storeOrders.filter((o) => o.phone === c.phone);
+      const lastOrd = custOrders[0];
+      const delivered = custOrders.filter((o) => o.status === 'delivered').length;
+      const returned = custOrders.filter((o) => o.status === 'returned').length;
+      const totalResolved = delivered + returned;
+      const deliverySuccessRate = totalResolved > 0 ? Math.round((delivered / totalResolved) * 100) : 100;
+
+      return {
+        id: c.id,
+        storeSlug,
+        name: c.name,
+        phone: c.phone,
+        email: c.email || '',
+        city: c.city,
+        totalOrders: Math.max(c.totalOrders, custOrders.length),
+        totalSpend: Math.max(c.totalSpend, custOrders.reduce((sum, o) => sum + Number(o.total), 0)),
+        averageBasket: c.averageBasket || Math.round(c.totalSpend / Math.max(1, c.totalOrders)),
+        status: (c.status as any) || (custOrders.length > 1 ? 'returning' : 'new'),
+        riskScore: 'low' as const,
+        lastOrderDate: (c.lastOrderAt || lastOrd?.createdAt || c.createdAt)?.toISOString() || new Date().toISOString(),
+        lastOrderNumber: lastOrd?.orderNumber,
+        lastOrderStatus: (lastOrd?.status as any) || 'new',
+        lastTrackingNumber: lastOrd?.trackingNumber || undefined,
+        deliverySuccessRate,
+        confirmedOrders: custOrders.filter((o) => o.status === 'confirmed').length,
+        shippedOrders: custOrders.filter((o) => ['shipped', 'shipping'].includes(o.status)).length,
+        deliveredOrders: delivered,
+        returnedOrders: returned,
+        canceledOrders: custOrders.filter((o) => o.status === 'canceled').length,
+        recentOrders: custOrders.slice(0, 5).map((o) => ({
+          id: o.id,
+          orderNumber: o.orderNumber,
+          createdAt: o.createdAt?.toISOString() || new Date().toISOString(),
+          status: o.status as any,
+          total: Number(o.total),
+          itemsSummary: Array.isArray(o.items) && o.items.length > 0 ? o.items.map((it: any) => `${it.quantity}x ${it.title}`).join(', ') : 'Articles',
+          courier: o.courier || undefined,
+          trackingNumber: o.trackingNumber || undefined,
+          countryCode: o.countryCode || 'MA',
+          currency: o.currency || 'MAD',
+        })),
+      };
+    });
+  } catch (err) {
+    console.warn('[DbRepo] Error querying customers from DB, fallback to mock:', err);
+    return getMockCustomers(storeSlug);
+  }
+}
+
+export async function updateCustomerNotes(phone: string, notes: string, storeSlug: string) {
+  updateMockCustomerNotes(phone, notes, storeSlug);
 }
 
 // ── User Authentication Repository ────────────────────────────

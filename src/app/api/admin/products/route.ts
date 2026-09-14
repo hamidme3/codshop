@@ -78,7 +78,7 @@ export async function POST(req: Request) {
 
     if (!title || price === undefined) {
       return NextResponse.json(
-        { success: false, message: 'Titre et prix sont obligatoires' },
+        { success: false, message: 'Title and price are required' },
         { status: 400 }
       );
     }
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
       storeSlug,
       title: title.trim(),
       sku: sku ? sku.trim() : `SKU-${Math.floor(1000 + Math.random() * 9000)}`,
-      category: category ? category.trim() : 'Général',
+      category: category ? category.trim() : 'General',
       price: Number(price),
       comparePrice: comparePrice ? Number(comparePrice) : undefined,
       costPrice: Number(costPrice) || 0,
@@ -106,7 +106,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       product: created,
-      message: 'Produit créé avec succès',
+      message: 'Product created successfully',
     });
   } catch (error: any) {
     console.error('[API Admin Products] POST error:', error);
@@ -124,7 +124,7 @@ export async function PATCH(req: Request) {
     const targetId = productId || id;
 
     if (!targetId) {
-      return NextResponse.json({ success: false, message: 'ID produit requis' }, { status: 400 });
+      return NextResponse.json({ success: false, message: 'Product ID is required' }, { status: 400 });
     }
 
     const updated = await updateProduct(targetId, updates);
@@ -132,7 +132,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json({
       success: true,
       product: updated,
-      message: 'Produit mis à jour avec succès',
+      message: 'Product updated successfully',
     });
   } catch (error: any) {
     console.error('[API Admin Products] PATCH error:', error);
@@ -157,14 +157,14 @@ export async function DELETE(req: Request) {
     }
 
     if (!targetId) {
-      return NextResponse.json({ success: false, message: 'ID produit requis' }, { status: 400 });
+      return NextResponse.json({ success: false, message: 'Product ID is required' }, { status: 400 });
     }
 
     await deleteProduct(targetId);
 
     return NextResponse.json({
       success: true,
-      message: 'Produit supprimé avec succès',
+      message: 'Product deleted successfully',
     });
   } catch (error: any) {
     console.error('[API Admin Products] DELETE error:', error);

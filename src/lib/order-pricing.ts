@@ -7,6 +7,7 @@
 import { getDb, schema } from '@/db';
 import { eq } from 'drizzle-orm';
 import { MOCK_PRODUCTS, QuantityTier, getProductQuantityTiers } from './mockProducts';
+import { convertDbProductToStorefrontProduct } from './db-repository';
 import { PRODUCTS } from './mocks';
 import { getStoreBySlug as getMockStoreBySlug } from './stores';
 import { MOROCCAN_CITIES, getCityShipping, FREE_SHIPPING_THRESHOLD } from './moroccanCities';
@@ -24,12 +25,13 @@ export interface CatalogProductResolution {
  * Resolves a product from Postgres DB or Mock Product Catalogs.
  */
 export async function resolveCatalogProduct(
-  identifier: { id?: string; productId?: string; slug?: string; title?: string },
+  identifier: { id?: string; productId?: string; slug?: string; title?: string; sku?: string },
   storeSlug: string
 ): Promise<CatalogProductResolution | null> {
   const targetId = (identifier.productId || identifier.id || '').trim().toLowerCase();
   const targetSlug = (identifier.slug || '').trim().toLowerCase();
   const targetTitle = (identifier.title || '').trim().toLowerCase();
+  const targetSku = (identifier.sku || '').trim().toLowerCase();
 
   // 1. Try Postgres DB if connected
   const db = getDb();
@@ -46,14 +48,20 @@ export async function resolveCatalogProduct(
           const pId = p.id.toLowerCase();
           const pSku = p.sku.toLowerCase();
           const pTitle = p.title.toLowerCase();
+          const titleSlug = pTitle.replace(/[^a-z0-9]+/g, '-');
           if (targetId && (pId === targetId || pSku === targetId)) return true;
-          if (targetSlug && pSku === targetSlug) return true;
-          if (targetTitle && pTitle === targetTitle) return true;
+          if (targetSku && (pSku === targetSku || targetSku.startsWith(pSku) || pSku.startsWith(targetSku))) return true;
+          if (targetSlug && (pSku === targetSlug || titleSlug === targetSlug)) return true;
+          if (targetTitle && (pTitle === targetTitle || pTitle.includes(targetTitle) || targetTitle.includes(pTitle))) return true;
           return false;
         });
         if (matched) {
-          const mockMatch = MOCK_PRODUCTS.find((p) => p.id === matched.id || p.sku === matched.sku || p.slug === matched.sku);
-          const tiers = mockMatch?.quantityTiers;
+          const mockMatch = MOCK_PRODUCTS.find((p) => p.id === matched.id || p.sku.toLowerCase() === matched.sku.toLowerCase() || p.slug.toLowerCase() === matched.sku.toLowerCase());
+          let tiers = mockMatch?.quantityTiers;
+          if (!tiers || tiers.length === 0) {
+            const sfProd = convertDbProductToStorefrontProduct(matched);
+            tiers = sfProd.quantityTiers;
+          }
           return {
             id: matched.id,
             title: matched.title,
@@ -71,9 +79,12 @@ export async function resolveCatalogProduct(
   const mockProduct = MOCK_PRODUCTS.find((p) => {
     const pId = p.id.toLowerCase();
     const pSlug = p.slug.toLowerCase();
+    const pSku = p.sku.toLowerCase();
     const pTitle = p.title.toLowerCase();
-    if (targetId && (pId === targetId || pSlug === targetId)) return true;
-    if (targetSlug && pSlug === targetSlug) return true;
+    const titleSlug = pTitle.replace(/[^a-z0-9]+/g, '-');
+    if (targetId && (pId === targetId || pSlug === targetId || pSku === targetId)) return true;
+    if (targetSku && (pSku === targetSku || targetSku.startsWith(pSku) || pSku.startsWith(targetSku))) return true;
+    if (targetSlug && (pSlug === targetSlug || titleSlug === targetSlug || pSku === targetSlug)) return true;
     if (targetTitle && (pTitle === targetTitle || (p.titleAr && p.titleAr === identifier.title))) return true;
     return false;
   });

@@ -63,7 +63,7 @@ async function runCategoryCrudTests() {
   const deleteActiveAttempt = deleteCategory(leatherCategory.id, storeSlug);
   assert.strictEqual(deleteActiveAttempt.success, false, 'Deletion of active category must fail');
   assert.ok(
-    deleteActiveAttempt.error?.includes('produit(s) y sont encore associés'), 
+    deleteActiveAttempt.error?.includes('product(s) are still assigned') || deleteActiveAttempt.error?.includes('produit(s) y sont encore associés'), 
     'Error message must clearly inform the merchant about attached products'
   );
   console.log(`  ✓ Safety guard prevented deletion: "${deleteActiveAttempt.error}"`);

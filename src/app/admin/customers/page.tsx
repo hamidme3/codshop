@@ -114,6 +114,25 @@ function CustomersContent() {
     }
   }, [selectedCustomer]);
 
+  const fetchLiveCustomers = React.useCallback(async () => {
+    try {
+      const res = await fetch(`/api/admin/customers?store=${encodeURIComponent(storeSlug)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.customers) && data.customers.length > 0) {
+          setCustomers(data.customers);
+        }
+      }
+    } catch (err) {
+      console.warn('[Admin Customers] Could not fetch live customers, using fallback:', err);
+    }
+  }, [storeSlug]);
+
+  React.useEffect(() => {
+    setCustomers(getCustomers(storeSlug));
+    fetchLiveCustomers();
+  }, [storeSlug, fetchLiveCustomers]);
+
   const handleSaveNotes = () => {
     if (!selectedCustomer) return;
     const notesToSave = customerNotes[selectedCustomer.id] ?? selectedCustomer.addressNotes ?? '';
@@ -121,6 +140,13 @@ function CustomersContent() {
     if (typeof window !== 'undefined') {
       localStorage.setItem(`cod_customer_notes_${selectedCustomer.phone}`, notesToSave);
     }
+    // Persist customer notes to database asynchronously
+    fetch('/api/admin/customers', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: selectedCustomer.phone, notes: notesToSave, storeSlug }),
+    }).catch((err) => console.warn('[Admin Customers] Save notes error:', err));
+
     setSelectedCustomer({ ...selectedCustomer, addressNotes: notesToSave });
     setNotesSaved(true);
     setTimeout(() => setNotesSaved(false), 2500);
@@ -136,11 +162,15 @@ function CustomersContent() {
 
   const refreshCustomers = () => {
     setCustomers(getCustomers(storeSlug));
+    fetchLiveCustomers();
   };
 
   // Real-time synchronization with order pipeline updates
   React.useEffect(() => {
-    const handleSync = () => setCustomers(getCustomers(storeSlug));
+    const handleSync = () => {
+      setCustomers(getCustomers(storeSlug));
+      fetchLiveCustomers();
+    };
     window.addEventListener('cod_orders_updated', handleSync);
     let bc: BroadcastChannel | null = null;
     try {
@@ -152,7 +182,7 @@ function CustomersContent() {
       window.removeEventListener('cod_orders_updated', handleSync);
       if (bc) bc.close();
     };
-  }, [storeSlug]);
+  }, [storeSlug, fetchLiveCustomers]);
 
   // ── Dynamic KPIs calculated directly from synchronized store customers ──
   const totalCustomersCount = customers.length;

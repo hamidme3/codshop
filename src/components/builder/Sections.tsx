@@ -256,11 +256,27 @@ export function CodCheckoutSection({
     if (!fullName || !phone) return;
     setSubmitting(true);
 
+    let effectiveStoreSlug = 'ottavio';
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      const urlStore = sp.get('store');
+      if (urlStore) {
+        effectiveStoreSlug = urlStore;
+      } else {
+        const host = window.location.hostname.toLowerCase();
+        const root = 'codshop.vipone.site';
+        if (host.endsWith(root) && host !== root && host !== `www.${root}`) {
+          effectiveStoreSlug = host.replace(`.${root}`, '');
+        }
+      }
+    }
+
     try {
       await fetch('/api/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          storeSlug: effectiveStoreSlug,
           customer: { fullName, phone, city, address },
           product: { title: settings.productTitle || 'Article Boutique' },
           quantity: selectedPack === 'single' ? 1 : selectedPack === 'duo' ? 2 : 3,
@@ -270,7 +286,7 @@ export function CodCheckoutSection({
       });
       setSuccess(true);
     } catch (err) {
-      alert('Erreur lors de la validation de la commande');
+      alert('Error placing order. Please try again.');
     } finally {
       setSubmitting(false);
     }

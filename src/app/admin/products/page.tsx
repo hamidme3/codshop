@@ -42,8 +42,8 @@ function ProductsContent() {
   }, [storeSlug]);
 
   useEffect(() => {
-    setCategories(getCategories(storeSlug));
-  }, [products.length, storeSlug]);
+    setCategories(getCategories(storeSlug, products));
+  }, [products, storeSlug]);
   const [activeTab, setActiveTab] = useState<'products' | 'categories'>('products');
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -204,7 +204,8 @@ function ProductsContent() {
       ? computeTotalStock(editVariants)
       : Number(editStock);
 
-    const updated = updateProduct(editingProduct.id, {
+    const editPayload = {
+      productId: editingProduct.id,
       title: editTitle,
       category: editCategory,
       price: Number(editPrice),
@@ -218,10 +219,20 @@ function ProductsContent() {
         stock: Number(v.stock) || 0,
         sku: v.sku || undefined,
       })),
-    });
+      storeSlug,
+    };
+
+    const updated = updateProduct(editingProduct.id, editPayload);
+
+    // Persist edits to PostgreSQL database asynchronously
+    fetch('/api/admin/products', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editPayload),
+    }).catch((err) => console.warn('[Admin Products] PATCH DB persist notice:', err));
 
     if (updated) {
-      setProducts(getProducts(storeSlug));
+      setProducts((prev) => prev.map((p) => (p.id === editingProduct.id ? { ...p, ...editPayload } : p)));
       setCategories(getCategories(storeSlug));
       setShowEditModal(false);
       setEditingProduct(null);

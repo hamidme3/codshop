@@ -667,9 +667,40 @@ export function updateProduct(productId: string, updates: Partial<Product>): Pro
 }
 
 
-export function getCategories(storeSlug: string = 'ottavio'): Category[] {
-  const storeProducts = PRODUCTS.filter((p) => !storeSlug || p.storeSlug === storeSlug);
-  return CATEGORIES.map((cat) => {
+export function getCategories(storeSlug: string = 'ottavio', customProducts?: Product[]): Category[] {
+  const storeProducts = customProducts && customProducts.length > 0
+    ? customProducts
+    : PRODUCTS.filter((p) => !storeSlug || p.storeSlug === storeSlug);
+
+  const existingCategories = [...CATEGORIES];
+
+  // Dynamically discover any categories from products not present in CATEGORIES
+  for (const p of storeProducts) {
+    const rawCat = (p.category || '').trim();
+    if (!rawCat) continue;
+    const catLower = rawCat.toLowerCase();
+    const alreadyExists = existingCategories.some(
+      (c) => c.name.toLowerCase() === catLower || c.slug.toLowerCase() === catLower
+    );
+    if (!alreadyExists) {
+      const slug = rawCat
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      existingCategories.push({
+        id: `cat_${slug || Date.now()}`,
+        name: rawCat,
+        slug: slug || `cat-${Date.now()}`,
+        icon: '🏷️',
+        description: `Collection ${rawCat}`,
+        productCount: 0,
+      });
+    }
+  }
+
+  return existingCategories.map((cat) => {
     const count = storeProducts.filter((p) => {
       const pCat = (p.category || '').toLowerCase().trim();
       const cName = cat.name.toLowerCase().trim();
@@ -685,7 +716,7 @@ export function getCategories(storeSlug: string = 'ottavio'): Category[] {
 
 export function addCategory(category: { name: string; slug?: string; icon?: string; description?: string }): Category {
   const trimmedName = category.name.trim();
-  if (!trimmedName) throw new Error('Le nom de la catégorie est obligatoire.');
+  if (!trimmedName) throw new Error('Category name is required.');
   const slug = (category.slug?.trim() || trimmedName)
     .toLowerCase()
     .normalize('NFD')
@@ -714,11 +745,13 @@ export function addCategory(category: { name: string; slug?: string; icon?: stri
   return newCat;
 }
 
-export function deleteCategory(idOrSlug: string, storeSlug: string = 'ottavio'): { success: boolean; error?: string } {
+export function deleteCategory(idOrSlug: string, storeSlug: string = 'ottavio', customProducts?: Product[]): { success: boolean; error?: string } {
   const cat = CATEGORIES.find((c) => c.id === idOrSlug || c.slug === idOrSlug);
-  if (!cat) return { success: false, error: 'Catégorie introuvable.' };
+  if (!cat) return { success: false, error: 'Category not found.' };
 
-  const storeProducts = PRODUCTS.filter((p) => !storeSlug || p.storeSlug === storeSlug);
+  const storeProducts = customProducts && customProducts.length > 0
+    ? customProducts
+    : PRODUCTS.filter((p) => !storeSlug || p.storeSlug === storeSlug);
   const activeProducts = storeProducts.filter((p) => {
     const pCat = (p.category || '').toLowerCase().trim();
     return pCat === cat.name.toLowerCase().trim() || pCat === cat.slug.toLowerCase().trim();
@@ -727,7 +760,7 @@ export function deleteCategory(idOrSlug: string, storeSlug: string = 'ottavio'):
   if (activeProducts.length > 0) {
     return {
       success: false,
-      error: `Impossible de supprimer "${cat.name}" : ${activeProducts.length} produit(s) y sont encore associés dans votre catalogue. Réassignez d'abord ces produits.`,
+      error: `Cannot delete "${cat.name}": ${activeProducts.length} product(s) are still assigned to it. Please reassign them first.`,
     };
   }
 
@@ -742,15 +775,15 @@ export function reassignAndDeleteCategory(
   storeSlug: string = 'ottavio'
 ): { success: boolean; reallocatedCount: number; error?: string } {
   const sourceCat = CATEGORIES.find((c) => c.id === sourceIdOrSlug || c.slug === sourceIdOrSlug);
-  if (!sourceCat) return { success: false, reallocatedCount: 0, error: 'Catégorie source introuvable.' };
+  if (!sourceCat) return { success: false, reallocatedCount: 0, error: 'Source category not found.' };
 
   const targetCat = CATEGORIES.find(
     (c) => c.id === targetCategoryNameOrSlug || c.slug === targetCategoryNameOrSlug || c.name.toLowerCase().trim() === targetCategoryNameOrSlug.toLowerCase().trim()
   );
-  if (!targetCat) return { success: false, reallocatedCount: 0, error: 'Catégorie cible introuvable.' };
+  if (!targetCat) return { success: false, reallocatedCount: 0, error: 'Target category not found.' };
 
   if (targetCat.id === sourceCat.id) {
-    return { success: false, reallocatedCount: 0, error: 'La catégorie cible ne peut pas être identique à la catégorie source.' };
+    return { success: false, reallocatedCount: 0, error: 'Target category cannot be identical to source category.' };
   }
 
   let reallocatedCount = 0;

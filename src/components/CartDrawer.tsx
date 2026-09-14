@@ -124,11 +124,27 @@ export function CartDrawer() {
 
     setIsSubmitting(true);
 
+    let effectiveStoreSlug = 'ottavio';
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      const urlStore = sp.get('store');
+      if (urlStore) {
+        effectiveStoreSlug = urlStore;
+      } else {
+        const host = window.location.hostname.toLowerCase();
+        const root = 'codshop.vipone.site';
+        if (host.endsWith(root) && host !== root && host !== `www.${root}`) {
+          effectiveStoreSlug = host.replace(`.${root}`, '');
+        }
+      }
+    }
+
     try {
       const response = await fetch('/api/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          storeSlug: effectiveStoreSlug,
           customerName: customerName.trim(),
           customerPhone: (phoneCheck as any).cleanPhone || customerPhone.trim(),
           customerCity,

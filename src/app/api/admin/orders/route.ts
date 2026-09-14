@@ -94,6 +94,16 @@ export async function PATCH(req: Request) {
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
         const whereClause = isUuid ? eq(schema.orders.id, orderId) : eq(schema.orders.orderNumber, orderId);
 
+        const existingOrder = await db.query.orders.findFirst({
+          where: whereClause,
+        });
+
+        // Restore DB stock if transitioning to canceled or returned from active state
+        if (existingOrder && (status === 'canceled' || status === 'returned') && existingOrder.status !== 'canceled' && existingOrder.status !== 'returned') {
+          const { restoreDbProductStock } = await import('@/lib/db-repository');
+          await restoreDbProductStock(existingOrder.storeId, existingOrder.items as any);
+        }
+
         await db
           .update(schema.orders)
           .set(updatePayload)
@@ -103,7 +113,7 @@ export async function PATCH(req: Request) {
       console.warn('[API Admin Orders] Warning updating order in DB:', dbErr);
     }
 
-    return NextResponse.json({ success: true, message: 'Statut de commande mis à jour' });
+    return NextResponse.json({ success: true, message: 'Order status updated successfully' });
   } catch (error: any) {
     console.error('[API Admin Orders] PATCH error:', error);
     return NextResponse.json(
@@ -137,6 +147,17 @@ export async function DELETE(req: Request) {
         const { eq } = await import('drizzle-orm');
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
         const whereClause = isUuid ? eq(schema.orders.id, orderId) : eq(schema.orders.orderNumber, orderId);
+
+        const existingOrder = await db.query.orders.findFirst({
+          where: whereClause,
+        });
+
+        // Restore DB stock if deleting an active order
+        if (existingOrder && existingOrder.status !== 'canceled' && existingOrder.status !== 'returned') {
+          const { restoreDbProductStock } = await import('@/lib/db-repository');
+          await restoreDbProductStock(existingOrder.storeId, existingOrder.items as any);
+        }
+
         await db
           .delete(schema.orders)
           .where(whereClause);
@@ -145,7 +166,7 @@ export async function DELETE(req: Request) {
       console.warn('[API Admin Orders] Warning deleting order from DB:', dbErr);
     }
 
-    return NextResponse.json({ success: true, message: 'Commande supprimée avec succès' });
+    return NextResponse.json({ success: true, message: 'Order deleted successfully' });
   } catch (error: any) {
     console.error('[API Admin Orders] DELETE error:', error);
     return NextResponse.json(

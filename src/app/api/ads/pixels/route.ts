@@ -59,7 +59,7 @@ export async function GET(request: Request) {
     });
   } catch (err: any) {
     console.error('[Ads Pixels GET API] Error:', err);
-    return NextResponse.json({ error: 'Erreur chargement pixels' }, { status: 500 });
+    return NextResponse.json({ error: 'Error loading pixels' }, { status: 500 });
   }
 }
 
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
   try {
     const session = await getSession();
     if (!session) {
-      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const storeId = session.activeStoreId || session.storeId;
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     const db = getDb();
 
     if (!db) {
-      return NextResponse.json({ success: true, message: 'Pixels enregistrés (mode fallback).' });
+      return NextResponse.json({ success: true, message: 'Pixels saved (fallback mode).' });
     }
 
     const existing = await db.query.adIntegrations.findFirst({
@@ -107,10 +107,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Pixels publicitaires mis à jour avec succès !',
+      message: 'Ad pixels updated successfully',
     });
   } catch (err: any) {
     console.error('[Ads Pixels API] Error:', err);
-    return NextResponse.json({ error: 'Erreur lors de la sauvegarde des pixels' }, { status: 500 });
+    return NextResponse.json({ error: 'Error saving ad pixels' }, { status: 500 });
   }
 }

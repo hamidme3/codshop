@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
     // 1. Anti-Bot Honeypot: silently accept and discard if hidden honeypot fields are filled
     if (body._hp || body.website || body.fax) {
-      return NextResponse.json({ success: true, orderId: `CMD-${Math.floor(1000 + Math.random() * 9000)}`, message: 'Commande reçue' });
+      return NextResponse.json({ success: true, orderId: `CMD-${Math.floor(1000 + Math.random() * 9000)}`, message: 'Order received' });
     }
 
     // 2. Store Slug Scoping: detect store slug from body, x-store-slug header, Host subdomain, or Referer
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
     const rawStoreSlug = detectedStoreSlug || 'ottavio';
     if (!isValidStoreSlug(rawStoreSlug)) {
       return NextResponse.json(
-        { success: false, message: 'Identifiant de boutique invalide' },
+        { success: false, message: 'Invalid store identifier' },
         { status: 400 }
       );
     }
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
     const store = await getStoreBySlug(rawStoreSlug);
     if (!store) {
       return NextResponse.json(
-        { success: false, message: `Boutique "${rawStoreSlug}" introuvable ou inactive` },
+        { success: false, message: `Store "${rawStoreSlug}" not found or inactive` },
         { status: 400 }
       );
     }
@@ -123,7 +123,7 @@ export async function POST(req: Request) {
 
     if (!phoneResult.isValid) {
       return NextResponse.json(
-        { success: false, message: (phoneResult as any).error || `Numéro de téléphone invalide (${orderCountryCode})` },
+        { success: false, message: (phoneResult as any).error || `Invalid phone number (${orderCountryCode})` },
         { status: 400 }
       );
     }
@@ -135,7 +135,7 @@ export async function POST(req: Request) {
     const rateCheck = checkOrderRateLimit(clientIp, phone);
     if (!rateCheck.allowed) {
       return NextResponse.json(
-        { success: false, message: rateCheck.reason || 'Trop de requêtes, veuillez patienter.' },
+        { success: false, message: rateCheck.reason || 'Too many requests, please slow down.' },
         { status: 429 }
       );
     }
@@ -144,7 +144,7 @@ export async function POST(req: Request) {
     const pricingResult = await verifyAndRecalculateOrder(body, storeSlug, orderCountryCode);
     if (!pricingResult.success) {
       return NextResponse.json(
-        { success: false, message: pricingResult.error || 'Erreur de calcul du prix de la commande' },
+        { success: false, message: pricingResult.error || 'Error calculating order price' },
         { status: 400 }
       );
     }
@@ -155,7 +155,7 @@ export async function POST(req: Request) {
         {
           success: false,
           code: 'PRICE_TAMPERING_REJECTED',
-          message: 'Le montant soumis ne correspond pas au prix officiel du catalogue.',
+          message: 'Submitted amount does not match catalog pricing.',
           catalogTotal: pricingResult.total,
           submittedTotal: Number(body.total),
         },
@@ -257,12 +257,12 @@ export async function POST(req: Request) {
       success: true,
       orderId,
       order: savedOrder,
-      message: 'Commande enregistrée avec succès',
+      message: 'Order placed successfully',
     });
   } catch (error: unknown) {
     console.error('[CODShop] Order submission error:', error);
     return NextResponse.json(
-      { success: false, message: 'Erreur lors du traitement de la commande' },
+      { success: false, message: 'Error processing order' },
       { status: 500 }
     );
   }
