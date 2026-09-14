@@ -1,6 +1,6 @@
 import { getDb, schema } from '@/db';
 import { eq, desc, asc, and, ne } from 'drizzle-orm';
-import type { Order, Product, Customer } from './types';
+import type { Order, Product, Customer, CourierName } from './types';
 import {
   ORDERS,
   getOrders as getMockOrders,
@@ -249,7 +249,7 @@ export async function createOrder(data: {
   subtotal: number;
   shippingFee: number;
   total: number;
-  courier?: 'ozon' | 'sendit' | 'manual';
+  courier?: CourierName;
   abVariant?: string;
   deliveryType?: 'home' | 'stopdesk';
   agencyName?: string;
@@ -340,7 +340,7 @@ export async function createOrder(data: {
       subtotal: cleanSubtotal,
       shippingFee: cleanShippingFee,
       total: cleanTotal,
-      courier: data.courier || 'ozon',
+      courier: data.courier || 'manual',
       abVariant: data.abVariant || 'control',
       deliveryType: data.deliveryType || 'home',
       agencyName: cleanAgencyName || undefined,
@@ -401,7 +401,7 @@ export async function createOrder(data: {
       subtotal: cleanSubtotal,
       shippingFee: cleanShippingFee,
       total: cleanTotal,
-      courier: data.courier || 'ozon',
+      courier: data.courier || 'manual',
       abVariant: data.abVariant || 'control',
       deliveryType: data.deliveryType || 'home',
       agencyName: cleanAgencyName,

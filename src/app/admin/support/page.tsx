@@ -369,7 +369,7 @@ export default function SupportDeskPage() {
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Problème d'attribution Pixel Facebook ou livraison Ozon"
+                  placeholder="Ex: Problème d'attribution Pixel Facebook ou export CSV"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500"

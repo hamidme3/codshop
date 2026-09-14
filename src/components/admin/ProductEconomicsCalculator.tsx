@@ -91,7 +91,7 @@ export const ProductEconomicsCalculator: React.FC<ProductEconomicsCalculatorProp
               </span>
             </h3>
             <p className="text-[11px] text-zinc-400">
-              Modélisation financière avec taux de retour réels (15%) et frais transporteurs (Ozon, Cathedis, SendIt, Amana).
+              Modélisation financière avec taux de retour réels (15%) et frais de livraison.
             </p>
           </div>
         </div>

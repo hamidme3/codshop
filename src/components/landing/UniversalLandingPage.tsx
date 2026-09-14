@@ -6,7 +6,7 @@ import {
   Globe, Truck, ShieldCheck, CheckCircle2, ArrowRight, Sparkles, 
   Smartphone, MessageCircle, DollarSign, Package, BarChart3, Layers, 
   Store, Users, Check, ExternalLink, Zap, ChevronRight, Star, Percent, 
-  TrendingUp, RefreshCw, ShoppingBag, Award, ArrowUpRight, Play
+  TrendingUp, RefreshCw, ShoppingBag, Award, ArrowUpRight, Play, FileSpreadsheet
 } from 'lucide-react';
 import { THEME_LIST, ThemeConfig } from '@/lib/themes';
 
@@ -20,7 +20,7 @@ interface MarketHub {
   dialCode: string;
   phoneExample: string;
   popularHub: string;
-  carriers: string[];
+  features: string[];
   inspectionCopy: string;
   inspectionCopyAr: string;
   headline: string;
@@ -37,11 +37,11 @@ const GLOBAL_MARKETS: MarketHub[] = [
     dialCode: '+212',
     phoneExample: '06 61 23 45 67',
     popularHub: 'Casablanca (24h Express)',
-    carriers: ['Ozon Express', 'SendIt', 'Cathedis', 'Amana Poste Maroc'],
+    features: ['Paiement Espèces (MAD)', 'Export CSV Universel (Excel)', 'Mise à jour des statuts 1-clic', 'Relance Client WhatsApp'],
     inspectionCopy: 'Vérifiez votre colis avant de payer',
     inspectionCopyAr: 'عاين سلعتك قبل ما تخلص',
     headline: 'E-commerce COD #1 au Maroc',
-    heroSub: 'Couvre Casablanca, Rabat, Marrakech et 16 régions avec expédition multi-transporteurs.',
+    heroSub: 'Couvre Casablanca, Rabat, Marrakech et toutes les régions avec formulaires haute conversion et export CSV.',
   },
   {
     id: 'SA',
@@ -52,11 +52,11 @@ const GLOBAL_MARKETS: MarketHub[] = [
     dialCode: '+966',
     phoneExample: '050 123 4567',
     popularHub: 'Riyadh Hub (Same-Day / 24h)',
-    carriers: ['SMSA Express', 'Aramex GCC', 'J&T Express', 'Careem Box'],
+    features: ['الدفع عند الاستلام (SAR)', 'تصدير الطلبات CSV', 'تحديث الحالات بنقرة واحدة', 'إشعارات واتساب فورية'],
     inspectionCopy: 'الدفع عند الاستلام مع فحص الطلب',
     inspectionCopyAr: 'افحص طلبك بالكامل قبل تسليم المبلغ للمندوب',
     headline: 'الدفع عند الاستلام في المملكة العربية السعودية',
-    heroSub: 'Scalable COD across Riyadh, Jeddah, Dammam & Mecca with automatic SMSA & Aramex manifests.',
+    heroSub: 'Scalable COD across Riyadh, Jeddah, Dammam & Mecca with 1-tap checkout and universal CSV order exports.',
   },
   {
     id: 'AE',
@@ -67,11 +67,11 @@ const GLOBAL_MARKETS: MarketHub[] = [
     dialCode: '+971',
     phoneExample: '050 123 4567',
     popularHub: 'Dubai Logistics City (4h-24h)',
-    carriers: ['Aramex UAE', 'Fetchr', 'Careem Express', 'Emirates Post'],
+    features: ['Cash on Delivery (AED)', '1-Click CSV Orders Export', 'Fast Manual Status Flow', 'WhatsApp Confirmations'],
     inspectionCopy: 'Cash on Delivery with Inspection Guarantee',
     inspectionCopyAr: 'الدفع عند الاستلام مع ضمان المعاينة الفورية',
     headline: 'High-Velocity COD in Dubai & UAE',
-    heroSub: 'Ultra-fast delivery routing across 7 Emirates with zero card barrier.',
+    heroSub: 'Ultra-fast ordering across 7 Emirates with frictionless COD and universal CSV exports.',
   },
   {
     id: 'KW',
@@ -82,11 +82,11 @@ const GLOBAL_MARKETS: MarketHub[] = [
     dialCode: '+965',
     phoneExample: '51 23 45 67',
     popularHub: 'Kuwait City Hub',
-    carriers: ['Aramex GCC', 'Posta Plus', 'DHL Global COD'],
+    features: ['Cash on Delivery (KWD)', 'Universal CSV Export', 'Manual Status Updates', 'WhatsApp Notifications'],
     inspectionCopy: 'Cash on Delivery - Pay upon Handover',
     inspectionCopyAr: 'الدفع عند الاستلام في جميع محافظات الكويت',
     headline: 'GCC High-AOV Cash on Delivery',
-    heroSub: 'Unlock high basket values in Kuwait, Qatar, Bahrain & Oman with 1-tap ordering.',
+    heroSub: 'Unlock high basket values in Kuwait, Qatar, Bahrain & Oman with 1-tap ordering and CSV export.',
   },
   {
     id: 'EG',
@@ -97,11 +97,11 @@ const GLOBAL_MARKETS: MarketHub[] = [
     dialCode: '+20',
     phoneExample: '010 1234 5678',
     popularHub: 'Cairo & Giza Mega-Hub',
-    carriers: ['Bosta', 'Aramex Egypt', 'Mylerz', 'Egypt Post'],
+    features: ['الدفع عند الاستلام (EGP)', 'تصدير إكسل و CSV فوري', 'متابعة الحالات يدوياً', 'تأكيد عبر الواتساب'],
     inspectionCopy: 'معاينة مجانية للشحنة قبل الدفع',
     inspectionCopyAr: 'افتح العلبة وافحص المنتج قبل ما تدفع أي مليم',
     headline: 'High-Volume COD in Egypt',
-    heroSub: 'Massive consumer base in Cairo, Alexandria & Delta with native WhatsApp order confirmations.',
+    heroSub: 'Massive consumer base in Cairo, Alexandria & Delta with native WhatsApp order confirmations and CSV exports.',
   },
   {
     id: 'EU',
@@ -112,11 +112,11 @@ const GLOBAL_MARKETS: MarketHub[] = [
     dialCode: '+34',
     phoneExample: '612 34 56 78',
     popularHub: 'Madrid / Rome / Paris Hubs',
-    carriers: ['DHL Express COD', 'Correos Express', 'Mondial Relay', 'GLS Contra Reembolso'],
+    features: ['Contre-remboursement (EUR)', 'Export CSV Universel (Excel)', 'Gestion Manuelle des Statuts', 'Notifications WhatsApp'],
     inspectionCopy: 'Pago Contra Reembolso / Contanti alla consegna',
     inspectionCopyAr: 'Paiement à la livraison universel pour marchés européens',
     headline: 'Cash on Delivery in Southern & Eastern Europe',
-    heroSub: 'Scale COD in Spain, Italy, Portugal, Romania & Greece where cash payments represent >40% of sales.',
+    heroSub: 'Scale COD in Spain, Italy, Portugal, Romania & Greece with universal CSV order management.',
   },
 ];
 
@@ -193,7 +193,7 @@ export function UniversalLandingPage() {
           <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-zinc-400">
             <a href="#markets" className="hover:text-white transition-colors">Marchés Mondiaux</a>
             <a href="#features" className="hover:text-white transition-colors">Bordereau Express</a>
-            <a href="#carriers" className="hover:text-white transition-colors">Transporteurs</a>
+            <a href="#export" className="hover:text-white transition-colors">Export CSV</a>
             <a href="#themes" className="hover:text-white transition-colors">25 Thèmes</a>
             <a href="#calculator" className="hover:text-white transition-colors">Simulateur COD</a>
             <a href="#pricing" className="hover:text-white transition-colors">Tarifs</a>
@@ -369,18 +369,18 @@ export function UniversalLandingPage() {
                   </div>
                 </div>
 
-                {/* Partner Fleet for this market */}
+                {/* Features for this market */}
                 <div className="p-4 rounded-xl bg-zinc-900/90 border border-zinc-800 flex flex-col justify-between space-y-3">
                   <div>
                     <div className="text-[11px] font-mono font-bold uppercase text-zinc-400 mb-2 flex items-center gap-1.5">
-                      <Truck className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>Transporteurs Prêts :</span>
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Gestion & Export :</span>
                     </div>
                     <div className="space-y-1.5">
-                      {activeMarket.carriers.map((carrier, idx) => (
+                      {activeMarket.features.map((feat, idx) => (
                         <div key={idx} className="flex items-center gap-2 text-xs font-semibold text-zinc-300">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                          <span>{carrier}</span>
+                          <span>{feat}</span>
                         </div>
                       ))}
                     </div>
@@ -461,7 +461,7 @@ export function UniversalLandingPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-400 font-bold">✓</span>
-                  <span><strong>Export Transporteurs 1-Clic :</strong> Manifests Excel/CSV pré-formatés pour Ozon, SendIt, Amana, SMSA, Aramex.</span>
+                  <span><strong>Export CSV Universel :</strong> Téléchargement en 1-clic des commandes au format CSV standard (compatible Excel UTF-8 et Google Sheets).</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-400 font-bold">✓</span>
@@ -518,14 +518,14 @@ export function UniversalLandingPage() {
               </p>
             </div>
 
-            {/* Bento Card 3: Multi-Carrier Manifests */}
-            <div className="p-6 sm:p-8 rounded-2xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-all space-y-4">
+            {/* Bento Card 3: Universal CSV Export */}
+            <div id="export" className="p-6 sm:p-8 rounded-2xl bg-[#121215] border border-zinc-800 hover:border-zinc-700 transition-all space-y-4">
               <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                <Truck className="w-5 h-5" />
+                <FileSpreadsheet className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-black text-white">Exports Manifests en 1-Clic</h3>
+              <h3 className="text-lg font-black text-white">Export CSV & Suivi des Statuts</h3>
               <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
-                Générez instantanément vos fichiers CSV pré-formatés avec encodage Excel UTF-8 BOM pour Ozon Express, SendIt, Cathedis, Amana, SMSA ou Aramex. Bon de Ramassage A4 imprimable inclus.
+                Mise à jour manuelle des statuts (Nouvelle, Confirmée, Expédiée, Livrée) et téléchargement immédiat des fichiers CSV avec encodage Windows Excel UTF-8 BOM.
               </p>
             </div>
 
@@ -867,7 +867,7 @@ export function UniversalLandingPage() {
                   <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <strong>Commandes illimitées</strong></li>
                   <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <strong>Tous les 25 thèmes</strong> débloqués</li>
                   <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Formulaires Bordereau Express</li>
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Manifests transporteurs (Ozon, SendIt, Amana, SMSA)</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Export CSV universel des commandes</li>
                   <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Templates WhatsApp Darija & Khaliji</li>
                   <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Multi-pays & devises en direct</li>
                 </ul>

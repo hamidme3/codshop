@@ -188,7 +188,7 @@ export async function POST(req: Request) {
         subtotal: pricingResult.subtotal,
         shippingFee: pricingResult.shippingFee,
         total: pricingResult.total,
-        courier: 'ozon',
+        courier: 'manual',
         abVariant,
         deliveryType: pricingResult.deliveryType,
         agencyName: pricingResult.agencyName || undefined,

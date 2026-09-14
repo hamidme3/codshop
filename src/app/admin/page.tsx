@@ -96,10 +96,10 @@ function OverviewContent() {
           </div>
         </div>
 
-        {/* 2. En Cours d'Acheminement (Sky Blue) */}
+        {/* 2. Commandes Expédiées (Sky Blue) */}
         <div className="p-5 rounded-2xl bg-[#13171c] border border-slate-800/70 space-y-2 shadow-sm bento-card">
           <div className="flex items-center justify-between text-xs text-zinc-400 font-semibold">
-            <span>En Transit Transporteurs</span>
+            <span>Commandes Expédiées</span>
             <span className="p-1 rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/20">
               <Truck className="w-4 h-4" />
             </span>
@@ -108,7 +108,7 @@ function OverviewContent() {
             {totalInTransitMad.toLocaleString('fr-MA')} <span className="text-xs font-sans text-zinc-400">DH</span>
           </div>
           <div className="text-[11px] text-zinc-400 font-medium">
-            {inTransitOrders.length} colis en route (Ozon, SendIt...)
+            {inTransitOrders.length} colis en cours de livraison
           </div>
         </div>
 
@@ -152,67 +152,79 @@ function OverviewContent() {
       {/* Enterprise Milestones Progress */}
       <MilestoneWidget />
 
-      {/* Moroccan Courier Fleets & Reconciliation Strip */}
+      {/* Executive Orders Lifecycle & Universal CSV Export Strip */}
       <div className="p-5 rounded-2xl bg-[#13171c] border border-slate-800/70 space-y-4 bento-card">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/70 pb-3">
           <div>
             <h3 className="text-sm font-black text-white flex items-center gap-2">
-              <Truck className="w-4 h-4 text-sky-400" />
-              <span>Flotte Logistique & Réconciliation Transporteurs</span>
+              <ShoppingBag className="w-4 h-4 text-emerald-400" />
+              <span>Traitement des Commandes & Export CSV</span>
             </h3>
             <p className="text-[11px] text-zinc-400 mt-0.5">
-              Suivi consolidé des bordereaux et ramassages multi-opérateurs (BOM UTF-8 Windows Excel).
+              Mise à jour manuelle des statuts et téléchargement direct au format CSV (encodage UTF-8 BOM pour Excel et Sheets).
             </p>
           </div>
           <Link
             href={`/admin/orders?store=${storeSlug}`}
             className="text-xs font-bold text-emerald-400 hover:underline flex items-center gap-1 self-start sm:self-auto"
           >
-            <span>Gérer les manifests</span>
+            <span>Pipeline des commandes</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-          {/* Ozon Express */}
-          <div className="p-3 rounded-xl bg-[#0c0f12] border border-slate-800/80 space-y-1.5">
+          {/* Nouvelles / À confirmer */}
+          <Link
+            href={`/admin/orders?store=${storeSlug}`}
+            className="p-3 rounded-xl bg-[#0c0f12] border border-slate-800/80 hover:border-slate-700 transition space-y-1.5 cursor-pointer block"
+          >
             <div className="flex items-center justify-between">
-              <span className="font-extrabold text-white">Ozon Express</span>
-              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">Casablanca & National</span>
+              <span className="font-extrabold text-white">À Confirmer</span>
+              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">Étape 0</span>
             </div>
-            <div className="text-[11px] text-zinc-400">Hubs Derb Ghallef / Ain Sebaa</div>
-            <div className="text-xs font-mono font-bold text-zinc-200">Format API & CSV ✓</div>
-          </div>
+            <div className="text-lg font-black text-white font-mono tabular-nums">{pendingOrders.length}</div>
+            <div className="text-[11px] text-zinc-400">À relancer par appel / WhatsApp</div>
+          </Link>
 
-          {/* SendIt */}
-          <div className="p-3 rounded-xl bg-[#0c0f12] border border-slate-800/80 space-y-1.5">
+          {/* Confirmées */}
+          <Link
+            href={`/admin/orders?store=${storeSlug}`}
+            className="p-3 rounded-xl bg-[#0c0f12] border border-slate-800/80 hover:border-slate-700 transition space-y-1.5 cursor-pointer block"
+          >
             <div className="flex items-center justify-between">
-              <span className="font-extrabold text-white">SendIt Maroc</span>
-              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Express 24h</span>
+              <span className="font-extrabold text-white">Confirmées</span>
+              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Étape 1</span>
             </div>
-            <div className="text-[11px] text-zinc-400">Rabat, Fès, Marrakech, Tanger</div>
-            <div className="text-xs font-mono font-bold text-zinc-200">Ramassage 0 DH ✓</div>
-          </div>
+            <div className="text-lg font-black text-cyan-400 font-mono tabular-nums">{orders.filter((o) => o.status === 'confirmed').length}</div>
+            <div className="text-[11px] text-zinc-400">Prêtes à être expédiées</div>
+          </Link>
 
-          {/* Cathedis */}
-          <div className="p-3 rounded-xl bg-[#0c0f12] border border-slate-800/80 space-y-1.5">
+          {/* Expédiées */}
+          <Link
+            href={`/admin/orders?store=${storeSlug}`}
+            className="p-3 rounded-xl bg-[#0c0f12] border border-slate-800/80 hover:border-slate-700 transition space-y-1.5 cursor-pointer block"
+          >
             <div className="flex items-center justify-between">
-              <span className="font-extrabold text-white">Cathedis</span>
-              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">National 48h</span>
+              <span className="font-extrabold text-white">Expédiées</span>
+              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">Étape 2</span>
             </div>
-            <div className="text-[11px] text-zinc-400">Réseau Agences & Relais</div>
-            <div className="text-xs font-mono font-bold text-zinc-200">CRBT Garanti ✓</div>
-          </div>
+            <div className="text-lg font-black text-sky-400 font-mono tabular-nums">{inTransitOrders.length}</div>
+            <div className="text-[11px] text-zinc-400">En cours d&apos;acheminement</div>
+          </Link>
 
-          {/* Amana */}
-          <div className="p-3 rounded-xl bg-[#0c0f12] border border-slate-800/80 space-y-1.5">
+          {/* Livrées */}
+          <Link
+            href={`/admin/orders?store=${storeSlug}`}
+            className="p-3 rounded-xl bg-[#0c0f12] border border-slate-800/80 hover:border-slate-700 transition space-y-1.5 cursor-pointer block"
+          >
             <div className="flex items-center justify-between">
-              <span className="font-extrabold text-white">Amana Poste</span>
-              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">Tout le Maroc</span>
+              <span className="font-extrabold text-white">Livrées (CRBT)</span>
+              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Étape 3</span>
             </div>
-            <div className="text-[11px] text-zinc-400">Villes & Zones Éloignées</div>
-            <div className="text-xs font-mono font-bold text-zinc-200">Reçu Officiel ✓</div>
-          </div>
+            <div className="text-lg font-black text-emerald-400 font-mono tabular-nums">{deliveredOrders.length}</div>
+            <div className="text-[11px] text-zinc-400">Encaissées avec succès</div>
+          </Link>
         </div>
       </div>
 

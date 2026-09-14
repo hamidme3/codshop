@@ -67,7 +67,7 @@ export interface Translations {
     };
     whatsappConfirm: string;
     directCall: string;
-    dispatchOzon: string;
+    quickShip: string;
     printLabel: string;
   };
   products: {
@@ -143,8 +143,8 @@ export interface Translations {
   logistics: {
     title: string;
     subtitle: string;
-    ozonGateway: string;
-    senditGateway: string;
+    deliveryRates: string;
+    freeShippingThreshold: string;
     autoDispatch: string;
     ratesMatrix: string;
   };
@@ -187,7 +187,7 @@ export const DICTIONARY: Record<Language, Translations> = {
       funnel: 'Sales Funnel',
       customers: 'CRM & Customers',
       payments: 'Payment Gateways',
-      logistics: 'Couriers (Ozon)',
+      logistics: 'Delivery & Shipping',
       billing: 'Subscription (14d)',
     },
     common: {
@@ -222,7 +222,7 @@ export const DICTIONARY: Record<Language, Translations> = {
     },
     orders: {
       title: 'Moroccan COD Orders Pipeline',
-      subtitle: 'Confirm orders by WhatsApp/Phone, dispatch Ozon Express couriers, and print thermal A6 labels.',
+      subtitle: 'Confirm orders by WhatsApp/Phone, update statuses manually, and export CSV.',
       tabs: {
         all: 'All Orders',
         new: 'New',
@@ -242,7 +242,7 @@ export const DICTIONARY: Record<Language, Translations> = {
       },
       whatsappConfirm: 'WhatsApp Confirm',
       directCall: 'Call',
-      dispatchOzon: 'Dispatch Ozon',
+      quickShip: 'Mark Shipped',
       printLabel: 'Print A6 Label',
     },
     products: {
@@ -316,12 +316,12 @@ export const DICTIONARY: Record<Language, Translations> = {
       configure: 'Configure',
     },
     logistics: {
-      title: 'Couriers & Logistics Configuration',
-      subtitle: 'Connect your Ozon Express and SendIt API credentials and set custom city delivery rates.',
-      ozonGateway: 'Ozon Express Gateway',
-      senditGateway: 'SendIt Courier Gateway',
-      autoDispatch: 'Auto-Dispatch Confirmed Orders',
-      ratesMatrix: 'Moroccan City Delivery Rates Matrix',
+      title: 'Delivery Rates & Shipping Settings',
+      subtitle: 'Set custom city delivery rates, free shipping thresholds, and delivery timeframes.',
+      deliveryRates: 'City Delivery Rates',
+      freeShippingThreshold: 'Free Shipping Threshold',
+      autoDispatch: 'Manual Status Updates',
+      ratesMatrix: 'City Delivery Rates Matrix',
     },
     billing: {
       title: 'Billing & Store Subscription',
@@ -360,7 +360,7 @@ export const DICTIONARY: Record<Language, Translations> = {
       funnel: 'Entonnoir (Funnel)',
       customers: 'CRM Clients',
       payments: 'Moyens de Paiement',
-      logistics: 'Transporteurs (Ozon)',
+      logistics: 'Frais de Livraison',
       billing: 'Abonnement (14j)',
     },
     common: {
@@ -395,7 +395,7 @@ export const DICTIONARY: Record<Language, Translations> = {
     },
     orders: {
       title: 'Pipeline Commandes COD Maroc',
-      subtitle: 'Confirmez vos commandes par WhatsApp/Appel, expédiez avec Ozon Express et imprimez les étiquettes A6.',
+      subtitle: 'Confirmez vos commandes par WhatsApp/Appel, mettez à jour les statuts et exportez en CSV.',
       tabs: {
         all: 'Toutes les Commandes',
         new: 'Nouvelles',
@@ -415,7 +415,7 @@ export const DICTIONARY: Record<Language, Translations> = {
       },
       whatsappConfirm: 'Confirmer WhatsApp',
       directCall: 'Appeler',
-      dispatchOzon: 'Expédier Ozon',
+      quickShip: 'Expédier',
       printLabel: 'Étiquette A6',
     },
     products: {
@@ -489,12 +489,12 @@ export const DICTIONARY: Record<Language, Translations> = {
       configure: 'Configurer',
     },
     logistics: {
-      title: 'Transporteurs & Logistique Maroc',
-      subtitle: 'Connectez vos clés API Ozon Express et SendIt et personnalisez les tarifs par ville.',
-      ozonGateway: 'Passerelle Ozon Express',
-      senditGateway: 'Passerelle SendIt Express',
-      autoDispatch: 'Expédition Automatique des Confirmées',
-      ratesMatrix: 'Grille Tarifaire par Ville Marocaine',
+      title: 'Paramètres de Livraison & Tarifs',
+      subtitle: 'Définissez les frais par ville, seuil de gratuité et délais d\'expédition.',
+      deliveryRates: 'Tarifs par Ville',
+      freeShippingThreshold: 'Seuil Livraison Gratuite',
+      autoDispatch: 'Mise à Jour Manuelle des Statuts',
+      ratesMatrix: 'Grille Tarifaire par Ville',
     },
     billing: {
       title: 'Facturation & Abonnement Boutique',
@@ -533,7 +533,7 @@ export const DICTIONARY: Record<Language, Translations> = {
       funnel: 'مسار التحويل والمبيعات',
       customers: 'إدارة العملاء (CRM)',
       payments: 'بوابات الدفع',
-      logistics: 'شركات الشحن والتوصيل',
+      logistics: 'إعدادات ومناطق التوصيل',
       billing: 'الاشتراك والفوترة',
     },
     common: {
@@ -568,7 +568,7 @@ export const DICTIONARY: Record<Language, Translations> = {
     },
     orders: {
       title: 'إدارة طلبيات الدفع عند الاستلام بالمغرب',
-      subtitle: 'أكّد الطلبيات عبر واتساب والمكالمات، اشحن مع أوزون إكسبريس واطبع بوالص الشحن A6.',
+      subtitle: 'أكّد الطلبيات عبر واتساب والمكالمات، حدّث الحالات يدوياً وصدّر ملفات CSV المتوافقة مع إكسل.',
       tabs: {
         all: 'جميع الطلبات',
         new: 'جديدة',
@@ -588,7 +588,7 @@ export const DICTIONARY: Record<Language, Translations> = {
       },
       whatsappConfirm: 'تأكيد عبر واتساب',
       directCall: 'اتصال هاتفي',
-      dispatchOzon: 'إرسال لـ Ozon Express',
+      quickShip: 'تحديث إلى مشحونة',
       printLabel: 'طباعة البوليصة A6',
     },
     products: {
@@ -662,12 +662,12 @@ export const DICTIONARY: Record<Language, Translations> = {
       configure: 'إعداد',
     },
     logistics: {
-      title: 'شركات الشحن والخدمات اللوجستية',
-      subtitle: 'ربط حسابات Ozon Express و SendIt وتحديد أسعار التوصيل لكل مدينة.',
-      ozonGateway: 'بوابة أوزون إكسبريس (Ozon)',
-      senditGateway: 'بوابة سند إت (SendIt)',
-      autoDispatch: 'إرسال آلي للطلبيات المؤكدة',
-      ratesMatrix: 'جدول تسعيرة الشحن حسب المدن',
+      title: 'أسعار التوصيل وإعدادات الشحن',
+      subtitle: 'تحديد أسعار التوصيل لكل مدينة وحد الشحن المجاني والمهلة الزمنية.',
+      deliveryRates: 'أسعار التوصيل حسب المدينة',
+      freeShippingThreshold: 'حد التوصيل المجاني',
+      autoDispatch: 'تحديث الحالات يدوياً',
+      ratesMatrix: 'جدول تسعيرة التوصيل حسب المدن',
     },
     billing: {
       title: 'الفوترة وخطة الاشتراك',

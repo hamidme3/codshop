@@ -8,7 +8,7 @@ export type OrderStatus =
   | 'returned' // Colis refusé ou retourné
   | 'canceled'; // Annulée
 
-export type CourierName = 'ozon' | 'sendit' | 'cathedis' | 'amana' | 'manual';
+export type CourierName = 'manual' | 'standard' | 'ozon' | 'sendit' | 'cathedis' | 'amana' | string;
 
 export interface OrderItem {
   id: string;

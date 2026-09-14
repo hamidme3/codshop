@@ -490,10 +490,10 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     announcementBg: '#047857',
     announcementTextColor: '#ffffff',
     heroHeadline: 'L’Expérience d’Achat en Ligne la Plus Rapide du Maroc.',
-    heroSubheadline: 'Un formulaire direct en 3 champs : Nom, Numéro et Ville. Votre commande est immédiatement expédiée par Ozon.',
+    heroSubheadline: 'Un formulaire direct en 3 champs : Nom, Numéro et Ville. Votre commande est validée et expédiée rapidement.',
     trustPills: [
       { icon: 'Zap', title: 'Validation 1-Clic', subtitle: 'Aucun formulaire complexe' },
-      { icon: 'Truck', title: 'Livreurs Ozon & Sendit', subtitle: 'Suivi par SMS temps réel' },
+      { icon: 'Truck', title: 'Livraison Express', subtitle: 'Suivi par SMS temps réel' },
       { icon: 'ShieldCheck', title: 'Vérification Colis', subtitle: 'Ouvrez avant de payer' },
       { icon: 'PhoneCall', title: 'Confirmation WhatsApp', subtitle: 'Message immédiat reçu' },
     ],

@@ -19,7 +19,7 @@ export default function LuckyWheelWidget() {
 
   const prizes: Prize[] = [
     { id: '1', label: '100 DH Crédit Pub TikTok', type: 'ad', value: 100, color: '#f43f5e' },
-    { id: '2', label: '5 Colis Livraison Ozon Offerts', type: 'shipping', value: 125, color: '#059669' },
+    { id: '2', label: '5 Colis Livraison Offerts', type: 'shipping', value: 125, color: '#059669' },
     { id: '3', label: '-50% sur l’Abonnement Scale', type: 'discount', value: 50, color: '#2563eb' },
     { id: '4', label: 'Audit Gratuit Tunnel par un Expert', type: 'coaching', value: 500, color: '#c59b27' },
     { id: '5', label: 'Badge Marchand Vérifié VIP', type: 'badge', value: 0, color: '#8b5cf6' },

@@ -3,7 +3,7 @@ import { getSession } from '@/lib/auth';
 
 const WHEEL_PRIZES = [
   { id: 'prize_1', label: '100 DH Crédit Publicitaire TikTok', type: 'ad_credit', value: 100, color: '#f43f5e' },
-  { id: 'prize_2', label: 'Livraison Gratuite 5 Colis Ozon', type: 'shipping_credit', value: 125, color: '#059669' },
+  { id: 'prize_2', label: 'Livraison Gratuite 5 Colis', type: 'shipping_credit', value: 125, color: '#059669' },
   { id: 'prize_3', label: '-50% sur l’Abonnement Scale', type: 'discount_subscription', value: 50, color: '#2563eb' },
   { id: 'prize_4', label: 'Audit Gratuit Tunnel COD par un Expert', type: 'coaching', value: 500, color: '#c59b27' },
   { id: 'prize_5', label: 'Badge Marchand Vérifié VIP', type: 'badge', value: 0, color: '#8b5cf6' },

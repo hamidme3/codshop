@@ -233,7 +233,7 @@ export function generateStandardCodManifest(orders: Order[], storeName = 'Boutiq
     escapeCsv(o.shippingFee, delimiter),
     escapeCsv(o.total, delimiter),
     escapeCsv(o.status, delimiter),
-    escapeCsv(o.courier || 'ozon', delimiter),
+    escapeCsv(o.courier || 'standard', delimiter),
     escapeCsv(o.trackingNumber || '-', delimiter),
     escapeCsv(o.source || 'web', delimiter),
     escapeCsv(o.abVariant || 'control', delimiter),
@@ -250,6 +250,23 @@ export function generateStandardCodManifest(orders: Order[], storeName = 'Boutiq
     content: csvContent,
     orderCount: orders.length,
     totalCrbt,
+  };
+}
+
+// ── Standard Universal Orders CSV Exporter ───────────────────────────
+export function exportOrdersToCsv(
+  orders: Order[],
+  filenamePrefix = 'commandes',
+  storeName = 'Boutique'
+): { filename: string; mimeType: string; content: string; orderCount: number; totalAmount: number } {
+  const result = generateStandardCodManifest(orders, storeName);
+  const dateStr = new Date().toISOString().slice(0, 10);
+  return {
+    filename: `${filenamePrefix}_${storeName.toLowerCase()}_${dateStr}.csv`,
+    mimeType: result.mimeType,
+    content: result.content,
+    orderCount: result.orderCount,
+    totalAmount: result.totalCrbt,
   };
 }
 

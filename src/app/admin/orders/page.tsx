@@ -12,15 +12,10 @@ import { getOrders, updateOrderStatus, deleteOrder, Order, OrderStatus } from '@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   buildWhatsAppLink, 
-  WhatsAppTemplateType, 
-  getCourierManifestWhatsAppText, 
-  buildManifestWhatsAppLink 
+  WhatsAppTemplateType 
 } from '@/lib/whatsapp-templates';
 import { 
-  exportCourierManifest, 
-  generateBonDeRamassageHtml, 
-  CourierKey, 
-  ShippingCourier 
+  exportOrdersToCsv 
 } from '@/lib/courier-manifest';
 
 function OrdersContent() {
@@ -65,29 +60,6 @@ function OrdersContent() {
   const [activeWaOrderId, setActiveWaOrderId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Manifest & Dispatch Modal State (Option 1 + WhatsApp Share)
-  const [manifestModal, setManifestModal] = useState<{
-    isOpen: boolean;
-    label: string;
-    filterKey: 'confirmed' | 'shipped' | 'delivered' | 'returned' | 'current' | 'selected';
-    orders: Order[];
-    courier: CourierKey;
-    driverPhone: string;
-    autoShip: boolean;
-    showPreviewText: boolean;
-    copied: boolean;
-  }>({
-    isOpen: false,
-    label: '',
-    filterKey: 'confirmed',
-    orders: [],
-    courier: 'ozon',
-    driverPhone: '',
-    autoShip: false,
-    showPreviewText: false,
-    copied: false,
-  });
-
   // Global Escape key dismiss listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -95,7 +67,6 @@ function OrdersContent() {
         setSelectedOrder(null);
         setIsExportOpen(false);
         setActiveWaOrderId(null);
-        setManifestModal((prev) => ({ ...prev, isOpen: false }));
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -222,12 +193,9 @@ function OrdersContent() {
     showToast(`Commande ${orderId} passée à "${statusLabels[newStatus] || newStatus}"`);
   };
 
-  // 1-Click Fast Dispatch with Moroccan Couriers
-  const handleQuickDispatch = (orderId: string, courier: ShippingCourier = 'ozon') => {
-    const existingOrder = orders.find((o) => o.id === orderId || o.orderNumber === orderId);
-    const courierPrefix = courier.toUpperCase();
-    const tracking = existingOrder?.trackingNumber || `${courierPrefix}-MA-${Math.floor(100000 + Math.random() * 900000)}`;
-    handleQuickTransition(orderId, 'shipped', tracking, courier);
+  // 1-Click Fast Manual Transitions
+  const handleQuickShip = (orderId: string) => {
+    handleQuickTransition(orderId, 'shipped');
   };
 
   // Bulk Operations
@@ -261,25 +229,23 @@ function OrdersContent() {
     setSelectedOrderIds([]);
   };
 
-  const handleBulkDispatch = (courier: ShippingCourier = 'ozon') => {
+  const handleBulkShip = () => {
     selectedOrderIds.forEach((id) => {
-      const existing = orders.find((o) => o.id === id || o.orderNumber === id);
-      const tracking = existing?.trackingNumber || `${courier.toUpperCase()}-MA-${Math.floor(100000 + Math.random() * 900000)}`;
-      updateOrderStatus(id, 'shipped', tracking, courier);
+      updateOrderStatus(id, 'shipped');
       fetch('/api/admin/orders', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ storeSlug, orderId: id, status: 'shipped', trackingNumber: tracking, courier }),
+        body: JSON.stringify({ storeSlug, orderId: id, status: 'shipped' }),
       }).catch(() => {});
     });
     setOrders((prev) =>
       prev.map((o) =>
         selectedOrderIds.includes(o.id)
-          ? { ...o, status: 'shipped' as const, courier }
+          ? { ...o, status: 'shipped' as const }
           : o
       )
     );
-    showToast(`${selectedOrderIds.length} commandes expédiées avec ${courier.toUpperCase()} !`);
+    showToast(`${selectedOrderIds.length} commandes marquées comme expédiées !`);
     setSelectedOrderIds([]);
   };
 
@@ -312,80 +278,50 @@ function OrdersContent() {
     }
   };
 
-  const courierNames: Record<CourierKey, string> = {
-    standard: 'Standard Universel',
-    ozon: 'Ozon Express',
-    sendit: 'Sendit Maroc',
-    cathedis: 'Cathedis',
-    amana: 'Amana Poste Maroc',
-    manual: 'Livraison Interne / Manuel',
-  };
-
-  // Open Manifest & WhatsApp Dispatch Modal (Option 1 + WhatsApp Share)
-  const handleOpenManifestModal = (
-    statusFilter: 'confirmed' | 'shipped' | 'delivered' | 'returned' | 'current' | 'selected',
-    preferredCourier: CourierKey = 'ozon'
+  // Universal Standard Orders CSV Export
+  const handleExportCsv = (
+    type: 'all' | 'confirmed' | 'shipped' | 'delivered' | 'returned' | 'current' | 'selected'
   ) => {
     let ordersToExport: Order[] = [];
     let label = '';
+    let prefix = 'commandes';
 
-    if (statusFilter === 'confirmed') {
+    if (type === 'all') {
+      ordersToExport = orders;
+      label = 'Toutes les commandes';
+      prefix = 'toutes_commandes';
+    } else if (type === 'confirmed') {
       ordersToExport = orders.filter((o) => o.status === 'confirmed');
       label = 'Commandes Confirmées';
-    } else if (statusFilter === 'shipped') {
+      prefix = 'commandes_confirmees';
+    } else if (type === 'shipped') {
       ordersToExport = orders.filter((o) => ['shipped', 'shipping'].includes(o.status));
       label = 'Commandes Expédiées';
-    } else if (statusFilter === 'delivered') {
+      prefix = 'commandes_expediees';
+    } else if (type === 'delivered') {
       ordersToExport = orders.filter((o) => o.status === 'delivered');
-      label = 'Commandes Livrées & Encaissées';
-    } else if (statusFilter === 'returned') {
+      label = 'Commandes Livrées';
+      prefix = 'commandes_livrees';
+    } else if (type === 'returned') {
       ordersToExport = orders.filter((o) => ['returned', 'canceled'].includes(o.status));
-      label = 'Commandes Retournées (Refus / Retours)';
-    } else if (statusFilter === 'selected') {
+      label = 'Commandes Retournées';
+      prefix = 'commandes_retournees';
+    } else if (type === 'selected') {
       ordersToExport = orders.filter((o) => selectedOrderIds.includes(o.id));
       label = `Sélection (${ordersToExport.length} commandes)`;
+      prefix = 'selection_commandes';
     } else {
-      ordersToExport = selectedOrderIds.length > 0
-        ? orders.filter((o) => selectedOrderIds.includes(o.id))
-        : filteredOrders;
-      label = `Commandes Affichées (${ordersToExport.length})`;
+      ordersToExport = filteredOrders;
+      label = `Filtre Actuel (${ordersToExport.length} commandes)`;
+      prefix = 'commandes_filtrees';
     }
 
     if (ordersToExport.length === 0) {
-      showToast(`Aucune commande disponible pour : ${label}.`);
+      showToast(`Aucune commande à exporter pour : ${label}.`);
       return;
     }
 
-    setManifestModal({
-      isOpen: true,
-      label,
-      filterKey: statusFilter,
-      orders: ordersToExport,
-      courier: preferredCourier,
-      driverPhone: '',
-      autoShip: statusFilter === 'confirmed' || ordersToExport.some((o) => o.status === 'confirmed'),
-      showPreviewText: false,
-      copied: false,
-    });
-    setIsExportOpen(false);
-  };
-
-  // 1-Click Filtered Export opens the Manifest & WhatsApp Dispatch Modal
-  const handleExportByStatus = (statusFilter: 'confirmed' | 'shipped' | 'delivered' | 'returned' | 'current', courier: CourierKey = 'ozon') => {
-    handleOpenManifestModal(statusFilter, courier);
-  };
-
-  // Specific courier triggers open the Manifest & WhatsApp Dispatch Modal
-  const handleExportManifest = (courier: CourierKey = 'ozon') => {
-    handleOpenManifestModal(selectedOrderIds.length > 0 ? 'selected' : 'current', courier);
-  };
-
-  // Deliberate CSV file download action triggered from the modal
-  const handleExecuteDownload = () => {
-    const { courier, orders: ordersToExport, filterKey, autoShip } = manifestModal;
-    if (ordersToExport.length === 0) return;
-
-    const result = exportCourierManifest(courier, ordersToExport, `${storeSlug}_${filterKey}`);
+    const result = exportOrdersToCsv(ordersToExport, prefix, storeSlug);
     const blob = new Blob([result.content], { type: result.mimeType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -396,79 +332,8 @@ function OrdersContent() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    if (autoShip) {
-      const confirmedOrders = ordersToExport.filter((o) => o.status === 'confirmed');
-      if (confirmedOrders.length > 0) {
-        confirmedOrders.forEach((o) => {
-          const prefix = courier === 'standard' ? 'EXP' : courier.toUpperCase();
-          const tracking = o.trackingNumber || `${prefix}-MA-${Math.floor(100000 + Math.random() * 900000)}`;
-          updateOrderStatus(o.id, 'shipped', tracking, courier === 'standard' ? 'ozon' : (courier as ShippingCourier));
-        });
-        setOrders([...getOrders(storeSlug)]);
-        showToast(`${confirmedOrders.length} commande(s) passée(s) en « Expédiée » avec tracking !`);
-      }
-    }
-
-    showToast(`Bordereau ${courier.toUpperCase()} téléchargé (${result.orderCount} colis - ${result.totalCrbt} DH)`);
-    setManifestModal((prev) => ({ ...prev, isOpen: false }));
-  };
-
-  const manifestTotalCrbt = useMemo(() => {
-    return manifestModal.orders.reduce((sum, o) => sum + (o.total || 0), 0);
-  }, [manifestModal.orders]);
-
-  const manifestCitiesSummary = useMemo(() => {
-    const cityCounts: Record<string, number> = {};
-    manifestModal.orders.forEach((o) => {
-      const c = o.city || 'Maroc';
-      cityCounts[c] = (cityCounts[c] || 0) + 1;
-    });
-    return Object.entries(cityCounts)
-      .sort((a, b) => b[1] - a[1])
-      .map(([city, count]) => `${city} (${count})`)
-      .slice(0, 3)
-      .join(', ');
-  }, [manifestModal.orders]);
-
-  const manifestWhatsAppText = useMemo(() => {
-    if (!manifestModal.isOpen || manifestModal.orders.length === 0) return '';
-    return getCourierManifestWhatsAppText(
-      manifestModal.orders,
-      storeSlug,
-      courierNames[manifestModal.courier] || 'Transporteur'
-    );
-  }, [manifestModal.isOpen, manifestModal.orders, manifestModal.courier, storeSlug]);
-
-  const handleCopyWhatsAppManifest = async () => {
-    try {
-      await navigator.clipboard.writeText(manifestWhatsAppText);
-      setManifestModal((prev) => ({ ...prev, copied: true }));
-      showToast('Listing WhatsApp copié dans le presse-papier !');
-      setTimeout(() => setManifestModal((prev) => ({ ...prev, copied: false })), 3000);
-    } catch {
-      showToast('Impossible de copier dans le presse-papier.');
-    }
-  };
-
-  const handleSendWhatsAppManifest = () => {
-    const link = buildManifestWhatsAppLink(manifestModal.driverPhone, manifestWhatsAppText);
-    window.open(link, '_blank');
-  };
-
-  const handlePrintBonDeRamassage = () => {
-    const html = generateBonDeRamassageHtml(
-      `BDR-${storeSlug.toUpperCase()}-${Date.now().toString().slice(-4)}`,
-      manifestModal.orders,
-      storeSlug,
-      courierNames[manifestModal.courier] || 'Transporteur'
-    );
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(html);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-    }
+    showToast(`Export CSV réussi (${result.orderCount} commandes - ${result.totalAmount.toLocaleString('fr-MA')} DH)`);
+    setIsExportOpen(false);
   };
 
   // Copy Tracking Number State
@@ -524,7 +389,7 @@ function OrdersContent() {
             </span>
           </div>
           <p className="text-zinc-400 text-xs mt-1">
-            Fulfillment opérationnel, expéditions multi-transporteurs (Ozon, SendIt, Cathedis, Amana) et suivi Darija.
+            Gestion des commandes, mise à jour manuelle des statuts et export CSV universel.
           </p>
         </div>
 
@@ -533,7 +398,7 @@ function OrdersContent() {
           <div className="relative">
             <button
               onClick={() => setIsExportOpen(!isExportOpen)}
-              className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center gap-2 border border-slate-700 shadow-md transition-colors"
+              className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center gap-2 border border-slate-700 shadow-md transition-colors cursor-pointer"
             >
               <Download className="w-4 h-4 text-emerald-400" />
               <span>Exporter CSV</span>
@@ -550,9 +415,9 @@ function OrdersContent() {
 
                 <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2.5 z-50 space-y-1 text-xs max-h-[calc(100vh-14rem)] overflow-y-auto admin-scrollbar animate-in fade-in zoom-in-95 duration-150">
                   <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 flex items-center justify-between">
-                    <span>Export 1-Clic par Statut</span>
+                    <span>Export des Commandes (CSV)</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-400 font-mono">Excel / Sheets</span>
+                      <span className="text-emerald-400 font-mono text-[10px]">Excel / Sheets UTF-8</span>
                       <button
                         type="button"
                         onClick={(e) => {
@@ -567,85 +432,73 @@ function OrdersContent() {
                       </button>
                     </div>
                   </div>
+
+                  {selectedOrderIds.length > 0 && (
+                    <button
+                      onClick={() => handleExportCsv('selected')}
+                      className="w-full text-left px-3 py-2 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 font-bold flex items-center justify-between transition-colors cursor-pointer"
+                    >
+                      <span>Sélection ({selectedOrderIds.length})</span>
+                      <Download className="w-3.5 h-3.5 text-emerald-400" />
+                    </button>
+                  )}
+
                   <button
-                    onClick={() => handleExportByStatus('confirmed')}
-                    className="w-full text-left px-3 py-2 rounded-xl bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-300 font-bold flex items-center justify-between transition-colors"
+                    onClick={() => handleExportCsv('confirmed')}
+                    className="w-full text-left px-3 py-2 rounded-xl bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-300 font-bold flex items-center justify-between transition-colors cursor-pointer"
                   >
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-                      <span>1-Clic : Confirmées ({confirmedCount})</span>
+                      <span>Confirmées ({confirmedCount})</span>
                     </span>
                     <Download className="w-3.5 h-3.5 text-cyan-400" />
                   </button>
                   <button
-                    onClick={() => handleExportByStatus('shipped')}
-                    className="w-full text-left px-3 py-2 rounded-xl bg-sky-950/40 hover:bg-sky-900/60 text-sky-300 font-bold flex items-center justify-between transition-colors"
+                    onClick={() => handleExportCsv('shipped')}
+                    className="w-full text-left px-3 py-2 rounded-xl bg-sky-950/40 hover:bg-sky-900/60 text-sky-300 font-bold flex items-center justify-between transition-colors cursor-pointer"
                   >
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-sky-400"></span>
-                      <span>1-Clic : Expédiées ({shippedCount})</span>
+                      <span>Expédiées ({shippedCount})</span>
                     </span>
                     <Download className="w-3.5 h-3.5 text-sky-400" />
                   </button>
                   <button
-                    onClick={() => handleExportByStatus('delivered')}
-                    className="w-full text-left px-3 py-2 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 font-bold flex items-center justify-between transition-colors"
+                    onClick={() => handleExportCsv('delivered')}
+                    className="w-full text-left px-3 py-2 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 font-bold flex items-center justify-between transition-colors cursor-pointer"
                   >
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                      <span>1-Clic : Livrées ({deliveredCount})</span>
+                      <span>Livrées ({deliveredCount})</span>
                     </span>
                     <Download className="w-3.5 h-3.5 text-emerald-400" />
                   </button>
                   <button
-                    onClick={() => handleExportByStatus('returned')}
-                    className="w-full text-left px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 font-bold flex items-center justify-between transition-colors"
+                    onClick={() => handleExportCsv('returned')}
+                    className="w-full text-left px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 font-bold flex items-center justify-between transition-colors cursor-pointer"
                   >
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-rose-400"></span>
-                      <span>1-Clic : Retournées ({returnedCount})</span>
+                      <span>Retournées ({returnedCount})</span>
                     </span>
                     <Download className="w-3.5 h-3.5 text-rose-400" />
                   </button>
                   <button
-                    onClick={() => handleExportByStatus('current')}
-                    className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 flex items-center justify-between"
+                    onClick={() => handleExportCsv('current')}
+                    className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 flex items-center justify-between cursor-pointer"
                   >
-                    <span>📄 Filtre Actuel ({filteredOrders.length})</span>
+                    <span>Filtre Actuel ({filteredOrders.length})</span>
                     <Download className="w-3.5 h-3.5 text-slate-400" />
                   </button>
-
-                  <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-t border-b border-slate-800 mt-1">
-                    Formats Transporteurs Spécifiques
+                  <div className="border-t border-slate-800 pt-1 mt-1">
+                    <button
+                      onClick={() => handleExportCsv('all')}
+                      className="w-full text-left px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-white font-bold flex items-center justify-between cursor-pointer"
+                    >
+                      <span>Toutes les commandes ({orders.length})</span>
+                      <Download className="w-3.5 h-3.5 text-emerald-400" />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => handleExportManifest('ozon')}
-                    className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-between"
-                  >
-                    <span>📦 Ozon Express (.csv)</span>
-                    <Download className="w-3.5 h-3.5 text-sky-400" />
-                  </button>
-                  <button
-                    onClick={() => handleExportManifest('sendit')}
-                    className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-between"
-                  >
-                    <span>📦 SendIt Express (.csv)</span>
-                    <Download className="w-3.5 h-3.5 text-cyan-400" />
-                  </button>
-                  <button
-                    onClick={() => handleExportManifest('cathedis')}
-                    className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-between"
-                  >
-                    <span>📦 Cathedis (.csv)</span>
-                    <Download className="w-3.5 h-3.5 text-indigo-400" />
-                  </button>
-                  <button
-                    onClick={() => handleExportManifest('amana')}
-                    className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-between"
-                  >
-                    <span>📦 Amana Poste Maroc (.csv)</span>
-                    <Download className="w-3.5 h-3.5 text-emerald-400" />
-                  </button>
                 </div>
               </>
             )}
@@ -716,7 +569,7 @@ function OrdersContent() {
             <Download className="w-3.5 h-3.5 text-emerald-400" /> Export 1-Clic :
           </span>
           <button
-            onClick={() => handleExportByStatus('confirmed')}
+            onClick={() => handleExportCsv('confirmed')}
             className="shrink-0 px-3 py-1.5 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-800/50 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
             title="Télécharger immédiatement toutes les commandes confirmées prêtes pour expédition"
           >
@@ -725,7 +578,7 @@ function OrdersContent() {
             <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
           </button>
           <button
-            onClick={() => handleExportByStatus('shipped')}
+            onClick={() => handleExportCsv('shipped')}
             className="shrink-0 px-3 py-1.5 rounded-lg bg-sky-950/40 hover:bg-sky-900/60 border border-sky-800/50 text-sky-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
             title="Télécharger immédiatement toutes les commandes expédiées en cours de livraison"
           >
@@ -734,7 +587,7 @@ function OrdersContent() {
             <Truck className="w-3.5 h-3.5 text-sky-400" />
           </button>
           <button
-            onClick={() => handleExportByStatus('delivered')}
+            onClick={() => handleExportCsv('delivered')}
             className="shrink-0 px-3 py-1.5 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/50 text-emerald-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
             title="Télécharger immédiatement toutes les commandes livrées et encaissées (CRBT)"
           >
@@ -743,9 +596,9 @@ function OrdersContent() {
             <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
           </button>
           <button
-            onClick={() => handleExportByStatus('returned')}
+            onClick={() => handleExportCsv('returned')}
             className="shrink-0 px-3 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 text-rose-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-            title="Télécharger immédiatement toutes les commandes retournées ou refusées pour rapprochement transporteur"
+            title="Télécharger immédiatement toutes les commandes retournées ou annulées au format CSV"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
             <span>Retournées ({returnedCount})</span>
@@ -818,15 +671,15 @@ function OrdersContent() {
               <Check className="w-3.5 h-3.5" /> Confirmer
             </button>
             <button
-              onClick={() => handleBulkDispatch('ozon')}
+              onClick={handleBulkShip}
               className="px-3 py-1.5 rounded-lg bg-sky-950/60 hover:bg-sky-900/80 text-sky-300 border border-sky-700/50 font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Truck className="w-3.5 h-3.5 text-sky-400" /> Expédier (Ozon)
+              <Truck className="w-3.5 h-3.5 text-sky-400" /> Expédier
             </button>
             <button
-              onClick={() => handleExportManifest('standard')}
-              className="px-3 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 font-medium text-xs flex items-center gap-1.5 transition-colors"
-              title="Exporter les commandes sélectionnées au format CSV universel"
+              onClick={() => handleExportCsv('selected')}
+              className="px-3 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Exporter les commandes sélectionnées au format CSV"
             >
               <Download className="w-3.5 h-3.5" /> Exporter CSV
             </button>
@@ -954,7 +807,7 @@ function OrdersContent() {
 
                       {order.status === 'confirmed' && (
                         <button
-                          onClick={() => handleQuickDispatch(order.id, 'ozon')}
+                          onClick={() => handleQuickShip(order.id)}
                           className="touch-target px-2.5 py-1.5 rounded-lg bg-sky-950/60 hover:bg-sky-900 text-sky-300 border border-sky-800/50 text-xs font-bold flex items-center gap-1 cursor-pointer"
                         >
                           <Truck className="w-3.5 h-3.5 text-sky-400" />
@@ -1099,7 +952,7 @@ function OrdersContent() {
 
                                 {col.id === 'confirmed' && (
                                   <button
-                                    onClick={() => handleQuickDispatch(order.id, order.courier || 'ozon')}
+                                    onClick={() => handleQuickShip(order.id)}
                                     className="flex-1 py-1 px-2 rounded-md bg-sky-950/60 hover:bg-sky-900 text-sky-300 border border-sky-800/50 text-[10px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                                   >
                                     <Truck className="w-3 h-3 text-sky-400" />
@@ -1378,7 +1231,7 @@ function OrdersContent() {
 
                               {/* Switch 2: Shipped Switch */}
                               <button
-                                onClick={() => handleQuickDispatch(order.id, order.courier || 'ozon')}
+                                onClick={() => handleQuickShip(order.id)}
                                 className={`px-2 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all cursor-pointer ${
                                   ['shipped', 'shipping'].includes(order.status)
                                     ? 'bg-sky-500/20 text-sky-300 border border-sky-500/50 shadow-sm shadow-sky-500/20'
@@ -1529,7 +1382,7 @@ function OrdersContent() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleQuickDispatch(selectedOrder.id, selectedOrder.courier || 'ozon')}
+                    onClick={() => handleQuickShip(selectedOrder.id)}
                     className={`py-1.5 px-1 rounded-md text-[10px] font-medium transition-colors text-center cursor-pointer ${
                       ['shipped', 'shipping'].includes(selectedOrder.status)
                         ? 'bg-sky-500/20 text-sky-300 border border-sky-500/50 font-bold'
@@ -1607,19 +1460,19 @@ function OrdersContent() {
             <div className="flex gap-2 pt-2 border-t border-zinc-800/80">
               <button
                 onClick={() => {
-                  const result = exportCourierManifest('standard', [selectedOrder], storeSlug);
+                  const result = exportOrdersToCsv([selectedOrder], `commande_${selectedOrder.orderNumber}`, storeSlug);
                   const blob = new Blob([result.content], { type: result.mimeType });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `commande_${selectedOrder.orderNumber}.csv`;
+                  a.download = result.filename;
                   document.body.appendChild(a);
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                   showToast(`Commande ${selectedOrder.orderNumber} exportée en CSV`);
                 }}
-                className="flex-1 py-2 px-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 font-medium text-xs flex items-center justify-center gap-2 transition-colors"
+                className="flex-1 py-2 px-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 font-medium text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" /> Exporter CSV
               </button>
@@ -1637,242 +1490,6 @@ function OrdersContent() {
               >
                 Fermer
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Manifest & WhatsApp Dispatch Modal (Option 1 + WhatsApp Share) */}
-      {manifestModal.isOpen && (
-        <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 cursor-pointer"
-          onClick={() => setManifestModal((prev) => ({ ...prev, isOpen: false }))}
-        >
-          <div
-            className="bg-[#13171c] border border-slate-800 rounded-2xl p-4 sm:p-6 max-w-2xl w-full max-h-[92vh] overflow-y-auto admin-scrollbar space-y-4 sm:space-y-5 shadow-2xl animate-in zoom-in-95 cursor-default bento-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
-                  <FileSpreadsheet className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-mono font-bold text-white tracking-tight flex items-center gap-2">
-                    Bordereau & Manifeste d&apos;Expédition
-                  </h3>
-                  <p className="text-xs text-zinc-400 mt-0.5">
-                    {manifestModal.label} • <strong className="text-white font-mono">{manifestModal.orders.length}</strong> colis •{' '}
-                    <strong className="text-emerald-400 font-mono">
-                      {manifestTotalCrbt.toLocaleString('fr-MA')} DH
-                    </strong>{' '}
-                    CRBT
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setManifestModal((prev) => ({ ...prev, isOpen: false }))}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Top KPI Cards */}
-            <div className="grid grid-cols-3 gap-2.5">
-              <div className="bg-[#0c0f12] border border-slate-800/80 rounded-xl p-3">
-                <span className="text-[10px] uppercase font-bold text-zinc-500">Volume</span>
-                <div className="text-base font-black font-mono text-white mt-0.5">
-                  {manifestModal.orders.length} colis
-                </div>
-              </div>
-              <div className="bg-[#0c0f12] border border-slate-800/80 rounded-xl p-3">
-                <span className="text-[10px] uppercase font-bold text-zinc-500">Total CRBT</span>
-                <div className="text-base font-black font-mono text-emerald-400 mt-0.5">
-                  {manifestTotalCrbt.toLocaleString('fr-MA')} DH
-                </div>
-              </div>
-              <div className="bg-[#0c0f12] border border-slate-800/80 rounded-xl p-3">
-                <span className="text-[10px] uppercase font-bold text-zinc-500">Destinations</span>
-                <div className="text-xs font-semibold text-zinc-300 truncate mt-1" title={manifestCitiesSummary}>
-                  {manifestCitiesSummary || 'Maroc'}
-                </div>
-              </div>
-            </div>
-
-            {/* 1. Courier Format Selector */}
-            <div className="space-y-2">
-              <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider">
-                1. Choisir le format de bordereau / transporteur
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {[
-                  { id: 'ozon', name: 'Ozon Express', badge: 'CRBT Direct', icon: Truck },
-                  { id: 'sendit', name: 'Sendit Maroc', badge: 'Rabat & Casa', icon: Truck },
-                  { id: 'cathedis', name: 'Cathedis', badge: 'National 48h', icon: Truck },
-                  { id: 'amana', name: 'Amana Poste', badge: 'Poste Maroc', icon: Truck },
-                  { id: 'standard', name: 'Standard CSV', badge: 'Excel UTF-8', icon: FileSpreadsheet },
-                ].map((c) => {
-                  const isSelected = manifestModal.courier === c.id;
-                  const IconComp = c.icon;
-                  return (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => setManifestModal((prev) => ({ ...prev, courier: c.id as CourierKey }))}
-                      className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                        isSelected
-                          ? 'bg-emerald-500/10 border-emerald-500 text-white ring-1 ring-emerald-500/30'
-                          : 'bg-[#0c0f12] border-slate-800 text-zinc-400 hover:text-zinc-200 hover:border-slate-700'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <IconComp className={`w-3.5 h-3.5 ${isSelected ? 'text-emerald-400' : 'text-zinc-500'}`} />
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-800/80 text-zinc-400">
-                          {c.badge}
-                        </span>
-                      </div>
-                      <span className="text-xs font-bold mt-2">{c.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 2. WhatsApp Courier Dispatch Card */}
-            <div className="bg-[#0c0f12] border border-emerald-950/40 rounded-xl p-3.5 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400">
-                    <MessageCircle className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-white">2. Partager le bordereau sur WhatsApp</h4>
-                    <p className="text-[11px] text-zinc-400">Transmettez le listing directement au chauffeur ou à l&apos;agence sans fichier lourd.</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setManifestModal((prev) => ({ ...prev, showPreviewText: !prev.showPreviewText }))}
-                  className="text-[11px] text-zinc-400 hover:text-white underline cursor-pointer"
-                >
-                  {manifestModal.showPreviewText ? 'Masquer texte' : 'Voir le texte'}
-                </button>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <div className="relative flex-1">
-                  <Phone className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-500" />
-                  <input
-                    type="tel"
-                    value={manifestModal.driverPhone}
-                    onChange={(e) => setManifestModal((prev) => ({ ...prev, driverPhone: e.target.value }))}
-                    placeholder="N° WhatsApp du livreur (ex: 0661234567) ou laisser vide"
-                    className="w-full bg-[#13171c] border border-slate-800 rounded-lg pl-8 pr-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={handleSendWhatsAppManifest}
-                    className="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer"
-                    title="Ouvrir WhatsApp avec le listing pré-rempli"
-                  >
-                    <MessageCircle className="w-3.5 h-3.5" />
-                    <span>Envoyer sur WhatsApp</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCopyWhatsAppManifest}
-                    className={`px-3 py-2 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer ${
-                      manifestModal.copied
-                        ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300'
-                        : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-zinc-300 hover:text-white'
-                    }`}
-                    title="Copier le listing formaté dans le presse-papier"
-                  >
-                    {manifestModal.copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{manifestModal.copied ? 'Copié !' : 'Copier'}</span>
-                  </button>
-                </div>
-              </div>
-
-              {manifestModal.showPreviewText && (
-                <div className="p-2.5 bg-[#13171c] border border-slate-800/80 rounded-lg text-[11px] font-mono text-zinc-300 whitespace-pre-wrap max-h-40 overflow-y-auto admin-scrollbar">
-                  {manifestWhatsAppText}
-                </div>
-              )}
-            </div>
-
-            {/* 3. Fulfillment Automation Toggle */}
-            {manifestModal.orders.some((o) => o.status === 'confirmed') && (
-              <label className="flex items-center gap-2.5 p-3 rounded-xl bg-[#0c0f12] border border-slate-800/80 text-xs text-zinc-300 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={manifestModal.autoShip}
-                  onChange={(e) => setManifestModal((prev) => ({ ...prev, autoShip: e.target.checked }))}
-                  className="w-4 h-4 rounded border-slate-700 accent-emerald-500 cursor-pointer"
-                />
-                <div>
-                  <span className="font-semibold text-white">
-                    Passer automatiquement les {manifestModal.orders.filter((o) => o.status === 'confirmed').length} commande(s) confirmée(s) en « Expédiées »
-                  </span>
-                  <p className="text-[11px] text-zinc-500">
-                    Génère les numéros de suivi {manifestModal.courier.toUpperCase()} et met à jour le stock en temps réel.
-                  </p>
-                </div>
-              </label>
-            )}
-
-            {/* 4. Mini Orders Table Preview */}
-            <div className="border border-slate-800 rounded-xl overflow-hidden">
-              <div className="px-3 py-2 bg-[#0c0f12] border-b border-slate-800 text-[11px] font-bold text-zinc-400 flex items-center justify-between">
-                <span>Colis inclus dans ce bordereau ({manifestModal.orders.length})</span>
-                <span className="text-zinc-500 text-[10px]">Aperçu avant téléchargement</span>
-              </div>
-              <div className="max-h-36 overflow-y-auto admin-scrollbar divide-y divide-slate-800/60 text-xs">
-                {manifestModal.orders.map((o) => (
-                  <div key={o.id} className="p-2.5 flex items-center justify-between hover:bg-slate-800/20">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="font-mono font-bold text-white text-xs">{o.orderNumber}</span>
-                      <span className="text-zinc-300 truncate">{o.customerName}</span>
-                      <span className="text-zinc-500 text-[11px]">({o.city})</span>
-                    </div>
-                    <span className="font-mono font-bold text-emerald-400 whitespace-nowrap">{o.total} {o.currency || 'DH'}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Modal Footer Actions */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-3 border-t border-slate-800/80">
-              <button
-                type="button"
-                onClick={handlePrintBonDeRamassage}
-                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-              >
-                <Printer className="w-3.5 h-3.5 text-sky-400" />
-                <span>Imprimer Bon de Ramassage A4</span>
-              </button>
-
-              <div className="flex items-center gap-2 justify-end">
-                <button
-                  type="button"
-                  onClick={() => setManifestModal((prev) => ({ ...prev, isOpen: false }))}
-                  className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 font-medium text-xs transition cursor-pointer"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="button"
-                  onClick={handleExecuteDownload}
-                  className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-xs flex items-center justify-center gap-2 transition shadow-md shadow-emerald-500/20 cursor-pointer"
-                >
-                  <Download className="w-4 h-4 text-zinc-950" />
-                  <span>Télécharger le Fichier (.csv)</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>

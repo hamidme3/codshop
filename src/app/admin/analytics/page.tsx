@@ -110,7 +110,7 @@ function AnalyticsContent() {
             </div>
           </div>
           <div className="p-4 rounded-xl bg-slate-950 border border-slate-800">
-            <div className="text-slate-400">Frais Ozon Express & Retours :</div>
+            <div className="text-slate-400">Frais de Livraison & Retours :</div>
             <div className="text-lg font-black text-rose-400 mt-1">
               -{(analytics.totalOrders * 22).toFixed(0)} DH
             </div>

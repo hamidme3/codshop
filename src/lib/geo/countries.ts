@@ -45,10 +45,10 @@ export const COUNTRY_MA: CountryConfig = {
   },
   inCountryName: 'au Maroc',
   addressPlaceholder: 'Ex: Quartier Maârif, Rue Abou Bakr Essedik, Résidence Al Manar Appt 4',
-  agencyPlaceholder: 'Ex: Agence Ozon Maârif, Sendit Agdal, Barid Cash, ou le plus proche',
-  pickupPartnerText: 'Ozon / Sendit / Barid Cash',
+  agencyPlaceholder: 'Ex: Agence Relais Maârif, Agence Agdal, ou agence la plus proche',
+  pickupPartnerText: 'Point Relais / Agence Locale',
   defaultHubCity: 'Casablanca',
-  courierPartners: ['Ozon Express', 'Sendit', 'Cathedis', 'Amana Poste Maroc'],
+  courierPartners: ['Livraison Standard', 'Express 24h', 'Point Relais'],
 };
 
 // ── Saudi Arabia (SA) ──────────────────────────────────────────

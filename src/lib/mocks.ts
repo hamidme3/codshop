@@ -260,7 +260,7 @@ export let CUSTOMERS: Customer[] = [
     email: 'yassine.m@gmail.com',
     city: 'Marrakech',
     address: 'Rue de la Liberté, Guéliz',
-    addressNotes: 'Près de la Grande Poste, Point Relais Ozon préféré',
+    addressNotes: 'Près de la Grande Poste, Point Relais préféré',
     totalOrders: 4,
     totalSpend: 1396,
     averageBasket: 349,

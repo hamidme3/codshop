@@ -1137,7 +1137,7 @@ Merci de me confirmer la livraison !`;
                       </div>
                       <p className="text-[10px] text-emerald-800 mt-0.5">
                         {deliveryType === 'stopdesk'
-                          ? `Colis conservé 48h à l'agence partenaire (${countryConfig.pickupPartnerText || 'Express'}) • SMS dès réception`
+                          ? `Colis conservé 48h au point relais (${countryConfig.pickupPartnerText || 'Agence Locale'}) • SMS dès réception`
                           : `Délai ${deliveryEstimate.sla} • Paiement cash lors de la remise en main propre`}
                       </p>
                     </div>
@@ -1200,7 +1200,7 @@ Merci de me confirmer la livraison !`;
                       type="text"
                       value={agencyName}
                       onChange={(e) => setAgencyName(e.target.value)}
-                      placeholder={countryConfig.agencyPlaceholder || "Ex: Agence Ozon Maârif, Sendit Agdal, Barid Cash, ou le plus proche"}
+                      placeholder={countryConfig.agencyPlaceholder || "Ex: Agence Relais Maârif, Agence Agdal, ou agence la plus proche"}
                       className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-300 rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition"
                     />
                     <p className="text-[10px] text-zinc-500 mt-1 font-normal">

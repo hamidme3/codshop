@@ -70,7 +70,7 @@ export default function RegisterStorePage() {
             Lancez votre boutique COD au Maroc en <span className="text-amber-400">10 secondes</span>
           </h1>
           <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
-            Générez des ventes par paiement à la livraison (Cash on Delivery). Page builder visuel, formulaire 1-page ultra-rapide et expédition Ozon Express & SendIt.
+            Générez des ventes par paiement à la livraison (Cash on Delivery). Page builder visuel, formulaire 1-page ultra-rapide et export CSV instantané.
           </p>
         </div>
 
@@ -246,7 +246,7 @@ export default function RegisterStorePage() {
           </div>
           <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-slate-900/40 border border-slate-800">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>Intégration Ozon & SendIt</span>
+            <span>Export CSV & Suivi des commandes</span>
           </div>
           <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-slate-900/40 border border-slate-800">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />

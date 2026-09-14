@@ -506,7 +506,7 @@ export function CartDrawer() {
                   <label className="block text-xs font-bold text-zinc-800">Agence Point Relais Souhaitée</label>
                   <input
                     type="text"
-                    placeholder={`Ex: Agence Ozon / Cathedis ${customerCity}`}
+                    placeholder={`Ex: Point Relais / Agence Locale ${customerCity}`}
                     value={agencyName}
                     onChange={(e) => setAgencyName(e.target.value)}
                     className="w-full px-3 py-2.5 text-xs border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:outline-none bg-white text-zinc-900"

@@ -161,7 +161,7 @@ function PaymentsContent() {
 
               {editingGw.type === 'cod' && (
                 <p className="text-slate-400">
-                  Le paiement à la livraison ne requiert aucune clé API. Vos livreurs Ozon Express ou SendIt collectent le montant directement auprès du client.
+                  Le paiement à la livraison ne requiert aucune clé API. Le montant est encaissé en espèces directement auprès du client à la réception.
                 </p>
               )}
 

@@ -120,7 +120,7 @@ function BillingContent() {
                 <ul className="mt-6 space-y-3 text-xs text-slate-300">
                   <li className="flex items-center gap-2 font-semibold text-white"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Page Builder Visuel Complet</li>
                   <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Blocs Urgence & Vidéos Avis</li>
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Expédition Ozon Express & SendIt</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Export CSV & Gestion des Commandes</li>
                   <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Jusqu&apos;à 1 000 commandes/mois</li>
                   <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Nom de domaine personnalisé (.ma)</li>
                 </ul>

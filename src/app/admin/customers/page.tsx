@@ -660,8 +660,8 @@ function CustomersContent() {
                       status: selectedCustomer.lastOrderStatus || 'delivered',
                       total: selectedCustomer.totalSpend || 349,
                       itemsSummary: 'Sac Cuir Artisanal Marrakech (Marron Vintage) x1',
-                      courier: 'ozon',
-                      trackingNumber: selectedCustomer.lastTrackingNumber || 'OZON-MA-774419',
+                      courier: 'manual',
+                      trackingNumber: selectedCustomer.lastTrackingNumber || 'EXP-MA-774419',
                     }];
                 const activeOrder = 
                   customerOrders.find((o) => o.id === activeOrderId) || 
@@ -785,9 +785,9 @@ function CustomersContent() {
                               )}
                             </div>
                             <div className="flex items-center justify-between text-xs">
-                              <span className="font-semibold text-zinc-200">3. Prise en Charge Transporteur</span>
+                              <span className="font-semibold text-zinc-200">3. Expédition & Suivi</span>
                               <span className="text-[10px] font-mono uppercase text-zinc-400">
-                                {activeOrder.courier || 'OZON EXPRESS'}
+                                {activeOrder.trackingNumber ? 'Expédiée' : 'En cours'}
                               </span>
                             </div>
                             {activeOrder.trackingNumber ? (

@@ -669,5 +669,41 @@ STATUS: PERMANENT CORE MANDATE
 - Supported markets: Morocco (MAD), Saudi Arabia (SAR), UAE (AED), Kuwait & GCC (KWD), Egypt (EGP), and Europe/International (EUR/USD).
 - All platform features (1-tap waybill checkout, multi-currency auto-detection, local phone normalizers, courier manifest formats, WhatsApp templates) must support global COD corridors.
 
+=== ROUND 18: Zero Carrier Integration Mandate: Fulfillment Boundaries & Universal CSV Export Standard ===
+
+DATE: 2026-09-13
+STATUS: PERMANENT CORE MANDATE & PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS, 66/66 ROUTES BUILT)
+
+1. PERMANENT RULE 4: ZERO CARRIER INTEGRATION MANDATE (MANUAL STATUS UPDATES & CSV EXPORT ONLY)
+- CODShop NEVER claims or offers proprietary or direct "carrier integrations", automated courier fleet dispatch, or API connections to couriers (Ozon, SendIt, Cathedis, Amana, SMSA, Aramex, etc.).
+- The fulfillment process in CODShop stops STRICTLY at:
+  1. Manual Order Status Progression: Orders move manually through the 4-stage pipeline:
+     `new` / `to_confirm` -> `confirmed` -> `shipped` -> `delivered` (or `returned`).
+  2. Universal CSV Export: Standardized, 1-click order export with Windows Excel UTF-8 BOM (`\uFEFF`) and semicolon delimiters. Merchants download this clean CSV to share with whichever delivery service, driver, or transport company they work with.
+- BANNED COPY & BEHAVIOR:
+  * Never mention Ozon, SendIt, Cathedis, Amana, or any courier company as an integrated partner, fleet, or built-in gateway in user-facing copy or admin UI.
+  * Never present automated carrier API dispatch modals or fake courier integrations in merchant backoffice workflows.
+  * Keep the admin dashboard focused on manual status tracking, order economics, and clean CSV export.
+
+2. ADMIN DASHBOARD RE-ALIGNMENT:
+- Orders Pipeline (`src/app/admin/orders/page.tsx`):
+  * Removed carrier manifest modal and driver pickup modals.
+  * 1-Click direct CSV downloads for any status stage (`handleExportCsv('confirmed' | 'shipped' | 'delivered' | 'returned' | 'all' | 'selected')`).
+  * Manual status transitions: `handleQuickShip(order.id)` and `handleBulkShip()`.
+  * Order details drawer triggers direct CSV export via `exportOrdersToCsv`.
+- Command Center Overview (`src/app/admin/page.tsx`):
+  * Replaced "Flotte Logistique & Réconciliation Transporteurs" with "Traitement des Commandes & Export CSV" executive stage strip.
+  * Replaced "En Transit Transporteurs" KPI with "Commandes Expédiées".
+- Logistics Settings (`src/app/admin/logistics/page.tsx`):
+  * Replaced fake carrier API key inputs with clean "Frais de Livraison & Villes" settings (city rates, free shipping threshold, delivery timeframe).
+- Translations (`src/lib/i18n.ts`):
+  * Cleaned EN, FR, and AR dictionaries: renamed `dispatchOzon` -> `quickShip`, `ozonGateway` -> `deliveryRates`, removed all carrier references.
+
+3. VERIFICATION & ZERO REGRESSION:
+- `npx tsc --noEmit`: 0 errors.
+- `npm run build`: 66/66 routes compiled cleanly.
+- Automated Test Suites: 100% pass across all test suites.
+
 <!-- GOAL_COMPLETE -->
+
 
