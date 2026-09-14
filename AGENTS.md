@@ -1,3 +1,10 @@
+=== GLOBAL CORE RULES ===
+RULE: NO FRENCH LANGUAGE
+- NEVER use French in assistant responses, explanations, summaries, or communication with the user.
+- Always communicate strictly in English (or Arabic if explicitly requested by the user).
+- Technical terms, commit messages, and documentation must be written in English.
+=== END GLOBAL CORE RULES ===
+
 === ROUND 1: Theme Customization Initiative ===
 
 IMMEDIATE NEXT ACTION:
