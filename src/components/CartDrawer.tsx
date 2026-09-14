@@ -27,7 +27,7 @@ import {
   validateMoroccanPhone,
   getCityShipping,
 } from '@/lib/moroccanCities';
-import { getCountryConfig, validateCountryPhone } from '@/lib/geo';
+import { getCountryConfig, validateCountryPhone, getCountryCityShipping } from '@/lib/geo';
 
 export function CartDrawer() {
   const router = useRouter();
@@ -80,16 +80,20 @@ export function CartDrawer() {
 
   // Free shipping threshold calculation
   const freeThreshold = countryConfig.freeShippingThreshold || FREE_SHIPPING_THRESHOLD;
+  const hasItemFreeDelivery = items.some((it) => Boolean(it.freeDelivery));
   const isFreeShipping =
     deliveryType === 'stopdesk' ||
     totalCount >= 2 ||
-    subtotal >= freeThreshold;
+    hasItemFreeDelivery ||
+    (freeThreshold > 0 && subtotal >= freeThreshold);
 
   const shippingFee = useMemo(() => {
     if (isFreeShipping) return 0;
-    if (countryCode && countryCode !== 'MA') return countryConfig.defaultShippingFee;
+    if (countryCode && countryCode !== 'MA') {
+      return getCountryCityShipping(countryCode, customerCity, subtotal).fee;
+    }
     return getCityShipping(customerCity, subtotal).fee;
-  }, [isFreeShipping, countryCode, countryConfig, customerCity, subtotal]);
+  }, [isFreeShipping, countryCode, customerCity, subtotal]);
 
   const grandTotal = subtotal + shippingFee;
   const progressToFree = Math.min(100, Math.round((subtotal / freeThreshold) * 100));
@@ -152,6 +156,10 @@ export function CartDrawer() {
           deliveryType,
           agencyName: deliveryType === 'stopdesk' ? agencyName || customerCity : undefined,
           countryCode: countryCode || 'MA',
+          subtotal,
+          shippingFee,
+          total: grandTotal,
+          freeDelivery: isFreeShipping,
           items: items.map((it) => ({
             id: it.productId,
             productId: it.productId,
@@ -163,6 +171,7 @@ export function CartDrawer() {
             color: it.color,
             size: it.size,
             sku: it.sku,
+            freeDelivery: Boolean(it.freeDelivery || isFreeShipping),
           })),
         }),
       });

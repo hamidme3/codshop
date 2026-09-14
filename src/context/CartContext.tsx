@@ -15,6 +15,7 @@ export interface CartItem {
   size?: string;
   variant?: string;
   sku?: string;
+  freeDelivery?: boolean;
 }
 
 interface CartContextType {
@@ -61,6 +62,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             size: item.size,
             variant: item.variant,
             sku: item.sku,
+            freeDelivery: Boolean(item.freeDelivery),
           }));
           setItems(normalized);
         }

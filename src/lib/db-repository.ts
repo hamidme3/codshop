@@ -410,6 +410,7 @@ export function convertDbProductToStorefrontProduct(p: any): any {
         label: '1 Pièce (Standard)',
         unitPrice: price,
         totalPrice: price,
+        freeDelivery: price >= 400,
       },
       {
         quantity: 2,

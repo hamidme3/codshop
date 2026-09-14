@@ -7,7 +7,7 @@ import {
   PackageCheck, Play, Sparkles, AlertCircle, ShoppingBag,
   RotateCcw, ThumbsUp, MapPin
 } from 'lucide-react';
-import { MOROCCAN_CITIES, getCityShipping } from '@/lib/moroccanCities';
+import { MOROCCAN_CITIES, getCityShipping, FREE_SHIPPING_THRESHOLD } from '@/lib/moroccanCities';
 
 export function getButtonRadiusClass(radius?: string) {
   if (radius === 'sharp') return 'rounded-none';
@@ -247,9 +247,11 @@ export function CodCheckoutSection({
     return basePrice * 3 - trioDiscount;
   };
 
-  const shippingInfo = getCityShipping(city, getPackTotal());
-  const shippingFee = shippingInfo.fee;
-  const total = getPackTotal() + shippingFee;
+  const packSubtotal = getPackTotal();
+  const isFreeShipping = selectedPack !== 'single' || packSubtotal >= FREE_SHIPPING_THRESHOLD;
+  const shippingInfo = getCityShipping(city, packSubtotal);
+  const shippingFee = isFreeShipping ? 0 : shippingInfo.fee;
+  const total = packSubtotal + shippingFee;
 
   const handleOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -278,10 +280,13 @@ export function CodCheckoutSection({
         body: JSON.stringify({
           storeSlug: effectiveStoreSlug,
           customer: { fullName, phone, city, address },
-          product: { title: settings.productTitle || 'Article Boutique' },
+          product: { title: settings.productTitle || 'Article Boutique', freeDelivery: isFreeShipping },
           quantity: selectedPack === 'single' ? 1 : selectedPack === 'duo' ? 2 : 3,
           unitPrice: basePrice,
+          subtotal: packSubtotal,
+          shippingFee,
           total,
+          freeDelivery: isFreeShipping,
         }),
       });
       setSuccess(true);
@@ -381,7 +386,7 @@ export function CodCheckoutSection({
                 <div className="font-black text-sm mt-0.5" style={{ color: accentColor }}>
                   {basePrice * 2 - duoDiscount} DH
                 </div>
-                <div className="text-[10px] text-emerald-400 font-bold">-100 DH</div>
+                <div className="text-[10px] text-emerald-400 font-bold">-100 DH • Livraison Offerte</div>
               </button>
 
               <button
@@ -400,7 +405,7 @@ export function CodCheckoutSection({
                 <div className="font-black text-sm mt-0.5 text-white">
                   {basePrice * 3 - trioDiscount} DH
                 </div>
-                <div className="text-[10px] text-emerald-400 font-bold">-200 DH</div>
+                <div className="text-[10px] text-emerald-400 font-bold">-200 DH • Livraison Offerte</div>
               </button>
             </div>
           </div>

@@ -64,8 +64,13 @@ export interface DeliveryEstimate {
 }
 
 export function getCityShipping(cityName: string, subtotal: number = 0): { fee: number; sla: string; isFree: boolean } {
+  const safeCity = (cityName || '').trim();
+  const cleanCity = safeCity.toLowerCase();
+  const city = MOROCCAN_CITIES.find(
+    c => c.name.toLowerCase() === cleanCity || c.id.toLowerCase() === cleanCity || c.nameAr === safeCity
+  );
+
   if (subtotal >= FREE_SHIPPING_THRESHOLD && subtotal > 0) {
-    const city = MOROCCAN_CITIES.find(c => c.name.toLowerCase() === cityName.toLowerCase());
     return {
       fee: 0,
       sla: city ? city.deliverySla : '24h à 48h',
@@ -73,7 +78,6 @@ export function getCityShipping(cityName: string, subtotal: number = 0): { fee: 
     };
   }
 
-  const city = MOROCCAN_CITIES.find(c => c.name.toLowerCase() === cityName.toLowerCase());
   if (city) {
     return {
       fee: city.shippingFee,
@@ -137,8 +141,12 @@ export function getDispatchBaseDate(now: Date): Date {
 }
 
 export function getDeliveryDateEstimate(cityName: string, subtotal: number = 0, now: Date = new Date()): DeliveryEstimate {
-  const shipping = getCityShipping(cityName, subtotal);
-  const city = MOROCCAN_CITIES.find(c => c.name.toLowerCase() === cityName.toLowerCase());
+  const safeCity = (cityName || '').trim();
+  const cleanCity = safeCity.toLowerCase();
+  const shipping = getCityShipping(safeCity, subtotal);
+  const city = MOROCCAN_CITIES.find(
+    c => c.name.toLowerCase() === cleanCity || c.id.toLowerCase() === cleanCity || c.nameAr === safeCity
+  );
 
   // Determine SLA business days
   let minDays = 1;
@@ -323,7 +331,13 @@ export const getDeliveryDateRange = (city: string): string => {
     laayoune: { minDays: 2, maxDays: 3 },
     dakhla: { minDays: 3, maxDays: 4 },
   };
-  const s = citySLA[city.toLowerCase()] || { minDays: 2, maxDays: 3 };
+  const safeCity = (city || '').trim();
+  const cleanCity = safeCity.toLowerCase();
+  const matched = MOROCCAN_CITIES.find(
+    c => c.name.toLowerCase() === cleanCity || c.id.toLowerCase() === cleanCity || c.nameAr === safeCity
+  );
+  const cityKey = matched ? matched.id : cleanCity;
+  const s = citySLA[cityKey] || { minDays: 2, maxDays: 3 };
   const now = new Date();
   const minD = addBusinessDays(now, s.minDays);
   const maxD = addBusinessDays(now, s.maxDays);

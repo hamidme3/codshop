@@ -308,6 +308,7 @@ export function CodCheckoutModal({
           sku: selectedSku,
           color: selectedColor,
           size: selectedSize,
+          freeDelivery: Boolean(selectedTier.freeDelivery || isFreeShipping),
         },
         items: [
           {
@@ -319,6 +320,7 @@ export function CodCheckoutModal({
             sku: selectedSku,
             color: selectedColor,
             size: selectedSize,
+            freeDelivery: Boolean(selectedTier.freeDelivery || isFreeShipping),
           },
         ],
         storeSlug: effectiveStoreSlug,
@@ -328,6 +330,7 @@ export function CodCheckoutModal({
         subtotal: selectedTier.totalPrice,
         shippingFee: effectiveShippingFee,
         total: finalTotal,
+        freeDelivery: Boolean(selectedTier.freeDelivery || isFreeShipping),
         abVariant: isWaybill ? 'waybill' : 'control',
         countryCode: effectiveCountryCode,
         country: effectiveCountryCode,
@@ -652,7 +655,10 @@ Merci de me confirmer la livraison !`;
                       const isSelected = selectedTier.quantity === tier.quantity;
                       const isPackDuo = tier.isPopular || tier.quantity === 2;
                       const isPackTrio = tier.quantity === 3;
-                      const isMulti = tier.quantity > 1 || tier.freeDelivery;
+                      const isMulti =
+                        tier.quantity > 1 ||
+                        tier.freeDelivery ||
+                        (countryConfig.freeShippingThreshold > 0 && tier.totalPrice >= countryConfig.freeShippingThreshold);
 
                       return (
                         <div
@@ -702,7 +708,7 @@ Merci de me confirmer la livraison !`;
                                 {isMulti && (
                                   <span className="text-[9px] font-bold text-emerald-800 bg-emerald-100/90 px-1.5 py-0.5 rounded flex items-center gap-0.5">
                                     <Truck className="w-3 h-3 text-emerald-700" />
-                                    Livraison Gratuite 24h
+                                    Livraison Gratuite ({countryConfig.hubSla.hubSla})
                                   </span>
                                 )}
                                 {tier.freeGift && (

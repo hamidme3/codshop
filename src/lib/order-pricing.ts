@@ -330,6 +330,7 @@ export async function verifyAndRecalculateOrder(
           sku: body.product?.sku || body.sku,
           color: body.product?.color || body.color,
           size: body.product?.size || body.size,
+          freeDelivery: Boolean(body.freeDelivery || body.product?.freeDelivery),
         },
       ];
 
@@ -348,7 +349,7 @@ export async function verifyAndRecalculateOrder(
 
   let computedSubtotal = 0;
   let totalQuantity = 0;
-  let hasTierFreeDelivery = false;
+  let hasTierFreeDelivery = Boolean(body.freeDelivery || body.product?.freeDelivery);
 
   // Store discount settings
   const mockStore = getMockStoreBySlug(safeStoreSlug);
