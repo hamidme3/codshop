@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createStore, getStoreBySlug } from '@/lib/stores';
+import { getStorefrontUrl } from '@/lib/store-urls';
 
 export async function POST(req: Request) {
   try {
@@ -81,7 +82,7 @@ export async function POST(req: Request) {
       success: true,
       store: newStore,
       message: 'Boutique créée avec succès ! Votre essai gratuit de 14 jours a commencé.',
-      previewUrl: `/?store=${newStore.slug}`,
+      previewUrl: getStorefrontUrl(newStore.slug),
       adminUrl: `/admin/builder?store=${newStore.slug}`,
     });
 

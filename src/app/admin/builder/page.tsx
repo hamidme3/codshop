@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { DynamicSectionRenderer } from '@/components/builder/Sections';
 import { THEMES, THEME_LIST, ThemeId } from '@/lib/themes';
+import { getStorefrontUrl } from '@/lib/store-urls';
 
 interface ThemeConfigState {
   primaryColor: string;
@@ -57,6 +58,7 @@ const THEME_PRESETS: Record<string, {
 function BuilderContent() {
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
+  const storefrontUrl = getStorefrontUrl(storeSlug);
 
   const [storeData, setStoreData] = useState<any>(null);
   const [sections, setSections] = useState<any[]>([]);
@@ -299,7 +301,7 @@ function BuilderContent() {
         {/* Actions */}
         <div className="flex items-center gap-2">
           <a
-            href={`/?store=${storeSlug}`}
+            href={storefrontUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition-colors"

@@ -13,6 +13,7 @@ import {
 import LanguageToggle from '@/components/LanguageToggle';
 import StoreSwitcher from '@/components/admin/StoreSwitcher';
 import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
+import { getStorefrontUrl } from '@/lib/store-urls';
 
 interface NavSection {
   title: string;
@@ -30,6 +31,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
+  const storefrontUrl = useMemo(() => getStorefrontUrl(storeSlug), [storeSlug]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ name: string; email: string } | null>(null);
   const [showCommandModal, setShowCommandModal] = useState(false);
@@ -163,7 +165,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
           <div className="flex items-center justify-between text-[11px]">
             <span className="text-zinc-400 font-medium">{t.common.activeStore}</span>
             <a
-              href={`/?store=${storeSlug}`}
+              href={storefrontUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-semibold"
@@ -279,7 +281,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
 
             {/* Direct Storefront Link */}
             <a
-              href={`/?store=${storeSlug}`}
+              href={storefrontUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-zinc-300 hover:text-emerald-400 hover:border-slate-700 transition-colors"
@@ -327,7 +329,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
 
             {/* Direct Storefront link on mobile */}
             <a
-              href={`/?store=${storeSlug}`}
+              href={storefrontUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Voir la boutique"

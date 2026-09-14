@@ -234,6 +234,20 @@ export async function middleware(request: NextRequest) {
     }
   } else {
     requestHeaders.set('x-tenant-type', 'platform');
+
+    // Permanent Rule 2: Clean Multi-Tenant Subdomain Architecture
+    // If a visitor requests a public storefront route on the root platform domain with a legacy ?store= parameter,
+    // permanently redirect them to the clean canonical merchant subdomain (e.g. https://[store].codshop.vipone.site/)
+    if (!url.pathname.startsWith('/admin') && !url.pathname.startsWith('/api') && url.searchParams.has('store')) {
+      const legacyStoreSlug = url.searchParams.get('store')?.trim().toLowerCase();
+      if (legacyStoreSlug && (currentHost === rootDomain || currentHost === `www.${rootDomain}`)) {
+        const redirectUrl = new URL(url.toString());
+        redirectUrl.hostname = `${legacyStoreSlug}.${rootDomain}`;
+        redirectUrl.port = ''; // Strip internal container port (e.g. :3000 behind reverse proxy)
+        redirectUrl.searchParams.delete('store');
+        return NextResponse.redirect(redirectUrl, 308);
+      }
+    }
   }
 
   // Return standard response with enriched headers

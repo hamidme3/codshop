@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { THEMES, THEME_LIST, ThemeConfig, ThemeId, ThemeCategory } from '@/lib/themes';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getStorefrontUrl } from '@/lib/store-urls';
 
 const CATEGORIES: { id: ThemeCategory | 'all'; labelFr: string; labelEn: string; labelAr: string }[] = [
   { id: 'all', labelFr: 'Tous les thèmes (25)', labelEn: 'All Themes (25)', labelAr: 'جميع القوالب (25)' },
@@ -116,6 +117,7 @@ function MiniThemeMockup({ theme }: { theme: ThemeConfig }) {
 function ThemeGalleryContent() {
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
+  const storefrontUrl = getStorefrontUrl(storeSlug);
   const { language } = useLanguage();
 
   const [activeThemeId, setActiveThemeId] = useState<ThemeId>('luxury');
@@ -229,7 +231,7 @@ function ThemeGalleryContent() {
             <span>{language === 'ar' ? 'مُصمم الصفحات المرئي' : language === 'en' ? 'Visual Page Builder' : 'Page Builder Visuel'}</span>
           </Link>
           <a
-            href={`/?store=${storeSlug}`}
+            href={storefrontUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="px-3.5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 text-xs font-bold flex items-center gap-2 transition shadow-sm cursor-pointer shadow-emerald-500/20"
@@ -248,7 +250,7 @@ function ThemeGalleryContent() {
             <span className="font-semibold">{successMessage}</span>
           </div>
           <a
-            href={`/?store=${storeSlug}`}
+            href={storefrontUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-white text-xs flex items-center gap-1"
@@ -335,7 +337,7 @@ function ThemeGalleryContent() {
               <span>Personnaliser dans Page Builder</span>
             </Link>
             <a
-              href={`/?store=${storeSlug}`}
+              href={storefrontUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 transition cursor-pointer shadow-xs"
