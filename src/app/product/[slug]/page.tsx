@@ -21,11 +21,14 @@ import {
   Zap,
   AlertCircle,
   ShoppingBag,
+  Home,
+  ChevronRight,
 } from 'lucide-react';
 import { CodCheckoutModal } from '@/components/CodCheckoutModal';
 import { CartWidget } from '@/components/CartWidget';
 import { useCart } from '@/context/CartContext';
 import { fetchAndInitPixels, trackViewContent } from '@/lib/pixel-tracker';
+import { THEMES } from '@/lib/themes';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -167,6 +170,26 @@ export default function ProductDetailPage() {
     );
   }
 
+  const getNavUrl = (targetPath: string) => {
+    if (typeof window !== 'undefined') {
+      const host = window.location.hostname.toLowerCase();
+      const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
+      const hasSub =
+        (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
+        (host.endsWith('.localhost') && host !== 'localhost');
+
+      if (!hasSub) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const store = urlParams.get('store');
+        if (store) {
+          const sep = targetPath.includes('?') ? '&' : '?';
+          return `${targetPath}${sep}store=${encodeURIComponent(store)}`;
+        }
+      }
+    }
+    return targetPath;
+  };
+
   const discountPercent = product?.originalPrice && product.originalPrice > 0 && product.price > 0
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
@@ -190,17 +213,49 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      {/* Breadcrumb with cart widget */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-xs text-zinc-400 min-w-0">
-          <a href="/" className="hover:text-zinc-900 transition">Accueil</a>
-          <span>/</span>
-          <span className="text-zinc-600 font-medium capitalize">{product.theme}</span>
-          <span>/</span>
-          <span className="text-zinc-900 font-semibold truncate">{product.title}</span>
-        </div>
+      {/* Interactive Breadcrumb Trail with Cart Widget */}
+      <nav aria-label="Fil d'Ariane" className="flex items-center justify-between gap-3 text-xs">
+        <ol className="flex items-center flex-wrap gap-1.5 min-w-0 text-zinc-500 font-medium">
+          <li className="flex items-center gap-1.5 shrink-0">
+            <a
+              href={getNavUrl('/')}
+              className="inline-flex items-center gap-1 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition py-0.5"
+            >
+              <Home className="w-3.5 h-3.5" />
+              <span>Accueil</span>
+            </a>
+            <ChevronRight className="w-3 h-3 text-zinc-400 shrink-0" aria-hidden="true" />
+          </li>
+          <li className="flex items-center gap-1.5 shrink-0">
+            <a
+              href={getNavUrl('/catalog')}
+              className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition py-0.5"
+            >
+              Catalogue
+            </a>
+            <ChevronRight className="w-3 h-3 text-zinc-400 shrink-0" aria-hidden="true" />
+          </li>
+          {product.theme && (
+            <li className="flex items-center gap-1.5 shrink-0">
+              <a
+                href={getNavUrl(`/catalog?category=${encodeURIComponent(product.theme)}`)}
+                className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition py-0.5"
+              >
+                {THEMES[product.theme]?.name || product.theme}
+              </a>
+              <ChevronRight className="w-3 h-3 text-zinc-400 shrink-0" aria-hidden="true" />
+            </li>
+          )}
+          <li
+            className="font-semibold text-zinc-900 dark:text-zinc-100 truncate max-w-[180px] sm:max-w-xs md:max-w-md py-0.5"
+            aria-current="page"
+            title={product.title}
+          >
+            {product.title}
+          </li>
+        </ol>
         <CartWidget />
-      </div>
+      </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
         {/* Left: Product Images Gallery */}

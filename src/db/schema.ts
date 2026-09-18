@@ -16,6 +16,7 @@ export const stores = pgTable(
     country: text('country').default('MA').notNull(), // 'MA' | 'SA' | 'AE' | 'EG' | 'DZ' | 'SN' | 'CI'
     planTier: text('plan_tier').default('starter').notNull(), // 'starter' | 'pro' | 'scale'
     isWaybillEnabled: boolean('is_waybill_enabled').default(false).notNull(), // A/B: "Bon de Livraison" waybill skin
+    checkoutEmailMode: text('checkout_email_mode').default('hidden').notNull(), // 'hidden' | 'optional_collapsed' | 'optional_visible' | 'required'
     trialEndsAt: timestamp('trial_ends_at').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -66,6 +67,7 @@ export const orders = pgTable(
       .notNull(),
     orderNumber: text('order_number').notNull(), // e.g. "CMD-9482"
     customerName: text('customer_name').notNull(),
+    email: text('email'), // Optional customer email if collected
     phone: text('phone').notNull(),
     city: text('city').notNull(),
     address: text('address').notNull(),

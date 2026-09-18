@@ -58,10 +58,54 @@ export async function getStoreBySlug(slug: string) {
       planTier: mockStore.plan,
       status: mockStore.status,
       isWaybillEnabled: false,
+      checkoutEmailMode: (mockStore as any).checkoutEmailMode || 'hidden',
     };
   }
 
   return null;
+}
+
+export async function getStoreCheckoutSettings(slug: string) {
+  const store = await getStoreBySlug(slug);
+  return {
+    checkoutEmailMode: ((store as any)?.checkoutEmailMode || 'hidden') as
+      | 'hidden'
+      | 'optional_collapsed'
+      | 'optional_visible'
+      | 'required',
+  };
+}
+
+export async function updateStoreCheckoutSettings(
+  slug: string,
+  settings: { checkoutEmailMode: string }
+) {
+  const db = getDb();
+  const validModes = ['hidden', 'optional_collapsed', 'optional_visible', 'required'];
+  const mode = validModes.includes(settings.checkoutEmailMode)
+    ? settings.checkoutEmailMode
+    : 'hidden';
+
+  if (db) {
+    try {
+      await db
+        .update(schema.stores)
+        .set({
+          checkoutEmailMode: mode,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.stores.slug, slug));
+    } catch (err) {
+      console.error('[DbRepo] Error updating store checkout settings in DB:', err);
+    }
+  }
+
+  const mockStore = getMockStoreBySlug(slug);
+  if (mockStore) {
+    (mockStore as any).checkoutEmailMode = mode;
+  }
+
+  return { success: true, checkoutEmailMode: mode };
 }
 
 export async function createStore(data: {
@@ -486,6 +530,7 @@ export async function getOrders(storeSlug: string): Promise<Order[]> {
 export async function createOrder(data: {
   storeSlug: string;
   customerName: string;
+  email?: string;
   phone: string;
   city: string;
   address: string;
@@ -515,6 +560,7 @@ export async function createOrder(data: {
 
   // 2. Input Sanitization (anti-XSS) & Variant Preservation
   const cleanCustomerName = sanitizeText(data.customerName, 100) || 'Client Anonyme';
+  const cleanEmail = data.email ? sanitizeText(data.email, 120)?.toLowerCase().trim() || undefined : undefined;
   const cleanAddress = sanitizeText(data.address, 300) || 'Adresse standard';
   const cleanCity = sanitizeText(data.city, 100) || 'Casablanca';
   const cleanAgencyName = data.agencyName ? sanitizeText(data.agencyName, 150) : null;
@@ -577,6 +623,7 @@ export async function createOrder(data: {
       orderNumber,
       storeSlug: data.storeSlug,
       customerName: cleanCustomerName,
+      email: cleanEmail,
       phone: data.phone,
       city: cleanCity,
       address: cleanAddress,
@@ -649,6 +696,7 @@ export async function createOrder(data: {
       storeId: store.id,
       orderNumber,
       customerName: cleanCustomerName,
+      email: cleanEmail || null,
       phone: data.phone,
       city: cleanCity,
       address: cleanAddress,
@@ -667,7 +715,7 @@ export async function createOrder(data: {
     }).returning();
 
     // Auto-update or create Customer in CRM
-    await syncCustomerFromOrder(store.id, cleanCustomerName, data.phone, cleanCity, cleanTotal);
+    await syncCustomerFromOrder(store.id, cleanCustomerName, data.phone, cleanCity, cleanTotal, cleanEmail);
 
     // Sync to in-memory ORDERS cache for real-time backoffice parity
     try {
@@ -676,6 +724,7 @@ export async function createOrder(data: {
         orderNumber: newOrder.orderNumber,
         storeSlug: data.storeSlug,
         customerName: newOrder.customerName,
+        email: (newOrder as any).email || cleanEmail || undefined,
         phone: newOrder.phone,
         city: newOrder.city,
         address: newOrder.address,
@@ -787,12 +836,104 @@ export async function getOrderByNumber(orderNumberOrId: string) {
   }
 }
 
+export async function addUpsellToOrder(
+  orderNumberOrId: string,
+  item: {
+    id: string;
+    title: string;
+    price: number;
+    quantity: number;
+    variant?: string;
+    sku?: string;
+    color?: string;
+    size?: string;
+  },
+  newSubtotal: number,
+  newTotal: number
+) {
+  const db = getDb();
+  let updatedOrder: any = null;
+
+  // 1. In-memory update
+  const memOrder = ORDERS.find((o) => o.orderNumber === orderNumberOrId || o.id === orderNumberOrId);
+  if (memOrder) {
+    const existingItems = Array.isArray(memOrder.items) ? [...memOrder.items] : [];
+    existingItems.push(item);
+    memOrder.items = existingItems;
+    memOrder.subtotal = newSubtotal;
+    memOrder.total = newTotal;
+    updatedOrder = memOrder;
+    if (memOrder.storeSlug) {
+      syncCustomersFromOrders(memOrder.storeSlug);
+    }
+  }
+
+  // 2. PostgreSQL database update
+  if (db) {
+    try {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderNumberOrId);
+      const whereClause = isUuid
+        ? eq(schema.orders.id, orderNumberOrId)
+        : eq(schema.orders.orderNumber, orderNumberOrId);
+
+      const dbOrder = await db.query.orders.findFirst({
+        where: whereClause,
+      });
+
+      if (dbOrder) {
+        const dbItems = Array.isArray(dbOrder.items) ? [...(dbOrder.items as any[])] : [];
+        dbItems.push(item);
+
+        const [saved] = await db
+          .update(schema.orders)
+          .set({
+            items: dbItems,
+            subtotal: newSubtotal,
+            total: newTotal,
+            updatedAt: new Date(),
+          })
+          .where(whereClause)
+          .returning();
+
+        if (saved) {
+          updatedOrder = saved;
+          try {
+            const customer = await db.query.customers.findFirst({
+              where: and(
+                eq(schema.customers.storeId, dbOrder.storeId),
+                eq(schema.customers.phone, dbOrder.phone)
+              ),
+            });
+            if (customer) {
+              const newSpend = customer.totalSpend + (item.price * item.quantity);
+              await db
+                .update(schema.customers)
+                .set({
+                  totalSpend: newSpend,
+                  averageBasket: Math.round(newSpend / Math.max(1, customer.totalOrders)),
+                })
+                .where(eq(schema.customers.id, customer.id));
+            }
+          } catch (crmErr) {
+            console.warn('[DbRepo] CRM spend sync warning on upsell:', crmErr);
+          }
+        }
+      }
+    } catch (dbErr) {
+      console.error('[DbRepo] Error adding upsell in DB:', dbErr);
+    }
+  }
+
+  return updatedOrder;
+}
+
 async function syncCustomerFromOrder(
   storeId: string,
   name: string,
   phone: string,
   city: string,
-  orderTotal: number
+  orderTotal: number,
+  email?: string
 ) {
   const db = getDb();
   if (!db) return;
@@ -808,19 +949,24 @@ async function syncCustomerFromOrder(
     if (existing) {
       const updatedTotalOrders = existing.totalOrders + 1;
       const updatedTotalSpend = existing.totalSpend + orderTotal;
+      const updatePayload: any = {
+        totalOrders: updatedTotalOrders,
+        totalSpend: updatedTotalSpend,
+        averageBasket: Math.round(updatedTotalSpend / updatedTotalOrders),
+        status: 'returning',
+        lastOrderAt: new Date(),
+      };
+      if (email && (!existing.email || existing.email !== email)) {
+        updatePayload.email = email;
+      }
       await db.update(schema.customers)
-        .set({
-          totalOrders: updatedTotalOrders,
-          totalSpend: updatedTotalSpend,
-          averageBasket: Math.round(updatedTotalSpend / updatedTotalOrders),
-          status: 'returning',
-          lastOrderAt: new Date(),
-        })
+        .set(updatePayload)
         .where(eq(schema.customers.id, existing.id));
     } else {
       await db.insert(schema.customers).values({
         storeId,
         name,
+        email: email || null,
         phone,
         city,
         totalOrders: 1,

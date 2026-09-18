@@ -6,6 +6,8 @@ import { ThemeSelectorBar } from '@/components/ThemeSelectorBar';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { CartDrawer } from '@/components/CartDrawer';
+import { MobileBottomNav } from '@/components/MobileBottomNav';
+import { SearchModal } from '@/components/SearchModal';
 
 function ShellContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '';
@@ -31,6 +33,8 @@ function ShellContent({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
+  const isProductPage = pathname.startsWith('/product/');
+
   return (
     <>
       {/* Single sticky container for demo bar + navbar — prevents top-8 overlap */}
@@ -38,9 +42,11 @@ function ShellContent({ children }: { children: React.ReactNode }) {
         <ThemeSelectorBar />
         <Navbar />
       </div>
-      <main className="min-w-0">{children}</main>
+      <main className={`min-w-0 ${!isProductPage ? 'pb-20 md:pb-0' : ''}`}>{children}</main>
       <Footer />
       <CartDrawer />
+      <MobileBottomNav />
+      <SearchModal />
     </>
   );
 }

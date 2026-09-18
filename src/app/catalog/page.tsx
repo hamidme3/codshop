@@ -50,6 +50,16 @@ export default function CatalogPage() {
         detected = urlParams.get('store') || '';
       }
 
+      const urlParams = new URLSearchParams(window.location.search);
+      const catParam = urlParams.get('category');
+      if (catParam) {
+        setSelectedCategory(catParam);
+      }
+      const qParam = urlParams.get('q');
+      if (qParam) {
+        setSearchQuery(qParam);
+      }
+
       const fetchSlug = detected || 'storet1';
       fetch(`/api/products?store=${encodeURIComponent(fetchSlug)}`)
         .then((r) => r.json())

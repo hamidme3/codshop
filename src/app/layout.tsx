@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { CartProvider } from "@/context/CartContext";
+import { SearchProvider } from "@/context/SearchContext";
 import { StorefrontShell } from "@/components/StorefrontShell";
 import { Inter, Playfair_Display, JetBrains_Mono, Cairo } from "next/font/google";
 
@@ -66,7 +67,9 @@ export default function RootLayout({
       <body className="antialiased" suppressHydrationWarning>
         <ThemeProvider>
           <CartProvider>
-            <StorefrontShell>{children}</StorefrontShell>
+            <SearchProvider>
+              <StorefrontShell>{children}</StorefrontShell>
+            </SearchProvider>
           </CartProvider>
         </ThemeProvider>
       </body>

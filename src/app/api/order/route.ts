@@ -167,11 +167,13 @@ export async function POST(req: Request) {
     const abVariant = body.abVariant || req.headers.get('x-ab-variant') || 'control';
 
     // 6. Persist order with authentic server-recalculated pricing, variant SKUs, and inventory reservation
+    const customerEmail = body.customer?.email || body.email || undefined;
     let savedOrder;
     try {
       savedOrder = await createOrder({
         storeSlug,
         customerName: pricingResult.customerName,
+        email: customerEmail,
         phone,
         city: pricingResult.city,
         address: pricingResult.address,

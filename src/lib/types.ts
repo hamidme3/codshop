@@ -27,6 +27,7 @@ export interface Order {
   storeSlug: string;
   createdAt: string;
   customerName: string;
+  email?: string;
   phone: string;
   city: string;
   address: string;

@@ -3,12 +3,14 @@
 import React, { useMemo } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { getCountryConfig } from '@/lib/geo';
-import { MessageCircle, ShieldCheck, ShoppingBag, Compass } from 'lucide-react';
+import { MessageCircle, ShieldCheck, ShoppingBag, Compass, Search } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useSearch } from '@/context/SearchContext';
 
 export function Navbar() {
   const { theme, countryCode } = useTheme();
   const { totalCount, openCart } = useCart();
+  const { openSearch } = useSearch();
   const countryConfig = useMemo(() => getCountryConfig(countryCode || 'MA'), [countryCode]);
 
   const announcement = useMemo(() => {
@@ -103,6 +105,42 @@ export function Navbar() {
 
         {/* Header Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Instant Search Trigger - Desktop */}
+          <button
+            type="button"
+            onClick={openSearch}
+            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition cursor-pointer hover:opacity-90 shadow-xs"
+            style={{
+              backgroundColor: 'var(--theme-card-bg)',
+              borderColor: 'var(--theme-border)',
+              color: 'var(--theme-text-secondary)',
+            }}
+            aria-label="Rechercher des produits (Cmd+K)"
+            title="Rechercher des produits (Cmd+K)"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span className="text-xs">Rechercher...</span>
+            <kbd className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-zinc-400 bg-black/5 dark:bg-white/10 rounded border border-black/10 dark:border-white/10">
+              ⌘K
+            </kbd>
+          </button>
+
+          {/* Instant Search Trigger - Mobile */}
+          <button
+            type="button"
+            onClick={openSearch}
+            className="sm:hidden p-2 rounded-xl border flex items-center justify-center transition shadow-xs cursor-pointer hover:opacity-90"
+            style={{
+              backgroundColor: 'var(--theme-card-bg)',
+              borderColor: 'var(--theme-border)',
+              color: 'var(--theme-text-primary)',
+            }}
+            aria-label="Rechercher des produits"
+            title="Rechercher"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+
           <a
             href="https://wa.me/212661000000?text=Salam,%20j'ai%20une%20question%20sur%20vos%20produits"
             target="_blank"

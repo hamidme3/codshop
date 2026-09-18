@@ -37,6 +37,7 @@ import {
   Gift,
   PackageCheck,
   Zap,
+  Mail,
 } from 'lucide-react';
 import { trackInitiateCheckout } from '@/lib/pixel-tracker';
 
@@ -53,6 +54,7 @@ interface CodCheckoutModalProps {
   initialSize?: string;
   initialCity?: string;
   isWaybill?: boolean; // override from parent (optional)
+  emailMode?: 'hidden' | 'optional_collapsed' | 'optional_visible' | 'required';
 }
 
 function getAbVariant(): boolean {
@@ -74,6 +76,7 @@ export function CodCheckoutModal({
   initialSize,
   initialCity,
   isWaybill: waybillOverride,
+  emailMode: initialEmailMode,
 }: CodCheckoutModalProps) {
   const router = useRouter();
   const { theme, formatMAD, lang } = useTheme();
@@ -146,6 +149,34 @@ export function CodCheckoutModal({
   // Form State
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [emailMode, setEmailMode] = useState<'hidden' | 'optional_collapsed' | 'optional_visible' | 'required'>(
+    initialEmailMode || 'hidden'
+  );
+  const [email, setEmail] = useState('');
+  const [isEmailExpanded, setIsEmailExpanded] = useState(false);
+
+  // Auto-fetch store checkout settings if emailMode not explicitly passed
+  useEffect(() => {
+    if (initialEmailMode) {
+      setEmailMode(initialEmailMode);
+      return;
+    }
+    const slug = effectiveStoreSlug || 'ottavio';
+    fetch(`/api/stores/${encodeURIComponent(slug)}/checkout-settings`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && data.checkoutEmailMode) {
+          setEmailMode(data.checkoutEmailMode);
+        }
+      })
+      .catch(() => {});
+  }, [effectiveStoreSlug, initialEmailMode]);
+
+  const isEmailValid = useMemo(() => {
+    if (!email.trim()) return emailMode !== 'required';
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  }, [email, emailMode]);
+
   const [city, setCity] = useState(initialCity || countryConfig.popularCities[0] || 'Casablanca');
   const [address, setAddress] = useState('');
   const [deliveryType, setDeliveryType] = useState<'home' | 'stopdesk'>('home');
@@ -295,6 +326,24 @@ export function CodCheckoutModal({
       return;
     }
 
+    if (emailMode === 'required' && (!email.trim() || !isEmailValid)) {
+      setError(
+        lang === 'ar'
+          ? 'يرجى إدخال بريد إلكتروني صحيح'
+          : 'Veuillez renseigner une adresse e-mail valide (ex: contact@domaine.com)'
+      );
+      return;
+    }
+
+    if (email.trim() && !isEmailValid) {
+      setError(
+        lang === 'ar'
+          ? 'يرجى إدخال بريد إلكتروني صحيح'
+          : 'Format d’adresse e-mail invalide (ex: contact@domaine.com)'
+      );
+      return;
+    }
+
     setError('');
     setLoading(true);
 
@@ -340,6 +389,7 @@ export function CodCheckoutModal({
         customer: {
           fullName: fullName.trim(),
           phone: phoneValidation.cleanPhone || phone.replace(/\s+/g, ''),
+          email: email.trim() || undefined,
           city,
           address: deliveryType === 'stopdesk'
             ? `[STOPDESK / POINT RELAIS ${city}] ${agencyName.trim() || 'Agence la plus proche'}`
@@ -959,6 +1009,61 @@ Merci de me confirmer la livraison !`;
                     </p>
                   )}
                 </div>
+
+                {/* Optional / Configurable Email Field */}
+                {emailMode !== 'hidden' && (
+                  <div>
+                    {emailMode === 'optional_collapsed' && !isEmailExpanded && !email ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsEmailExpanded(true)}
+                        className="text-[11px] text-zinc-500 hover:text-zinc-900 font-semibold flex items-center gap-1.5 transition py-1 cursor-pointer"
+                      >
+                        <Mail className="w-3.5 h-3.5 text-zinc-400" />
+                        <span>+ Ajouter une adresse e-mail pour le suivi (Optionnel)</span>
+                      </button>
+                    ) : (
+                      <div className="space-y-1">
+                        <label className="block text-xs font-bold text-zinc-700 mb-1 flex items-center justify-between">
+                          <span className="flex items-center gap-1.5">
+                            <Mail className="w-3.5 h-3.5 text-zinc-400" />
+                            <span>Adresse E-mail</span>
+                            {emailMode === 'required' ? (
+                              <span className="text-red-500 font-bold">*</span>
+                            ) : (
+                              <span className="text-[10px] text-zinc-400 font-normal">(Optionnel)</span>
+                            )}
+                          </span>
+                          {email.trim() && isEmailValid && (
+                            <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                              <Check className="w-3 h-3 stroke-[3]" /> Valide
+                            </span>
+                          )}
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          autoComplete="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="nom@exemple.com"
+                          className={`w-full px-3.5 py-2.5 bg-zinc-50 border rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition ${
+                            email.trim() && !isEmailValid
+                              ? 'border-red-400 bg-red-50/30'
+                              : email.trim() && isEmailValid
+                              ? 'border-emerald-500 bg-emerald-50/20'
+                              : 'border-zinc-300'
+                          }`}
+                        />
+                        <p className="text-[10px] text-zinc-500">
+                          {emailMode === 'required'
+                            ? 'Requis pour l’envoi de votre reçu numérique et notifications de transit.'
+                            : 'Pour recevoir le récapitulatif de commande et le suivi par e-mail.'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* City & Delivery Mode Selection */}
                 <div className="space-y-2">

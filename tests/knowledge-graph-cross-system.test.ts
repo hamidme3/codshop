@@ -87,25 +87,25 @@ async function runTests() {
   assert.strictEqual(targetOrder.trackingNumber, 'TRK-TEST-99');
   console.log('  ✓ updateOrderStatus successfully resolved by orderNumber.');
 
-  // Test 5: deleteOrder lookup by orderNumber
-  console.log('5. Testing deleteOrder by orderNumber...');
-  // Add a test order to ORDERS
-  const testOrderNumber = `CMD-TEST-${Date.now()}`;
-  ORDERS.push({
-    id: `ord_test_${Date.now()}`,
-    orderNumber: testOrderNumber,
-    storeSlug: 'ottavio',
-    customerName: 'Test Customer',
-    customerPhone: '0600000000',
-    customerCity: 'Casablanca',
-    customerAddress: 'Test address',
-    items: [{ id: 'prod_1', title: 'Test Item', quantity: 1, price: 100 }],
-    subtotal: 100,
-    shippingFee: 20,
-    total: 120,
-    status: 'new',
-    createdAt: new Date().toISOString(),
-  });
+  // 5. deleteOrder lookup by orderNumber
+    console.log('5. Testing deleteOrder by orderNumber...');
+    // Add a test order to ORDERS
+    const testOrderNumber = `CMD-TEST-${Date.now()}`;
+    ORDERS.push({
+      id: `ord_test_${Date.now()}`,
+      orderNumber: testOrderNumber,
+      storeSlug: 'ottavio',
+      customerName: 'Test Customer',
+      phone: '0600000000',
+      city: 'Casablanca',
+      address: 'Test address',
+      items: [{ id: 'prod_1', title: 'Test Item', quantity: 1, price: 100 }],
+      subtotal: 100,
+      shippingFee: 20,
+      total: 120,
+      status: 'new',
+      createdAt: new Date().toISOString(),
+    });
 
   const deleteSuccess = deleteOrder(testOrderNumber, 'ottavio');
   assert.strictEqual(deleteSuccess, true, 'deleteOrder by orderNumber must succeed');

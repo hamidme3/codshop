@@ -452,7 +452,7 @@ export function syncCustomersFromOrders(storeSlug: string): Customer[] {
         storeSlug,
         name: order.customerName,
         phone: order.phone,
-        email: `${order.customerName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@client.ma`,
+        email: order.email || `${order.customerName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@client.ma`,
         city: order.city,
         address: order.address,
         totalOrders: 0,
@@ -470,7 +470,8 @@ export function syncCustomersFromOrders(storeSlug: string): Customer[] {
       customerMap.set(key, cust);
     }
 
-    // Keep name/city/address up to date from most recent orders
+    // Keep name/city/address/email up to date from most recent orders
+    if (order.email) cust.email = order.email;
     if (!cust.address && order.address) cust.address = order.address;
     if (order.city) cust.city = order.city;
 
