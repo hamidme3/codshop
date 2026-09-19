@@ -90,30 +90,30 @@ function AnalyticsContent() {
   }, [storeSlug]);
 
   return (
-    <div className="p-4 sm:p-8 lg:p-10 space-y-8 max-w-7xl mx-auto font-sans text-slate-100">
+    <div className="p-4 sm:p-8 lg:p-10 space-y-8 max-w-7xl mx-auto font-sans text-slate-900 dark:text-slate-100">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800/60">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200 dark:border-slate-800/60">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Tableau de Bord Stratégique • {storeSlug.toUpperCase()}</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
             Analytiques & Rentabilité COD
           </h1>
-          <p className="text-slate-400 text-xs sm:text-sm mt-1">
+          <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1">
             Trafic en direct, entonnoir de conversion, recherches clients et rentabilité nette réelle en Dirhams (MAD).
           </p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-inner self-start sm:self-auto backdrop-blur-md">
+        <div className="flex items-center p-1.5 rounded-2xl bg-slate-200/80 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 shadow-inner self-start sm:self-auto backdrop-blur-md">
           <button
             onClick={() => setActiveTab('storefront')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'storefront'
                 ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 scale-[1.02]'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Activity className="w-4 h-4" />
@@ -124,7 +124,7 @@ function AnalyticsContent() {
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'operations'
                 ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 scale-[1.02]'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Wallet className="w-4 h-4" />
@@ -137,7 +137,7 @@ function AnalyticsContent() {
       {activeTab === 'storefront' && (
         <div className="space-y-8">
           {/* Live Command Center Banner */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-linear-to-br from-emerald-950/60 via-slate-900 to-slate-950 border border-emerald-500/30 shadow-2xl relative overflow-hidden">
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#0b1419] border border-emerald-500/40 shadow-2xl relative overflow-hidden text-white">
             <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
             
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
