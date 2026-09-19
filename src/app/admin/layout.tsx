@@ -180,7 +180,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
             },
           ],
         },
-        { label: t.nav.logistics, href: `/admin/logistics?store=${storeSlug}`, icon: Truck },
+        { label: t.nav.shipping || t.nav.logistics, href: `/admin/shipping?store=${storeSlug}`, icon: Truck },
         { label: t.nav.customers, href: `/admin/customers?store=${storeSlug}`, icon: Users },
       ],
     },

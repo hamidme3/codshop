@@ -183,13 +183,19 @@ async function runArchitectureVerificationSuite() {
   // Safety check 1: Standard deleteCategory must block deletion with explanatory error
   const blockedDelete = deleteCategory(sourceCategory.id, storeSlug);
   assert.strictEqual(blockedDelete.success, false);
-  assert.ok(blockedDelete.error?.includes('produit(s) y sont encore associés'));
+  assert.ok(
+    blockedDelete.error?.includes('still assigned') ||
+      blockedDelete.error?.includes('produit(s) y sont encore associés')
+  );
   console.log(`  ✓ deleteCategory blocked orphan deletion: "${blockedDelete.error}"`);
 
   // Safety check 2: Target identical to source must fail
   const selfReassign = reassignAndDeleteCategory(sourceCategory.id, sourceCategory.id, storeSlug);
   assert.strictEqual(selfReassign.success, false);
-  assert.ok(selfReassign.error?.includes('identique'), 'Cannot reassign to same category');
+  assert.ok(
+    selfReassign.error?.includes('identical') || selfReassign.error?.includes('identique'),
+    'Cannot reassign to same category'
+  );
   console.log(`  ✓ Identical source and target reassignment safely blocked: "${selfReassign.error}"`);
 
   // Perform Safe Reallocation

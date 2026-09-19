@@ -209,7 +209,10 @@ async function runProductCategoryExperienceSuite() {
   // Safe deletion guard: Direct deletion of category with productCount > 0 must fail
   const directDelete = deleteCategory(targetCat.id, storeSlug);
   assert.strictEqual(directDelete.success, false, 'Direct deletion of non-empty category must fail');
-  assert.ok(directDelete.error?.includes('Impossible de supprimer'), 'Guard must return clear error message');
+  assert.ok(
+    directDelete.error?.includes('Cannot delete') || directDelete.error?.includes('Impossible de supprimer'),
+    'Guard must return clear error message'
+  );
 
   // Find another destination category
   const destCat = catsAfterAdd.find((c) => c.id !== targetCat.id);

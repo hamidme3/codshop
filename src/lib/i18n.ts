@@ -13,6 +13,7 @@ export interface Translations {
     customers: string;
     payments: string;
     logistics: string;
+    shipping: string;
     billing: string;
   };
   common: {
@@ -188,6 +189,7 @@ export const DICTIONARY: Record<Language, Translations> = {
       customers: 'CRM & Customers',
       payments: 'Payment Gateways',
       logistics: 'Delivery & Shipping',
+      shipping: 'Shipping & Delivery',
       billing: 'Subscription (14d)',
     },
     common: {
@@ -361,6 +363,7 @@ export const DICTIONARY: Record<Language, Translations> = {
       customers: 'CRM Clients',
       payments: 'Moyens de Paiement',
       logistics: 'Frais de Livraison',
+      shipping: 'Frais de Livraison',
       billing: 'Abonnement (14j)',
     },
     common: {
@@ -534,6 +537,7 @@ export const DICTIONARY: Record<Language, Translations> = {
       customers: 'إدارة العملاء (CRM)',
       payments: 'بوابات الدفع',
       logistics: 'إعدادات ومناطق التوصيل',
+      shipping: 'إعدادات التوصيل',
       billing: 'الاشتراك والفوترة',
     },
     common: {

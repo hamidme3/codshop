@@ -33,7 +33,33 @@ export async function resolveCatalogProduct(
   const targetTitle = (identifier.title || '').trim().toLowerCase();
   const targetSku = (identifier.sku || '').trim().toLowerCase();
 
-  // 1. Try Postgres DB if connected
+  // 1. Try Payload CMS first (single source of truth for products)
+  try {
+    const { resolvePayloadCatalogProduct } = await import('./payload-products');
+    const payloadProd = await resolvePayloadCatalogProduct(identifier, storeSlug);
+    if (payloadProd) {
+      let tiers = payloadProd.quantityTiers;
+      if (!tiers || tiers.length === 0) {
+        const mockMatch = MOCK_PRODUCTS.find(
+          (p) =>
+            p.id === payloadProd.id ||
+            p.sku.toLowerCase() === (identifier.sku || '').toLowerCase() ||
+            p.slug.toLowerCase() === targetSlug
+        );
+        tiers = mockMatch?.quantityTiers;
+      }
+      return {
+        id: payloadProd.id,
+        title: payloadProd.title,
+        price: payloadProd.price,
+        quantityTiers: tiers,
+      };
+    }
+  } catch (err) {
+    console.warn('[Pricing Engine] Payload catalog resolution unavailable, fallback:', err);
+  }
+
+  // 2. Try Postgres DB if connected
   const db = getDb();
   if (db) {
     try {

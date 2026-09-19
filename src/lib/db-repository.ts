@@ -188,6 +188,18 @@ export async function createStore(data: {
 
 // ── Products Repository ────────────────────────────────────────
 export async function getProducts(storeSlug: string): Promise<Product[]> {
+  // Try Payload CMS first (single source of truth for products)
+  try {
+    const { getProductsFromPayload } = await import('./payload-products');
+    const payloadProducts = await getProductsFromPayload(storeSlug);
+    if (payloadProducts.length > 0) {
+      return payloadProducts;
+    }
+  } catch (err) {
+    console.warn('[DbRepo] Payload product fetch unavailable, trying Drizzle fallback:', err);
+  }
+
+  // Fallback to Drizzle DB (legacy data during migration)
   const db = getDb();
   if (!db) {
     return getMockProducts(storeSlug);
@@ -229,6 +241,20 @@ export async function getProducts(storeSlug: string): Promise<Product[]> {
 }
 
 export async function createProduct(data: Omit<Product, 'id'>): Promise<Product> {
+  // Try Payload CMS first (single source of truth for products)
+  try {
+    const { createProductInPayload } = await import('./payload-products');
+    const created = await createProductInPayload(data);
+    if (created) {
+      // Also sync to mock for instant UI cache
+      addMockProduct(data);
+      return created;
+    }
+  } catch (err) {
+    console.warn('[DbRepo] Payload product create unavailable, trying Drizzle fallback:', err);
+  }
+
+  // Fallback to Drizzle DB
   const db = getDb();
   if (!db) {
     return addMockProduct(data);
@@ -275,6 +301,19 @@ export async function createProduct(data: Omit<Product, 'id'>): Promise<Product>
 }
 
 export async function updateProduct(productId: string, updates: Partial<Product>): Promise<Product | null> {
+  // Try Payload CMS first (single source of truth for products)
+  try {
+    const { updateProductInPayload } = await import('./payload-products');
+    const updated = await updateProductInPayload(productId, updates);
+    if (updated) {
+      updateMockProduct(productId, updates);
+      return updated;
+    }
+  } catch (err) {
+    console.warn('[DbRepo] Payload product update unavailable, trying Drizzle fallback:', err);
+  }
+
+  // Fallback to Drizzle DB
   const db = getDb();
   if (!db) {
     return updateMockProduct(productId, updates);
@@ -351,6 +390,19 @@ export async function updateProduct(productId: string, updates: Partial<Product>
 }
 
 export async function deleteProduct(productId: string): Promise<boolean> {
+  // Try Payload CMS first (single source of truth for products)
+  try {
+    const { deleteProductInPayload } = await import('./payload-products');
+    const deleted = await deleteProductInPayload(productId);
+    if (deleted) {
+      deleteMockProduct(productId);
+      return true;
+    }
+  } catch (err) {
+    console.warn('[DbRepo] Payload product delete unavailable, trying Drizzle fallback:', err);
+  }
+
+  // Fallback to Drizzle DB
   const db = getDb();
   deleteMockProduct(productId);
   if (!db) return true;
@@ -683,7 +735,17 @@ export async function createOrder(data: {
   }
 
   try {
-    // Also decrement in Postgres if database is active
+    // 1. Decrement product stock in Payload CMS (single source of truth)
+    try {
+      const { decrementPayloadStock } = await import('./payload-products');
+      for (const it of cleanItems) {
+        await decrementPayloadStock(it.id, it.quantity, { size: it.size, color: it.color });
+      }
+    } catch (payloadStockErr) {
+      console.warn('[DbRepo] Non-fatal Payload stock decrement warning:', payloadStockErr);
+    }
+
+    // 2. Also decrement in Drizzle Postgres for backward-compatibility during migration
     try {
       const allStoreProds = await db.query.products.findMany({
         where: eq(schema.products.storeId, store.id),
@@ -795,8 +857,18 @@ export async function restoreDbProductStock(
   storeId: string,
   items: Array<{ id: string; sku?: string; quantity: number; size?: string; color?: string }>
 ) {
+  if (!items || items.length === 0) return;
+
+  // Restore in Payload CMS (single source of truth for products)
+  try {
+    const { restorePayloadStock } = await import('./payload-products');
+    await restorePayloadStock(items);
+  } catch (err) {
+    console.warn('[DbRepo] Non-fatal Payload stock restore warning:', err);
+  }
+
   const db = getDb();
-  if (!db || !items || items.length === 0) return;
+  if (!db) return;
 
   try {
     const storeProducts = await db.query.products.findMany({
@@ -864,7 +936,10 @@ export async function getOrderByNumber(orderNumberOrId: string) {
       const mock = ORDERS.find((o) => o.orderNumber === orderNumberOrId || o.id === orderNumberOrId);
       return mock || null;
     }
-    return order;
+    return {
+      ...order,
+      email: order.email || undefined,
+    };
   } catch (err) {
     console.error('[DbRepo] Error fetching order by number or ID:', err);
     const mock = ORDERS.find((o) => o.orderNumber === orderNumberOrId || o.id === orderNumberOrId);
