@@ -48,8 +48,7 @@ export function CartDrawer() {
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerCity, setCustomerCity] = useState(POPULAR_CITIES[0]);
   const [customerAddress, setCustomerAddress] = useState('');
-  const [deliveryType, setDeliveryType] = useState<'home' | 'stopdesk'>('home');
-  const [agencyName, setAgencyName] = useState('');
+  const deliveryType = 'home' as const;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -82,7 +81,6 @@ export function CartDrawer() {
   const freeThreshold = countryConfig.freeShippingThreshold || FREE_SHIPPING_THRESHOLD;
   const hasItemFreeDelivery = items.some((it) => Boolean(it.freeDelivery));
   const isFreeShipping =
-    deliveryType === 'stopdesk' ||
     totalCount >= 2 ||
     hasItemFreeDelivery ||
     (freeThreshold > 0 && subtotal >= freeThreshold);
@@ -121,7 +119,7 @@ export function CartDrawer() {
       return;
     }
 
-    if (deliveryType === 'home' && (!customerAddress.trim() || customerAddress.trim().length < 5)) {
+    if (!customerAddress.trim() || customerAddress.trim().length < 5) {
       setFormError('Veuillez préciser votre adresse de livraison.');
       return;
     }
@@ -152,9 +150,8 @@ export function CartDrawer() {
           customerName: customerName.trim(),
           customerPhone: (phoneCheck as any).cleanPhone || customerPhone.trim(),
           customerCity,
-          customerAddress: deliveryType === 'stopdesk' ? `Point Relais / Agence: ${agencyName || customerCity}` : customerAddress.trim(),
-          deliveryType,
-          agencyName: deliveryType === 'stopdesk' ? agencyName || customerCity : undefined,
+          customerAddress: customerAddress.trim(),
+          deliveryType: 'home',
           countryCode: countryCode || 'MA',
           subtotal,
           shippingFee,
@@ -473,71 +470,18 @@ export function CartDrawer() {
                 </select>
               </div>
 
-              {/* Delivery Type: Home vs Stopdesk */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-zinc-800">Mode de Livraison</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setDeliveryType('home')}
-                    className={`p-2.5 rounded-xl border text-left text-xs transition ${
-                      deliveryType === 'home'
-                        ? 'border-zinc-900 bg-zinc-900 text-white shadow-xs'
-                        : 'border-zinc-200 bg-white text-zinc-700'
-                    }`}
-                  >
-                    <div className="font-bold flex items-center justify-between">
-                      <span>À Domicile</span>
-                      <Truck className="w-3.5 h-3.5" />
-                    </div>
-                    <span className="text-[10px] opacity-80 mt-0.5 block">
-                      {isFreeShipping ? 'Gratuit' : `${shippingFee} DH`}
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setDeliveryType('stopdesk')}
-                    className={`p-2.5 rounded-xl border text-left text-xs transition ${
-                      deliveryType === 'stopdesk'
-                        ? 'border-emerald-700 bg-emerald-700 text-white shadow-xs'
-                        : 'border-zinc-200 bg-white text-zinc-700'
-                    }`}
-                  >
-                    <div className="font-bold flex items-center justify-between">
-                      <span>Point Relais</span>
-                      <span className="text-[10px] bg-emerald-500/30 px-1 rounded">0 DH</span>
-                    </div>
-                    <span className="text-[10px] opacity-80 mt-0.5 block">Agence de votre ville</span>
-                  </button>
-                </div>
-              </div>
-
               {/* Address */}
-              {deliveryType === 'home' ? (
-                <div className="space-y-1">
-                  <label className="block text-xs font-bold text-zinc-800">Adresse de Livraison *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Quartier, Rue, N° d'immeuble ou maison"
-                    value={customerAddress}
-                    onChange={(e) => setCustomerAddress(e.target.value)}
-                    className="w-full px-3 py-2.5 text-xs border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:outline-none bg-white text-zinc-900"
-                  />
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <label className="block text-xs font-bold text-zinc-800">Agence Point Relais Souhaitée</label>
-                  <input
-                    type="text"
-                    placeholder={`Ex: Point Relais / Agence Locale ${customerCity}`}
-                    value={agencyName}
-                    onChange={(e) => setAgencyName(e.target.value)}
-                    className="w-full px-3 py-2.5 text-xs border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:outline-none bg-white text-zinc-900"
-                  />
-                </div>
-              )}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-zinc-800">Adresse de Livraison *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Quartier, Rue, N° d'immeuble ou maison"
+                  value={customerAddress}
+                  onChange={(e) => setCustomerAddress(e.target.value)}
+                  className="w-full px-3 py-2.5 text-xs border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:outline-none bg-white text-zinc-900"
+                />
+              </div>
 
               {/* Hidden anti-bot honeypot */}
               <input type="text" name="_hp" className="hidden" tabIndex={-1} autoComplete="off" />

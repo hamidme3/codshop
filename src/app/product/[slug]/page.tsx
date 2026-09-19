@@ -266,14 +266,22 @@ export default function ProductDetailPage() {
               alt={product?.title || 'Produit'}
               className="w-full h-full object-cover object-center"
             />
-            <div className="absolute top-4 left-4 flex flex-col gap-2">
-              <span className="bg-red-600 text-white font-black text-xs px-2.5 py-1 rounded-md shadow-sm">
-                -{discountPercent}% OFF
-              </span>
-              <span className="bg-emerald-600 text-white font-bold text-xs px-2.5 py-1 rounded-md shadow-sm">
-                Paiement Cash • {countryConfig.inspectionBadge.fr} ({countryConfig.inspectionBadge.ar})
-              </span>
-            </div>
+            {/* Top-Left Sleek Discount Badge */}
+            {discountPercent > 0 && (
+              <div className="absolute top-3 left-3 z-10">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-red-600 text-white shadow-md uppercase tracking-wider">
+                  -{discountPercent}% OFF
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Reassurance Strip Under Image */}
+          <div className="p-2.5 bg-emerald-50/90 border border-emerald-200/90 rounded-xl flex items-center justify-center gap-2 text-emerald-900 text-xs font-semibold shadow-2xs">
+            <PackageCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span className="text-center leading-snug">
+              Paiement Cash • {countryConfig.inspectionBadge.fr} <span className="font-arabic font-bold text-emerald-800">({countryConfig.inspectionBadge.ar})</span>
+            </span>
           </div>
 
           {/* Thumbnail row */}

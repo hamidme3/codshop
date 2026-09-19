@@ -177,10 +177,30 @@ export function CodCheckoutModal({
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   }, [email, emailMode]);
 
-  const [city, setCity] = useState(initialCity || countryConfig.popularCities[0] || 'Casablanca');
+  const [city, setCity] = useState(initialCity || countryConfig.popularCities[0] || '');
+  const [dynamicCities, setDynamicCities] = useState<{ name: string; state?: string }[]>([]);
+
+  // Fetch dynamic cities for Tier 2 worldwide countries if knownCities is empty
+  useEffect(() => {
+    if (!countryConfig.knownCities || countryConfig.knownCities.length === 0) {
+      fetch(`/api/geo/cities?country=${encodeURIComponent(effectiveCountryCode)}&limit=100`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.cities) && data.cities.length > 0) {
+            setDynamicCities(data.cities);
+            if (!city) {
+              setCity(data.cities[0].name);
+            }
+          }
+        })
+        .catch(() => {});
+    } else {
+      setDynamicCities([]);
+    }
+  }, [effectiveCountryCode, countryConfig.knownCities, city]);
+
   const [address, setAddress] = useState('');
-  const [deliveryType, setDeliveryType] = useState<'home' | 'stopdesk'>('home');
-  const [agencyName, setAgencyName] = useState('');
+  const deliveryType = 'home' as const;
   const tiers = useMemo(() => getProductQuantityTiers(product, effectiveCountryCode), [product, effectiveCountryCode]);
   const [selectedVariant, setSelectedVariant] = useState(
     initialVariant || (product.variants?.options.find((o) => o.inStock)?.name ?? '')
@@ -266,8 +286,8 @@ export function CodCheckoutModal({
     [effectiveCountryCode, city, selectedTier.totalPrice]
   );
 
-  // COD Upsell Economics: Pack Duo (2+ units) OR Stopdesk/Agence pickup gets Free Shipping!
-  const isFreeShipping = selectedTier.quantity >= 2 || selectedTier.freeDelivery || deliveryType === 'stopdesk' || deliveryEstimate.isFree;
+  // COD Upsell Economics: Pack Duo (2+ units) gets Free Shipping!
+  const isFreeShipping = selectedTier.quantity >= 2 || selectedTier.freeDelivery || deliveryEstimate.isFree;
   const effectiveShippingFee = isFreeShipping ? 0 : deliveryEstimate.shippingFee;
   const finalTotal = selectedTier.totalPrice + effectiveShippingFee;
 
@@ -317,7 +337,7 @@ export function CodCheckoutModal({
       return;
     }
 
-    if (deliveryType === 'home' && !addressValidation.isValid) {
+    if (!addressValidation.isValid) {
       setError(
         lang === 'ar'
           ? 'يرجى كتابة عنوان التوصيل'
@@ -383,46 +403,53 @@ export function CodCheckoutModal({
         abVariant: isWaybill ? 'waybill' : 'control',
         countryCode: effectiveCountryCode,
         country: effectiveCountryCode,
-        deliveryType,
-        agencyName: deliveryType === 'stopdesk' ? (agencyName.trim() || `Agence principale ${city}`) : undefined,
+        deliveryType: 'home',
         source: 'web',
         customer: {
           fullName: fullName.trim(),
           phone: phoneValidation.cleanPhone || phone.replace(/\s+/g, ''),
           email: email.trim() || undefined,
           city,
-          address: deliveryType === 'stopdesk'
-            ? `[STOPDESK / POINT RELAIS ${city}] ${agencyName.trim() || 'Agence la plus proche'}`
-            : address.trim(),
+          address: address.trim(),
         },
         theme: theme.id,
         createdAt: new Date().toISOString(),
       };
 
+      let data: any = null;
       const res = await fetch('/api/order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
 
-      const data = await res.json();
-
-      if (data.success) {
-        onClose();
-        router.push(`/order-success/${data.orderId}?total=${finalTotal}&city=${encodeURIComponent(city)}&store=${encodeURIComponent(effectiveStoreSlug)}`);
-      } else {
-        if (data.code === 'OUT_OF_STOCK') {
-          setError(`⚠️ RUPTURE DE STOCK : ${data.message || 'Cette variante est en rupture de stock.'}`);
-        } else {
-          setError(data.message || 'Une erreur est survenue lors de la commande.');
+        try {
+          data = await res.json();
+        } catch {
+          data = null;
         }
+
+        if (res.ok && data?.success) {
+          onClose();
+          router.push(`/order-success/${data.orderId}?total=${finalTotal}&city=${encodeURIComponent(city)}&store=${encodeURIComponent(effectiveStoreSlug)}`);
+          return;
+        }
+
+        if (data?.code === 'OUT_OF_STOCK') {
+          setError(`⚠️ RUPTURE DE STOCK : ${data.message || 'Cette variante est en rupture de stock.'}`);
+        } else if (data?.message) {
+          setError(data.message);
+        } else if (res.status === 502 || res.status === 504) {
+          setError('Serveur momentanément indisponible. Vous pouvez finaliser votre commande en 1 clic via WhatsApp ci-dessous.');
+        } else {
+          setError('Impossible de finaliser la commande. Veuillez vérifier votre connexion ou commander via WhatsApp.');
+        }
+      } catch (err) {
+        console.error('[COD Checkout] Order submission error:', err);
+        setError('Impossible de finaliser la commande. Veuillez vérifier votre connexion ou commander via WhatsApp.');
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('[COD Checkout] Order submission error:', err);
-      setError('Impossible de finaliser la commande. Veuillez vérifier votre connexion et réessayer.');
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleWhatsAppOrder = () => {
@@ -463,15 +490,12 @@ export function CodCheckoutModal({
           abVariant: isWaybill ? 'waybill' : 'control',
           countryCode: effectiveCountryCode,
           country: effectiveCountryCode,
-          deliveryType,
-          agencyName: deliveryType === 'stopdesk' ? (agencyName.trim() || `Agence principale ${city}`) : undefined,
+          deliveryType: 'home',
           source: 'whatsapp',
           customerName: fullName.trim() || 'Client WhatsApp 1-Clic',
           customerPhone: phoneValidation.cleanPhone || phone.replace(/\s+/g, '') || 'À confirmer via WhatsApp',
           customerCity: city,
-          customerAddress: deliveryType === 'stopdesk'
-            ? `[STOPDESK WHATSAPP] ${agencyName.trim() || 'Agence principale'}`
-            : (address.trim() || 'Adresse à confirmer par WhatsApp'),
+          customerAddress: address.trim() || 'Adresse à confirmer par WhatsApp',
         }),
       }).catch(() => {});
     } catch {}
@@ -480,9 +504,7 @@ export function CodCheckoutModal({
     const packText = selectedTier.quantity > 1
       ? `${selectedTier.quantity} Pièces (${selectedTier.label}) — 🚚 Livraison Gratuite${selectedTier.freeGift ? ` + 🎁 Cadeau : ${selectedTier.freeGift}` : ''}`
       : '1 Pièce (Standard)';
-    const modeText = deliveryType === 'stopdesk'
-      ? `🏢 En Agence / Point Relais Stopdesk (${city})`
-      : `🏠 Livraison à Domicile (${city})`;
+    const modeText = `🏠 Livraison à Domicile (${city})`;
 
     const text = `Salam / السلام عليكم ! 👋
 Je souhaite commander en 1 Clic :
@@ -492,7 +514,7 @@ ${selectedSku ? `🏷️ *SKU :* ${selectedSku}\n` : ''}${selectedVariant ? `�
 📍 *Ville :* ${city || countryConfig.popularCities[0]} (${countryConfig.name})
 🚚 *Délais :* ${deliveryEstimate.sla}
 🚚 *Mode :* ${modeText}
-${fullName.trim() ? `👤 *Nom complet :* ${fullName.trim()}\n` : ''}${deliveryType === 'home' && address.trim() ? `🏠 *Adresse :* ${address.trim()}\n` : ''}
+${fullName.trim() ? `👤 *Nom complet :* ${fullName.trim()}\n` : ''}${address.trim() ? `🏠 *Adresse :* ${address.trim()}\n` : ''}
 ✅ *Garantie Royale :* "${countryConfig.inspectionBadge.fr}" (${countryConfig.inspectionBadge.ar})
 Merci de me confirmer la livraison !`;
 
@@ -577,7 +599,7 @@ Merci de me confirmer la livraison !`;
         <div className="px-3.5 sm:px-5 py-2.5 bg-zinc-50 border-b border-zinc-200">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-zinc-900">
-              {step === 1 ? 'Étape 1 sur 2 : Choix de votre commande' : 'Étape 2 sur 2 : Coordonnées & Livraison'}
+              {step === 1 ? 'Choix de votre offre' : 'Coordonnées & Livraison'}
             </span>
             <span className="text-[10px] sm:text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
               Étape {step} sur 2
@@ -640,9 +662,19 @@ Merci de me confirmer la livraison !`;
         {/* Scrollable Form Body (320px safe & max-h-[82vh]) */}
         <form ref={formRef} onSubmit={handleSubmit} className="p-3.5 sm:p-5 space-y-4 max-h-[82vh] overflow-y-auto">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-              <span>{error}</span>
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs space-y-2.5">
+              <div className="flex items-center gap-2 text-red-700 font-medium">
+                <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+                <span className="leading-snug">{error}</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleWhatsAppOrder}
+                className="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Finaliser directement par WhatsApp (1 Clic)</span>
+              </button>
             </div>
           )}
 
@@ -885,9 +917,11 @@ Merci de me confirmer la livraison !`;
           {step === 2 && (
             <div className="space-y-4 animate-in fade-in-50 duration-150">
               {/* Moroccan COD Trust Reassurance Micro-Banner */}
-              <div className="p-2.5 bg-emerald-50/90 border border-emerald-200/90 rounded-xl flex items-center gap-2 text-emerald-900 text-xs font-semibold shadow-2xs">
+              <div className="p-2.5 bg-emerald-50/90 border border-emerald-200/90 rounded-xl flex items-center gap-2.5 text-emerald-900 text-xs font-semibold shadow-2xs">
                 <PackageCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span className="truncate">Garantie Sérénité : Ouvrez et vérifiez votre colis avant de payer (عاين سلعتك)</span>
+                <span className="leading-snug text-[11px] sm:text-xs">
+                  <strong className="font-extrabold">Garantie Sérénité :</strong> Ouvrez et vérifiez votre colis avant de payer <span className="font-bold text-emerald-800">(عاين سلعتك قبل الأداء)</span>
+                </span>
               </div>
 
               {/* Chosen Offer Recap Banner with Edit Button */}
@@ -899,8 +933,8 @@ Merci de me confirmer la livraison !`;
                     className="w-10 h-10 object-cover rounded-lg border border-zinc-200 shrink-0"
                   />
                   <div className="min-w-0">
-                    <div className="font-bold text-xs text-zinc-900 truncate">{product.title}</div>
-                    <div className="text-[11px] text-zinc-600 truncate">
+                    <div className="font-bold text-xs text-zinc-900 line-clamp-2">{product.title}</div>
+                    <div className="text-[11px] text-zinc-600 truncate mt-0.5">
                       {selectedTier.label} {selectedVariant ? `• ${selectedVariant}` : ''} {selectedSku ? `[SKU: ${selectedSku}]` : ''} —{' '}
                       <span className="font-bold text-emerald-700">{formatPrice(selectedTier.totalPrice)}</span>
                     </div>
@@ -1068,40 +1102,6 @@ Merci de me confirmer la livraison !`;
                 {/* City & Delivery Mode Selection */}
                 <div className="space-y-2">
                   <div>
-                    {/* Cross-Border Destination Country Strip */}
-                    <div className="flex items-center justify-between gap-1 mb-2 pb-2 border-b border-zinc-200/80">
-                      <span className="text-[11px] font-bold text-zinc-600 flex items-center gap-1">
-                        <span>Destination :</span>
-                        <span className="text-zinc-900 font-extrabold">{countryConfig.name}</span>
-                      </span>
-                      <div className="flex items-center gap-1 overflow-x-auto py-0.5">
-                        {[
-                          { code: 'MA', flag: '🇲🇦', label: 'Maroc' },
-                          { code: 'SA', flag: '🇸🇦', label: 'Arabie S.' },
-                          { code: 'AE', flag: '🇦🇪', label: 'Émirats' },
-                          { code: 'EG', flag: '🇪🇬', label: 'Égypte' },
-                          { code: 'DZ', flag: '🇩🇿', label: 'Algérie' },
-                        ].map((c) => {
-                          const isActive = effectiveCountryCode === c.code;
-                          return (
-                            <button
-                              key={c.code}
-                              type="button"
-                              onClick={() => handleCountrySwitch(c.code)}
-                              className={`px-2 py-0.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition cursor-pointer shrink-0 ${
-                                isActive
-                                  ? 'bg-zinc-900 text-white shadow-xs scale-105'
-                                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900'
-                              }`}
-                              title={c.label}
-                            >
-                              <span>{c.flag}</span>
-                              <span className="text-[10px] font-mono">{c.code}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
 
                     <label className="block text-xs font-bold text-zinc-700 mb-1 flex items-center justify-between">
                       <span>
@@ -1144,92 +1144,30 @@ Merci de me confirmer la livraison !`;
                         list="checkout-city-datalist"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
-                        placeholder={`Tapez ou choisissez votre ville (ex: ${countryConfig.popularCities[0] || 'Casablanca'})...`}
+                        placeholder={
+                          countryConfig.popularCities[0]
+                            ? `Tapez ou choisissez votre ville (ex: ${countryConfig.popularCities[0]})...`
+                            : 'Tapez ou choisissez votre ville...'
+                        }
                         required
                         className="w-full pl-9 pr-3 py-2.5 bg-zinc-50 border border-zinc-300 rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition"
                         autoComplete="address-level2"
                       />
                       <datalist id="checkout-city-datalist">
-                        {countryConfig.knownCities.map((c) => (
-                          <option key={c.id || c.name} value={c.name}>
-                            {c.nameAr ? `${c.name} (${c.nameAr})` : c.name}
-                          </option>
-                        ))}
+                        {countryConfig.knownCities && countryConfig.knownCities.length > 0
+                          ? countryConfig.knownCities.map((c) => (
+                              <option key={c.id || c.name} value={c.name}>
+                                {c.nameAr ? `${c.name} (${c.nameAr})` : c.name}
+                              </option>
+                            ))
+                          : dynamicCities.map((c) => (
+                              <option key={c.name} value={c.name}>
+                                {c.state ? `${c.name} (${c.state})` : c.name}
+                              </option>
+                            ))}
                       </datalist>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] text-zinc-500 mt-1.5 font-normal">
-                      <span>
-                        {city.trim() ? (
-                          <span className="text-emerald-700 font-medium flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
-                            {deliveryEstimate.sla}
-                          </span>
-                        ) : (
-                          'Délais et frais calculés automatiquement selon la ville.'
-                        )}
-                      </span>
-                      <span className="font-semibold text-zinc-700 text-right">
-                        {effectiveShippingFee === 0 || isFreeShipping ? (
-                          <span className="text-emerald-600 font-bold">Livraison Gratuite</span>
-                        ) : (
-                          `${effectiveShippingFee} ${countryConfig.currency.symbol}`
-                        )}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Delivery Mode Choice: Home vs Stopdesk / Agence (Positioned above estimate) */}
-                  <div>
-                    <label className="block text-xs font-bold text-zinc-700 mb-1.5">
-                      Mode de Réception <span className="text-red-500">*</span>
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setDeliveryType('home')}
-                        className={`p-2.5 rounded-xl border-2 text-left transition cursor-pointer flex flex-col justify-between min-h-[56px] ${
-                          deliveryType === 'home'
-                            ? 'border-zinc-900 bg-zinc-900 text-white shadow-xs'
-                            : 'border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-800'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-1 font-bold text-xs">
-                          <span>🏠 À Domicile</span>
-                          <span className={`text-[10px] font-black ${
-                            deliveryType === 'home' ? 'text-emerald-300' : 'text-emerald-700'
-                          }`}>
-                            {effectiveShippingFee === 0 || isFreeShipping ? 'Gratuit' : formatPrice(deliveryEstimate.shippingFee)}
-                          </span>
-                        </div>
-                        <span className={`text-[10px] mt-1 ${deliveryType === 'home' ? 'text-zinc-300' : 'text-zinc-500'}`}>
-                          Livreur à votre porte
-                        </span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setDeliveryType('stopdesk')}
-                        className={`p-2.5 rounded-xl border-2 text-left transition cursor-pointer flex flex-col justify-between relative min-h-[56px] ${
-                          deliveryType === 'stopdesk'
-                            ? 'border-emerald-600 bg-emerald-50 text-emerald-950 ring-1 ring-emerald-600'
-                            : 'border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-800'
-                        }`}
-                      >
-                        <span className="absolute -top-2 right-2 text-[8px] font-black uppercase bg-emerald-600 text-white px-1.5 py-0.5 rounded-full shadow-xs">
-                          100% Gratuit
-                        </span>
-                        <div className="flex items-center justify-between gap-1 font-bold text-xs text-emerald-800">
-                          <span>🏢 Point Relais</span>
-                          <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">
-                            Gratuit
-                          </span>
-                        </div>
-                        <span className="text-[10px] mt-1 text-emerald-700">
-                          En agence / Point Relais
-                        </span>
-                      </button>
-                    </div>
                   </div>
 
                   {/* Dynamic Delivery Estimate Card */}
@@ -1238,87 +1176,60 @@ Merci de me confirmer la livraison !`;
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-1 flex-wrap">
                         <span className="font-bold text-emerald-950">
-                          {deliveryType === 'stopdesk'
-                            ? `Point Relais / Agence : ${city}`
-                            : `Livraison estimée : ${deliveryEstimate.formattedEstimate}`}
+                          Livraison estimée : {deliveryEstimate.formattedEstimate}
                         </span>
                         <span className="font-black text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded text-[10px]">
                           {effectiveShippingFee === 0 ? 'GRATUITE' : formatPrice(effectiveShippingFee)}
                         </span>
                       </div>
                       <p className="text-[10px] text-emerald-800 mt-0.5">
-                        {deliveryType === 'stopdesk'
-                          ? `Colis conservé 48h au point relais (${countryConfig.pickupPartnerText || 'Agence Locale'}) • SMS dès réception`
-                          : `Délai ${deliveryEstimate.sla} • Paiement cash lors de la remise en main propre`}
+                        Délai {deliveryEstimate.sla} • Paiement cash lors de la remise en main propre
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Address or Agency Selection */}
-                {deliveryType === 'home' ? (
-                  <div>
-                    <label className="block text-xs font-bold text-zinc-700 mb-1 flex items-center justify-between">
-                      <span>
-                        Adresse Complète / Quartier <span className="text-red-500">*</span>
-                      </span>
-                      {addressValidation.isValid && address.trim().length >= 5 && (
-                        <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
-                          <Check className="w-3 h-3 stroke-[3]" /> Valide
-                        </span>
-                      )}
-                    </label>
-                    <textarea
-                      name="address"
-                      autoComplete="street-address"
-                      autoCapitalize="sentences"
-                      required
-                      rows={2}
-                      value={address}
-                      onChange={(e) => {
-                        setAddress(e.target.value);
-                        if (!touched.address) setTouched((prev) => ({ ...prev, address: true }));
-                      }}
-                      onBlur={() => setTouched((prev) => ({ ...prev, address: true }))}
-                      placeholder={countryConfig.addressPlaceholder || "Ex: Quartier Maârif, Rue Abou Bakr Essedik, Résidence Al Manar Appt 4"}
-                      className={`w-full px-3.5 py-2 bg-zinc-50 border rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition ${
-                        touched.address && !addressValidation.isValid
-                          ? 'border-red-400 bg-red-50/30'
-                          : touched.address && addressValidation.isValid
-                          ? 'border-emerald-500 bg-emerald-50/20'
-                          : 'border-zinc-300'
-                      }`}
-                    />
-                    {touched.address && !addressValidation.isValid ? (
-                      <p className="text-[10px] text-red-500 mt-1 font-medium">{addressValidation.error}</p>
-                    ) : (
-                      <p className="text-[10px] text-zinc-500 mt-1 font-normal">
-                        Quartier, rue, numéro de bâtiment ou repère connu (ex: Près de la mosquée).
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <div>
-                    <label className="block text-xs font-bold text-zinc-700 mb-1 flex items-center justify-between">
-                      <span>
-                        Agence souhaitée ou Quartier à {city}
-                      </span>
+                {/* Direct Delivery Address */}
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 mb-1 flex items-center justify-between">
+                    <span>
+                      Adresse de Livraison <span className="text-red-500">*</span>
+                    </span>
+                    {addressValidation.isValid && address.trim().length >= 5 && (
                       <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
-                        <Check className="w-3 h-3 stroke-[3]" /> Sans adresse requise
+                        <Check className="w-3 h-3 stroke-[3]" /> Valide
                       </span>
-                    </label>
-                    <input
-                      type="text"
-                      value={agencyName}
-                      onChange={(e) => setAgencyName(e.target.value)}
-                      placeholder={countryConfig.agencyPlaceholder || "Ex: Agence Relais Maârif, Agence Agdal, ou agence la plus proche"}
-                      className="w-full px-3.5 py-2.5 bg-zinc-50 border border-zinc-300 rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition"
-                    />
+                    )}
+                  </label>
+                  <textarea
+                    name="address"
+                    autoComplete="street-address"
+                    autoCapitalize="sentences"
+                    required
+                    rows={2}
+                    value={address}
+                    onChange={(e) => {
+                      setAddress(e.target.value);
+                      if (!touched.address) setTouched((prev) => ({ ...prev, address: true }));
+                    }}
+                    onBlur={() => setTouched((prev) => ({ ...prev, address: true }))}
+                    placeholder={countryConfig.addressPlaceholder || "Ex: Quartier Maârif, Rue Abou Bakr Essedik, Résidence Al Manar Appt 4"}
+                    className={`w-full px-3.5 py-2 bg-zinc-50 border rounded-xl text-base sm:text-xs font-medium focus:ring-2 focus:ring-zinc-900 focus:bg-white focus:outline-none transition ${
+                      touched.address && !addressValidation.isValid
+                        ? 'border-red-400 bg-red-50/30'
+                        : touched.address && addressValidation.isValid
+                        ? 'border-emerald-500 bg-emerald-50/20'
+                        : 'border-zinc-300'
+                    }`}
+                  />
+                  {touched.address && !addressValidation.isValid ? (
+                    <p className="text-[10px] text-red-500 mt-1 font-medium">{addressValidation.error}</p>
+                  ) : (
                     <p className="text-[10px] text-zinc-500 mt-1 font-normal">
-                      Laissez vide pour recevoir le colis à l'agence la plus proche de votre zone. SMS envoyé dès réception.
+                      Quartier, rue, numéro de bâtiment ou repère connu (ex: Près de la mosquée).
                     </p>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               {/* Pricing Breakdown */}
@@ -1334,7 +1245,7 @@ Merci de me confirmer la livraison !`;
                   <span className="font-semibold text-zinc-800">
                     {effectiveShippingFee === 0 ? (
                       <span className="text-emerald-600 font-bold">
-                        GRATUITE {selectedTier.quantity >= 2 ? '(Pack Duo 🎉)' : (deliveryType === 'stopdesk' ? '(Point Relais 🏢)' : '')}
+                        GRATUITE {selectedTier.quantity >= 2 ? '(Pack Duo 🎉)' : ''}
                       </span>
                     ) : (
                       formatPrice(effectiveShippingFee)

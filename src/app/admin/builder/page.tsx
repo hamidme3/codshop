@@ -68,6 +68,7 @@ function BuilderContent() {
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<'sections' | 'settings' | 'theme'>('sections');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [mobileViewMode, setMobileViewMode] = useState<'editor' | 'preview'>('editor');
 
   // Theme Customizer State
   const [themeId, setThemeId] = useState<string>('luxury');
@@ -256,26 +257,50 @@ function BuilderContent() {
   return (
     <div className="h-screen flex flex-col bg-slate-950 text-slate-100 font-sans overflow-hidden">
       {/* Top Bar */}
-      <header className="h-16 bg-slate-900 border-b border-slate-800 px-4 flex items-center justify-between z-20 shrink-0">
-        <div className="flex items-center gap-3">
+      <header className="h-16 bg-slate-900 border-b border-slate-800 px-3 sm:px-4 flex items-center justify-between z-20 shrink-0 gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <Link
             href={`/admin?store=${storeSlug}`}
-            className="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+            className="p-1.5 sm:p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors shrink-0"
             title="Retour au tableau de bord"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-white text-sm sm:text-base">
-                {storeData?.name || storeSlug}
-              </span>
-            </div>
+          <div className="min-w-0">
+            <span className="font-extrabold text-white text-xs sm:text-base truncate block max-w-[90px] sm:max-w-[200px]">
+              {storeData?.name || storeSlug}
+            </span>
           </div>
         </div>
 
-        {/* Viewport Switcher */}
-        <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-1">
+        {/* Mobile View Toggle (Editor vs Preview) - Visible only on < lg */}
+        <div className="flex lg:hidden items-center bg-slate-950 border border-slate-800 rounded-xl p-0.5 shrink-0">
+          <button
+            onClick={() => setMobileViewMode('editor')}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+              mobileViewMode === 'editor'
+                ? 'bg-emerald-500 text-zinc-950 shadow-xs'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>Éditeur</span>
+          </button>
+          <button
+            onClick={() => setMobileViewMode('preview')}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+              mobileViewMode === 'preview'
+                ? 'bg-emerald-500 text-zinc-950 shadow-xs'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Eye className="w-3.5 h-3.5" />
+            <span>Aperçu</span>
+          </button>
+        </div>
+
+        {/* Viewport Switcher - Desktop only */}
+        <div className="hidden lg:flex items-center bg-slate-950 border border-slate-800 rounded-xl p-1">
           <button
             onClick={() => setViewport('mobile')}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
@@ -299,7 +324,7 @@ function BuilderContent() {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <a
             href={storefrontUrl}
             target="_blank"
@@ -311,11 +336,11 @@ function BuilderContent() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black px-4 py-2 rounded-xl text-xs shadow-lg shadow-emerald-500/20 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-1.5 sm:gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black px-3 sm:px-4 py-2 rounded-xl text-xs shadow-lg shadow-emerald-500/20 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             {savedSuccess ? (
               <>
-                <Check className="w-4 h-4 text-zinc-950" /> Publié dans PostgreSQL !
+                <Check className="w-4 h-4 text-zinc-950" /> <span className="hidden sm:inline">Publié dans PostgreSQL !</span><span className="sm:hidden">Publié</span>
               </>
             ) : (
               <>
@@ -327,9 +352,14 @@ function BuilderContent() {
       </header>
 
       {/* Main Workspace */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         {/* Left Sidebar: Controls, Inspector, & Theme Customizer */}
-        <aside aria-label="Page Builder Controls" className="w-80 sm:w-96 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 z-10">
+        <aside
+          aria-label="Page Builder Controls"
+          className={`bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 z-10 w-full lg:w-96 ${
+            mobileViewMode === 'editor' ? 'flex' : 'hidden lg:flex'
+          }`}
+        >
           {/* Sub-Tabs: Sections | Bloc | Thème & Design */}
           <div className="flex border-b border-slate-800 bg-slate-950/50">
             <button
@@ -886,12 +916,16 @@ function BuilderContent() {
         </aside>
 
         {/* Center Canvas: Live Interactive Preview */}
-        <main className="flex-1 bg-slate-950/90 p-4 sm:p-8 overflow-y-auto flex items-start justify-center">
+        <main
+          className={`flex-1 bg-slate-950/90 p-2 sm:p-4 lg:p-8 overflow-y-auto flex items-start justify-center ${
+            mobileViewMode === 'preview' ? 'flex' : 'hidden lg:flex'
+          }`}
+        >
           <div
-            className={`transition-all duration-300 shadow-2xl overflow-hidden bg-slate-950 border border-slate-800 ${
+            className={`transition-all duration-300 shadow-2xl overflow-hidden bg-slate-950 border border-slate-800 w-full ${
               viewport === 'mobile'
-                ? 'w-[375px] min-h-[667px] rounded-[40px] border-8 border-slate-800 my-4'
-                : 'w-full max-w-5xl rounded-2xl min-h-[800px]'
+                ? 'max-w-[390px] min-h-[667px] rounded-2xl sm:rounded-[40px] sm:border-8 border-slate-800 my-2 sm:my-4'
+                : 'max-w-5xl rounded-2xl min-h-[800px]'
             }`}
           >
             {/* Mobile Notch Bar */}

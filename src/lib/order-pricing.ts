@@ -240,12 +240,12 @@ export function calculateVerifiedShippingFee(
   cityName: string,
   subtotal: number,
   totalQuantity: number,
-  deliveryType: 'home' | 'stopdesk',
+  deliveryType: 'home' | 'stopdesk' = 'home',
   tierFreeDelivery: boolean = false,
   countryCode: string = 'MA'
 ): { shippingFee: number; isFreeShipping: boolean } {
-  // 1. Stopdesk / Relais pickup is always free
-  if (deliveryType === 'stopdesk' || totalQuantity >= 2 || tierFreeDelivery) {
+  // 1. Pack Duo (2+ units) or tier free delivery
+  if (totalQuantity >= 2 || tierFreeDelivery || deliveryType === 'stopdesk') {
     return { shippingFee: 0, isFreeShipping: true };
   }
 

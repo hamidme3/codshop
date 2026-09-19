@@ -1,5 +1,7 @@
 import { CountryConfig, CountryCityItem } from './types';
 import { MOROCCAN_CITIES } from '../moroccanCities';
+import { UNIVERSAL_COUNTRY_MAP } from './universalCountryMap';
+import { parsePhoneNumberFromString } from 'libphonenumber-js/min';
 
 // ── Morocco (MA) ────────────────────────────────────────────────
 const MOROCCO_KNOWN_CITIES: CountryCityItem[] = MOROCCAN_CITIES.map((c) => ({
@@ -45,10 +47,7 @@ export const COUNTRY_MA: CountryConfig = {
   },
   inCountryName: 'au Maroc',
   addressPlaceholder: 'Ex: Quartier Maârif, Rue Abou Bakr Essedik, Résidence Al Manar Appt 4',
-  agencyPlaceholder: 'Ex: Agence Relais Maârif, Agence Agdal, ou agence la plus proche',
-  pickupPartnerText: 'Point Relais / Agence Locale',
   defaultHubCity: 'Casablanca',
-  courierPartners: ['Livraison Standard', 'Express 24h', 'Point Relais'],
 };
 
 // ── Saudi Arabia (SA) ──────────────────────────────────────────
@@ -103,10 +102,7 @@ export const COUNTRY_SA: CountryConfig = {
   ],
   inCountryName: 'en Arabie Saoudite',
   addressPlaceholder: 'Ex: Quartier Al Olaya, Rue King Fahd, Immeuble Al Nakheel Appt 12',
-  agencyPlaceholder: 'Ex: Agence SMSA Olaya, Aramex Malaz, SPL Poste, ou la plus proche',
-  pickupPartnerText: 'SMSA Express / SPL / Aramex',
   defaultHubCity: 'Riyadh',
-  courierPartners: ['SMSA Express', 'SPL Poste', 'Aramex KSA'],
 };
 
 // ── United Arab Emirates (AE) ──────────────────────────────────
@@ -153,10 +149,7 @@ export const COUNTRY_AE: CountryConfig = {
   ],
   inCountryName: 'aux Émirats',
   addressPlaceholder: 'Ex: Al Barsha 1, Street 14, Building Oasis Apt 204, Dubai',
-  agencyPlaceholder: 'Ex: Agence Aramex Deira, Emirates Post, ou la plus proche',
-  pickupPartnerText: 'Aramex / Emirates Post',
   defaultHubCity: 'Dubai',
-  courierPartners: ['Aramex UAE', 'Emirates Post', 'Fetchr'],
 };
 
 // ── Egypt (EG) ─────────────────────────────────────────────────
@@ -206,10 +199,7 @@ export const COUNTRY_EG: CountryConfig = {
   ],
   inCountryName: 'en Égypte',
   addressPlaceholder: 'Ex: Nasr City, Rue Abbas El Akkad, Immeuble 12 Appt 4, Le Caire',
-  agencyPlaceholder: 'Ex: Agence Bosta Nasr City, Mylerz Maadi, ou la plus proche',
-  pickupPartnerText: 'Bosta / Mylerz / Aramex',
   defaultHubCity: 'Cairo',
-  courierPartners: ['Bosta', 'Mylerz', 'Aramex Egypt'],
 };
 
 // ── Algeria (DZ) ───────────────────────────────────────────────
@@ -256,10 +246,7 @@ export const COUNTRY_DZ: CountryConfig = {
   ],
   inCountryName: 'en Algérie',
   addressPlaceholder: 'Ex: 14 Rue Didouche Mourad, Alger Centre, Apt 3',
-  agencyPlaceholder: 'Ex: Agence Yalidine Bab Ezzouar, Zimou Express, ou la plus proche',
-  pickupPartnerText: 'Yalidine Express / Zimou',
   defaultHubCity: 'Alger',
-  courierPartners: ['Yalidine Express', 'Zimou Express', 'EMS Algérie'],
 };
 
 // ── Senegal (SN) ───────────────────────────────────────────────
@@ -304,10 +291,7 @@ export const COUNTRY_SN: CountryConfig = {
   ],
   inCountryName: 'au Sénégal',
   addressPlaceholder: 'Ex: Plateau, Rue Felix Faure, Immeuble Horizon, Dakar',
-  agencyPlaceholder: 'Ex: Agence Colis Express Plateau, La Poste SN, ou la plus proche',
-  pickupPartnerText: 'Colis Express / La Poste SN',
   defaultHubCity: 'Dakar',
-  courierPartners: ['Colis Express Dakar', 'La Poste SN'],
 };
 
 // ── Côte d'Ivoire (CI) ─────────────────────────────────────────
@@ -352,10 +336,7 @@ export const COUNTRY_CI: CountryConfig = {
   ],
   inCountryName: "en Côte d'Ivoire",
   addressPlaceholder: 'Ex: Cocody Angré 8ème Tranche, Résidence Perle, Abidjan',
-  agencyPlaceholder: 'Ex: Agence Flash Cocody, Chronopost Marcory, ou la plus proche',
-  pickupPartnerText: 'Flash Livraison / Chronopost CI',
   defaultHubCity: 'Abidjan',
-  courierPartners: ['Flash Livraison Abidjan', 'Chronopost CI'],
 };
 
 // ── France (FR) Fallback ───────────────────────────────────────
@@ -400,10 +381,7 @@ export const COUNTRY_FR: CountryConfig = {
   ],
   inCountryName: 'en France',
   addressPlaceholder: 'Ex: 14 Rue de la Paix, Bâtiment B, 75002 Paris',
-  agencyPlaceholder: 'Ex: Point Relais Mondial Relay, Relais Colis, ou le plus proche',
-  pickupPartnerText: 'Mondial Relay / Relais Colis',
   defaultHubCity: 'Paris',
-  courierPartners: ['Colissimo', 'Mondial Relay', 'Chronopost'],
 };
 
 export const DEFAULT_COUNTRY_HUBS: Record<string, string> = {
@@ -432,6 +410,31 @@ export const SUPPORTED_COUNTRY_MAP: Record<string, CountryConfig> = {
 export const SUPPORTED_COUNTRIES: CountryConfig[] = Object.values(SUPPORTED_COUNTRY_MAP);
 export const COUNTRIES = SUPPORTED_COUNTRY_MAP;
 
+export interface CountryListItem {
+  code: string;
+  name: string;
+  flag: string;
+  currency: string;
+}
+
+export const ALL_COUNTRIES: CountryListItem[] = [
+  ...Object.values(SUPPORTED_COUNTRY_MAP).map((c) => ({
+    code: c.code,
+    name: c.name,
+    flag: c.phone.flag,
+    currency: c.currency.code,
+  })),
+  ...Object.entries(UNIVERSAL_COUNTRY_MAP)
+    .filter(([code]) => !SUPPORTED_COUNTRY_MAP[code])
+    .map(([code, meta]) => ({
+      code,
+      name: meta.name,
+      flag: meta.flag,
+      currency: meta.currency,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name)),
+];
+
 /**
  * Returns the CountryConfig for a given country code.
  * Guaranteed to return a valid config (falls back to Morocco MA).
@@ -439,7 +442,63 @@ export const COUNTRIES = SUPPORTED_COUNTRY_MAP;
 export function getCountryConfig(code?: string): CountryConfig {
   if (!code) return COUNTRY_MA;
   const upper = code.trim().toUpperCase();
-  return SUPPORTED_COUNTRY_MAP[upper] || COUNTRY_MA;
+  if (SUPPORTED_COUNTRY_MAP[upper]) {
+    return SUPPORTED_COUNTRY_MAP[upper];
+  }
+
+  // Universal Worldwide Fallback (All 249 ISO countries)
+  const meta = UNIVERSAL_COUNTRY_MAP[upper];
+  if (meta) {
+    let frName = meta.name;
+    let arName = meta.name;
+    try {
+      const frDisplay = new Intl.DisplayNames(['fr'], { type: 'region' });
+      const arDisplay = new Intl.DisplayNames(['ar'], { type: 'region' });
+      frName = frDisplay.of(upper) || meta.name;
+      arName = arDisplay.of(upper) || meta.name;
+    } catch {
+      // Ignore Intl errors in unsupported environments
+    }
+
+    return {
+      code: upper,
+      name: frName,
+      nameAr: arName,
+      currency: {
+        code: meta.currency,
+        symbol: meta.currency,
+        symbolAr: meta.currency,
+        position: 'after',
+      },
+      phone: {
+        dialCode: meta.phonecode,
+        flag: meta.flag,
+        placeholder: `${meta.phonecode} ...`,
+        example: `${meta.phonecode} 12345678`,
+        digitsLength: [8, 9, 10, 11, 12],
+      },
+      defaultShippingFee: 0,
+      defaultSla: '3 à 5 jours ouvrables',
+      freeShippingThreshold: 0,
+      popularCities: [],
+      knownCities: [],
+      hubSla: {
+        hubName: 'Capitale / Hub',
+        hubSla: '48h Express',
+        nationalName: 'National',
+        nationalSla: '3 à 5 jours',
+      },
+      inspectionBadge: {
+        fr: 'Vérifiez votre colis avant de payer',
+        ar: 'عاين طلبيتك قبل الدفع',
+      },
+      inCountryName: `en ${frName}`,
+      addressPlaceholder: 'Adresse complète (Rue, Bâtiment, Quartier, Code postal)',
+      defaultHubCity: '',
+    };
+  }
+
+  return COUNTRY_MA;
 }
 
 /**
@@ -513,21 +572,36 @@ export function getCountryCityShipping(
 export function formatCountryPrice(amount: number, countryCode?: string, lang: 'fr' | 'ar' = 'fr'): string {
   const config = getCountryConfig(countryCode);
   const safeAmount = Number.isFinite(amount) ? amount : 0;
-  const s = safeAmount.toLocaleString('fr-FR');
   const symbol = lang === 'ar' ? config.currency.symbolAr : config.currency.symbol;
-  if (lang === 'ar') {
-    return `\u2068${s}\u2069 ${symbol}`;
+
+  if (config.code === 'MA' || config.currency.code === 'MAD') {
+    const s = safeAmount.toLocaleString('fr-FR');
+    if (lang === 'ar') {
+      return `\u2068${s}\u2069 ${symbol}`;
+    }
+    return `${s} ${symbol}`;
   }
-  if (config.currency.position === 'before') {
-    return `${symbol} ${s}`;
+
+  try {
+    return new Intl.NumberFormat(lang === 'ar' ? 'ar' : 'fr-FR', {
+      style: 'currency',
+      currency: config.currency.code || 'USD',
+      maximumFractionDigits: 2,
+    }).format(safeAmount);
+  } catch {
+    const s = safeAmount.toLocaleString('fr-FR');
+    if (config.currency.position === 'before') {
+      return `${symbol} ${s}`;
+    }
+    return `${s} ${symbol}`;
   }
-  return `${s} ${symbol}`;
 }
 
 import { getDeliveryDateEstimate, validateMoroccanPhone } from '../moroccanCities';
 
 /**
- * Universal country-aware phone validator.
+ * Universal country-aware phone validator powered by libphonenumber-js.
+ * Supports every carrier, dial code, and formatting rule worldwide.
  */
 export function validateCountryPhone(
   phone: string,
@@ -541,96 +615,30 @@ export function validateCountryPhone(
 } {
   const code = (countryCode || 'MA').toUpperCase();
   if (code === 'MA') {
-    return validateMoroccanPhone(phone);
+    const moroccan = validateMoroccanPhone(phone);
+    if (moroccan.isValid) return moroccan;
   }
 
-  if (!phone) {
+  if (!phone || !phone.trim()) {
     return { isValid: false, cleanPhone: '', formatted: '', error: 'Le numéro de téléphone est obligatoire' };
   }
 
+  // 1. Google libphonenumber pure TS validator (worldwide)
+  try {
+    const parsed = parsePhoneNumberFromString(phone, code as any);
+    if (parsed && parsed.isValid()) {
+      return {
+        isValid: true,
+        cleanPhone: parsed.number, // E.164 standard (+212661234567)
+        formatted: parsed.formatInternational(),
+      };
+    }
+  } catch {
+    // Continue to fallback
+  }
+
+  // 2. International fallback: 8 to 15 digits
   const digits = phone.replace(/\D/g, '');
-
-  if (code === 'SA') {
-    // Saudi: mobile starts with 05 (10 digits) or 5 (9 digits) or +966 5
-    let cleaned = digits;
-    if (cleaned.startsWith('966')) cleaned = cleaned.slice(3);
-    if (cleaned.startsWith('0')) cleaned = cleaned.slice(1);
-    if (/^5\d{8}$/.test(cleaned)) {
-      return {
-        isValid: true,
-        cleanPhone: '0' + cleaned,
-        formatted: `0${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}`,
-      };
-    }
-    return {
-      isValid: false,
-      cleanPhone: digits,
-      formatted: digits,
-      error: 'Format attendu : 05X XXX XXXX (9 chiffres après l\'indicatif)',
-    };
-  }
-
-  if (code === 'AE') {
-    // UAE: mobile starts with 05 (10 digits) or 5 (9 digits) or +971 5
-    let cleaned = digits;
-    if (cleaned.startsWith('971')) cleaned = cleaned.slice(3);
-    if (cleaned.startsWith('0')) cleaned = cleaned.slice(1);
-    if (/^5\d{7,8}$/.test(cleaned)) {
-      return {
-        isValid: true,
-        cleanPhone: '0' + cleaned,
-        formatted: `0${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}`,
-      };
-    }
-    return {
-      isValid: false,
-      cleanPhone: digits,
-      formatted: digits,
-      error: 'Format attendu : 05X XXX XXXX (numéro émirati valide)',
-    };
-  }
-
-  if (code === 'EG') {
-    // Egypt: mobile starts with 010, 011, 012, 015 (11 digits) or +20
-    let cleaned = digits;
-    if (cleaned.startsWith('20')) cleaned = cleaned.slice(2);
-    if (cleaned.startsWith('0')) cleaned = cleaned.slice(1);
-    if (/^1[0125]\d{8}$/.test(cleaned)) {
-      return {
-        isValid: true,
-        cleanPhone: '0' + cleaned,
-        formatted: `0${cleaned.slice(0, 2)} ${cleaned.slice(2, 6)} ${cleaned.slice(6)}`,
-      };
-    }
-    return {
-      isValid: false,
-      cleanPhone: digits,
-      formatted: digits,
-      error: 'Format attendu : 01X XXXX XXXX (11 chiffres en Égypte)',
-    };
-  }
-
-  if (code === 'DZ') {
-    // Algeria: mobile starts with 05, 06, 07 (10 digits) or +213
-    let cleaned = digits;
-    if (cleaned.startsWith('213')) cleaned = cleaned.slice(3);
-    if (cleaned.startsWith('0')) cleaned = cleaned.slice(1);
-    if (/^[5-7]\d{8}$/.test(cleaned)) {
-      return {
-        isValid: true,
-        cleanPhone: '0' + cleaned,
-        formatted: `0${cleaned.slice(0, 2)} ${cleaned.slice(2, 4)} ${cleaned.slice(4, 6)} ${cleaned.slice(6)}`,
-      };
-    }
-    return {
-      isValid: false,
-      cleanPhone: digits,
-      formatted: digits,
-      error: 'Format attendu : 05/06/07 XX XX XX (10 chiffres)',
-    };
-  }
-
-  // Universal international fallback: at least 8 digits, max 15
   if (digits.length >= 8 && digits.length <= 15) {
     return {
       isValid: true,
@@ -643,7 +651,7 @@ export function validateCountryPhone(
     isValid: false,
     cleanPhone: digits,
     formatted: digits,
-    error: 'Numéro de téléphone incomplet (8 chiffres minimum)',
+    error: 'Numéro de téléphone incomplet ou invalide',
   };
 }
 
@@ -691,9 +699,9 @@ export function detectClientVisitorCountry(defaultCountry: string = 'MA'): strin
   // 1. Check URL query param ?country=SA or ?geo_country=SA
   try {
     const params = new URLSearchParams(window.location.search);
-    const qCountry = params.get('country') || params.get('geo_country');
-    if (qCountry && SUPPORTED_COUNTRY_MAP[qCountry.toUpperCase()]) {
-      return qCountry.toUpperCase();
+    const qCountry = (params.get('country') || params.get('geo_country'))?.toUpperCase();
+    if (qCountry && (SUPPORTED_COUNTRY_MAP[qCountry] || UNIVERSAL_COUNTRY_MAP[qCountry])) {
+      return qCountry;
     }
   } catch {
     // Ignore URL parse error
@@ -702,8 +710,11 @@ export function detectClientVisitorCountry(defaultCountry: string = 'MA'): strin
   // 2. Check cookie set by edge middleware
   try {
     const cookieMatch = document.cookie.match(/cod_visitor_country=([A-Za-z]{2})/);
-    if (cookieMatch && SUPPORTED_COUNTRY_MAP[cookieMatch[1].toUpperCase()]) {
-      return cookieMatch[1].toUpperCase();
+    if (cookieMatch) {
+      const c = cookieMatch[1].toUpperCase();
+      if (SUPPORTED_COUNTRY_MAP[c] || UNIVERSAL_COUNTRY_MAP[c]) {
+        return c;
+      }
     }
   } catch {
     // Ignore cookie read error
@@ -721,6 +732,14 @@ export function detectClientVisitorCountry(defaultCountry: string = 'MA'): strin
     if (tz.includes('Paris')) return 'FR';
     if (tz.includes('Madrid')) return 'ES';
     if (tz.includes('Casablanca')) return 'MA';
+    if (tz.includes('London')) return 'GB';
+    if (tz.includes('New_York') || tz.includes('Chicago') || tz.includes('Los_Angeles')) return 'US';
+    if (tz.includes('Toronto') || tz.includes('Vancouver')) return 'CA';
+    if (tz.includes('Berlin')) return 'DE';
+    if (tz.includes('Rome')) return 'IT';
+    if (tz.includes('Istanbul')) return 'TR';
+    if (tz.includes('Qatar')) return 'QA';
+    if (tz.includes('Kuwait')) return 'KW';
   } catch {
     // Ignore timezone error
   }
@@ -730,11 +749,23 @@ export function detectClientVisitorCountry(defaultCountry: string = 'MA'): strin
 
 /**
  * Normalizes any international phone number for WhatsApp wa.me links.
- * Automatically injects the country dial code if only national digits were provided.
+ * Powered by libphonenumber-js to automatically convert to E.164 format worldwide.
  */
 export function normalizePhoneForWhatsApp(phone?: string | null, countryCode: string = 'MA'): string {
   if (!phone) return '';
-  const digits = String(phone).replace(/\D/g, '');
+  const raw = String(phone).trim();
+  if (!raw) return '';
+
+  try {
+    const parsed = parsePhoneNumberFromString(raw, (countryCode || 'MA').toUpperCase() as any);
+    if (parsed && parsed.isValid()) {
+      return parsed.number.replace('+', '');
+    }
+  } catch {
+    // Fallback to manual normalization
+  }
+
+  const digits = raw.replace(/\D/g, '');
   if (!digits) return '';
 
   const cfg = getCountryConfig(countryCode);

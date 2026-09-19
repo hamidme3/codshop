@@ -80,7 +80,7 @@ function OrdersContent() {
 
   const filterMap: Record<string, OrderStatus[]> = {
     all: ['new', 'to_confirm', 'confirmed', 'shipped', 'shipping', 'delivered', 'returned', 'canceled'],
-    new: ['new'],
+    new: ['new', 'to_confirm'],
     to_confirm: ['to_confirm'],
     confirmed: ['confirmed'],
     shipped: ['shipped', 'shipping'],
@@ -538,28 +538,32 @@ function OrdersContent() {
         ))}
       </div>
 
-      {/* Filter Tabs with Live Counts */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 border-b border-slate-800/80 text-xs no-scrollbar">
-        {[
-          { id: 'all', label: `Toutes (${orders.length})` },
-          { id: 'new', label: `Nouvelles (${newCount})` },
-          { id: 'confirmed', label: `Confirmées (${confirmedCount})` },
-          { id: 'shipped', label: `Expédiées (${shippedCount})` },
-          { id: 'delivered', label: `Livrées (${deliveredCount})` },
-          { id: 'returned', label: `Retournées (${returnedCount})` },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveFilter(tab.id)}
-            className={`shrink-0 px-3.5 py-1.5 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer ${
-              activeFilter === tab.id
-                ? 'bg-slate-800 text-white border border-slate-700/80 shadow-sm font-bold'
-                : 'text-zinc-400 hover:text-white hover:bg-slate-800/50'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      {/* Filter Tabs with Live Counts & Scroll Indicator */}
+      <div className="relative">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 border-b border-slate-800/80 text-xs scrollbar-thin scrollbar-thumb-slate-800">
+          {[
+            { id: 'all', label: `Toutes (${orders.length})` },
+            { id: 'new', label: `À Confirmer (${newCount})` },
+            { id: 'confirmed', label: `Confirmées (${confirmedCount})` },
+            { id: 'shipped', label: `En Transit (${shippedCount})` },
+            { id: 'delivered', label: `Livrées (${deliveredCount})` },
+            { id: 'returned', label: `Retours (${returnedCount})` },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveFilter(tab.id)}
+              className={`shrink-0 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer text-xs ${
+                activeFilter === tab.id
+                  ? 'bg-slate-800 text-white border border-slate-700/80 shadow-sm font-bold'
+                  : 'text-zinc-400 hover:text-white hover:bg-slate-800/50'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        {/* Subtle Right Gradient Hint indicating scrollability on mobile */}
+        <div className="pointer-events-none absolute right-0 top-0 bottom-1.5 w-6 bg-gradient-to-l from-[#0b0f17] to-transparent sm:hidden" />
       </div>
 
       {/* 1-Click Status Export Toolbar (Direct filtered exports) */}

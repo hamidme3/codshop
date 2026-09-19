@@ -322,30 +322,30 @@ export default function CatalogPage() {
             </div>
 
             {/* Sort & In-Stock Controls */}
-            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-              <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer select-none">
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+              <label className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer select-none shrink-0">
                 <input
                   type="checkbox"
                   checked={inStockOnly}
                   onChange={(e) => setInStockOnly(e.target.checked)}
                   className="w-4 h-4 rounded text-zinc-900 focus:ring-zinc-900 border-zinc-300"
                 />
-                <span style={{ color: 'var(--theme-text-primary)' }}>En stock uniquement</span>
+                <span style={{ color: 'var(--theme-text-primary)' }}>En stock</span>
               </label>
 
-              <div className="relative">
+              <div className="relative flex-1 sm:flex-initial min-w-0 max-w-[200px] sm:max-w-none">
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
                   aria-label="Trier les produits"
-                  className="text-xs font-bold py-2.5 px-3 rounded-xl border bg-white text-zinc-800 focus:outline-none focus:ring-2 cursor-pointer shadow-xs"
+                  className="w-full text-xs font-bold py-2 px-2.5 rounded-xl border bg-white text-zinc-800 focus:outline-none focus:ring-2 cursor-pointer shadow-xs truncate"
                   style={{
                     borderColor: 'var(--theme-border)',
                   }}
                 >
                   <option value="featured">✨ Populaire & Recommandé</option>
-                  <option value="price-asc">Prix : Moins cher au plus cher</option>
-                  <option value="price-desc">Prix : Plus cher au moins cher</option>
+                  <option value="price-asc">Prix croissant</option>
+                  <option value="price-desc">Prix décroissant</option>
                   <option value="rating">⭐ Meilleures Notes</option>
                 </select>
               </div>

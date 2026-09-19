@@ -23,13 +23,18 @@ function getCityFromHeaders(request: NextRequest): string | null {
   const standardCity = request.headers.get('x-forwarded-city');
   const country = request.headers.get('cf-ipcountry') || request.headers.get('x-vercel-ip-country');
   
-  // Only accept city if country is MA (Morocco) or unknown (local dev)
-  if (country && country !== 'MA' && country !== 'unknown') {
-    return null; // Foreign IP — don't trust city
-  }
-  
   const rawCity = cfCity || vercelCity || standardCity;
-  return normalizeCity(rawCity);
+  if (!rawCity) return null;
+
+  try {
+    const decoded = decodeURIComponent(rawCity.trim());
+    if (!country || country === 'MA' || country === 'unknown') {
+      return normalizeCity(decoded) || decoded;
+    }
+    return decoded;
+  } catch {
+    return rawCity.trim();
+  }
 }
 
 function getCountryFromHeaders(request: NextRequest): string {
