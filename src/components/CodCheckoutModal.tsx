@@ -40,6 +40,13 @@ import {
   Mail,
 } from 'lucide-react';
 import { trackInitiateCheckout } from '@/lib/pixel-tracker';
+import { 
+  trackInitiateCheckout as trackPostHogInitiateCheckout,
+  trackCheckoutStep2 as trackPostHogCheckoutStep2,
+  trackOrderCompleted as trackPostHogOrderCompleted,
+  trackWhatsAppRescue as trackPostHogWhatsAppRescue,
+  trackCodAbandoned as trackPostHogCodAbandoned,
+} from '@/lib/posthog';
 
 interface CodCheckoutModalProps {
   product: Product;
@@ -218,9 +225,16 @@ export function CodCheckoutModal({
     return formatCountryPrice(amount, effectiveCountryCode, lang);
   };
 
-  // Track InitiateCheckout on pixel channels when modal is opened
+  // Track InitiateCheckout on pixel channels and PostHog when modal is opened
   useEffect(() => {
     if (isOpen) {
+      trackPostHogInitiateCheckout(effectiveStoreSlug, {
+        id: product.id,
+        title: product.title,
+        price: selectedTier?.unitPrice || product.price,
+        quantity: selectedTier?.quantity || 1,
+      });
+
       trackInitiateCheckout({
         id: product.id,
         title: product.title,
@@ -228,7 +242,7 @@ export function CodCheckoutModal({
         quantity: selectedTier?.quantity || 1,
       });
     }
-  }, [isOpen, product.id, product.title, selectedTier]);
+  }, [isOpen, product.id, product.title, selectedTier, effectiveStoreSlug]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -251,9 +265,29 @@ export function CodCheckoutModal({
     setIsWaybill(getAbVariant() || waybillOverride === true);
   }, [waybillOverride]);
 
+  // Abandonment & order submission tracking
+  const [isOrderSubmitted, setIsOrderSubmitted] = useState(false);
+
+  const handleClose = () => {
+    if (!isOrderSubmitted) {
+      trackPostHogCodAbandoned(effectiveStoreSlug, {
+        productId: product.id,
+        productTitle: product.title,
+        step,
+        hasName: Boolean(fullName.trim()),
+        hasPhone: Boolean(phone.trim()),
+        phone: phone.trim() || undefined,
+        hasAddress: Boolean(address.trim()),
+        city,
+      });
+    }
+    onClose();
+  };
+
   // Reset or initialize on modal open
   useEffect(() => {
     if (isOpen) {
+      setIsOrderSubmitted(false);
       setStep(1);
       setError('');
       if (initialQuantity) {
@@ -306,6 +340,7 @@ export function CodCheckoutModal({
     if (e) e.preventDefault();
     setError('');
     setStep(2);
+    trackPostHogCheckoutStep2(effectiveStoreSlug, { productId: product.id, city });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -430,6 +465,14 @@ export function CodCheckoutModal({
         }
 
         if (res.ok && data?.success) {
+          setIsOrderSubmitted(true);
+          trackPostHogOrderCompleted(effectiveStoreSlug, {
+            orderId: data.orderId,
+            total: finalTotal,
+            city,
+            deliveryType: 'home',
+            productId: product.id,
+          });
           onClose();
           router.push(`/order-success/${data.orderId}?total=${finalTotal}&city=${encodeURIComponent(city)}&store=${encodeURIComponent(effectiveStoreSlug)}`);
           return;
@@ -453,6 +496,12 @@ export function CodCheckoutModal({
   };
 
   const handleWhatsAppOrder = () => {
+    trackPostHogWhatsAppRescue(effectiveStoreSlug, {
+      productId: product.id,
+      total: finalTotal,
+      reason: error ? 'error_rescue' : 'user_intent',
+    });
+
     // 1. Asynchronous non-blocking lead capture so merchant never loses the client even if they abandon WhatsApp
     try {
       fetch('/api/order', {
@@ -523,7 +572,12 @@ Merci de me confirmer la livraison !`;
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleClose();
+      }}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-sm overflow-y-auto"
+    >
       <div className={`relative w-full max-w-lg my-auto bg-white ${theme.styleTokens.cardRadius || 'rounded-2xl'} shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col ${
         isWaybill ? 'border-2 border-dashed border-zinc-400 bg-amber-50/10' : 'border border-zinc-200'
       }`}>
@@ -541,7 +595,7 @@ Merci de me confirmer la livraison !`;
               </div>
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleClose}
                 aria-label="Fermer"
                 className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
               >
@@ -586,7 +640,7 @@ Merci de me confirmer la livraison !`;
             </div>
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               aria-label="Fermer"
               className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-white/70 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
             >

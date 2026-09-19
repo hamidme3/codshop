@@ -19,6 +19,7 @@ import {
   Filter,
   ExternalLink,
 } from 'lucide-react';
+import { trackCatalogView, trackSearch, trackStorePageView } from '@/lib/posthog';
 
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'rating';
 
@@ -177,6 +178,27 @@ export default function CatalogPage() {
       return 0; // 'featured' keeps curated order
     });
   }, [allProducts, searchQuery, selectedCategory, selectedPriceRange, inStockOnly, sortBy]);
+
+  // Track Catalog View
+  React.useEffect(() => {
+    const activeStore = (storeProducts[0] as any)?.storeSlug || 'ottavio';
+    trackCatalogView(activeStore, {
+      category: selectedCategory,
+      sort: sortBy,
+      resultsCount: filteredProducts.length,
+    });
+    trackStorePageView(activeStore, '/catalog');
+  }, [selectedCategory, sortBy, storeProducts, filteredProducts.length]);
+
+  // Track Searches with 800ms debounce
+  React.useEffect(() => {
+    if (!searchQuery.trim() || searchQuery.trim().length < 2) return;
+    const activeStore = (storeProducts[0] as any)?.storeSlug || 'ottavio';
+    const timer = setTimeout(() => {
+      trackSearch(activeStore, searchQuery.trim(), filteredProducts.length);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [searchQuery, filteredProducts.length, storeProducts]);
 
   const resetFilters = () => {
     setSearchQuery('');

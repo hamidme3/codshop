@@ -28,6 +28,7 @@ import { CodCheckoutModal } from '@/components/CodCheckoutModal';
 import { CartWidget } from '@/components/CartWidget';
 import { useCart } from '@/context/CartContext';
 import { fetchAndInitPixels, trackViewContent } from '@/lib/pixel-tracker';
+import { trackProductView, trackStorePageView } from '@/lib/posthog';
 import { THEMES } from '@/lib/themes';
 
 export default function ProductDetailPage() {
@@ -81,9 +82,18 @@ export default function ProductDetailPage() {
 
   const countryConfig = useMemo(() => getCountryConfig(visitorCountry), [visitorCountry]);
 
-  // Initialize and track ViewContent across ad platforms
+  // Initialize and track ViewContent across ad platforms and PostHog
   useEffect(() => {
     if (product) {
+      const activeStore = (product as any)?.storeSlug || 'ottavio';
+      trackProductView(activeStore, {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        slug: product.slug,
+      });
+      trackStorePageView(activeStore, `/product/${slug}`);
+
       fetchAndInitPixels().then(() => {
         trackViewContent({
           id: product.id,
@@ -93,7 +103,7 @@ export default function ProductDetailPage() {
         });
       });
     }
-  }, [product]);
+  }, [product, slug]);
 
   const [activeImage, setActiveImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(

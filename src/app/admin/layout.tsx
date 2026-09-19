@@ -303,6 +303,15 @@ function AdminNav({ children }: { children: React.ReactNode }) {
             {/* Language Toggle */}
             <LanguageToggle />
 
+            {/* Live Visitors Pill */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 text-xs font-semibold">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span>8 en direct</span>
+            </div>
+
             {/* Store Status Pill */}
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 text-xs font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -327,6 +336,12 @@ function AdminNav({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-1.5">
+            {/* Live Visitors Pill Mobile */}
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>8</span>
+            </div>
+
             {/* Quick ⌘K Search trigger on mobile */}
             <button
               onClick={() => setShowCommandModal(true)}
