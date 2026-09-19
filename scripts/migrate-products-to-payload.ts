@@ -19,7 +19,7 @@ async function migrateProducts() {
 
   // Lazy load Payload to avoid compilation-phase side effects
   const { getPayload } = await import('payload');
-  const configPromise = (await import('@payload-config')).default;
+  const configPromise = (await import('../src/payload.config')).default;
   const payload = await getPayload({ config: configPromise });
 
   // 1. Fetch all Drizzle products
@@ -66,7 +66,7 @@ async function migrateProducts() {
             slug: storeSlug,
             subdomain: storeSlug,
             currency: 'MAD',
-            planTier: 'free',
+            planTier: 'starter',
           } as any,
           overrideAccess: true,
         });

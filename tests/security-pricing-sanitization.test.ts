@@ -422,6 +422,7 @@ async function runSecurityAuditTests() {
 
   console.log('  ✓ POST /api/order accurately calculated 598 DH tier price server-side with sanitized inputs.');
   console.log('\n🎉 ALL ROUND 2 SECURITY AUDIT TESTS PASSED WITH 100% INTEGRITY!');
+  process.exit(0);
 }
 
 runSecurityAuditTests().catch((err) => {

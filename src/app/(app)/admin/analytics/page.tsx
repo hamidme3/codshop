@@ -263,23 +263,23 @@ function AnalyticsContent() {
           )}
 
           {/* 5-Step COD Conversion Funnel */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-[#13171c] border border-slate-800/80 space-y-6 shadow-sm">
+          <div className="p-6 sm:p-8 rounded-3xl admin-surface bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/80 space-y-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 mb-1">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-500 dark:text-sky-400 mb-1">
                   <Filter className="w-3.5 h-3.5" />
                   <span>Pipeline d'Acquisition</span>
                 </div>
-                <h2 className="text-lg sm:text-xl font-black text-white">
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
                   Entonnoir de Conversion COD (30 Derniers Jours)
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Visualisez le parcours client : de la visite initiale à la livraison finale, avec taux de passage précis.
                 </p>
               </div>
 
-              <div className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-extrabold text-xs flex items-center gap-2 self-start sm:self-auto">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <div className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs flex items-center gap-2 self-start sm:self-auto">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
                 <span>Conversion Globale : {storefrontData?.funnel?.overallConversionRate ?? 0}%</span>
               </div>
             </div>
@@ -287,81 +287,81 @@ function AnalyticsContent() {
             {/* Funnel Visual Horizontal Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 pt-2">
               {/* Step 1: Visiteurs */}
-              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2 relative shadow-inner">
-                <div className="text-[11px] uppercase font-bold text-slate-400 flex items-center gap-1.5">
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 space-y-2 relative shadow-xs">
+                <div className="text-[11px] uppercase font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <Users className="w-3.5 h-3.5 text-slate-400" />
                   <span>1. Visiteurs</span>
                 </div>
-                <div className="text-2xl font-black text-white font-mono">{storefrontData?.funnel?.visitors ?? 0}</div>
-                <div className="text-[11px] text-slate-400 font-medium">Trafic global boutique</div>
-                <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
+                <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">{storefrontData?.funnel?.visitors ?? 0}</div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Trafic global boutique</div>
+                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
                   <div className="bg-slate-400 h-full rounded-full w-full" />
                 </div>
-                <div className="hidden sm:block absolute -right-2.5 top-1/2 -translate-y-1/2 z-10 text-slate-600">
+                <div className="hidden sm:block absolute -right-2.5 top-1/2 -translate-y-1/2 z-10 text-slate-400 dark:text-slate-600">
                   <ChevronRightSmall />
                 </div>
               </div>
 
               {/* Step 2: Catalogue & Fiches */}
-              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2 relative shadow-inner">
-                <div className="text-[11px] uppercase font-bold text-sky-400 flex items-center gap-1.5">
-                  <Compass className="w-3.5 h-3.5 text-sky-400" />
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 space-y-2 relative shadow-xs">
+                <div className="text-[11px] uppercase font-bold text-sky-600 dark:text-sky-400 flex items-center gap-1.5">
+                  <Compass className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
                   <span>2. Catalogue & Vues</span>
                 </div>
-                <div className="text-2xl font-black text-white font-mono">{storefrontData?.funnel?.productViews ?? 0}</div>
-                <div className="text-[11px] text-sky-400 font-medium">
+                <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">{storefrontData?.funnel?.productViews ?? 0}</div>
+                <div className="text-[11px] text-sky-600 dark:text-sky-400 font-medium">
                   {storefrontData?.funnel?.catalogViews ?? 0} vues catalogue
                 </div>
-                <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
-                  <div className="bg-sky-400 h-full rounded-full" style={{ width: `${Math.min(100, Math.round(((storefrontData?.funnel?.productViews ?? 0) / Math.max(1, storefrontData?.funnel?.visitors ?? 1)) * 100))}%` }} />
+                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
+                  <div className="bg-sky-500 dark:bg-sky-400 h-full rounded-full" style={{ width: `${Math.min(100, Math.round(((storefrontData?.funnel?.productViews ?? 0) / Math.max(1, storefrontData?.funnel?.visitors ?? 1)) * 100))}%` }} />
                 </div>
-                <div className="hidden sm:block absolute -right-2.5 top-1/2 -translate-y-1/2 z-10 text-slate-600">
+                <div className="hidden sm:block absolute -right-2.5 top-1/2 -translate-y-1/2 z-10 text-slate-400 dark:text-slate-600">
                   <ChevronRightSmall />
                 </div>
               </div>
 
               {/* Step 3: Étape 1 Pack & Offre */}
-              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2 relative shadow-inner">
-                <div className="text-[11px] uppercase font-bold text-amber-400 flex items-center gap-1.5">
-                  <Package className="w-3.5 h-3.5 text-amber-400" />
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 space-y-2 relative shadow-xs">
+                <div className="text-[11px] uppercase font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                  <Package className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                   <span>3. Formulaire Étape 1</span>
                 </div>
-                <div className="text-2xl font-black text-white font-mono">{storefrontData?.funnel?.initiatedCheckout ?? 0}</div>
-                <div className="text-[11px] text-amber-400 font-medium">Choix Pack & Quantité</div>
-                <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
-                  <div className="bg-amber-400 h-full rounded-full" style={{ width: `${Math.min(100, Math.round(((storefrontData?.funnel?.initiatedCheckout ?? 0) / Math.max(1, storefrontData?.funnel?.productViews ?? 1)) * 100))}%` }} />
+                <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">{storefrontData?.funnel?.initiatedCheckout ?? 0}</div>
+                <div className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">Choix Pack & Quantité</div>
+                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
+                  <div className="bg-amber-500 dark:bg-amber-400 h-full rounded-full" style={{ width: `${Math.min(100, Math.round(((storefrontData?.funnel?.initiatedCheckout ?? 0) / Math.max(1, storefrontData?.funnel?.productViews ?? 1)) * 100))}%` }} />
                 </div>
-                <div className="hidden sm:block absolute -right-2.5 top-1/2 -translate-y-1/2 z-10 text-slate-600">
+                <div className="hidden sm:block absolute -right-2.5 top-1/2 -translate-y-1/2 z-10 text-slate-400 dark:text-slate-600">
                   <ChevronRightSmall />
                 </div>
               </div>
 
               {/* Step 4: Étape 2 Coordonnées */}
-              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2 relative shadow-inner">
-                <div className="text-[11px] uppercase font-bold text-purple-400 flex items-center gap-1.5">
-                  <Truck className="w-3.5 h-3.5 text-purple-400" />
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 space-y-2 relative shadow-xs">
+                <div className="text-[11px] uppercase font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
+                  <Truck className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
                   <span>4. Formulaire Étape 2</span>
                 </div>
-                <div className="text-2xl font-black text-white font-mono">{storefrontData?.funnel?.checkoutStep2 ?? 0}</div>
-                <div className="text-[11px] text-purple-400 font-medium">Saisie Téléphone & Adresse</div>
-                <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
-                  <div className="bg-purple-400 h-full rounded-full" style={{ width: `${Math.min(100, Math.round(((storefrontData?.funnel?.checkoutStep2 ?? 0) / Math.max(1, storefrontData?.funnel?.initiatedCheckout ?? 1)) * 100))}%` }} />
+                <div className="text-2xl font-black text-slate-900 dark:text-white font-mono">{storefrontData?.funnel?.checkoutStep2 ?? 0}</div>
+                <div className="text-[11px] text-purple-600 dark:text-purple-400 font-medium">Saisie Téléphone & Adresse</div>
+                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
+                  <div className="bg-purple-500 dark:bg-purple-400 h-full rounded-full" style={{ width: `${Math.min(100, Math.round(((storefrontData?.funnel?.checkoutStep2 ?? 0) / Math.max(1, storefrontData?.funnel?.initiatedCheckout ?? 1)) * 100))}%` }} />
                 </div>
-                <div className="hidden sm:block absolute -right-2.5 top-1/2 -translate-y-1/2 z-10 text-slate-600">
+                <div className="hidden sm:block absolute -right-2.5 top-1/2 -translate-y-1/2 z-10 text-slate-400 dark:text-slate-600">
                   <ChevronRightSmall />
                 </div>
               </div>
 
               {/* Step 5: Commandes Finalisées */}
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2 shadow-inner">
-                <div className="text-[11px] uppercase font-bold text-emerald-400 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2 shadow-xs">
+                <div className="text-[11px] uppercase font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                   <span>5. Commandes Livrées</span>
                 </div>
-                <div className="text-2xl font-black text-emerald-400 font-mono">{storefrontData?.funnel?.ordersCompleted ?? 0}</div>
-                <div className="text-[11px] text-emerald-300 font-medium">Finalisées avec succès</div>
-                <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
-                  <div className="bg-emerald-400 h-full rounded-full w-full" />
+                <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">{storefrontData?.funnel?.ordersCompleted ?? 0}</div>
+                <div className="text-[11px] text-emerald-700 dark:text-emerald-300 font-medium">Finalisées avec succès</div>
+                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
+                  <div className="bg-emerald-500 dark:bg-emerald-400 h-full rounded-full w-full" />
                 </div>
               </div>
             </div>
@@ -370,51 +370,51 @@ function AnalyticsContent() {
           {/* Abandons & Search Intent Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Abandonment Breakdown Card */}
-            <div className="p-6 sm:p-7 rounded-3xl bg-[#13171c] border border-slate-800/80 space-y-5 shadow-sm">
+            <div className="p-6 sm:p-7 rounded-3xl admin-surface bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/80 space-y-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-rose-400 mb-1">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-rose-500 dark:text-rose-400 mb-1">
                     <UserX className="w-3.5 h-3.5" />
                     <span>Déperditions de Commande</span>
                   </div>
-                  <h2 className="text-lg font-black text-white">
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white">
                     Abandons du Formulaire COD
                   </h2>
                 </div>
-                <span className="px-3 py-1 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-bold">
+                <span className="px-3 py-1 rounded-xl bg-rose-500/10 text-rose-500 dark:text-rose-400 border border-rose-500/20 text-xs font-bold">
                   {storefrontData?.abandonment?.totalAbandoned ?? 0} abandons
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Détection de l'étape exacte où les clients ont fermé le modal sans confirmer leur commande.
               </p>
 
               <div className="grid grid-cols-2 gap-3 pt-1">
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
-                  <div className="text-[11px] text-slate-400 font-semibold">Abandon à l'Étape 1</div>
-                  <div className="text-3xl font-black text-white font-mono">
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1 shadow-xs">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">Abandon à l'Étape 1</div>
+                  <div className="text-3xl font-black text-slate-900 dark:text-white font-mono">
                     {storefrontData?.abandonment?.step1Abandoned ?? 0}
                   </div>
-                  <div className="text-[11px] text-amber-400 font-medium">Hésitation offre ou prix</div>
+                  <div className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">Hésitation offre ou prix</div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
-                  <div className="text-[11px] text-slate-400 font-semibold">Abandon à l'Étape 2</div>
-                  <div className="text-3xl font-black text-white font-mono">
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1 shadow-xs">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">Abandon à l'Étape 2</div>
+                  <div className="text-3xl font-black text-slate-900 dark:text-white font-mono">
                     {storefrontData?.abandonment?.step2Abandoned ?? 0}
                   </div>
-                  <div className="text-[11px] text-rose-400 font-medium">Hésitation adresse/livraison</div>
+                  <div className="text-[11px] text-rose-600 dark:text-rose-400 font-medium">Hésitation adresse/livraison</div>
                 </div>
               </div>
 
               {/* Recoverable Phone Leads Banner */}
               <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-4">
                 <div className="space-y-0.5">
-                  <div className="text-xs font-black text-emerald-400 flex items-center gap-1.5">
+                  <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5" />
                     <span>{storefrontData?.abandonment?.recoverableLeads ?? 0} Prospects Récupérables</span>
                   </div>
-                  <p className="text-[11px] text-slate-300">
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300">
                     Ces clients ont saisi leur numéro WhatsApp avant d'abandonner.
                   </p>
                 </div>
@@ -430,52 +430,52 @@ function AnalyticsContent() {
             </div>
 
             {/* Top Searched Queries & Keywords */}
-            <div className="p-6 sm:p-7 rounded-3xl bg-[#13171c] border border-slate-800/80 space-y-5 shadow-sm">
+            <div className="p-6 sm:p-7 rounded-3xl admin-surface bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/80 space-y-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 mb-1">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-500 dark:text-sky-400 mb-1">
                     <Search className="w-3.5 h-3.5" />
                     <span>Intention d'Achat Réelle</span>
                   </div>
-                  <h2 className="text-lg font-black text-white">
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white">
                     Top Recherches & Mots-Clés
                   </h2>
                 </div>
-                <span className="text-xs text-slate-400 font-semibold">Demande visiteurs</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Demande visiteurs</span>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Mots-clés tapés par les visiteurs dans la barre de recherche du catalogue. Identifiez les articles manquants à ajouter.
               </p>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-xs admin-table">
                   <thead>
-                    <tr className="border-b border-slate-800 text-slate-400 bg-slate-950/50 font-semibold">
+                    <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/50 font-semibold">
                       <th className="py-2.5 px-3">Terme recherché</th>
                       <th className="py-2.5 px-3 text-center">Volume</th>
                       <th className="py-2.5 px-3 text-right">Articles trouvés</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60">
                     {storefrontData?.searches?.map((s, idx) => (
-                      <tr key={idx} className="hover:bg-slate-800/30 transition-colors">
-                        <td className="py-3 px-3 font-bold text-white flex items-center gap-2">
-                          <span className="w-5 h-5 rounded-md bg-slate-800 text-slate-400 text-[10px] flex items-center justify-center font-mono">
+                      <tr key={idx} className="hover:bg-slate-100/60 dark:hover:bg-slate-800/30 transition-colors">
+                        <td className="py-3 px-3 font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] flex items-center justify-center font-mono">
                             {idx + 1}
                           </span>
                           <span>"{s.query}"</span>
                         </td>
-                        <td className="py-3 px-3 text-center font-mono text-sky-400 font-extrabold">
+                        <td className="py-3 px-3 text-center font-mono text-sky-600 dark:text-sky-400 font-extrabold">
                           {s.count}
                         </td>
                         <td className="py-3 px-3 text-right">
                           {s.isZeroResult ? (
-                            <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-rose-500/15 text-rose-400 border border-rose-500/30 inline-flex items-center gap-1">
+                            <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-rose-500/15 text-rose-500 dark:text-rose-400 border border-rose-500/30 inline-flex items-center gap-1">
                               <AlertTriangle className="w-3 h-3" />
                               <span>0 résultat (À ajouter !)</span>
                             </span>
                           ) : (
-                            <span className="text-emerald-400 font-semibold font-mono">{s.resultsCount} articles</span>
+                            <span className="text-emerald-600 dark:text-emerald-400 font-semibold font-mono">{s.resultsCount} articles</span>
                           )}
                         </td>
                       </tr>
@@ -487,29 +487,29 @@ function AnalyticsContent() {
           </div>
 
           {/* Product Visitor & Conversion Breakdown Table */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-[#13171c] border border-slate-800/80 space-y-5 shadow-sm">
+          <div className="p-6 sm:p-8 rounded-3xl admin-surface bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/80 space-y-5 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 mb-1">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-500 dark:text-sky-400 mb-1">
                   <Eye className="w-3.5 h-3.5" />
                   <span>Performance de l'Offre</span>
                 </div>
-                <h2 className="text-lg sm:text-xl font-black text-white">
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
                   Visiteurs et Taux de Conversion par Produit
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Mesurez l'attractivité réelle de chaque article : volume de visiteurs uniques vs commandes finalisées.
                 </p>
               </div>
-              <div className="text-xs text-slate-400 font-medium">
-                Articles analysés : <strong className="text-white font-mono">{storefrontData?.products?.length ?? 0}</strong>
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                Articles analysés : <strong className="text-slate-900 dark:text-white font-mono">{storefrontData?.products?.length ?? 0}</strong>
               </div>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs admin-table">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 bg-slate-950/60 font-semibold">
+                  <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/60 font-semibold">
                     <th className="py-3 px-4">Produit</th>
                     <th className="py-3 px-4 text-center">Visiteurs Uniques</th>
                     <th className="py-3 px-4 text-center">Vues Totales</th>
@@ -518,40 +518,40 @@ function AnalyticsContent() {
                     <th className="py-3 px-4 text-right">Diagnostic Produit</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60">
                   {storefrontData?.products?.map((prod) => (
-                    <tr key={prod.id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3.5 px-4 font-bold text-white text-sm">
+                    <tr key={prod.id} className="hover:bg-slate-100/60 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white text-sm">
                         <div className="max-w-[280px] truncate flex items-center gap-2">
-                          <Package className="w-4 h-4 text-slate-500 shrink-0" />
+                          <Package className="w-4 h-4 text-slate-400 shrink-0" />
                           <span>{prod.title}</span>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 text-center font-mono font-bold text-sky-400">
+                      <td className="py-3.5 px-4 text-center font-mono font-bold text-sky-600 dark:text-sky-400">
                         {prod.uniqueVisitors}
                       </td>
-                      <td className="py-3.5 px-4 text-center font-mono text-slate-300">
+                      <td className="py-3.5 px-4 text-center font-mono text-slate-600 dark:text-slate-300">
                         {prod.totalViews}
                       </td>
-                      <td className="py-3.5 px-4 text-center font-mono font-black text-emerald-400">
+                      <td className="py-3.5 px-4 text-center font-mono font-black text-emerald-600 dark:text-emerald-400">
                         {prod.ordersCount}
                       </td>
                       <td className="py-3.5 px-4 text-center">
-                        <div className="inline-flex items-center gap-1.5 font-bold font-mono text-white">
+                        <div className="inline-flex items-center gap-1.5 font-bold font-mono text-slate-900 dark:text-white">
                           <span>{prod.conversionRate}%</span>
                         </div>
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         {prod.conversionRate >= 5.0 ? (
-                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                             🔥 Top Vendeur
                           </span>
                         ) : prod.uniqueVisitors > 200 ? (
-                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
                             ⚠️ À Optimiser
                           </span>
                         ) : (
-                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-slate-800 text-slate-400 border border-slate-700">
+                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                             ⭐ Standard
                           </span>
                         )}
@@ -565,32 +565,32 @@ function AnalyticsContent() {
 
           {/* Acquisition & WhatsApp Rescue Split */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="p-6 rounded-3xl bg-[#13171c] border border-slate-800/80 space-y-3 shadow-sm">
-              <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
+            <div className="p-6 rounded-3xl admin-surface bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/80 space-y-3 shadow-sm">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-semibold">
                 <span>Commandes Directes Formulaire COD</span>
-                <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                   <ShieldCheck className="w-5 h-5" />
                 </span>
               </div>
-              <div className="text-3xl sm:text-4xl font-black text-white font-mono">
-                {storefrontData?.channels?.webOrders ?? 0} <span className="text-sm font-semibold text-slate-400">commandes</span>
+              <div className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white font-mono">
+                {storefrontData?.channels?.webOrders ?? 0} <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">commandes</span>
               </div>
-              <div className="text-xs text-emerald-400 font-semibold">
+              <div className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
                 {storefrontData?.channels?.webPercentage ?? 0}% du volume total finalisé
               </div>
             </div>
 
-            <div className="p-6 rounded-3xl bg-[#13171c] border border-slate-800/80 space-y-3 shadow-sm">
-              <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
+            <div className="p-6 rounded-3xl admin-surface bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/80 space-y-3 shadow-sm">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-semibold">
                 <span>Commandes Sauvées via WhatsApp</span>
-                <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                   <MessageCircle className="w-5 h-5" />
                 </span>
               </div>
-              <div className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono">
-                +{storefrontData?.channels?.whatsappRescues ?? 0} <span className="text-sm font-semibold text-slate-400">sauvées</span>
+              <div className="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                +{storefrontData?.channels?.whatsappRescues ?? 0} <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">sauvées</span>
               </div>
-              <div className="text-xs text-slate-400 font-medium">
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                 {storefrontData?.channels?.whatsappPercentage ?? 0}% de ventes récupérées en 1-clic après hésitation
               </div>
             </div>

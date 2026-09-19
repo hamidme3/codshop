@@ -9,6 +9,7 @@
     "lint": "next lint",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
+    "db:payload:push": "tsx scripts/push-payload-schema.ts",
     "seed:superadmin": "tsx scripts/seed-superadmin.ts"
   },
   "dependencies": {

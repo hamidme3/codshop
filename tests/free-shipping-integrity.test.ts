@@ -214,6 +214,7 @@ async function runFreeShippingTests() {
 
   console.log('  ✓ Order verification and tampering prevention verified.\n');
   console.log('🎉 ALL FREE SHIPPING & DELIVERY INTEGRITY TESTS PASSED SUCCESSFULLY!');
+  process.exit(0);
 }
 
 runFreeShippingTests().catch((err) => {

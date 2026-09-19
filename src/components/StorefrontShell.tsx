@@ -25,7 +25,11 @@ function ShellContent({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const isBackoffice = pathname.startsWith('/admin') || pathname.startsWith('/register-store') || pathname.startsWith('/sso');
+  const isBackoffice =
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/register-store') ||
+    pathname.startsWith('/sso') ||
+    pathname.startsWith('/cms');
   // Root domain homepage without a store parameter is the Universal SaaS Landing Page (which has its own header & footer)
   const isPlatformHome = pathname === '/' && !storeParam && !isSubdomain;
 

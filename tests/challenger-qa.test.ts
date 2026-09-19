@@ -104,6 +104,7 @@ async function run() {
   testInventoryLifecycle();
   await testPricingBusinessRules();
   console.log('🎉 All Challenger QA Regression Tests passed successfully!\n');
+  process.exit(0);
 }
 
 run().catch((err) => {

@@ -73,6 +73,7 @@ async function runTests() {
   console.log('  ✓ GET /api/admin/products?store=storet1 reflects stock 20 for SKU-5567.\n');
 
   console.log('=== ALL 6 CUSTOM PRODUCT TESTS PASSED! ===');
+  process.exit(0);
 }
 
 runTests().catch((err) => {
