@@ -63,7 +63,7 @@ export default function ProductDetailPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [slug, initialProduct]);
-  const { formatMAD, formatPrice, theme, countryCode: contextCountryCode } = useTheme();
+  const { formatMAD, formatPrice, theme, countryCode: contextCountryCode, shippingSettings } = useTheme();
   const { addItem } = useCart();
 
   // Multi-country visitor detection
@@ -81,6 +81,12 @@ export default function ProductDetailPage() {
   }, [product, contextCountryCode, visitorCountry]);
 
   const countryConfig = useMemo(() => getCountryConfig(visitorCountry), [visitorCountry]);
+
+  const effectiveShippingThreshold = useMemo(() => {
+    return visitorCountry === 'MA' && typeof shippingSettings?.freeShippingThreshold === 'number'
+      ? shippingSettings.freeShippingThreshold
+      : countryConfig.freeShippingThreshold;
+  }, [visitorCountry, shippingSettings, countryConfig]);
 
   const currentStoreSlug = useMemo(() => {
     if (typeof window === 'undefined') return 'storet1';
@@ -594,10 +600,10 @@ export default function ProductDetailPage() {
 
                         {/* Badges: Free delivery + Free gift */}
                         <div className="flex flex-wrap gap-1 mt-2">
-                          {(tier.freeDelivery || tier.quantity >= 2 || tier.totalPrice >= countryConfig.freeShippingThreshold) ? (
+                          {(tier.freeDelivery || tier.quantity >= 2 || (effectiveShippingThreshold > 0 && tier.totalPrice >= effectiveShippingThreshold)) ? (
                             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100/90 px-1.5 py-0.5 rounded">
                               <Truck className="w-3 h-3 text-emerald-700 shrink-0" />
-                              Livraison Gratuite ({countryConfig.hubSla.hubSla})
+                              Livraison Gratuite ({shippingSettings?.deliveryTimeframe || countryConfig.hubSla.hubSla})
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 text-[10px] font-medium text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded">
@@ -825,14 +831,14 @@ export default function ProductDetailPage() {
             <div className="flex items-center gap-1.5 mt-0.5">
               <span
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black ${
-                  activeTier?.freeDelivery || (activeTier?.quantity ?? 1) >= 2 || (activeTier?.totalPrice ?? 0) >= countryConfig.freeShippingThreshold
+                  activeTier?.freeDelivery || (activeTier?.quantity ?? 1) >= 2 || (effectiveShippingThreshold > 0 && (activeTier?.totalPrice ?? 0) >= effectiveShippingThreshold)
                     ? 'bg-emerald-100 text-emerald-800'
                     : 'bg-zinc-100 text-zinc-700'
                 }`}
               >
                 <Truck className="w-3 h-3 stroke-[2.5]" />
-                {activeTier?.freeDelivery || (activeTier?.quantity ?? 1) >= 2 || (activeTier?.totalPrice ?? 0) >= countryConfig.freeShippingThreshold
-                  ? `Livraison Gratuite (${countryConfig.hubSla.hubSla})`
+                {activeTier?.freeDelivery || (activeTier?.quantity ?? 1) >= 2 || (effectiveShippingThreshold > 0 && (activeTier?.totalPrice ?? 0) >= effectiveShippingThreshold)
+                  ? `Livraison Gratuite (${shippingSettings?.deliveryTimeframe || countryConfig.hubSla.hubSla})`
                   : 'Livraison Express COD'}
               </span>
               {activeTier?.freeGift && (

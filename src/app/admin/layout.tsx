@@ -7,7 +7,7 @@ import {
   LayoutDashboard, ShoppingBag, Package, Palette, 
   TrendingUp, Truck, CreditCard, ExternalLink, 
   Clock, Menu, X, Users, Filter, Wallet, LogOut, Shield, 
-  UserCheck, Zap, LifeBuoy, UserCog, Layers, Search, ChevronRight,
+  UserCheck, Zap, LifeBuoy, UserCog, Layers, Search, ChevronRight, ChevronDown,
   Command, Sparkles, CheckCircle2, ArrowRight
 } from 'lucide-react';
 import LanguageToggle from '@/components/LanguageToggle';
@@ -17,15 +17,29 @@ import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
 import { AdminThemeProvider } from '@/contexts/AdminThemeContext';
 import { getStorefrontUrl } from '@/lib/store-urls';
 
+interface NavItemChild {
+  label: string;
+  href: string;
+  filterKey: string;
+  count: number;
+  dotColor: string;
+}
+
+interface NavItem {
+  label: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  exact?: boolean;
+  badge?: string;
+  isCollapsible?: boolean;
+  isOpen?: boolean;
+  onToggle?: () => void;
+  children?: NavItemChild[];
+}
+
 interface NavSection {
   title: string;
-  items: {
-    label: string;
-    href: string;
-    icon: React.ComponentType<{ className?: string }>;
-    exact?: boolean;
-    badge?: string;
-  }[];
+  items: NavItem[];
 }
 
 function AdminNav({ children }: { children: React.ReactNode }) {
@@ -39,6 +53,41 @@ function AdminNav({ children }: { children: React.ReactNode }) {
   const [showCommandModal, setShowCommandModal] = useState(false);
   const [commandQuery, setCommandQuery] = useState('');
   const { language, setLanguage, t } = useLanguage();
+
+  const [orderCounts, setOrderCounts] = useState({
+    all: 0,
+    to_confirm: 0,
+    confirmed: 0,
+    shipped: 0,
+    delivered: 0,
+    returned: 0,
+  });
+  const [ordersOpen, setOrdersOpen] = useState(true);
+
+  const fetchOrderCounts = React.useCallback(async () => {
+    try {
+      const res = await fetch(`/api/admin/orders?store=${encodeURIComponent(storeSlug)}&countsOnly=true`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.counts) {
+          setOrderCounts(data.counts);
+        }
+      }
+    } catch (err) {
+      console.warn('[Admin Layout] Could not fetch order counts:', err);
+    }
+  }, [storeSlug]);
+
+  useEffect(() => {
+    fetchOrderCounts();
+    const handleOrdersUpdated = () => fetchOrderCounts();
+    window.addEventListener('orders-updated', handleOrdersUpdated);
+    const interval = setInterval(fetchOrderCounts, 30000);
+    return () => {
+      window.removeEventListener('orders-updated', handleOrdersUpdated);
+      clearInterval(interval);
+    };
+  }, [fetchOrderCounts]);
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -78,7 +127,59 @@ function AdminNav({ children }: { children: React.ReactNode }) {
       title: 'OPÉRATIONS & VENTES',
       items: [
         { label: t.nav.overview, href: `/admin?store=${storeSlug}`, icon: LayoutDashboard, exact: true },
-        { label: t.nav.orders, href: `/admin/orders?store=${storeSlug}`, icon: ShoppingBag, badge: '4-Étapes' },
+        { 
+          label: t.nav.orders, 
+          href: `/admin/orders?store=${storeSlug}`, 
+          icon: ShoppingBag, 
+          badge: orderCounts.all > 0 ? String(orderCounts.all) : undefined,
+          isCollapsible: true,
+          isOpen: ordersOpen,
+          onToggle: () => setOrdersOpen((prev) => !prev),
+          children: [
+            { 
+              label: 'Toutes', 
+              href: `/admin/orders?store=${storeSlug}`, 
+              filterKey: 'all', 
+              count: orderCounts.all, 
+              dotColor: 'bg-slate-400' 
+            },
+            { 
+              label: 'À Confirmer', 
+              href: `/admin/orders?store=${storeSlug}&filter=to_confirm`, 
+              filterKey: 'to_confirm', 
+              count: orderCounts.to_confirm, 
+              dotColor: 'bg-sky-400' 
+            },
+            { 
+              label: 'Confirmées', 
+              href: `/admin/orders?store=${storeSlug}&filter=confirmed`, 
+              filterKey: 'confirmed', 
+              count: orderCounts.confirmed, 
+              dotColor: 'bg-cyan-400' 
+            },
+            { 
+              label: 'En Transit', 
+              href: `/admin/orders?store=${storeSlug}&filter=shipped`, 
+              filterKey: 'shipped', 
+              count: orderCounts.shipped, 
+              dotColor: 'bg-amber-400' 
+            },
+            { 
+              label: 'Livrées', 
+              href: `/admin/orders?store=${storeSlug}&filter=delivered`, 
+              filterKey: 'delivered', 
+              count: orderCounts.delivered, 
+              dotColor: 'bg-emerald-400' 
+            },
+            { 
+              label: 'Retours', 
+              href: `/admin/orders?store=${storeSlug}&filter=returned`, 
+              filterKey: 'returned', 
+              count: orderCounts.returned, 
+              dotColor: 'bg-rose-400' 
+            },
+          ],
+        },
         { label: t.nav.logistics, href: `/admin/logistics?store=${storeSlug}`, icon: Truck },
         { label: t.nav.customers, href: `/admin/customers?store=${storeSlug}`, icon: Users },
       ],
@@ -114,7 +215,23 @@ function AdminNav({ children }: { children: React.ReactNode }) {
 
   // Flat items for ⌘K quick navigation
   const allNavItems = useMemo(() => {
-    return navSections.flatMap((s) => s.items);
+    const items: { label: string; href: string; icon: React.ComponentType<{ className?: string }>; badge?: string }[] = [];
+    for (const s of navSections) {
+      for (const item of s.items) {
+        items.push({ label: item.label, href: item.href, icon: item.icon, badge: item.badge });
+        if (item.children) {
+          for (const child of item.children) {
+            items.push({
+              label: `${item.label} → ${child.label} (${child.count})`,
+              href: child.href,
+              icon: item.icon,
+              badge: String(child.count),
+            });
+          }
+        }
+      }
+    }
+    return items;
   }, [navSections]);
 
   const filteredCommandItems = useMemo(() => {
@@ -127,13 +244,26 @@ function AdminNav({ children }: { children: React.ReactNode }) {
   const currentSection = useMemo(() => {
     for (const sec of navSections) {
       for (const item of sec.items) {
+        if (item.children && pathname === '/admin/orders') {
+          const currentFilter = searchParams.get('filter') || searchParams.get('status') || 'all';
+          const matchedChild = item.children.find((c) =>
+            c.filterKey === 'all'
+              ? (!searchParams.get('filter') && !searchParams.get('status')) || currentFilter === 'all'
+              : c.filterKey === 'to_confirm'
+              ? currentFilter === 'to_confirm' || currentFilter === 'new'
+              : currentFilter === c.filterKey
+          );
+          if (matchedChild) {
+            return { sectionTitle: sec.title, itemTitle: `${item.label} (${matchedChild.label})` };
+          }
+        }
         if (item.exact ? pathname === '/admin' : pathname.startsWith(item.href.split('?')[0])) {
           return { sectionTitle: sec.title, itemTitle: item.label };
         }
       }
     }
     return { sectionTitle: 'ADMINISTRATION', itemTitle: 'Tableau de Bord' };
-  }, [pathname, navSections]);
+  }, [pathname, navSections, searchParams]);
 
   const isBuilder = pathname.startsWith('/admin/builder');
 
@@ -200,34 +330,96 @@ function AdminNav({ children }: { children: React.ReactNode }) {
               </div>
 
               {section.items.map((item) => {
+                const isOrdersItem = Boolean(item.children && item.children.length > 0);
+                const isOrdersPath = pathname === '/admin/orders';
                 const isActive = item.exact
                   ? pathname === '/admin'
                   : pathname.startsWith(item.href.split('?')[0]);
                 const Icon = item.icon;
 
                 return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className={`flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors group ${
-                      isActive
-                        ? 'bg-emerald-500/15 text-white font-bold border-l-2 border-emerald-500 shadow-xs'
-                        : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 font-medium'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Icon className={`w-4 h-4 shrink-0 transition-colors ${
-                        isActive ? 'text-emerald-400' : 'text-slate-400 group-hover:text-slate-200'
-                      }`} />
-                      <span className="truncate">{item.label}</span>
+                  <div key={item.label} className="space-y-0.5">
+                    <div className="flex items-center">
+                      <Link
+                        href={item.href}
+                        className={`flex-1 flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors group ${
+                          isActive && !isOrdersItem
+                            ? 'bg-emerald-500/15 text-white font-bold border-l-2 border-emerald-500 shadow-xs'
+                            : isActive && isOrdersItem
+                            ? 'text-white font-bold bg-slate-800/60'
+                            : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 font-medium'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Icon className={`w-4 h-4 shrink-0 transition-colors ${
+                            isActive ? 'text-emerald-400' : 'text-slate-400 group-hover:text-slate-200'
+                          }`} />
+                          <span className="truncate">{item.label}</span>
+                        </div>
+
+                        {item.badge && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-mono">
+                            {item.badge}
+                          </span>
+                        )}
+                      </Link>
+
+                      {isOrdersItem && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            item.onToggle?.();
+                          }}
+                          className="p-1.5 ml-1 text-slate-400 hover:text-white rounded-md hover:bg-slate-800/80 transition-colors cursor-pointer"
+                          aria-label={item.isOpen ? 'Réduire' : 'Développer'}
+                          title={item.isOpen ? 'Réduire' : 'Développer'}
+                        >
+                          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${item.isOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                      )}
                     </div>
 
-                    {item.badge && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                        {item.badge}
-                      </span>
+                    {isOrdersItem && item.isOpen && (
+                      <div className="ml-4 pl-2.5 border-l border-slate-800/80 space-y-0.5 my-1">
+                        {item.children?.map((child) => {
+                          const currentFilter = searchParams.get('filter') || searchParams.get('status') || 'all';
+                          const isChildActive = isOrdersPath && (
+                            child.filterKey === 'all'
+                              ? (!searchParams.get('filter') && !searchParams.get('status')) || currentFilter === 'all'
+                              : child.filterKey === 'to_confirm'
+                              ? currentFilter === 'to_confirm' || currentFilter === 'new'
+                              : currentFilter === child.filterKey
+                          );
+
+                          return (
+                            <Link
+                              key={child.label}
+                              href={child.href}
+                              className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors group ${
+                                isChildActive
+                                  ? 'bg-emerald-500/15 text-white font-bold border-l-2 border-emerald-400 shadow-2xs'
+                                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 font-medium'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${child.dotColor} ${isChildActive ? 'ring-2 ring-emerald-400/40' : ''}`} />
+                                <span className="truncate">{child.label}</span>
+                              </div>
+                              <span className={`font-mono text-[11px] font-bold px-1.5 py-0.2 rounded ${
+                                isChildActive
+                                  ? 'text-emerald-300 bg-emerald-500/20'
+                                  : 'text-slate-400 group-hover:text-slate-300'
+                              }`}>
+                                ({child.count})
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </div>
                     )}
-                  </Link>
+                  </div>
                 );
               })}
             </div>
@@ -429,32 +621,94 @@ function AdminNav({ children }: { children: React.ReactNode }) {
                       {sec.title}
                     </div>
                     {sec.items.map((item) => {
+                      const isOrdersItem = Boolean(item.children && item.children.length > 0);
+                      const isOrdersPath = pathname === '/admin/orders';
                       const isActive = item.exact
                         ? pathname === '/admin'
                         : pathname.startsWith(item.href.split('?')[0]);
                       const Icon = item.icon;
 
                       return (
-                        <Link
-                          key={item.label}
-                          href={item.href}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors min-h-[40px] ${
-                            isActive
-                              ? 'bg-emerald-500/10 text-white font-bold border-l-2 border-emerald-500'
-                              : 'text-zinc-300 hover:text-white hover:bg-slate-800/60'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-400' : 'text-zinc-400'}`} />
-                            <span className="truncate">{item.label}</span>
+                        <div key={item.label} className="space-y-0.5">
+                          <div className="flex items-center">
+                            <Link
+                              href={item.href}
+                              onClick={() => !isOrdersItem && setMobileMenuOpen(false)}
+                              className={`flex-1 flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors min-h-[40px] ${
+                                isActive && !isOrdersItem
+                                  ? 'bg-emerald-500/10 text-white font-bold border-l-2 border-emerald-500'
+                                  : isActive && isOrdersItem
+                                  ? 'text-white font-bold bg-slate-800/60'
+                                  : 'text-zinc-300 hover:text-white hover:bg-slate-800/60'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-400' : 'text-zinc-400'}`} />
+                                <span className="truncate">{item.label}</span>
+                              </div>
+                              {item.badge && (
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                                  {item.badge}
+                                </span>
+                              )}
+                            </Link>
+
+                            {isOrdersItem && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  item.onToggle?.();
+                                }}
+                                className="p-2 ml-1 text-slate-400 hover:text-white rounded-md hover:bg-slate-800/80 transition-colors"
+                                aria-label={item.isOpen ? 'Réduire' : 'Développer'}
+                              >
+                                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${item.isOpen ? 'rotate-180' : ''}`} />
+                              </button>
+                            )}
                           </div>
-                          {item.badge && (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                              {item.badge}
-                            </span>
+
+                          {isOrdersItem && item.isOpen && (
+                            <div className="ml-4 pl-2.5 border-l border-slate-800/80 space-y-0.5 my-1">
+                              {item.children?.map((child) => {
+                                const currentFilter = searchParams.get('filter') || searchParams.get('status') || 'all';
+                                const isChildActive = isOrdersPath && (
+                                  child.filterKey === 'all'
+                                    ? (!searchParams.get('filter') && !searchParams.get('status')) || currentFilter === 'all'
+                                    : child.filterKey === 'to_confirm'
+                                    ? currentFilter === 'to_confirm' || currentFilter === 'new'
+                                    : currentFilter === child.filterKey
+                                );
+
+                                return (
+                                  <Link
+                                    key={child.label}
+                                    href={child.href}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-colors min-h-[36px] ${
+                                      isChildActive
+                                        ? 'bg-emerald-500/15 text-white font-bold border-l-2 border-emerald-400'
+                                        : 'text-zinc-400 hover:text-zinc-200 hover:bg-slate-800/40 font-medium'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${child.dotColor} ${isChildActive ? 'ring-2 ring-emerald-400/40' : ''}`} />
+                                      <span className="truncate">{child.label}</span>
+                                    </div>
+                                    <span className={`font-mono text-[11px] font-bold px-1.5 py-0.2 rounded ${
+                                      isChildActive
+                                        ? 'text-emerald-300 bg-emerald-500/20'
+                                        : 'text-zinc-500'
+                                    }`}>
+                                      ({child.count})
+                                    </span>
+                                  </Link>
+                                );
+                              })}
+                            </div>
                           )}
-                        </Link>
+                        </div>
                       );
                     })}
                   </div>

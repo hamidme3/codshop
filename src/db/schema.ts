@@ -17,6 +17,11 @@ export const stores = pgTable(
     planTier: text('plan_tier').default('starter').notNull(), // 'starter' | 'pro' | 'scale'
     isWaybillEnabled: boolean('is_waybill_enabled').default(false).notNull(), // A/B: "Bon de Livraison" waybill skin
     checkoutEmailMode: text('checkout_email_mode').default('hidden').notNull(), // 'hidden' | 'optional_collapsed' | 'optional_visible' | 'required'
+    freeShippingThreshold: integer('free_shipping_threshold').default(400).notNull(),
+    casaFee: integer('casa_fee').default(20).notNull(),
+    rabatFee: integer('rabat_fee').default(25).notNull(),
+    otherCitiesFee: integer('other_cities_fee').default(30).notNull(),
+    deliveryTimeframe: text('delivery_timeframe').default('24h à 48h').notNull(),
     trialEndsAt: timestamp('trial_ends_at').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),

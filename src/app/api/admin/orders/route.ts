@@ -42,10 +42,28 @@ export async function GET(req: Request) {
     // Sort descending by created date
     combined.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
 
+    const counts = {
+      all: combined.length,
+      to_confirm: combined.filter((o) => ['new', 'to_confirm'].includes(o.status)).length,
+      confirmed: combined.filter((o) => o.status === 'confirmed').length,
+      shipped: combined.filter((o) => ['shipped', 'shipping'].includes(o.status)).length,
+      delivered: combined.filter((o) => o.status === 'delivered').length,
+      returned: combined.filter((o) => ['returned', 'canceled'].includes(o.status)).length,
+    };
+
+    if (searchParams.get('countsOnly') === 'true') {
+      return NextResponse.json({
+        success: true,
+        counts,
+        store: storeSlug,
+      });
+    }
+
     return NextResponse.json({ 
       success: true, 
       orders: combined, 
       count: combined.length,
+      counts,
       store: storeSlug,
     });
   } catch (error: any) {

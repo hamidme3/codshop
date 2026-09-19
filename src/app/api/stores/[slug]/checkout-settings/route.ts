@@ -11,7 +11,7 @@ export async function GET(
     return NextResponse.json({
       success: true,
       storeSlug: slug,
-      checkoutEmailMode: settings.checkoutEmailMode,
+      ...settings,
     });
   } catch (error: any) {
     console.error('[Store Checkout Settings API] GET error:', error);
@@ -29,21 +29,29 @@ export async function POST(
   try {
     const { slug } = await params;
     const body = await req.json();
-    const { checkoutEmailMode } = body;
+    const { 
+      checkoutEmailMode,
+      freeShippingThreshold,
+      casaFee,
+      rabatFee,
+      otherCitiesFee,
+      deliveryTimeframe,
+    } = body;
 
-    if (!checkoutEmailMode || typeof checkoutEmailMode !== 'string') {
-      return NextResponse.json(
-        { success: false, message: 'Invalid checkoutEmailMode parameter' },
-        { status: 400 }
-      );
-    }
+    const updateData: any = {};
+    if (checkoutEmailMode) updateData.checkoutEmailMode = checkoutEmailMode;
+    if (typeof freeShippingThreshold === 'number') updateData.freeShippingThreshold = freeShippingThreshold;
+    if (typeof casaFee === 'number') updateData.casaFee = casaFee;
+    if (typeof rabatFee === 'number') updateData.rabatFee = rabatFee;
+    if (typeof otherCitiesFee === 'number') updateData.otherCitiesFee = otherCitiesFee;
+    if (typeof deliveryTimeframe === 'string') updateData.deliveryTimeframe = deliveryTimeframe;
 
-    const result = await updateStoreCheckoutSettings(slug, { checkoutEmailMode });
+    const result = await updateStoreCheckoutSettings(slug, updateData);
     return NextResponse.json({
       success: true,
       storeSlug: slug,
-      checkoutEmailMode: result.checkoutEmailMode,
-      message: 'Checkout settings updated successfully',
+      ...result,
+      message: 'Checkout & shipping settings updated successfully',
     });
   } catch (error: any) {
     console.error('[Store Checkout Settings API] POST error:', error);

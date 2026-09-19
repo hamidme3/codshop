@@ -87,7 +87,7 @@ export function CodCheckoutModal({
   emailMode: initialEmailMode,
 }: CodCheckoutModalProps) {
   const router = useRouter();
-  const { theme, formatMAD, lang } = useTheme();
+  const { theme, formatMAD, lang, shippingSettings } = useTheme();
   const formRef = React.useRef<HTMLFormElement>(null);
 
   // Multi-country configuration & dynamic visitor detection
@@ -158,27 +158,21 @@ export function CodCheckoutModal({
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [emailMode, setEmailMode] = useState<'hidden' | 'optional_collapsed' | 'optional_visible' | 'required'>(
-    initialEmailMode || 'hidden'
+    initialEmailMode || shippingSettings?.checkoutEmailMode || 'hidden'
   );
   const [email, setEmail] = useState('');
   const [isEmailExpanded, setIsEmailExpanded] = useState(false);
 
-  // Auto-fetch store checkout settings if emailMode not explicitly passed
+  // Auto-fetch and sync store checkout settings
   useEffect(() => {
     if (initialEmailMode) {
       setEmailMode(initialEmailMode);
       return;
     }
-    const slug = effectiveStoreSlug || 'ottavio';
-    fetch(`/api/stores/${encodeURIComponent(slug)}/checkout-settings`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.success && data.checkoutEmailMode) {
-          setEmailMode(data.checkoutEmailMode);
-        }
-      })
-      .catch(() => {});
-  }, [effectiveStoreSlug, initialEmailMode]);
+    if (shippingSettings?.checkoutEmailMode) {
+      setEmailMode(shippingSettings.checkoutEmailMode);
+    }
+  }, [effectiveStoreSlug, initialEmailMode, shippingSettings]);
 
   const isEmailValid = useMemo(() => {
     if (!email.trim()) return emailMode !== 'required';
@@ -324,8 +318,8 @@ export function CodCheckoutModal({
 
   // Universal Delivery Estimate helper (country-aware with dynamic SLA & guaranteed flat fee fallback)
   const deliveryEstimate = useMemo(
-    () => getCountryDeliveryEstimate(effectiveCountryCode, city, selectedTier.totalPrice),
-    [effectiveCountryCode, city, selectedTier.totalPrice]
+    () => getCountryDeliveryEstimate(effectiveCountryCode, city, selectedTier.totalPrice, new Date(), shippingSettings),
+    [effectiveCountryCode, city, selectedTier.totalPrice, shippingSettings]
   );
 
   // COD Upsell Economics: Pack Duo (2+ units) gets Free Shipping!
@@ -799,10 +793,14 @@ Merci de me confirmer la livraison !`;
                       const isSelected = selectedTier.quantity === tier.quantity;
                       const isPackDuo = tier.isPopular || tier.quantity === 2;
                       const isPackTrio = tier.quantity === 3;
+                      const effectiveThreshold =
+                        effectiveCountryCode === 'MA' && typeof shippingSettings?.freeShippingThreshold === 'number'
+                          ? shippingSettings.freeShippingThreshold
+                          : countryConfig.freeShippingThreshold;
                       const isMulti =
                         tier.quantity > 1 ||
                         tier.freeDelivery ||
-                        (countryConfig.freeShippingThreshold > 0 && tier.totalPrice >= countryConfig.freeShippingThreshold);
+                        (effectiveThreshold > 0 && tier.totalPrice >= effectiveThreshold);
 
                       return (
                         <div

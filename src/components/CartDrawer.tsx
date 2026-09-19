@@ -41,7 +41,7 @@ export function CartDrawer() {
     isDrawerOpen,
     closeCart,
   } = useCart();
-  const { theme, formatPrice, countryCode } = useTheme();
+  const { theme, formatPrice, countryCode, shippingSettings } = useTheme();
 
   const [mode, setMode] = useState<'cart' | 'checkout'>('cart');
   const [customerName, setCustomerName] = useState('');
@@ -62,15 +62,17 @@ export function CartDrawer() {
     }
   }, [isDrawerOpen]);
 
-  // Close on Escape key + handle body scroll lock
+  // Lock body scroll when drawer is open
   useEffect(() => {
     if (!isDrawerOpen) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') closeCart();
     };
     window.addEventListener('keydown', onKey);
+
     return () => {
       document.body.style.overflow = prev;
       window.removeEventListener('keydown', onKey);
@@ -78,7 +80,10 @@ export function CartDrawer() {
   }, [isDrawerOpen, closeCart]);
 
   // Free shipping threshold calculation
-  const freeThreshold = countryConfig.freeShippingThreshold || FREE_SHIPPING_THRESHOLD;
+  const freeThreshold =
+    countryCode === 'MA' && typeof shippingSettings?.freeShippingThreshold === 'number'
+      ? shippingSettings.freeShippingThreshold
+      : countryConfig.freeShippingThreshold || FREE_SHIPPING_THRESHOLD;
   const hasItemFreeDelivery = items.some((it) => Boolean(it.freeDelivery));
   const isFreeShipping =
     totalCount >= 2 ||
@@ -90,8 +95,8 @@ export function CartDrawer() {
     if (countryCode && countryCode !== 'MA') {
       return getCountryCityShipping(countryCode, customerCity, subtotal).fee;
     }
-    return getCityShipping(customerCity, subtotal).fee;
-  }, [isFreeShipping, countryCode, customerCity, subtotal]);
+    return getCityShipping(customerCity, subtotal, shippingSettings).fee;
+  }, [isFreeShipping, countryCode, customerCity, subtotal, shippingSettings]);
 
   const grandTotal = subtotal + shippingFee;
   const progressToFree = Math.min(100, Math.round((subtotal / freeThreshold) * 100));

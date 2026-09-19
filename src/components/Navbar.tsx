@@ -8,7 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { useSearch } from '@/context/SearchContext';
 
 export function Navbar() {
-  const { theme, countryCode } = useTheme();
+  const { theme, countryCode, shippingSettings } = useTheme();
   const { totalCount, openCart } = useCart();
   const { openSearch } = useSearch();
   const countryConfig = useMemo(() => getCountryConfig(countryCode || 'MA'), [countryCode]);
@@ -20,9 +20,11 @@ export function Navbar() {
         .replace(/🇲🇦/g, countryConfig.phone.flag)
         .replace(/au Maroc/gi, countryConfig.inCountryName || 'au Maroc')
         .replace(/(?:dès\s+)?(?:350|400)\s*DH/gi, `dès ${countryConfig.freeShippingThreshold} ${countryConfig.currency.symbol}`);
+    } else if (typeof shippingSettings?.freeShippingThreshold === 'number') {
+      text = text.replace(/(?:dès\s+)?(?:350|400)\s*DH/gi, `dès ${shippingSettings.freeShippingThreshold} DH`);
     }
     return text;
-  }, [theme.announcementText, countryConfig]);
+  }, [theme.announcementText, countryConfig, shippingSettings]);
 
   return (
     <header

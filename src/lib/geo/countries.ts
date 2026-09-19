@@ -662,11 +662,12 @@ export function getCountryDeliveryEstimate(
   countryCode: string | undefined,
   cityName: string,
   subtotal: number = 0,
-  now: Date = new Date()
+  now: Date = new Date(),
+  options?: any
 ) {
   const code = (countryCode || 'MA').toUpperCase();
   if (code === 'MA') {
-    return getDeliveryDateEstimate(cityName, subtotal, now);
+    return getDeliveryDateEstimate(cityName, subtotal, now, options);
   }
 
   const shipping = getCountryCityShipping(code, cityName, subtotal);

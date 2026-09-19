@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, Suspense, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   ShoppingBag, Search, Phone, MessageCircle, Truck, 
   CheckCircle2, Clock, Download, Check, X, DollarSign,
@@ -19,16 +19,35 @@ import {
 } from '@/lib/courier-manifest';
 
 function OrdersContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
+  const urlFilter = searchParams.get('filter') || searchParams.get('status') || 'all';
   const { t } = useLanguage();
 
   const [orders, setOrders] = useState<Order[]>(() => getOrders(storeSlug));
   const [isLoadingLive, setIsLoadingLive] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [activeFilter, setActiveFilter] = useState<string>(() => (urlFilter === 'new' ? 'to_confirm' : urlFilter));
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
+
+  useEffect(() => {
+    setActiveFilter(urlFilter === 'new' ? 'to_confirm' : urlFilter);
+  }, [urlFilter]);
+
+  const handleFilterChange = (filterId: string) => {
+    const canonicalId = filterId === 'new' ? 'to_confirm' : filterId;
+    setActiveFilter(canonicalId);
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (canonicalId === 'all') {
+      newParams.delete('filter');
+      newParams.delete('status');
+    } else {
+      newParams.set('filter', canonicalId);
+    }
+    router.replace(`/admin/orders?${newParams.toString()}`, { scroll: false });
+  };
 
   const fetchLiveOrders = React.useCallback(async (silent = false) => {
     try {
@@ -38,6 +57,7 @@ function OrdersContent() {
         const data = await res.json();
         if (data.success && Array.isArray(data.orders)) {
           setOrders(data.orders);
+          window.dispatchEvent(new CustomEvent('orders-updated'));
         }
       }
     } catch (err) {
@@ -81,7 +101,7 @@ function OrdersContent() {
   const filterMap: Record<string, OrderStatus[]> = {
     all: ['new', 'to_confirm', 'confirmed', 'shipped', 'shipping', 'delivered', 'returned', 'canceled'],
     new: ['new', 'to_confirm'],
-    to_confirm: ['to_confirm'],
+    to_confirm: ['new', 'to_confirm'],
     confirmed: ['confirmed'],
     shipped: ['shipped', 'shipping'],
     delivered: ['delivered'],
@@ -183,6 +203,8 @@ function OrdersContent() {
       body: JSON.stringify({ storeSlug, orderId, status: newStatus, trackingNumber: tracking, courier }),
     }).catch(() => {});
 
+    window.dispatchEvent(new CustomEvent('orders-updated'));
+
     const statusLabels: Record<string, string> = {
       confirmed: 'Confirmée ✓',
       shipped: 'Expédiée 🚚',
@@ -225,6 +247,7 @@ function OrdersContent() {
     setOrders((prev) =>
       prev.map((o) => (selectedOrderIds.includes(o.id) ? { ...o, status: 'confirmed' as const } : o))
     );
+    window.dispatchEvent(new CustomEvent('orders-updated'));
     showToast(`${selectedOrderIds.length} commandes confirmées en 1 clic !`);
     setSelectedOrderIds([]);
   };
@@ -245,6 +268,7 @@ function OrdersContent() {
           : o
       )
     );
+    window.dispatchEvent(new CustomEvent('orders-updated'));
     showToast(`${selectedOrderIds.length} commandes marquées comme expédiées !`);
     setSelectedOrderIds([]);
   };
@@ -258,6 +282,7 @@ function OrdersContent() {
       fetch(`/api/admin/orders?orderId=${encodeURIComponent(orderId)}&store=${encodeURIComponent(storeSlug)}`, {
         method: 'DELETE',
       }).catch(() => {});
+      window.dispatchEvent(new CustomEvent('orders-updated'));
       showToast(`Commande #${orderId} supprimée.`);
     }
   };
@@ -272,6 +297,7 @@ function OrdersContent() {
         }).catch(() => {});
       });
       setOrders((prev) => prev.filter((o) => !selectedOrderIds.includes(o.id)));
+      window.dispatchEvent(new CustomEvent('orders-updated'));
       showToast(`${selectedOrderIds.length} commandes supprimées avec succès.`);
       setSelectedOrderIds([]);
       if (selectedOrder && selectedOrderIds.includes(selectedOrder.id)) setSelectedOrder(null);
@@ -515,7 +541,7 @@ function OrdersContent() {
         {kanbanColumns.map((col) => (
           <div
             key={`bento-${col.id}`}
-            onClick={() => setActiveFilter(col.id === 'to_confirm' ? 'new' : col.id)}
+            onClick={() => handleFilterChange(col.id)}
             className={`p-3.5 rounded-2xl bg-[#13171c] border transition-all cursor-pointer bento-card ${
               activeFilter === col.id || (col.id === 'to_confirm' && (activeFilter === 'new' || activeFilter === 'to_confirm'))
                 ? 'border-emerald-500/60 shadow-md shadow-emerald-500/10 ring-1 ring-emerald-500/30'
@@ -543,24 +569,32 @@ function OrdersContent() {
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 border-b border-slate-800/80 text-xs scrollbar-thin scrollbar-thumb-slate-800">
           {[
             { id: 'all', label: `Toutes (${orders.length})` },
-            { id: 'new', label: `À Confirmer (${newCount})` },
+            { id: 'to_confirm', label: `À Confirmer (${newCount})` },
             { id: 'confirmed', label: `Confirmées (${confirmedCount})` },
             { id: 'shipped', label: `En Transit (${shippedCount})` },
             { id: 'delivered', label: `Livrées (${deliveredCount})` },
             { id: 'returned', label: `Retours (${returnedCount})` },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveFilter(tab.id)}
-              className={`shrink-0 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer text-xs ${
-                activeFilter === tab.id
-                  ? 'bg-slate-800 text-white border border-slate-700/80 shadow-sm font-bold'
-                  : 'text-zinc-400 hover:text-white hover:bg-slate-800/50'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+          ].map((tab) => {
+            const isTabActive = tab.id === 'all'
+              ? activeFilter === 'all'
+              : tab.id === 'to_confirm'
+              ? activeFilter === 'to_confirm' || activeFilter === 'new'
+              : activeFilter === tab.id;
+
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleFilterChange(tab.id)}
+                className={`shrink-0 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer text-xs ${
+                  isTabActive
+                    ? 'bg-slate-800 text-white border border-slate-700/80 shadow-sm font-bold'
+                    : 'text-zinc-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
         {/* Subtle Right Gradient Hint indicating scrollability on mobile */}
         <div className="pointer-events-none absolute right-0 top-0 bottom-1.5 w-6 bg-gradient-to-l from-[#0b0f17] to-transparent sm:hidden" />

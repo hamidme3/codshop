@@ -59,13 +59,27 @@ export async function getStoreBySlug(slug: string) {
       status: mockStore.status,
       isWaybillEnabled: false,
       checkoutEmailMode: (mockStore as any).checkoutEmailMode || 'hidden',
+      freeShippingThreshold: (mockStore as any).freeShippingThreshold ?? 400,
+      casaFee: (mockStore as any).casaFee ?? 20,
+      rabatFee: (mockStore as any).rabatFee ?? 25,
+      otherCitiesFee: (mockStore as any).otherCitiesFee ?? 30,
+      deliveryTimeframe: (mockStore as any).deliveryTimeframe || '24h à 48h',
     };
   }
 
   return null;
 }
 
-export async function getStoreCheckoutSettings(slug: string) {
+export interface StoreCheckoutSettings {
+  checkoutEmailMode: 'hidden' | 'optional_collapsed' | 'optional_visible' | 'required';
+  freeShippingThreshold: number;
+  casaFee: number;
+  rabatFee: number;
+  otherCitiesFee: number;
+  deliveryTimeframe: string;
+}
+
+export async function getStoreCheckoutSettings(slug: string): Promise<StoreCheckoutSettings> {
   const store = await getStoreBySlug(slug);
   return {
     checkoutEmailMode: ((store as any)?.checkoutEmailMode || 'hidden') as
@@ -73,27 +87,48 @@ export async function getStoreCheckoutSettings(slug: string) {
       | 'optional_collapsed'
       | 'optional_visible'
       | 'required',
+    freeShippingThreshold: typeof (store as any)?.freeShippingThreshold === 'number' ? (store as any).freeShippingThreshold : 400,
+    casaFee: typeof (store as any)?.casaFee === 'number' ? (store as any).casaFee : 20,
+    rabatFee: typeof (store as any)?.rabatFee === 'number' ? (store as any).rabatFee : 25,
+    otherCitiesFee: typeof (store as any)?.otherCitiesFee === 'number' ? (store as any).otherCitiesFee : 30,
+    deliveryTimeframe: (store as any)?.deliveryTimeframe || '24h à 48h',
   };
 }
 
 export async function updateStoreCheckoutSettings(
   slug: string,
-  settings: { checkoutEmailMode: string }
+  settings: Partial<StoreCheckoutSettings>
 ) {
   const db = getDb();
   const validModes = ['hidden', 'optional_collapsed', 'optional_visible', 'required'];
-  const mode = validModes.includes(settings.checkoutEmailMode)
-    ? settings.checkoutEmailMode
-    : 'hidden';
+  const updatePayload: any = {
+    updatedAt: new Date(),
+  };
+
+  if (settings.checkoutEmailMode && validModes.includes(settings.checkoutEmailMode)) {
+    updatePayload.checkoutEmailMode = settings.checkoutEmailMode;
+  }
+  if (typeof settings.freeShippingThreshold === 'number' && settings.freeShippingThreshold >= 0) {
+    updatePayload.freeShippingThreshold = settings.freeShippingThreshold;
+  }
+  if (typeof settings.casaFee === 'number' && settings.casaFee >= 0) {
+    updatePayload.casaFee = settings.casaFee;
+  }
+  if (typeof settings.rabatFee === 'number' && settings.rabatFee >= 0) {
+    updatePayload.rabatFee = settings.rabatFee;
+  }
+  if (typeof settings.otherCitiesFee === 'number' && settings.otherCitiesFee >= 0) {
+    updatePayload.otherCitiesFee = settings.otherCitiesFee;
+  }
+  if (settings.deliveryTimeframe && typeof settings.deliveryTimeframe === 'string') {
+    updatePayload.deliveryTimeframe = settings.deliveryTimeframe.trim();
+  }
 
   if (db) {
     try {
       await db
         .update(schema.stores)
-        .set({
-          checkoutEmailMode: mode,
-          updatedAt: new Date(),
-        })
+        .set(updatePayload)
         .where(eq(schema.stores.slug, slug));
     } catch (err) {
       console.error('[DbRepo] Error updating store checkout settings in DB:', err);
@@ -102,10 +137,10 @@ export async function updateStoreCheckoutSettings(
 
   const mockStore = getMockStoreBySlug(slug);
   if (mockStore) {
-    (mockStore as any).checkoutEmailMode = mode;
+    Object.assign(mockStore, updatePayload);
   }
 
-  return { success: true, checkoutEmailMode: mode };
+  return { success: true, ...updatePayload };
 }
 
 export async function createStore(data: {

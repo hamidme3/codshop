@@ -63,20 +63,53 @@ export interface DeliveryEstimate {
   cityName: string;
 }
 
-export function getCityShipping(cityName: string, subtotal: number = 0): { fee: number; sla: string; isFree: boolean } {
+export interface MoroccanShippingOptions {
+  freeShippingThreshold?: number;
+  casaFee?: number;
+  rabatFee?: number;
+  otherCitiesFee?: number;
+  deliveryTimeframe?: string;
+}
+
+export function getCityShipping(
+  cityName: string, 
+  subtotal: number = 0,
+  options?: MoroccanShippingOptions
+): { fee: number; sla: string; isFree: boolean } {
   const safeCity = (cityName || '').trim();
   const cleanCity = safeCity.toLowerCase();
-  const city = MOROCCAN_CITIES.find(
-    c => c.name.toLowerCase() === cleanCity || c.id.toLowerCase() === cleanCity || c.nameAr === safeCity
-  );
+  const threshold = options?.freeShippingThreshold ?? FREE_SHIPPING_THRESHOLD;
 
-  if (subtotal >= FREE_SHIPPING_THRESHOLD && subtotal > 0) {
+  if (threshold > 0 && subtotal >= threshold && subtotal > 0) {
     return {
       fee: 0,
-      sla: city ? city.deliverySla : '24h à 48h',
+      sla: options?.deliveryTimeframe || '24h à 48h',
       isFree: true,
     };
   }
+
+  // Check custom zone rates if provided
+  if (options) {
+    const isCasa = cleanCity.includes('casa') || cleanCity.includes('الدار البيضاء');
+    const isRabatRegion = ['rabat', 'salé', 'sale', 'kénitra', 'kenitra', 'témara', 'temara', 'skhirat', 'الرباط', 'سلا', 'القنيطرة', 'تمارة'].some(r => cleanCity.includes(r));
+    
+    let fee = options.otherCitiesFee ?? 30;
+    if (isCasa && typeof options.casaFee === 'number') {
+      fee = options.casaFee;
+    } else if (isRabatRegion && typeof options.rabatFee === 'number') {
+      fee = options.rabatFee;
+    }
+
+    return {
+      fee,
+      sla: options.deliveryTimeframe || (isCasa ? '24h Express' : '24h à 48h'),
+      isFree: false,
+    };
+  }
+
+  const city = MOROCCAN_CITIES.find(
+    c => c.name.toLowerCase() === cleanCity || c.id.toLowerCase() === cleanCity || c.nameAr === safeCity
+  );
 
   if (city) {
     return {
@@ -140,10 +173,15 @@ export function getDispatchBaseDate(now: Date): Date {
   return base;
 }
 
-export function getDeliveryDateEstimate(cityName: string, subtotal: number = 0, now: Date = new Date()): DeliveryEstimate {
+export function getDeliveryDateEstimate(
+  cityName: string, 
+  subtotal: number = 0, 
+  now: Date = new Date(),
+  options?: MoroccanShippingOptions
+): DeliveryEstimate {
   const safeCity = (cityName || '').trim();
   const cleanCity = safeCity.toLowerCase();
-  const shipping = getCityShipping(safeCity, subtotal);
+  const shipping = getCityShipping(safeCity, subtotal, options);
   const city = MOROCCAN_CITIES.find(
     c => c.name.toLowerCase() === cleanCity || c.id.toLowerCase() === cleanCity || c.nameAr === safeCity
   );
@@ -152,10 +190,10 @@ export function getDeliveryDateEstimate(cityName: string, subtotal: number = 0, 
   let minDays = 1;
   let maxDays = 2;
 
-  if (city?.isMajorHub) {
+  if (city?.isMajorHub || cleanCity.includes('casa')) {
     minDays = 1;
     maxDays = 2;
-  } else if (shipping.sla.includes('3 à 4 jours')) {
+  } else if (shipping.sla.includes('3 à 4 jours') || shipping.sla.includes('3 à 4')) {
     minDays = 3;
     maxDays = 4;
   } else if (shipping.sla.includes('48h à 72h')) {
@@ -164,6 +202,9 @@ export function getDeliveryDateEstimate(cityName: string, subtotal: number = 0, 
   } else if (shipping.sla.includes('48h')) {
     minDays = 2;
     maxDays = 3;
+  } else if (shipping.sla.includes('24h') && !shipping.sla.includes('48h')) {
+    minDays = 1;
+    maxDays = 1;
   } else {
     minDays = 1;
     maxDays = 2;

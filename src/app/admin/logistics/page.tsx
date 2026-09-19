@@ -26,13 +26,30 @@ function LogisticsContent() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Load checkout settings on mount
+  // Load checkout & shipping settings on mount
   useEffect(() => {
     fetch(`/api/stores/${encodeURIComponent(storeSlug)}/checkout-settings`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && data.checkoutEmailMode) {
-          setCheckoutEmailMode(data.checkoutEmailMode);
+        if (data.success) {
+          if (data.checkoutEmailMode) {
+            setCheckoutEmailMode(data.checkoutEmailMode);
+          }
+          if (typeof data.freeShippingThreshold === 'number') {
+            setFreeShippingThreshold(data.freeShippingThreshold);
+          }
+          if (typeof data.casaFee === 'number') {
+            setCasaFee(data.casaFee);
+          }
+          if (typeof data.rabatFee === 'number') {
+            setRabatFee(data.rabatFee);
+          }
+          if (typeof data.otherCitiesFee === 'number') {
+            setOtherCitiesFee(data.otherCitiesFee);
+          }
+          if (data.deliveryTimeframe) {
+            setDeliveryTimeframe(data.deliveryTimeframe);
+          }
         }
       })
       .catch((err) => console.error('[Logistics Settings] Fetch error:', err))
@@ -47,8 +64,16 @@ function LogisticsContent() {
       await fetch(`/api/stores/${encodeURIComponent(storeSlug)}/checkout-settings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ checkoutEmailMode }),
+        body: JSON.stringify({ 
+          checkoutEmailMode,
+          freeShippingThreshold: Number(freeShippingThreshold) || 0,
+          casaFee: Number(casaFee) || 0,
+          rabatFee: Number(rabatFee) || 0,
+          otherCitiesFee: Number(otherCitiesFee) || 0,
+          deliveryTimeframe: deliveryTimeframe.trim() || '24h à 48h',
+        }),
       });
+      window.dispatchEvent(new CustomEvent('shipping-settings-updated'));
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {

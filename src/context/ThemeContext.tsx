@@ -4,6 +4,15 @@ import React, { createContext, useContext, useState, useEffect, useMemo, useTran
 import { ThemeId, THEMES, ThemeConfig } from '@/lib/themes';
 import { detectClientVisitorCountry, formatCountryPrice } from '@/lib/geo';
 
+export interface StoreShippingSettings {
+  freeShippingThreshold: number;
+  casaFee: number;
+  rabatFee: number;
+  otherCitiesFee: number;
+  deliveryTimeframe: string;
+  checkoutEmailMode: 'hidden' | 'optional_collapsed' | 'optional_visible' | 'required';
+}
+
 interface ThemeContextType {
   themeId: ThemeId;
   theme: ThemeConfig;
@@ -12,8 +21,11 @@ interface ThemeContextType {
   setLang: (l: 'fr' | 'ar') => void;
   countryCode: string;
   setCountryCode: (c: string) => void;
+  shippingSettings: StoreShippingSettings;
+  setShippingSettings: React.Dispatch<React.SetStateAction<StoreShippingSettings>>;
   formatPrice: (amount: number, overrideCountry?: string) => string;
   formatMAD: (amount: number) => string;
+  storeSlug: string;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -22,6 +34,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [themeId, setThemeIdState] = useState<ThemeId>('luxury');
   const [lang, setLangState] = useState<'fr' | 'ar'>('fr');
   const [countryCode, setCountryCodeState] = useState<string>('MA');
+  const [storeSlug, setStoreSlug] = useState<string>('ottavio');
+  const [shippingSettings, setShippingSettings] = useState<StoreShippingSettings>({
+    freeShippingThreshold: 400,
+    casaFee: 20,
+    rabatFee: 25,
+    otherCitiesFee: 30,
+    deliveryTimeframe: '24h à 48h',
+    checkoutEmailMode: 'hidden',
+  });
   const [mounted, setMounted] = useState(false);
   const [, startTransition] = useTransition();
 
@@ -89,35 +110,80 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
-      if (params.get('theme')) return; // URL wins, no fetch
-      let storeSlug = params.get('store');
-      if (!storeSlug && typeof window !== 'undefined') {
+      let resolvedSlug = params.get('store');
+      if (!resolvedSlug && typeof window !== 'undefined') {
         const host = window.location.hostname.toLowerCase();
         const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
         if (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) {
-          storeSlug = host.replace(`.${rootDomain}`, '');
+          resolvedSlug = host.replace(`.${rootDomain}`, '');
         } else if (host.endsWith('.localhost') && host !== 'localhost') {
-          storeSlug = host.replace('.localhost', '');
+          resolvedSlug = host.replace('.localhost', '');
         }
       }
-      if (!storeSlug) return;
+      if (!resolvedSlug) return;
+      setStoreSlug(resolvedSlug);
+
       const ctrl = new AbortController();
-      fetch(`/api/stores/${storeSlug}/theme`, { signal: ctrl.signal })
+      if (!params.get('theme')) {
+        fetch(`/api/stores/${resolvedSlug}/theme`, { signal: ctrl.signal })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.activeThemeId && THEMES[data.activeThemeId as ThemeId]) {
+              const saved = localStorage.getItem('codshop_theme');
+              if (!saved || saved === themeId) {
+                startTransition(() => setThemeIdState(data.activeThemeId as ThemeId));
+              }
+            }
+          })
+          .catch(() => {});
+      }
+
+      fetch(`/api/stores/${encodeURIComponent(resolvedSlug)}/checkout-settings`, { signal: ctrl.signal })
         .then((r) => r.json())
         .then((data) => {
-          if (data.activeThemeId && THEMES[data.activeThemeId as ThemeId]) {
-            const saved = localStorage.getItem('codshop_theme');
-            if (!saved || saved === themeId) {
-              startTransition(() => setThemeIdState(data.activeThemeId as ThemeId));
-            }
+          if (data.success) {
+            setShippingSettings({
+              freeShippingThreshold: typeof data.freeShippingThreshold === 'number' ? data.freeShippingThreshold : 400,
+              casaFee: typeof data.casaFee === 'number' ? data.casaFee : 20,
+              rabatFee: typeof data.rabatFee === 'number' ? data.rabatFee : 25,
+              otherCitiesFee: typeof data.otherCitiesFee === 'number' ? data.otherCitiesFee : 30,
+              deliveryTimeframe: data.deliveryTimeframe || '24h à 48h',
+              checkoutEmailMode: data.checkoutEmailMode || 'hidden',
+            });
           }
         })
         .catch(() => {});
+
       return () => ctrl.abort();
     } catch {
       // ignore
     }
   }, []); // run once
+
+  // Listen to live updates from admin logistics page
+  useEffect(() => {
+    const handleSettingsUpdated = () => {
+      if (!storeSlug) return;
+      fetch(`/api/stores/${encodeURIComponent(storeSlug)}/checkout-settings`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success) {
+            setShippingSettings({
+              freeShippingThreshold: typeof data.freeShippingThreshold === 'number' ? data.freeShippingThreshold : 400,
+              casaFee: typeof data.casaFee === 'number' ? data.casaFee : 20,
+              rabatFee: typeof data.rabatFee === 'number' ? data.rabatFee : 25,
+              otherCitiesFee: typeof data.otherCitiesFee === 'number' ? data.otherCitiesFee : 30,
+              deliveryTimeframe: data.deliveryTimeframe || '24h à 48h',
+              checkoutEmailMode: data.checkoutEmailMode || 'hidden',
+            });
+          }
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener('shipping-settings-updated', handleSettingsUpdated);
+    return () => window.removeEventListener('shipping-settings-updated', handleSettingsUpdated);
+  }, [storeSlug]);
 
   const setThemeId = (id: ThemeId) => {
     // View transition progressive
@@ -202,7 +268,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   return (
-    <ThemeContext.Provider value={{ themeId, theme, setThemeId, lang, setLang, countryCode, setCountryCode, formatPrice, formatMAD }}>
+    <ThemeContext.Provider value={{ themeId, theme, setThemeId, lang, setLang, countryCode, setCountryCode, shippingSettings, setShippingSettings, formatPrice, formatMAD, storeSlug }}>
       <div
         data-theme={themeId}
         suppressHydrationWarning
