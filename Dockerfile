@@ -18,6 +18,9 @@ RUN mkdir -p ./public/uploads/products ./public/uploads/kyc && chown -R nextjs:n
 COPY --chown=nextjs:nodejs .next/standalone ./
 COPY --chown=nextjs:nodejs .next/static ./.next/static
 
+# Ensure sharp native musl bindings match Alpine runtime
+RUN npm install --legacy-peer-deps --no-save @img/sharp-linuxmusl-arm64 @img/sharp-libvips-linuxmusl-arm64
+
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
