@@ -82,10 +82,20 @@ export default function ProductDetailPage() {
 
   const countryConfig = useMemo(() => getCountryConfig(visitorCountry), [visitorCountry]);
 
+  const currentStoreSlug = useMemo(() => {
+    if (typeof window === 'undefined') return 'storet1';
+    const params = new URLSearchParams(window.location.search);
+    const storeFromUrl = params.get('store') || '';
+    const host = window.location.hostname.toLowerCase();
+    const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
+    const sub = host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}` ? host.replace(`.${rootDomain}`, '') : '';
+    return (product as any)?.storeSlug || storeFromUrl || sub || 'storet1';
+  }, [product]);
+
   // Initialize and track ViewContent across ad platforms and PostHog
   useEffect(() => {
     if (product) {
-      const activeStore = (product as any)?.storeSlug || 'ottavio';
+      const activeStore = (product as any)?.storeSlug || currentStoreSlug || 'storet1';
       trackProductView(activeStore, {
         id: product.id,
         title: product.title,
@@ -103,7 +113,7 @@ export default function ProductDetailPage() {
         });
       });
     }
-  }, [product, slug]);
+  }, [product, slug, currentStoreSlug]);
 
   const [activeImage, setActiveImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(

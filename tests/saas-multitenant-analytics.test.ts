@@ -20,14 +20,12 @@ async function runTests() {
     slug: storeSlugA,
     email: `contact@store-a-${uniqueId}.ma`,
     phone: '0612345678',
-    currency: 'MAD',
   });
   const storeB = await createStore({
     name: `Store B ${uniqueId}`,
     slug: storeSlugB,
     email: `contact@store-b-${uniqueId}.ma`,
     phone: '0687654321',
-    currency: 'MAD',
   });
 
   assert.ok(storeA && storeA.id, 'Store A must be created');

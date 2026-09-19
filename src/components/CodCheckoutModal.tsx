@@ -41,6 +41,7 @@ import {
 } from 'lucide-react';
 import { trackInitiateCheckout } from '@/lib/pixel-tracker';
 import { 
+  trackProductView as trackPostHogProductView,
   trackInitiateCheckout as trackPostHogInitiateCheckout,
   trackCheckoutStep2 as trackPostHogCheckoutStep2,
   trackOrderCompleted as trackPostHogOrderCompleted,
@@ -228,6 +229,13 @@ export function CodCheckoutModal({
   // Track InitiateCheckout on pixel channels and PostHog when modal is opened
   useEffect(() => {
     if (isOpen) {
+      trackPostHogProductView(effectiveStoreSlug, {
+        id: product.id,
+        title: product.title,
+        price: selectedTier?.unitPrice || product.price,
+        slug: product.slug,
+      });
+
       trackPostHogInitiateCheckout(effectiveStoreSlug, {
         id: product.id,
         title: product.title,
@@ -242,7 +250,7 @@ export function CodCheckoutModal({
         quantity: selectedTier?.quantity || 1,
       });
     }
-  }, [isOpen, product.id, product.title, selectedTier, effectiveStoreSlug]);
+  }, [isOpen, product.id, product.title, product.price, product.slug, selectedTier, effectiveStoreSlug]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 

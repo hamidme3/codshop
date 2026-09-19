@@ -37,21 +37,6 @@ export async function GET(req: Request) {
     const dbAnalytics = await getStorefrontAnalyticsFromDb(storeSlug);
 
     if (dbAnalytics) {
-      // Build product breakdown from store products and real orders/events
-      const productsStats: ProductStats[] = storeProducts.map((p) => {
-        const pViews = 0; // Default if not individually tagged yet
-        const pOrders = 0;
-        return {
-          id: p.id,
-          title: p.title,
-          slug: (p as any).slug || p.id,
-          uniqueVisitors: pViews,
-          totalViews: pViews,
-          ordersCount: pOrders,
-          conversionRate: 0,
-        };
-      });
-
       return NextResponse.json({
         success: true,
         store: storeSlug,
@@ -60,7 +45,7 @@ export async function GET(req: Request) {
         funnel: dbAnalytics.funnel,
         abandonment: dbAnalytics.abandonment,
         searches: dbAnalytics.searches,
-        products: dbAnalytics.products.length > 0 ? dbAnalytics.products : productsStats,
+        products: dbAnalytics.products || [],
         channels: dbAnalytics.channels,
         source: dbAnalytics.source,
       }, {

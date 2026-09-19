@@ -16,14 +16,19 @@ import MilestoneWidget from '@/components/admin/MilestoneWidget';
 function OverviewContent() {
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
-  const [orders, setOrders] = useState<Order[]>(() => getOrders(storeSlug));
-  const [analytics, setAnalytics] = useState(() => getAnalytics(storeSlug));
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [analytics, setAnalytics] = useState<any>({
+    totalOrders: 0,
+    totalRevenueDelivered: 0,
+    totalRevenuePotential: 0,
+    confirmationRate: 0,
+    deliveryRate: 0,
+    returnRate: 0,
+    netProfit: 0,
+  });
 
   useEffect(() => {
-    setOrders(getOrders(storeSlug));
-    setAnalytics(getAnalytics(storeSlug));
-
-    // Fetch live orders from PostgreSQL database
+    // 1. Fetch live orders from PostgreSQL database
     fetch(`/api/admin/orders?store=${encodeURIComponent(storeSlug)}`)
       .then((res) => res.json())
       .then((data) => {
@@ -32,6 +37,16 @@ function OverviewContent() {
         }
       })
       .catch((err) => console.warn('[OverviewContent] Live orders fetch notice:', err));
+
+    // 2. Fetch live operations analytics from database
+    fetch(`/api/admin/analytics/operations?store=${encodeURIComponent(storeSlug)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setAnalytics(data);
+        }
+      })
+      .catch((err) => console.warn('[OverviewContent] Operations analytics fetch notice:', err));
   }, [storeSlug]);
 
   const { t } = useLanguage();

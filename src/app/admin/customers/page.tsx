@@ -90,7 +90,7 @@ function CustomersContent() {
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
 
-  const [customers, setCustomers] = useState<Customer[]>(() => getCustomers(storeSlug));
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [activeTab, setActiveTab] = useState<'all' | 'confirmed' | 'shipped' | 'delivered' | 'returning' | 'risk'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -119,7 +119,7 @@ function CustomersContent() {
       const res = await fetch(`/api/admin/customers?store=${encodeURIComponent(storeSlug)}`);
       if (res.ok) {
         const data = await res.json();
-        if (data.success && Array.isArray(data.customers) && data.customers.length > 0) {
+        if (data.success && Array.isArray(data.customers)) {
           setCustomers(data.customers);
         }
       }
@@ -129,7 +129,6 @@ function CustomersContent() {
   }, [storeSlug]);
 
   React.useEffect(() => {
-    setCustomers(getCustomers(storeSlug));
     fetchLiveCustomers();
   }, [storeSlug, fetchLiveCustomers]);
 

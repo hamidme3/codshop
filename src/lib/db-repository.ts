@@ -419,6 +419,7 @@ export function convertDbProductToStorefrontProduct(p: any): any {
 
   return {
     id: p.id,
+    storeSlug: p.storeSlug || p.store_slug || p.store?.slug || undefined,
     slug: p.slug || baseSlug,
     sku: p.sku || `SKU-${p.id?.slice?.(0, 4) || '0000'}`,
     theme: p.theme || 'luxury',
@@ -2043,6 +2044,90 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
     const webOrders = storeOrders.filter((o) => (o as any).source !== 'whatsapp').length || ordersCompleted;
     const totalChannelOrders = Math.max(1, webOrders + whatsappRescues);
 
+    // 8. Products Breakdown (Performance de l'Offre)
+    let dbStoreProducts: any[] = [];
+    try {
+      dbStoreProducts = await db.query.products.findMany({
+        where: eq(schema.products.storeId, store.id),
+      });
+    } catch (prodErr) {
+      console.warn('[DbRepo] Non-fatal product fetch warning:', prodErr);
+    }
+    const memStoreProducts = getMockProducts(storeSlug);
+    const combinedProductsMap = new Map<string, any>();
+    for (const p of dbStoreProducts) {
+      const key = (p.sku || p.id || p.title || '').toLowerCase().trim();
+      combinedProductsMap.set(key, p);
+    }
+    for (const p of memStoreProducts) {
+      const key = (p.sku || p.id || p.title || '').toLowerCase().trim();
+      if (!combinedProductsMap.has(key)) {
+        combinedProductsMap.set(key, p);
+      }
+    }
+    const storeProducts = Array.from(combinedProductsMap.values());
+
+    const products = storeProducts.map((p) => {
+      const pId = String(p.id).toLowerCase();
+      const pSku = p.sku ? String(p.sku).toLowerCase() : '';
+      const pSlug = (p.slug || p.sku || p.id || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const pTitle = p.title ? String(p.title).toLowerCase() : '';
+      const pSkuClean = pSku.replace(/[^a-z0-9]/g, '');
+
+      // Match events for this product (views, initiates, checkout steps, abandonments, orders)
+      const matchingEvents = events.filter((e) => {
+        const props = (e.properties || {}) as any;
+        const eId = String(props.productId || props.product_id || props.id || '').toLowerCase();
+        const eSku = String(props.sku || '').toLowerCase();
+        const eSlug = String(props.slug || '').toLowerCase();
+        const eTitle = String(props.title || props.product_title || '').toLowerCase();
+        const ePath = String(props.path || '').toLowerCase();
+
+        const matches = (
+          (eId && (eId === pId || eId === pSku || eId.includes(pSkuClean) || pId.includes(eId))) ||
+          (pSku && (eSku === pSku || eId === pSku || ePath.includes(pSku) || eSlug.includes(pSkuClean))) ||
+          (pSlug && (eSlug === pSlug || ePath.includes(pSlug))) ||
+          (pTitle && eTitle === pTitle)
+        );
+
+        return matches && ['product_viewed', 'initiated_checkout', 'checkout_step_2', 'cod_checkout_abandoned', 'order_completed'].includes(e.eventName);
+      });
+
+      const uniqueVisitors = new Set(matchingEvents.map((e) => e.distinctId)).size;
+      const totalViews = matchingEvents.filter((e) => e.eventName === 'product_viewed').length || matchingEvents.length;
+
+      // Match orders containing this product
+      const matchingOrders = storeOrders.filter((ord) => {
+        const items = (ord.items || []) as any[];
+        return items.some((it) => {
+          const itId = String(it.id || it.productId || '').toLowerCase();
+          const itSku = String(it.sku || '').toLowerCase();
+          const itTitle = String(it.title || '').toLowerCase();
+
+          return (
+            (itId && (itId === pId || itId === pSku || itId.includes(pSkuClean))) ||
+            (pSku && (itSku === pSku || itId === pSku)) ||
+            (pTitle && itTitle === pTitle)
+          );
+        });
+      });
+
+      const ordersCount = matchingOrders.length;
+      const effectiveVisitors = Math.max(uniqueVisitors, ordersCount);
+      const effectiveViews = Math.max(totalViews, effectiveVisitors);
+      const conversionRate = effectiveVisitors > 0 ? Number(((ordersCount / effectiveVisitors) * 100).toFixed(1)) : 0;
+
+      return {
+        id: p.id,
+        title: p.title,
+        slug: p.slug || pSku || p.id,
+        uniqueVisitors: effectiveVisitors,
+        totalViews: effectiveViews,
+        ordersCount,
+        conversionRate,
+      };
+    });
+
     return {
       hasData: true,
       live: {
@@ -2067,7 +2152,7 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
         recoveryRate,
       },
       searches,
-      products: [],
+      products,
       channels: {
         webOrders,
         webPercentage: Math.round((webOrders / totalChannelOrders) * 100),
