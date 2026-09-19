@@ -30,12 +30,53 @@ export function initPostHog() {
   }
 }
 
+function getDistinctId(): string {
+  if (typeof window === 'undefined') return 'anon';
+  try {
+    const match = document.cookie.match(/(?:^|;\s*)cod_anon_id=([^;]+)/);
+    if (match && match[1]) return decodeURIComponent(match[1]);
+    let stored = localStorage.getItem('cod_anon_id');
+    if (!stored) {
+      stored = `anon_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+      localStorage.setItem('cod_anon_id', stored);
+    }
+    return stored;
+  } catch {
+    return 'anon';
+  }
+}
+
+function dispatchServerEvent(storeSlug: string, eventName: string, properties: Record<string, any> = {}) {
+  if (typeof window === 'undefined' || !storeSlug) return;
+  try {
+    const payload = JSON.stringify({
+      storeSlug,
+      eventName,
+      distinctId: getDistinctId(),
+      properties,
+    });
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/tracking/events', new Blob([payload], { type: 'application/json' }));
+    } else {
+      fetch('/api/tracking/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {});
+    }
+  } catch {
+    // Non-blocking telemetry
+  }
+}
+
 /**
  * Capture a pageview explicitly tagged with the tenant store_slug
  */
 export function trackStorePageView(storeSlug: string, path: string, properties?: Record<string, any>) {
   if (typeof window === 'undefined') return;
   initPostHog();
+  dispatchServerEvent(storeSlug, 'pageview', { path, ...properties });
   posthog.capture('$pageview', {
     store_slug: storeSlug,
     path,
@@ -50,6 +91,7 @@ export function trackStorePageView(storeSlug: string, path: string, properties?:
 export function trackCatalogView(storeSlug: string, properties?: { category?: string; sort?: string; resultsCount?: number }) {
   if (typeof window === 'undefined') return;
   initPostHog();
+  dispatchServerEvent(storeSlug, 'catalog_viewed', properties);
   posthog.capture('catalog_viewed', {
     store_slug: storeSlug,
     category: properties?.category || 'all',
@@ -65,6 +107,11 @@ export function trackCatalogView(storeSlug: string, properties?: { category?: st
 export function trackSearch(storeSlug: string, query: string, resultsCount: number) {
   if (typeof window === 'undefined' || !query.trim()) return;
   initPostHog();
+  dispatchServerEvent(storeSlug, 'search_performed', {
+    search_query: query.trim().toLowerCase(),
+    results_count: resultsCount,
+    is_zero_result: resultsCount === 0,
+  });
   posthog.capture('search_performed', {
     store_slug: storeSlug,
     search_query: query.trim().toLowerCase(),
@@ -79,6 +126,7 @@ export function trackSearch(storeSlug: string, query: string, resultsCount: numb
 export function trackProductView(storeSlug: string, product: { id: string; title: string; price: number; slug?: string }) {
   if (typeof window === 'undefined') return;
   initPostHog();
+  dispatchServerEvent(storeSlug, 'product_viewed', product);
   posthog.capture('product_viewed', {
     store_slug: storeSlug,
     product_id: product.id,
@@ -94,6 +142,7 @@ export function trackProductView(storeSlug: string, product: { id: string; title
 export function trackInitiateCheckout(storeSlug: string, product: { id: string; title: string; price: number; quantity: number }) {
   if (typeof window === 'undefined') return;
   initPostHog();
+  dispatchServerEvent(storeSlug, 'initiated_checkout', product);
   posthog.capture('initiated_checkout', {
     store_slug: storeSlug,
     product_id: product.id,
@@ -117,6 +166,7 @@ export function trackInitiateCheckout(storeSlug: string, product: { id: string; 
 export function trackCheckoutStep2(storeSlug: string, data: { productId: string; city: string }) {
   if (typeof window === 'undefined') return;
   initPostHog();
+  dispatchServerEvent(storeSlug, 'checkout_step_2', data);
   posthog.capture('checkout_step_2', {
     store_slug: storeSlug,
     product_id: data.productId,
@@ -148,6 +198,7 @@ export function trackCodAbandoned(
 ) {
   if (typeof window === 'undefined') return;
   initPostHog();
+  dispatchServerEvent(storeSlug, 'cod_checkout_abandoned', data);
   posthog.capture('cod_checkout_abandoned', {
     store_slug: storeSlug,
     product_id: data.productId,
@@ -168,6 +219,7 @@ export function trackCodAbandoned(
 export function trackOrderCompleted(storeSlug: string, order: { orderId: string; total: number; city: string; deliveryType: string; productId?: string }) {
   if (typeof window === 'undefined') return;
   initPostHog();
+  dispatchServerEvent(storeSlug, 'order_completed', order);
   posthog.capture('order_completed', {
     store_slug: storeSlug,
     order_id: order.orderId,
@@ -184,6 +236,7 @@ export function trackOrderCompleted(storeSlug: string, order: { orderId: string;
 export function trackWhatsAppRescue(storeSlug: string, data: { productId?: string; total?: number; reason?: string }) {
   if (typeof window === 'undefined') return;
   initPostHog();
+  dispatchServerEvent(storeSlug, 'whatsapp_rescue_clicked', data);
   posthog.capture('whatsapp_rescue_clicked', {
     store_slug: storeSlug,
     product_id: data.productId,

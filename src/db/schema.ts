@@ -339,6 +339,26 @@ export const adIntegrations = pgTable(
   ]
 );
 
+// ── Analytics Events (Multi-Tenant Storefront Traffic & Conversion Tracking) ──
+export const analyticsEvents = pgTable(
+  'analytics_events',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    storeId: uuid('store_id')
+      .references(() => stores.id, { onDelete: 'cascade' })
+      .notNull(),
+    eventName: text('event_name').notNull(),
+    distinctId: text('distinct_id').notNull(),
+    properties: jsonb('properties').default({}).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('analytics_events_store_idx').on(table.storeId),
+    index('analytics_events_name_idx').on(table.eventName),
+    index('analytics_events_created_idx').on(table.createdAt),
+  ]
+);
+
 // ── Relations ──────────────────────────────────────────────────
 export const storesRelations = relations(stores, ({ many, one }) => ({
   users: many(users),

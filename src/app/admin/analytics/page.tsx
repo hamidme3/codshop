@@ -56,17 +56,32 @@ interface StorefrontAnalyticsData {
   source: string;
 }
 
+interface OperationsAnalyticsData {
+  totalOrders: number;
+  totalRevenueDelivered: number;
+  totalRevenuePotential: number;
+  confirmationRate: number;
+  deliveryRate: number;
+  returnRate: number;
+  netProfit: number;
+  cityDistribution: { city: string; orders: number; rate: number; revenue: number }[];
+  source?: string;
+}
+
 function AnalyticsContent() {
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
 
   const [activeTab, setActiveTab] = useState<'storefront' | 'operations'>('storefront');
   const [storefrontData, setStorefrontData] = useState<StorefrontAnalyticsData | null>(null);
+  const [operationsData, setOperationsData] = useState<OperationsAnalyticsData | null>(null);
   const [loadingStorefront, setLoadingStorefront] = useState(true);
+  const [loadingOperations, setLoadingOperations] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<string>('');
 
-  // Operational metrics from DB
-  const analytics = getAnalytics(storeSlug);
+  // Synchronous fallback from memory
+  const fallbackAnalytics = getAnalytics(storeSlug);
+  const analytics = operationsData || fallbackAnalytics;
 
   const fetchStorefrontAnalytics = () => {
     setLoadingStorefront(true);
@@ -83,9 +98,26 @@ function AnalyticsContent() {
       .finally(() => setLoadingStorefront(false));
   };
 
+  const fetchOperationsAnalytics = () => {
+    setLoadingOperations(true);
+    fetch(`/api/admin/analytics/operations?store=${encodeURIComponent(storeSlug)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setOperationsData(data);
+        }
+      })
+      .catch((err) => console.warn('[Operations Analytics] Fetch notice:', err))
+      .finally(() => setLoadingOperations(false));
+  };
+
   useEffect(() => {
     fetchStorefrontAnalytics();
-    const interval = setInterval(fetchStorefrontAnalytics, 15000);
+    fetchOperationsAnalytics();
+    const interval = setInterval(() => {
+      fetchStorefrontAnalytics();
+      fetchOperationsAnalytics();
+    }, 15000);
     return () => clearInterval(interval);
   }, [storeSlug]);
 
@@ -159,7 +191,7 @@ function AnalyticsContent() {
 
                 <div className="flex items-baseline gap-3">
                   <span className="text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-sm font-mono">
-                    {storefrontData?.live?.activeNow ?? 8}
+                    {storefrontData?.live?.activeNow ?? 0}
                   </span>
                   <span className="text-sm sm:text-base font-bold text-slate-300">
                     acheteurs en ligne en ce moment
@@ -178,7 +210,7 @@ function AnalyticsContent() {
                   <div>
                     <div className="text-[10px] uppercase font-bold text-slate-400">En cours de checkout</div>
                     <div className="text-lg font-black text-white font-mono">
-                      {storefrontData?.live?.inCheckout ?? 2} <span className="text-xs font-medium text-emerald-400">clients à l'Étape 2</span>
+                      {storefrontData?.live?.inCheckout ?? 0} <span className="text-xs font-medium text-emerald-400">clients à l'Étape 2</span>
                     </div>
                   </div>
                 </div>
@@ -212,6 +244,24 @@ function AnalyticsContent() {
             )}
           </div>
 
+          {/* New Store Zero Visitors Banner */}
+          {storefrontData && storefrontData.funnel.visitors === 0 && (
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Boutique prête à enregistrer votre trafic réel. Partagez le lien de votre boutique pour suivre vos premiers visiteurs et conversions en direct.</span>
+              </div>
+              <a
+                href={`https://${storeSlug}.codshop.vipone.site`}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 transition whitespace-nowrap self-start sm:self-auto"
+              >
+                Ouvrir la boutique ↗
+              </a>
+            </div>
+          )}
+
           {/* 5-Step COD Conversion Funnel */}
           <div className="p-6 sm:p-8 rounded-3xl bg-[#13171c] border border-slate-800/80 space-y-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -230,7 +280,7 @@ function AnalyticsContent() {
 
               <div className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-extrabold text-xs flex items-center gap-2 self-start sm:self-auto">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span>Conversion Globale : {storefrontData?.funnel?.overallConversionRate ?? 5.8}%</span>
+                <span>Conversion Globale : {storefrontData?.funnel?.overallConversionRate ?? 0}%</span>
               </div>
             </div>
 
@@ -242,7 +292,7 @@ function AnalyticsContent() {
                   <Users className="w-3.5 h-3.5 text-slate-400" />
                   <span>1. Visiteurs</span>
                 </div>
-                <div className="text-2xl font-black text-white font-mono">{storefrontData?.funnel?.visitors ?? 1250}</div>
+                <div className="text-2xl font-black text-white font-mono">{storefrontData?.funnel?.visitors ?? 0}</div>
                 <div className="text-[11px] text-slate-400 font-medium">Trafic global boutique</div>
                 <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
                   <div className="bg-slate-400 h-full rounded-full w-full" />
@@ -258,12 +308,12 @@ function AnalyticsContent() {
                   <Compass className="w-3.5 h-3.5 text-sky-400" />
                   <span>2. Catalogue & Vues</span>
                 </div>
-                <div className="text-2xl font-black text-white font-mono">{storefrontData?.funnel?.productViews ?? 890}</div>
+                <div className="text-2xl font-black text-white font-mono">{storefrontData?.funnel?.productViews ?? 0}</div>
                 <div className="text-[11px] text-sky-400 font-medium">
-                  {storefrontData?.funnel?.catalogViews ?? 520} vues catalogue
+                  {storefrontData?.funnel?.catalogViews ?? 0} vues catalogue
                 </div>
                 <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
-                  <div className="bg-sky-400 h-full rounded-full" style={{ width: '71%' }} />
+                  <div className="bg-sky-400 h-full rounded-full" style={{ width: `${Math.min(100, Math.round(((storefrontData?.funnel?.productViews ?? 0) / Math.max(1, storefrontData?.funnel?.visitors ?? 1)) * 100))}%` }} />
                 </div>
                 <div className="hidden sm:block absolute -right-2.5 top-1/2 -translate-y-1/2 z-10 text-slate-600">
                   <ChevronRightSmall />
@@ -276,10 +326,10 @@ function AnalyticsContent() {
                   <Package className="w-3.5 h-3.5 text-amber-400" />
                   <span>3. Formulaire Étape 1</span>
                 </div>
-                <div className="text-2xl font-black text-white font-mono">{storefrontData?.funnel?.initiatedCheckout ?? 374}</div>
+                <div className="text-2xl font-black text-white font-mono">{storefrontData?.funnel?.initiatedCheckout ?? 0}</div>
                 <div className="text-[11px] text-amber-400 font-medium">Choix Pack & Quantité</div>
                 <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
-                  <div className="bg-amber-400 h-full rounded-full" style={{ width: '42%' }} />
+                  <div className="bg-amber-400 h-full rounded-full" style={{ width: `${Math.min(100, Math.round(((storefrontData?.funnel?.initiatedCheckout ?? 0) / Math.max(1, storefrontData?.funnel?.productViews ?? 1)) * 100))}%` }} />
                 </div>
                 <div className="hidden sm:block absolute -right-2.5 top-1/2 -translate-y-1/2 z-10 text-slate-600">
                   <ChevronRightSmall />
@@ -292,10 +342,10 @@ function AnalyticsContent() {
                   <Truck className="w-3.5 h-3.5 text-purple-400" />
                   <span>4. Formulaire Étape 2</span>
                 </div>
-                <div className="text-2xl font-black text-white font-mono">{storefrontData?.funnel?.checkoutStep2 ?? 292}</div>
+                <div className="text-2xl font-black text-white font-mono">{storefrontData?.funnel?.checkoutStep2 ?? 0}</div>
                 <div className="text-[11px] text-purple-400 font-medium">Saisie Téléphone & Adresse</div>
                 <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
-                  <div className="bg-purple-400 h-full rounded-full" style={{ width: '78%' }} />
+                  <div className="bg-purple-400 h-full rounded-full" style={{ width: `${Math.min(100, Math.round(((storefrontData?.funnel?.checkoutStep2 ?? 0) / Math.max(1, storefrontData?.funnel?.initiatedCheckout ?? 1)) * 100))}%` }} />
                 </div>
                 <div className="hidden sm:block absolute -right-2.5 top-1/2 -translate-y-1/2 z-10 text-slate-600">
                   <ChevronRightSmall />
@@ -308,7 +358,7 @@ function AnalyticsContent() {
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                   <span>5. Commandes Livrées</span>
                 </div>
-                <div className="text-2xl font-black text-emerald-400 font-mono">{storefrontData?.funnel?.ordersCompleted ?? 79}</div>
+                <div className="text-2xl font-black text-emerald-400 font-mono">{storefrontData?.funnel?.ordersCompleted ?? 0}</div>
                 <div className="text-[11px] text-emerald-300 font-medium">Finalisées avec succès</div>
                 <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
                   <div className="bg-emerald-400 h-full rounded-full w-full" />
@@ -332,7 +382,7 @@ function AnalyticsContent() {
                   </h2>
                 </div>
                 <span className="px-3 py-1 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-bold">
-                  {storefrontData?.abandonment?.totalAbandoned ?? 42} abandons
+                  {storefrontData?.abandonment?.totalAbandoned ?? 0} abandons
                 </span>
               </div>
               <p className="text-xs text-slate-400">
@@ -343,17 +393,17 @@ function AnalyticsContent() {
                 <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
                   <div className="text-[11px] text-slate-400 font-semibold">Abandon à l'Étape 1</div>
                   <div className="text-3xl font-black text-white font-mono">
-                    {storefrontData?.abandonment?.step1Abandoned ?? 24}
+                    {storefrontData?.abandonment?.step1Abandoned ?? 0}
                   </div>
-                  <div className="text-[11px] text-amber-400 font-medium">Hésitation offre ou prix (57%)</div>
+                  <div className="text-[11px] text-amber-400 font-medium">Hésitation offre ou prix</div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
                   <div className="text-[11px] text-slate-400 font-semibold">Abandon à l'Étape 2</div>
                   <div className="text-3xl font-black text-white font-mono">
-                    {storefrontData?.abandonment?.step2Abandoned ?? 18}
+                    {storefrontData?.abandonment?.step2Abandoned ?? 0}
                   </div>
-                  <div className="text-[11px] text-rose-400 font-medium">Hésitation adresse/livraison (43%)</div>
+                  <div className="text-[11px] text-rose-400 font-medium">Hésitation adresse/livraison</div>
                 </div>
               </div>
 
@@ -362,7 +412,7 @@ function AnalyticsContent() {
                 <div className="space-y-0.5">
                   <div className="text-xs font-black text-emerald-400 flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5" />
-                    <span>{storefrontData?.abandonment?.recoverableLeads ?? 11} Prospects Récupérables</span>
+                    <span>{storefrontData?.abandonment?.recoverableLeads ?? 0} Prospects Récupérables</span>
                   </div>
                   <p className="text-[11px] text-slate-300">
                     Ces clients ont saisi leur numéro WhatsApp avant d'abandonner.
@@ -523,10 +573,10 @@ function AnalyticsContent() {
                 </span>
               </div>
               <div className="text-3xl sm:text-4xl font-black text-white font-mono">
-                {storefrontData?.channels?.webOrders ?? 79} <span className="text-sm font-semibold text-slate-400">commandes</span>
+                {storefrontData?.channels?.webOrders ?? 0} <span className="text-sm font-semibold text-slate-400">commandes</span>
               </div>
               <div className="text-xs text-emerald-400 font-semibold">
-                {storefrontData?.channels?.webPercentage ?? 82}% du volume total finalisé
+                {storefrontData?.channels?.webPercentage ?? 0}% du volume total finalisé
               </div>
             </div>
 
@@ -538,10 +588,10 @@ function AnalyticsContent() {
                 </span>
               </div>
               <div className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono">
-                +{storefrontData?.channels?.whatsappRescues ?? 18} <span className="text-sm font-semibold text-slate-400">sauvées</span>
+                +{storefrontData?.channels?.whatsappRescues ?? 0} <span className="text-sm font-semibold text-slate-400">sauvées</span>
               </div>
               <div className="text-xs text-slate-400 font-medium">
-                {storefrontData?.channels?.whatsappPercentage ?? 18}% de ventes récupérées en 1-clic après hésitation
+                {storefrontData?.channels?.whatsappPercentage ?? 0}% de ventes récupérées en 1-clic après hésitation
               </div>
             </div>
           </div>
@@ -551,6 +601,30 @@ function AnalyticsContent() {
       {/* TAB 2: POST-PURCHASE DATABASE OPERATIONS & NET PROFIT */}
       {activeTab === 'operations' && (
         <div className="space-y-6">
+          {analytics.totalOrders === 0 && (
+            <div className="p-5 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-sky-500/20 text-sky-400">
+                  <Package className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Boutique en attente de premières commandes</h3>
+                  <p className="text-xs text-slate-400">
+                    Dès que vos premiers clients valident des commandes en Cash on Delivery, vous suivrez ici votre taux de livraison réel, vos marges nettes et vos villes les plus rentables.
+                  </p>
+                </div>
+              </div>
+              <a
+                href={`/${storeSlug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition-colors shrink-0"
+              >
+                Tester ma boutique ↗
+              </a>
+            </div>
+          )}
+
           {/* 4 Moroccan Operational KPIs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Taux de Livraison */}
@@ -666,35 +740,43 @@ function AnalyticsContent() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
-                  {analytics.cityDistribution.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3.5 px-4 font-bold text-white text-sm">
-                        {item.city}
-                      </td>
-                      <td className="py-3.5 px-4 text-slate-300">
-                        {item.orders} colis
-                      </td>
-                      <td className="py-3.5 px-4 font-extrabold text-white">
-                        {item.revenue.toLocaleString()} DH
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-24 bg-slate-800 h-2 rounded-full overflow-hidden">
-                            <div
-                              className="bg-emerald-400 h-full rounded-full"
-                              style={{ width: `${item.rate}%` }}
-                            />
-                          </div>
-                          <span className="font-bold text-emerald-400">{item.rate}%</span>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                          Top Rentable
-                        </span>
+                  {analytics.cityDistribution.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-slate-500 font-medium">
+                        Aucune commande enregistrée pour l'instant. Les statistiques par ville apparaîtront dès vos premières ventes.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    analytics.cityDistribution.map((item, idx) => (
+                      <tr key={idx} className="hover:bg-slate-800/40 transition-colors">
+                        <td className="py-3.5 px-4 font-bold text-white text-sm">
+                          {item.city}
+                        </td>
+                        <td className="py-3.5 px-4 text-slate-300">
+                          {item.orders} colis
+                        </td>
+                        <td className="py-3.5 px-4 font-extrabold text-white">
+                          {item.revenue.toLocaleString()} DH
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-24 bg-slate-800 h-2 rounded-full overflow-hidden">
+                              <div
+                                className="bg-emerald-400 h-full rounded-full"
+                                style={{ width: `${item.rate}%` }}
+                              />
+                            </div>
+                            <span className="font-bold text-emerald-400">{item.rate}%</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                            Top Rentable
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

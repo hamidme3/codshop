@@ -1,5 +1,5 @@
 import { getDb, schema } from '@/db';
-import { eq, desc, asc, and, ne } from 'drizzle-orm';
+import { eq, desc, asc, and, ne, gte } from 'drizzle-orm';
 import type { Order, Product, Customer, CourierName } from './types';
 import {
   ORDERS,
@@ -1877,6 +1877,208 @@ export async function closeSupportTicket(ticketId: string, accountId: string) {
   } catch (err) {
     console.error('[DbRepo] Error closing support ticket:', err);
     return false;
+  }
+}
+
+// ── Store Analytics & Events Repository (Multi-Tenant SaaS) ────
+export async function recordAnalyticsEvent(data: {
+  storeSlug: string;
+  eventName: string;
+  distinctId: string;
+  properties?: Record<string, any>;
+}) {
+  const db = getDb();
+  if (!db) return null;
+
+  try {
+    const store = await getStoreBySlug(data.storeSlug);
+    if (!store || !('id' in store)) return null;
+
+    const [event] = await db
+      .insert(schema.analyticsEvents)
+      .values({
+        storeId: store.id,
+        eventName: data.eventName,
+        distinctId: data.distinctId || 'anonymous',
+        properties: data.properties || {},
+      })
+      .returning();
+
+    return event;
+  } catch (err) {
+    console.warn('[DbRepo] Error recording analytics event:', err);
+    return null;
+  }
+}
+
+export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
+  const db = getDb();
+  if (!db) return null;
+
+  try {
+    const store = await getStoreBySlug(storeSlug);
+    if (!store || !('id' in store)) return null;
+
+    const now = new Date();
+    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+    const fifteenMinutesAgo = new Date(now.getTime() - 15 * 60 * 1000);
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    // 1. Fetch events from last 30 days
+    const events = await db.query.analyticsEvents.findMany({
+      where: and(
+        eq(schema.analyticsEvents.storeId, store.id),
+        gte(schema.analyticsEvents.createdAt, thirtyDaysAgo)
+      ),
+      orderBy: [desc(schema.analyticsEvents.createdAt)],
+      limit: 10000,
+    });
+
+    // 2. Fetch real orders from last 30 days
+    const storeOrders = await db.query.orders.findMany({
+      where: and(
+        eq(schema.orders.storeId, store.id),
+        gte(schema.orders.createdAt, thirtyDaysAgo)
+      ),
+      orderBy: [desc(schema.orders.createdAt)],
+    });
+
+    // If no events and not ottavio, return authentic zero metrics for fresh stores
+    if (events.length === 0 && storeOrders.length === 0 && storeSlug !== 'ottavio') {
+      return {
+        hasData: false,
+        live: { activeNow: 0, inCheckout: 0, activeProducts: [] },
+        funnel: {
+          visitors: 0,
+          catalogViews: 0,
+          productViews: 0,
+          initiatedCheckout: 0,
+          checkoutStep2: 0,
+          ordersCompleted: 0,
+          overallConversionRate: 0,
+        },
+        abandonment: {
+          totalAbandoned: 0,
+          step1Abandoned: 0,
+          step2Abandoned: 0,
+          recoverableLeads: 0,
+          recoveryRate: 0,
+        },
+        searches: [],
+        products: [],
+        channels: { webOrders: 0, webPercentage: 100, whatsappRescues: 0, whatsappPercentage: 0 },
+        source: 'database_tenant',
+      };
+    }
+
+    if (events.length === 0 && storeOrders.length === 0 && storeSlug === 'ottavio') {
+      // Fallback for demo store ottavio
+      return null;
+    }
+
+    // 3. Compute real live metrics
+    const recentEvents = events.filter((e) => e.createdAt >= fiveMinutesAgo);
+    const liveDistinctIds = new Set(recentEvents.map((e) => e.distinctId));
+    const activeNow = liveDistinctIds.size;
+
+    const checkoutEvents = events.filter(
+      (e) =>
+        e.createdAt >= fifteenMinutesAgo &&
+        ['initiated_checkout', 'checkout_step_2', 'cod_step_1_started', 'cod_step_2_started'].includes(e.eventName)
+    );
+    const completedOrderDistinctIds = new Set(
+      events.filter((e) => e.eventName === 'order_completed').map((e) => e.distinctId)
+    );
+    const inCheckoutNow = new Set(
+      checkoutEvents.filter((e) => !completedOrderDistinctIds.has(e.distinctId)).map((e) => e.distinctId)
+    ).size;
+
+    // 4. Compute funnel
+    const allVisitors = new Set(events.map((e) => e.distinctId)).size || (storeOrders.length > 0 ? storeOrders.length : 0);
+    const catalogViews = events.filter((e) => e.eventName === 'catalog_viewed').length;
+    const productViews = events.filter((e) => e.eventName === 'product_viewed').length;
+    const initiatedCheckout = events.filter(
+      (e) => e.eventName === 'initiated_checkout' || e.eventName === 'cod_step_1_started'
+    ).length;
+    const checkoutStep2 = events.filter(
+      (e) => e.eventName === 'checkout_step_2' || e.eventName === 'cod_step_2_started'
+    ).length;
+    const ordersCompleted = storeOrders.length || events.filter((e) => e.eventName === 'order_completed').length;
+    const overallConversionRate = allVisitors > 0 ? Number(((ordersCompleted / allVisitors) * 100).toFixed(1)) : 0;
+
+    // 5. Abandonment
+    const abandonedEvents = events.filter((e) => e.eventName === 'cod_checkout_abandoned');
+    const step1Abandoned = abandonedEvents.filter((e) => (e.properties as any)?.abandoned_at_step === 1 || (e.properties as any)?.step === 1).length;
+    const step2Abandoned = abandonedEvents.filter((e) => (e.properties as any)?.abandoned_at_step === 2 || (e.properties as any)?.step === 2).length;
+    const totalAbandoned = abandonedEvents.length || Math.max(0, initiatedCheckout - ordersCompleted);
+    const recoverableLeads = abandonedEvents.filter((e) => (e.properties as any)?.has_phone === true || (e.properties as any)?.hasPhone === true).length;
+    const recoveryRate = totalAbandoned > 0 ? Number(((recoverableLeads / totalAbandoned) * 100).toFixed(1)) : 0;
+
+    // 6. Searches
+    const searchEvents = events.filter((e) => e.eventName === 'search_performed');
+    const searchMap = new Map<string, { count: number; resultsCount: number; isZeroResult: boolean }>();
+    searchEvents.forEach((se) => {
+      const q = ((se.properties as any)?.search_query || (se.properties as any)?.query || '').trim().toLowerCase();
+      if (!q) return;
+      const existing = searchMap.get(q) || {
+        count: 0,
+        resultsCount: (se.properties as any)?.results_count ?? (se.properties as any)?.resultsCount ?? 0,
+        isZeroResult: (se.properties as any)?.is_zero_result ?? (se.properties as any)?.isZeroResult ?? false,
+      };
+      existing.count += 1;
+      searchMap.set(q, existing);
+    });
+    const searches = Array.from(searchMap.entries())
+      .map(([query, data]) => ({
+        query,
+        count: data.count,
+        resultsCount: data.resultsCount,
+        isZeroResult: data.isZeroResult,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // 7. Channels
+    const whatsappRescues = events.filter((e) => e.eventName === 'whatsapp_rescue_clicked').length;
+    const webOrders = storeOrders.filter((o) => (o as any).source !== 'whatsapp').length || ordersCompleted;
+    const totalChannelOrders = Math.max(1, webOrders + whatsappRescues);
+
+    return {
+      hasData: true,
+      live: {
+        activeNow,
+        inCheckout: inCheckoutNow,
+        activeProducts: [],
+      },
+      funnel: {
+        visitors: allVisitors,
+        catalogViews,
+        productViews,
+        initiatedCheckout,
+        checkoutStep2,
+        ordersCompleted,
+        overallConversionRate,
+      },
+      abandonment: {
+        totalAbandoned,
+        step1Abandoned,
+        step2Abandoned,
+        recoverableLeads,
+        recoveryRate,
+      },
+      searches,
+      products: [],
+      channels: {
+        webOrders,
+        webPercentage: Math.round((webOrders / totalChannelOrders) * 100),
+        whatsappRescues,
+        whatsappPercentage: Math.round((whatsappRescues / totalChannelOrders) * 100),
+      },
+      source: 'database_tenant',
+    };
+  } catch (err) {
+    console.error('[DbRepo] Error querying store analytics:', err);
+    return null;
   }
 }
 
