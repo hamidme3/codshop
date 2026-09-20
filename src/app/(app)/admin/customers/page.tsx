@@ -7,11 +7,14 @@ import {
   ShoppingBag, MessageCircle, Heart, UserPlus, 
   Sparkles, ArrowUpRight, CheckCircle2, Truck, DollarSign,
   AlertTriangle, ChevronRight, X, Clock, RefreshCw, Package,
-  Save, Copy, Check, ShieldCheck, ArrowRight, CornerDownRight
+  Save, Copy, Check, ShieldCheck, ArrowRight, CornerDownRight,
+  Crown, Repeat
 } from 'lucide-react';
 import { getCustomers, updateCustomerNotes, Customer, OrderStatus } from '@/lib/backoffice';
 import { normalizeMoroccanPhone } from '@/lib/whatsapp-templates';
 import { normalizePhoneForWhatsApp, COUNTRIES } from '@/lib/geo';
+import CustomerRiskBadge, { deriveCustomerSegment } from '@/components/admin/crm/CustomerRiskBadge';
+import CustomerRetentionChart from '@/components/admin/charts/CustomerRetentionChart';
 
 function getContextualWhatsAppUrl(customer: Customer, storeSlug: string): string {
   const countryCode = ((customer.recentOrders?.[0] as any)?.countryCode || (customer as any)?.country || 'MA').toUpperCase();
@@ -305,6 +308,9 @@ function CustomersContent() {
         </div>
       </div>
 
+      {/* Recharts Customer Retention & LTV Cohort Curve */}
+      <CustomerRetentionChart currency="MAD" />
+
       {/* Tabs & Search */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="flex items-center gap-1 p-1 bg-[#121215] border border-zinc-800/80 rounded-lg overflow-x-auto admin-scrollbar no-scrollbar text-xs">
@@ -370,19 +376,7 @@ function CustomersContent() {
                       <div className="min-w-0">
                         <div className="font-bold text-white text-xs truncate">{c.name}</div>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          {c.status === 'returning' ? (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-medium bg-purple-500/10 text-purple-300 border border-purple-500/30">
-                              ★ VIP Fidèle
-                            </span>
-                          ) : c.status === 'risk' ? (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-medium bg-rose-500/10 text-rose-400 border border-rose-500/30">
-                              Risque Retour
-                            </span>
-                          ) : (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-medium bg-zinc-800/80 text-zinc-400 border border-zinc-700/60">
-                              {c.status}
-                            </span>
-                          )}
+                          <CustomerRiskBadge customer={c} />
                         </div>
                       </div>
                     </div>
@@ -511,19 +505,7 @@ function CustomersContent() {
                         <div>
                           <div className="font-medium text-zinc-100 text-xs">{c.name}</div>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            {c.status === 'returning' ? (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-medium bg-purple-500/10 text-purple-300 border border-purple-500/30 flex items-center gap-1">
-                                ★ VIP Fidèle
-                              </span>
-                            ) : c.status === 'risk' ? (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-medium bg-rose-500/10 text-rose-400 border border-rose-500/30">
-                                Risque Retour
-                              </span>
-                            ) : (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-medium bg-zinc-800/80 text-zinc-400 border border-zinc-700/60">
-                                {c.status}
-                              </span>
-                            )}
+                            <CustomerRiskBadge customer={c} />
                           </div>
                         </div>
                       </td>
@@ -650,8 +632,11 @@ function CustomersContent() {
                     {selectedCustomer.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <h2 className="text-base font-semibold text-white">{selectedCustomer.name}</h2>
-                    <p className="text-xs text-zinc-400 font-mono">{selectedCustomer.phone} • {selectedCustomer.city}</p>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-base font-semibold text-white">{selectedCustomer.name}</h2>
+                      <CustomerRiskBadge customer={selectedCustomer} showDescription />
+                    </div>
+                    <p className="text-xs text-zinc-400 font-mono mt-0.5">{selectedCustomer.phone} • {selectedCustomer.city}</p>
                   </div>
                 </div>
                 <button
