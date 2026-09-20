@@ -24,7 +24,10 @@ function extractImageUrls(images: any): string[] {
     .map((img: any) => {
       if (typeof img === 'string') return img;
       if (typeof img === 'object' && img !== null) {
-        return img.url || img.sizes?.mobile?.url || img.filename || null;
+        const mobileUrl = img.sizes?.mobile?.url;
+        const mainUrl = img.url;
+        const filename = img.filename ? `/api/uploads/media/${img.filename}` : null;
+        return mobileUrl || mainUrl || filename || null;
       }
       return null;
     })

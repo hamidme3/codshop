@@ -38,4 +38,5 @@ test-results/
 # agent & tooling
 .mcp/
 .telegram_images/
-
+# uploads
+/public/uploads/

@@ -36,12 +36,14 @@ export const Media: CollectionConfig = {
     ],
     adminThumbnail: 'thumbnail',
     mimeTypes: ['image/*'],
+    focalPoint: true,
   },
   fields: [
     {
       name: 'alt',
       type: 'text',
-      required: true,
+      required: false,
+      defaultValue: '',
       admin: {
         description: 'Descriptive alt text for SEO and accessibility',
       },

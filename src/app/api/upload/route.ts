@@ -52,7 +52,30 @@ export async function POST(req: Request) {
     const targetDir = path.join(process.cwd(), 'public', 'uploads', 'products');
     await fs.mkdir(targetDir, { recursive: true });
 
+    // Ensure public/uploads/media exists for Payload DAM pipeline
+    const mediaDir = path.join(process.cwd(), 'public', 'uploads', 'media');
+    await fs.mkdir(mediaDir, { recursive: true });
+
     const uploadedUrls: string[] = [];
+    const mediaItems: Array<{
+      id?: string | number;
+      url: string;
+      sizes?: {
+        thumbnail?: string;
+        mobile?: string;
+        desktop?: string;
+      };
+    }> = [];
+
+    // Attempt to load Payload instance for auto-WebP conversion
+    let payloadInstance: any = null;
+    try {
+      const { getPayload } = await import('payload');
+      const configPromise = (await import('@payload-config')).default;
+      payloadInstance = await getPayload({ config: configPromise });
+    } catch (payloadErr) {
+      console.warn('[Upload API] Payload CMS unavailable, falling back to direct disk storage:', payloadErr);
+    }
 
     for (const file of files) {
       // Validate file size
@@ -82,18 +105,72 @@ export async function POST(req: Request) {
       const buffer = Buffer.from(await file.arrayBuffer());
       const randomHash = crypto.randomBytes(6).toString('hex');
       const safeFilename = `prod_${Date.now()}_${randomHash}${ext}`;
-      const filePath = path.join(targetDir, safeFilename);
 
-      await fs.writeFile(filePath, buffer);
-      uploadedUrls.push(`/api/uploads/products/${safeFilename}`);
+      let mediaProcessed = false;
+
+      if (payloadInstance) {
+        try {
+          const mediaDoc = await payloadInstance.create({
+            collection: 'media',
+            data: {
+              alt: file.name.replace(/\.[^/.]+$/, '') || 'Product Image',
+            },
+            file: {
+              data: buffer,
+              name: safeFilename,
+              mimetype: file.type || 'image/jpeg',
+              size: file.size,
+            },
+            overrideAccess: true,
+          });
+
+          if (mediaDoc) {
+            const mobileFilename = mediaDoc.sizes?.mobile?.filename;
+            const thumbFilename = mediaDoc.sizes?.thumbnail?.filename;
+            const desktopFilename = mediaDoc.sizes?.desktop?.filename;
+            const baseFilename = mediaDoc.filename || safeFilename;
+
+            const primaryUrl = `/api/uploads/media/${baseFilename}`;
+            const mobileUrl = mobileFilename ? `/api/uploads/media/${mobileFilename}` : primaryUrl;
+            const thumbUrl = thumbFilename ? `/api/uploads/media/${thumbFilename}` : primaryUrl;
+            const desktopUrl = desktopFilename ? `/api/uploads/media/${desktopFilename}` : primaryUrl;
+
+            // Use the lightweight mobile WebP URL for high mobile speed
+            uploadedUrls.push(mobileUrl);
+            mediaItems.push({
+              id: mediaDoc.id,
+              url: primaryUrl,
+              sizes: {
+                thumbnail: thumbUrl,
+                mobile: mobileUrl,
+                desktop: desktopUrl,
+              },
+            });
+            mediaProcessed = true;
+          }
+        } catch (mediaErr) {
+          console.warn('[Upload API] Payload media processing warning, falling back to disk:', mediaErr);
+        }
+      }
+
+      if (!mediaProcessed) {
+        const filePath = path.join(targetDir, safeFilename);
+        await fs.writeFile(filePath, buffer);
+        const fallbackUrl = `/api/uploads/products/${safeFilename}`;
+        uploadedUrls.push(fallbackUrl);
+        mediaItems.push({
+          url: fallbackUrl,
+        });
+      }
     }
 
     return NextResponse.json({
       success: true,
       url: uploadedUrls[0],
       urls: uploadedUrls,
+      media: mediaItems,
       count: uploadedUrls.length,
-      message: `${uploadedUrls.length} image(s) téléversée(s) avec succès`,
+      message: `${uploadedUrls.length} image(s) téléversée(s) et optimisée(s) avec succès`,
     });
   } catch (error: any) {
     console.error('[Upload API] Error saving image file:', error);
