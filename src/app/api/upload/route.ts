@@ -56,17 +56,6 @@ export async function POST(req: Request) {
     const mediaDir = path.join(process.cwd(), 'public', 'uploads', 'media');
     await fs.mkdir(mediaDir, { recursive: true });
 
-    const uploadedUrls: string[] = [];
-    const mediaItems: Array<{
-      id?: string | number;
-      url: string;
-      sizes?: {
-        thumbnail?: string;
-        mobile?: string;
-        desktop?: string;
-      };
-    }> = [];
-
     // Attempt to load Payload instance for auto-WebP conversion
     let payloadInstance: any = null;
     try {
@@ -77,8 +66,8 @@ export async function POST(req: Request) {
       console.warn('[Upload API] Payload CMS unavailable, falling back to direct disk storage:', payloadErr);
     }
 
+    // Validate all files before processing
     for (const file of files) {
-      // Validate file size
       if (file.size > MAX_FILE_SIZE) {
         return NextResponse.json(
           { success: false, message: `Le fichier "${file.name}" dépasse la limite maximale de 10 Mo` },
@@ -86,7 +75,6 @@ export async function POST(req: Request) {
         );
       }
 
-      // Validate extension and MIME type
       const ext = path.extname(file.name).toLowerCase();
       if (!ALLOWED_EXTENSIONS.has(ext)) {
         return NextResponse.json(
@@ -101,68 +89,78 @@ export async function POST(req: Request) {
           { status: 400 }
         );
       }
-
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const randomHash = crypto.randomBytes(6).toString('hex');
-      const safeFilename = `prod_${Date.now()}_${randomHash}${ext}`;
-
-      let mediaProcessed = false;
-
-      if (payloadInstance) {
-        try {
-          const mediaDoc = await payloadInstance.create({
-            collection: 'media',
-            data: {
-              alt: file.name.replace(/\.[^/.]+$/, '') || 'Product Image',
-            },
-            file: {
-              data: buffer,
-              name: safeFilename,
-              mimetype: file.type || 'image/jpeg',
-              size: file.size,
-            },
-            overrideAccess: true,
-          });
-
-          if (mediaDoc) {
-            const mobileFilename = mediaDoc.sizes?.mobile?.filename;
-            const thumbFilename = mediaDoc.sizes?.thumbnail?.filename;
-            const desktopFilename = mediaDoc.sizes?.desktop?.filename;
-            const baseFilename = mediaDoc.filename || safeFilename;
-
-            const primaryUrl = `/api/uploads/media/${baseFilename}`;
-            const mobileUrl = mobileFilename ? `/api/uploads/media/${mobileFilename}` : primaryUrl;
-            const thumbUrl = thumbFilename ? `/api/uploads/media/${thumbFilename}` : primaryUrl;
-            const desktopUrl = desktopFilename ? `/api/uploads/media/${desktopFilename}` : primaryUrl;
-
-            // Use the lightweight mobile WebP URL for high mobile speed
-            uploadedUrls.push(mobileUrl);
-            mediaItems.push({
-              id: mediaDoc.id,
-              url: primaryUrl,
-              sizes: {
-                thumbnail: thumbUrl,
-                mobile: mobileUrl,
-                desktop: desktopUrl,
-              },
-            });
-            mediaProcessed = true;
-          }
-        } catch (mediaErr) {
-          console.warn('[Upload API] Payload media processing warning, falling back to disk:', mediaErr);
-        }
-      }
-
-      if (!mediaProcessed) {
-        const filePath = path.join(targetDir, safeFilename);
-        await fs.writeFile(filePath, buffer);
-        const fallbackUrl = `/api/uploads/products/${safeFilename}`;
-        uploadedUrls.push(fallbackUrl);
-        mediaItems.push({
-          url: fallbackUrl,
-        });
-      }
     }
+
+    // Process all uploads concurrently in parallel
+    const results = await Promise.all(
+      files.map(async (file, index) => {
+        const ext = path.extname(file.name).toLowerCase() || '.webp';
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const randomHash = crypto.randomBytes(6).toString('hex');
+        const safeFilename = `prod_${Date.now()}_${index}_${randomHash}${ext}`;
+
+        let mediaItem: any = null;
+        let url = '';
+
+        if (payloadInstance) {
+          try {
+            const mediaDoc = await payloadInstance.create({
+              collection: 'media',
+              data: {
+                alt: file.name.replace(/\.[^/.]+$/, '') || 'Product Image',
+              },
+              file: {
+                data: buffer,
+                name: safeFilename,
+                mimetype: file.type || 'image/jpeg',
+                size: file.size,
+              },
+              overrideAccess: true,
+            });
+
+            if (mediaDoc) {
+              const mobileFilename = mediaDoc.sizes?.mobile?.filename;
+              const thumbFilename = mediaDoc.sizes?.thumbnail?.filename;
+              const desktopFilename = mediaDoc.sizes?.desktop?.filename;
+              const baseFilename = mediaDoc.filename || safeFilename;
+
+              const primaryUrl = `/api/uploads/media/${baseFilename}`;
+              const mobileUrl = mobileFilename ? `/api/uploads/media/${mobileFilename}` : primaryUrl;
+              const thumbUrl = thumbFilename ? `/api/uploads/media/${thumbFilename}` : primaryUrl;
+              const desktopUrl = desktopFilename ? `/api/uploads/media/${desktopFilename}` : primaryUrl;
+
+              url = mobileUrl;
+              mediaItem = {
+                id: mediaDoc.id,
+                url: primaryUrl,
+                sizes: {
+                  thumbnail: thumbUrl,
+                  mobile: mobileUrl,
+                  desktop: desktopUrl,
+                },
+              };
+            }
+          } catch (mediaErr) {
+            console.warn('[Upload API] Payload media processing warning, falling back to disk:', mediaErr);
+          }
+        }
+
+        if (!mediaItem) {
+          const filePath = path.join(targetDir, safeFilename);
+          await fs.writeFile(filePath, buffer);
+          const fallbackUrl = `/api/uploads/products/${safeFilename}`;
+          url = fallbackUrl;
+          mediaItem = {
+            url: fallbackUrl,
+          };
+        }
+
+        return { url, mediaItem };
+      })
+    );
+
+    const uploadedUrls = results.map((r) => r.url);
+    const mediaItems = results.map((r) => r.mediaItem);
 
     return NextResponse.json({
       success: true,

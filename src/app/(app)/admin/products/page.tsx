@@ -19,6 +19,7 @@ import {
 } from '@/lib/backoffice';
 import { ProductEconomicsCalculator } from '@/components/admin/ProductEconomicsCalculator';
 import { generateMoroccanProductCopy, MOROCCAN_NICHES, MoroccanAICopy } from '@/lib/ai-copywriter';
+import { compressAndResizeImage } from '@/lib/client-image-compressor';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
@@ -61,6 +62,7 @@ function ProductsContent() {
   const [editImages, setEditImages] = useState<string[]>([]);
   const [newImageInput, setNewImageInput] = useState('');
   const [editVariants, setEditVariants] = useState<Array<{ color?: string; size?: string; stock: number; sku?: string }>>([]);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   // Matrix Generator & Batch Fill State
   const [showMatrixTools, setShowMatrixTools] = useState(false);
@@ -196,23 +198,29 @@ function ProductsContent() {
     setShowEditModal(true);
   };
 
-  const handleSaveEditProduct = (e: React.FormEvent) => {
+  const handleSaveEditProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct || !editTitle.trim()) return;
+
+    setIsSavingEdit(true);
 
     const totalVariantStock = editVariants.length > 0
       ? computeTotalStock(editVariants)
       : Number(editStock);
 
+    const finalImages = editImages.length > 0
+      ? editImages
+      : [editImageUrl || 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=800&auto=format&fit=crop'];
+
     const editPayload = {
       productId: editingProduct.id,
-      title: editTitle,
-      category: editCategory,
+      title: editTitle.trim(),
+      category: editCategory.trim(),
       price: Number(editPrice),
-      comparePrice: Number(editComparePrice),
-      costPrice: Number(editCostPrice),
+      comparePrice: editComparePrice ? Number(editComparePrice) : undefined,
+      costPrice: Number(editCostPrice) || 0,
       stock: totalVariantStock,
-      images: editImages.length > 0 ? editImages : [editImageUrl || 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=800&auto=format&fit=crop'],
+      images: finalImages,
       variants: editVariants.map((v) => ({
         color: v.color || undefined,
         size: v.size || undefined,
@@ -222,23 +230,35 @@ function ProductsContent() {
       storeSlug,
     };
 
-    const updated = updateProduct(editingProduct.id, editPayload);
+    try {
+      // 1. Persist edits to database via PATCH API
+      const res = await fetch('/api/admin/products', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editPayload),
+      });
 
-    // Persist edits to PostgreSQL database asynchronously
-    fetch('/api/admin/products', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editPayload),
-    }).catch((err) => console.warn('[Admin Products] PATCH DB persist notice:', err));
+      const data = await res.json().catch(() => ({}));
 
-    if (updated) {
-      setProducts((prev) => prev.map((p) => (p.id === editingProduct.id ? { ...p, ...editPayload } : p)));
+      if (!res.ok || data.success === false) {
+        throw new Error(data.message || 'Erreur lors de la mise à jour du produit sur le serveur.');
+      }
+
+      // 2. Sync in-memory mock repository so other modules stay in sync
+      updateProduct(editingProduct.id, editPayload);
+
+      // 3. Update React state immediately with saved product
+      const savedProd = data.product ? { ...data.product, ...editPayload } : { ...editingProduct, ...editPayload };
+      setProducts((prev) => prev.map((p) => (p.id === editingProduct.id ? savedProd : p)));
       setCategories(getCategories(storeSlug));
       setShowEditModal(false);
       setEditingProduct(null);
       showToast(`Produit "${editTitle}" mis à jour (${totalVariantStock} unités, ${editVariants.length} variantes) !`);
-    } else {
-      alert('Erreur lors de la mise à jour du produit.');
+    } catch (err: any) {
+      console.error('[Admin Products] PATCH error:', err);
+      alert(err?.message || 'Erreur lors de la mise à jour du produit.');
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
@@ -513,8 +533,13 @@ function ProductsContent() {
     else setIsUploadingEditImage(true);
 
     try {
+      // 1. Client-side downscaling & compression to 1600px WebP for ultra-fast mobile uploads
+      const optimizedFiles = await Promise.all(
+        validFiles.map((file) => compressAndResizeImage(file, 1600, 0.85))
+      );
+
       const formData = new FormData();
-      for (const file of validFiles) {
+      for (const file of optimizedFiles) {
         formData.append('files', file);
       }
 
@@ -532,7 +557,7 @@ function ProductsContent() {
           }
           setAddImages(updated);
           if (updated[0]) setImageUrl(updated[0]);
-          showToast(`✓ ${data.urls.length} photo(s) téléversée(s) avec succès !`);
+          showToast(`✓ ${data.urls.length} photo(s) optimisée(s) et téléversée(s) !`);
         } else {
           let updated = [...editImages];
           for (const u of data.urls) {
@@ -2441,14 +2466,23 @@ function ProductsContent() {
               <div className="flex gap-2 pt-2 border-t border-zinc-800/80">
                 <button
                   type="submit"
-                  className="flex-1 py-2 px-4 rounded-lg bg-zinc-100 hover:bg-white text-zinc-900 font-semibold text-xs transition-colors shadow-sm"
+                  disabled={isSavingEdit}
+                  className="flex-1 py-2 px-4 rounded-lg bg-zinc-100 hover:bg-white text-zinc-900 font-semibold text-xs transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Enregistrer les Modifications
+                  {isSavingEdit ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-zinc-900" />
+                      <span>Enregistrement en cours...</span>
+                    </>
+                  ) : (
+                    'Enregistrer les Modifications'
+                  )}
                 </button>
                 <button
                   type="button"
+                  disabled={isSavingEdit}
                   onClick={() => setShowEditModal(false)}
-                  className="py-2 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-colors"
+                  className="py-2 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-colors disabled:opacity-50"
                 >
                   Annuler
                 </button>

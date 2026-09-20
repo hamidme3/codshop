@@ -130,40 +130,6 @@ export let ORDERS: Order[] = [
 // ── Seed Moroccan Products ──────────────────────────────────────
 export let PRODUCTS: Product[] = [
   {
-    id: 'prod_sku_5567',
-    storeSlug: 'storet1',
-    title: 'Test product',
-    sku: 'SKU-5567',
-    category: 'Chaussures & Babouches',
-    price: 299,
-    comparePrice: 499,
-    costPrice: 90,
-    stock: 20,
-    images: ['https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800&auto=format&fit=crop'],
-    variants: [
-      { size: '41', stock: 10, sku: 'SKU-5567-41' },
-      { size: '42', stock: 10, sku: 'SKU-5567-42' },
-    ],
-    status: 'active',
-  },
-  {
-    id: 'prod_sku_5567_ott',
-    storeSlug: 'ottavio',
-    title: 'Test product',
-    sku: 'SKU-5567',
-    category: 'Chaussures & Babouches',
-    price: 299,
-    comparePrice: 499,
-    costPrice: 90,
-    stock: 20,
-    images: ['https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800&auto=format&fit=crop'],
-    variants: [
-      { size: '41', stock: 10, sku: 'SKU-5567-41' },
-      { size: '42', stock: 10, sku: 'SKU-5567-42' },
-    ],
-    status: 'active',
-  },
-  {
     id: 'prod_1',
     storeSlug: 'ottavio',
     title: 'Sac Cuir Artisanal Marrakech',
@@ -637,15 +603,50 @@ export function deleteProduct(productId: string): boolean {
 }
 
 export function updateProductStock(productId: string, newStock: number): boolean {
-  const prod = PRODUCTS.find((p) => p.id === productId);
+  let prod = PRODUCTS.find((p) => p.id === productId);
+  if (!prod) {
+    prod = PRODUCTS.find((p) => p.sku === productId);
+  }
   if (!prod) return false;
   prod.stock = Math.max(0, newStock);
   return true;
 }
 
 export function updateProduct(productId: string, updates: Partial<Product>): Product | null {
-  const prod = PRODUCTS.find((p) => p.id === productId);
-  if (!prod) return null;
+  let prod = PRODUCTS.find((p) => p.id === productId);
+  if (!prod) {
+    prod = PRODUCTS.find(
+      (p) =>
+        (updates.sku && p.sku === updates.sku) ||
+        (updates.title && p.title.toLowerCase() === updates.title.toLowerCase())
+    );
+  }
+
+  if (!prod) {
+    // Upsert unknown / DB-persisted product into PRODUCTS so cache remains consistent
+    const newProd: Product = {
+      id: productId,
+      storeSlug: updates.storeSlug || 'ottavio',
+      title: (updates.title || 'Nouveau Produit').trim(),
+      sku: (updates.sku || `SKU-${Date.now()}`).trim(),
+      category: (updates.category || 'Général').trim(),
+      price: Number(updates.price) || 0,
+      comparePrice: updates.comparePrice ? Number(updates.comparePrice) : undefined,
+      costPrice: Number(updates.costPrice) || 0,
+      stock: Math.max(0, Number(updates.stock) || 0),
+      images: updates.images || [],
+      variants: updates.variants || [],
+      status: updates.status || 'active',
+      badge: updates.badge,
+      packDuoPrice: updates.packDuoPrice ? Number(updates.packDuoPrice) : undefined,
+      packDuoFreeShipping: updates.packDuoFreeShipping,
+      packTrioPrice: updates.packTrioPrice ? Number(updates.packTrioPrice) : undefined,
+      packTrioGift: updates.packTrioGift,
+      description: updates.description,
+    };
+    PRODUCTS.push(newProd);
+    return { ...newProd };
+  }
 
   if (updates.title !== undefined) prod.title = updates.title.trim();
   if (updates.category !== undefined) prod.category = updates.category.trim();

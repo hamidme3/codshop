@@ -242,6 +242,39 @@ export async function updateProductInPayload(
     if (updates.packTrioGift !== undefined) updateData.packTrioGift = updates.packTrioGift;
     if (updates.description !== undefined) updateData.description = updates.description;
 
+    if (updates.images !== undefined && Array.isArray(updates.images)) {
+      try {
+        const mediaIds: (string | number)[] = [];
+        for (const img of updates.images) {
+          if (typeof img === 'number') {
+            mediaIds.push(img);
+          } else if (typeof img === 'string') {
+            const filenameMatch = img.match(/\/api\/uploads\/media\/([^/?#]+)/);
+            const filename = filenameMatch ? filenameMatch[1] : img;
+            const search = await payload.find({
+              collection: 'media',
+              where: {
+                or: [
+                  { filename: { equals: filename } },
+                  { id: { equals: filename } },
+                ],
+              },
+              depth: 0,
+              limit: 1,
+            });
+            if (search.docs.length > 0) {
+              mediaIds.push(search.docs[0].id);
+            }
+          }
+        }
+        if (mediaIds.length > 0) {
+          updateData.images = mediaIds;
+        }
+      } catch (mediaErr) {
+        console.warn('[PayloadProducts] Non-critical warning resolving media for product update:', mediaErr);
+      }
+    }
+
     const updated = await payload.update({
       collection: 'products',
       id: resolvedId,
@@ -249,7 +282,11 @@ export async function updateProductInPayload(
       overrideAccess: true,
     });
 
-    return mapPayloadDocToProduct(updated);
+    const mapped = mapPayloadDocToProduct(updated);
+    if (updates.images && updates.images.length > 0) {
+      mapped.images = updates.images;
+    }
+    return mapped;
   } catch (err) {
     console.warn('[PayloadProducts] updateProduct error:', err);
     return null;

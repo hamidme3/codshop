@@ -39,13 +39,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(!initialProduct);
 
   useEffect(() => {
-    if (initialProduct) {
-      setProduct(initialProduct);
-      setLoading(false);
-      return;
-    }
     if (!slug) return;
-    setLoading(true);
     const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
     const storeFromUrl = urlParams?.get('store') || '';
     const host = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
@@ -60,9 +54,9 @@ export default function ProductDetailPage() {
           setProduct(data.product as Product);
         }
       })
-      .catch(() => {})
+      .catch((err) => console.warn('[ProductDetail] Live product fetch notice:', err))
       .finally(() => setLoading(false));
-  }, [slug, initialProduct]);
+  }, [slug]);
   const { formatMAD, formatPrice, theme, countryCode: contextCountryCode, shippingSettings } = useTheme();
   const { addItem } = useCart();
 
