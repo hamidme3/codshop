@@ -44,6 +44,14 @@ export async function GET(req: Request) {
         returnRate: 0,
         netProfit: 0,
         cityDistribution: [],
+        pipelineStages: [
+          { key: 'to_confirm', name: '1. À Confirmer', count: 0, value: 0, color: '#94a3b8' },
+          { key: 'confirmed', name: '2. Confirmées', count: 0, value: 0, color: '#06b6d4' },
+          { key: 'shipped', name: '3. En Transit', count: 0, value: 0, color: '#38bdf8' },
+          { key: 'delivered', name: '4. Livrées & Encaissées', count: 0, value: 0, color: '#10b981' },
+          { key: 'returned', name: '5. Retours / Refus', count: 0, value: 0, color: '#f43f5e' },
+        ],
+        topProducts: [],
         source: 'database_tenant_empty',
       });
     }
@@ -92,6 +100,118 @@ export async function GET(req: Request) {
         revenue: Math.round(data.revenue),
       }));
 
+    // 5. Order Pipeline Velocity (Stage Breakdown)
+    const pendingOrders = storeOrders.filter((o) => ['new', 'to_confirm'].includes(o.status));
+    const confirmedOnlyOrders = storeOrders.filter((o) => o.status === 'confirmed');
+    const inTransitOrders = storeOrders.filter((o) => ['shipped', 'shipping'].includes(o.status));
+    const deliveredOnlyOrders = storeOrders.filter((o) => o.status === 'delivered');
+    const returnedOnlyOrders = storeOrders.filter((o) => ['returned', 'canceled'].includes(o.status));
+
+    const pipelineStages = [
+      {
+        key: 'to_confirm',
+        name: '1. À Confirmer',
+        count: pendingOrders.length,
+        value: Math.round(pendingOrders.reduce((s, o) => s + (Number(o.total) || 0), 0)),
+        color: '#94a3b8',
+      },
+      {
+        key: 'confirmed',
+        name: '2. Confirmées',
+        count: confirmedOnlyOrders.length,
+        value: Math.round(confirmedOnlyOrders.reduce((s, o) => s + (Number(o.total) || 0), 0)),
+        color: '#06b6d4',
+      },
+      {
+        key: 'shipped',
+        name: '3. En Transit',
+        count: inTransitOrders.length,
+        value: Math.round(inTransitOrders.reduce((s, o) => s + (Number(o.total) || 0), 0)),
+        color: '#38bdf8',
+      },
+      {
+        key: 'delivered',
+        name: '4. Livrées & Encaissées',
+        count: deliveredOnlyOrders.length,
+        value: Math.round(deliveredOnlyOrders.reduce((s, o) => s + (Number(o.total) || 0), 0)),
+        color: '#10b981',
+      },
+      {
+        key: 'returned',
+        name: '5. Retours / Refus',
+        count: returnedOnlyOrders.length,
+        value: Math.round(returnedOnlyOrders.reduce((s, o) => s + (Number(o.total) || 0), 0)),
+        color: '#f43f5e',
+      },
+    ];
+
+    // 6. Top Products & SKU Realized Cashflow
+    const productStatsMap = new Map<string, {
+      title: string;
+      totalOrders: number;
+      totalQuantity: number;
+      grossRevenue: number;
+      deliveredRevenue: number;
+      deliveredCount: number;
+      returnedCount: number;
+    }>();
+
+    for (const order of storeOrders) {
+      const items = order.items || [];
+      const isDelivered = order.status === 'delivered';
+      const isReturned = ['returned', 'canceled'].includes(order.status);
+
+      for (const item of items) {
+        const title = item.title || 'Produit sans titre';
+        const key = title;
+        const existing = productStatsMap.get(key) || {
+          title,
+          totalOrders: 0,
+          totalQuantity: 0,
+          grossRevenue: 0,
+          deliveredRevenue: 0,
+          deliveredCount: 0,
+          returnedCount: 0,
+        };
+
+        const qty = Number(item.quantity) || 1;
+        const itemTotal = (Number(item.price) || 0) * qty;
+
+        existing.totalOrders += 1;
+        existing.totalQuantity += qty;
+        existing.grossRevenue += itemTotal;
+        if (isDelivered) {
+          existing.deliveredRevenue += itemTotal;
+          existing.deliveredCount += 1;
+        }
+        if (isReturned) {
+          existing.returnedCount += 1;
+        }
+
+        productStatsMap.set(key, existing);
+      }
+    }
+
+    const topProducts = Array.from(productStatsMap.values())
+      .map((p) => {
+        const dispatched = p.deliveredCount + p.returnedCount;
+        const deliveryRate = dispatched > 0
+          ? (p.deliveredCount / dispatched) * 100
+          : (p.totalOrders > 0 ? (p.deliveredCount / p.totalOrders) * 100 : 0);
+        const returnRate = dispatched > 0 ? (p.returnedCount / dispatched) * 100 : 0;
+        return {
+          title: p.title,
+          totalOrders: p.totalOrders,
+          totalQuantity: p.totalQuantity,
+          grossRevenue: Math.round(p.grossRevenue),
+          deliveredRevenue: Math.round(p.deliveredRevenue),
+          deliveryRate: Number(deliveryRate.toFixed(1)),
+          returnRate: Number(returnRate.toFixed(1)),
+        };
+      })
+      .sort((a, b) => b.deliveredRevenue - a.deliveredRevenue)
+      .slice(0, 6);
+
     return NextResponse.json({
       success: true,
       store: storeSlug,
@@ -103,6 +223,8 @@ export async function GET(req: Request) {
       returnRate: Number(returnRate.toFixed(1)),
       netProfit: Math.round(netProfit),
       cityDistribution,
+      pipelineStages,
+      topProducts,
       source: combined.length > 0 ? 'database_tenant' : 'demo_fallback',
     });
   } catch (error: any) {

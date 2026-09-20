@@ -741,6 +741,46 @@ STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS, 74/74 ROUTES BUILT, DOCK
 - Live Production Domain: `https://codshop.vipone.site` (HTTP/2 200 via Cloudflare and Traefik).
 - Git Repository: Synchronized with `origin/main`.
 
+=== ROUND 21: Carrier Benchmark Purge & 100% Real Order-Driven Analytics (Options 2 & 3) ===
+
+DATE: 2026-09-20
+STATUS: PERMANENT CORE MANDATE COMPLIANT & PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS, 74/74 ROUTES)
+
+1. CARRIER BENCHMARK PURGE & RULE 4 ENFORCEMENT:
+- Problem Eliminated:
+  * Deleted `src/components/admin/charts/CarrierPerformanceChart.tsx` which contained hardcoded mock carrier benchmarks (Ozon Express, SendIt, Cathedis, Amana) in direct violation of Permanent Rule 4.
+  * Purged all mock carrier names from the analytics pipeline.
+
+2. REAL STORE-ORDER ANALYTICS (OPTIONS 2 & 3):
+- Option 2: Order Pipeline Velocity & Stage Drop-Off (`src/components/admin/charts/OrderVelocityChart.tsx`):
+  * Recharts horizontal bar and stage cards tracking real volumes and MAD monetary values across all 5 operational fulfillment stages:
+    1. `À Confirmer` (Slate)
+    2. `Confirmées` (Cyan)
+    3. `En Transit` (Sky)
+    4. `Livrées & Encaissées` (Emerald)
+    5. `Retours / Refus` (Rose)
+  * Total pipeline value and stage conversion percentages computed dynamically from the store's active orders.
+- Option 3: Top Products Realized Cashflow & Return Risk (`src/components/admin/charts/TopProductsPerformanceChart.tsx`):
+  * Dynamic ranking of the merchant's real catalog items based on **Delivered Cash Collected (MAD)**, units sold, total orders, delivered success rate %, and return rate %.
+  * Return risk alert badges (`Alerte Refus` in rose with pulse animation for items with $> 20\%$ returns, `Top Rentable` for high delivery rate items).
+  * Interactive sorting pills: `Cash Encaissé` / `Volume Unités` / `Risque Retour`.
+- Real-Time Backend Aggregation:
+  * Updated `/api/admin/analytics/operations/route.ts` and `src/lib/backoffice.ts` to compute both `pipelineStages` and `topProducts` from `storeOrders`.
+  * Multi-tenant tenant isolation and zero-state handling for new stores.
+
+3. VERIFICATION & ZERO-REGRESSION ASSURANCE:
+- TypeScript Compilation: `npx tsc --noEmit` PASSED with 0 ERRORS.
+- Production Build: `npm run build` compiled 74/74 routes cleanly.
+- Automated Test Suite: `tests/crm-analytics-recharts.test.ts` PASSED with 100% success rate (verifying 5-stage pipeline, product cashflow ranking, and zero carrier mentions).
+- Live Headless Chrome Verification:
+  * Verified `/admin/analytics` Operations tab (`admin_analytics_operations_real.png`) and Top Products (`admin_analytics_top_products_real.png`).
+  * Confirmed that `CarrierPerformanceChart` is completely eliminated and replaced by authentic, reactive store metrics.
+
+4. PRODUCTION DEPLOYMENT & SYNC:
+- Docker Container: `codshop-app` rebuilt in 16.6s on Debian Slim runner, running healthy on `http://172.18.1.9:3000`.
+- Live Domain: `https://codshop.vipone.site` (HTTP/2 200 via Cloudflare and Traefik).
+- Git Repository: Synchronized with `origin/main`.
+
 <!-- GOAL_COMPLETE -->
 
 

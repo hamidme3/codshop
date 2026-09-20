@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 import { deriveCustomerSegment, CustomerSegment } from '../src/components/admin/crm/CustomerRiskBadge';
+import { getAnalytics } from '../src/lib/backoffice';
 
 console.log('🧪 Starting CRM Analytics & Recharts Data Pipeline Tests...\n');
 
@@ -121,7 +122,41 @@ async function runTests() {
   assert.ok(courierDeliveryRate > 85);
   console.log(`  ✓ Funnel metrics: Call Center Confirmation=${callCenterConfirmationRate.toFixed(1)}%, Courier Delivery=${courierDeliveryRate.toFixed(1)}%, End-to-End Cash=${fullEndToEndCashRate.toFixed(2)}%`);
 
-  console.log('\n✅ All CRM Analytics & Recharts Data Pipeline Tests Passed!\n');
+  console.log('\n4. Testing Real-Data Order Pipeline Velocity (Option 2)...');
+  const ottavioAnalytics = getAnalytics('ottavio');
+  assert.ok(ottavioAnalytics.pipelineStages, 'pipelineStages must be present');
+  assert.strictEqual(ottavioAnalytics.pipelineStages.length, 5, 'Must have exactly 5 pipeline stages');
+  
+  const stageKeys = ottavioAnalytics.pipelineStages.map((s) => s.key);
+  assert.deepStrictEqual(stageKeys, ['to_confirm', 'confirmed', 'shipped', 'delivered', 'returned']);
+  
+  const totalStageOrders = ottavioAnalytics.pipelineStages.reduce((acc, s) => acc + s.count, 0);
+  assert.strictEqual(totalStageOrders, ottavioAnalytics.totalOrders, 'Sum of pipeline stage counts must equal totalOrders');
+  console.log(`  ✓ 5 Pipeline stages correctly mapped across all ${totalStageOrders} orders without carrier dependencies.`);
+
+  console.log('\n5. Testing Real-Data Top Products SKU Cashflow (Option 3)...');
+  assert.ok(ottavioAnalytics.topProducts, 'topProducts must be present');
+  assert.ok(Array.isArray(ottavioAnalytics.topProducts), 'topProducts must be an array');
+  assert.ok(ottavioAnalytics.topProducts.length > 0, 'Ottavio must have top products calculated');
+
+  // Verify sorting by deliveredRevenue descending
+  for (let i = 0; i < ottavioAnalytics.topProducts.length - 1; i++) {
+    assert.ok(
+      ottavioAnalytics.topProducts[i].deliveredRevenue >= ottavioAnalytics.topProducts[i + 1].deliveredRevenue,
+      'topProducts must be sorted descending by deliveredRevenue'
+    );
+  }
+
+  const top = ottavioAnalytics.topProducts[0];
+  console.log(`  ✓ Top product: "${top.title}" with ${top.deliveredRevenue} MAD delivered cash (${top.totalQuantity} units sold, ${top.deliveryRate}% delivered rate).`);
+
+  console.log('\n6. Verifying Permanent Rule 4 Compliance (Zero Carrier Mentions)...');
+  const serialized = JSON.stringify(ottavioAnalytics).toLowerCase();
+  assert.strictEqual(serialized.includes('ozon express'), false, 'Must NOT contain "Ozon Express"');
+  assert.strictEqual(serialized.includes('cathedis'), false, 'Must NOT contain "Cathedis"');
+  console.log('  ✓ Permanent Rule 4 verified: zero fake carrier names present in analytics pipeline.');
+
+  console.log('\n✅ All CRM Analytics & Real-Data Recharts Pipeline Tests Passed!\n');
 }
 
 runTests().catch((err) => {

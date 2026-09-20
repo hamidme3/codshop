@@ -12,7 +12,8 @@ import {
 import { getAnalytics } from '@/lib/backoffice';
 import CodCashflowChart from '@/components/admin/charts/CodCashflowChart';
 import CodFunnelChart from '@/components/admin/charts/CodFunnelChart';
-import CarrierPerformanceChart from '@/components/admin/charts/CarrierPerformanceChart';
+import OrderVelocityChart, { PipelineStageMetric } from '@/components/admin/charts/OrderVelocityChart';
+import TopProductsPerformanceChart, { ProductPerformanceMetric } from '@/components/admin/charts/TopProductsPerformanceChart';
 import RegionalDistributionChart from '@/components/admin/charts/RegionalDistributionChart';
 
 interface StorefrontAnalyticsData {
@@ -69,6 +70,8 @@ interface OperationsAnalyticsData {
   returnRate: number;
   netProfit: number;
   cityDistribution: { city: string; orders: number; rate: number; revenue: number }[];
+  pipelineStages?: PipelineStageMetric[];
+  topProducts?: ProductPerformanceMetric[];
   source?: string;
 }
 
@@ -712,9 +715,12 @@ function AnalyticsContent() {
           {/* Interactive Recharts COD Cashflow Stream */}
           <CodCashflowChart currency="MAD" />
 
-          {/* 2-Column Grid: Multi-Carrier Fleet Benchmark & Regional Distribution */}
+          {/* 2-Column Grid: Order Pipeline Velocity & Regional Distribution */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <CarrierPerformanceChart currency="MAD" />
+            <OrderVelocityChart 
+              currency="MAD" 
+              data={analytics.pipelineStages} 
+            />
             <RegionalDistributionChart 
               currency="MAD"
               data={analytics.cityDistribution.length > 0 ? analytics.cityDistribution.map((cd, idx) => ({
@@ -726,6 +732,12 @@ function AnalyticsContent() {
               })) : undefined}
             />
           </div>
+
+          {/* Real Top Products SKU Realized Cashflow & Return Risk */}
+          <TopProductsPerformanceChart 
+            currency="MAD" 
+            data={analytics.topProducts} 
+          />
 
           {/* Net Profit Calculation Formula Breakdown */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
