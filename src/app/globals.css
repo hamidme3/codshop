@@ -377,9 +377,6 @@ h1 {
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-900\/40,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-slate-950,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-slate-950\/80,
-:root:not([data-admin-theme="dark"]) .admin-shell .bg-slate-900,
-:root:not([data-admin-theme="dark"]) .admin-shell .bg-slate-900\/90,
-:root:not([data-admin-theme="dark"]) .admin-shell .bg-slate-900\/80,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-black,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#0e1217\],
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#13171c\],
@@ -401,9 +398,6 @@ html:not(.dark) .admin-shell .bg-zinc-900\/50,
 html:not(.dark) .admin-shell .bg-zinc-900\/40,
 html:not(.dark) .admin-shell .bg-slate-950,
 html:not(.dark) .admin-shell .bg-slate-950\/80,
-html:not(.dark) .admin-shell .bg-slate-900,
-html:not(.dark) .admin-shell .bg-slate-900\/90,
-html:not(.dark) .admin-shell .bg-slate-900\/80,
 html:not(.dark) .admin-shell .bg-black,
 html:not(.dark) .admin-shell .bg-\[\#0e1217\],
 html:not(.dark) .admin-shell .bg-\[\#13171c\],
@@ -425,9 +419,6 @@ html:not(.dark) .admin-shell .bg-\[\#18181b\],
 [data-admin-theme="light"] .bg-zinc-900\/40,
 [data-admin-theme="light"] .bg-slate-950,
 [data-admin-theme="light"] .bg-slate-950\/80,
-[data-admin-theme="light"] .bg-slate-900,
-[data-admin-theme="light"] .bg-slate-900\/90,
-[data-admin-theme="light"] .bg-slate-900\/80,
 [data-admin-theme="light"] .bg-black,
 [data-admin-theme="light"] .bg-\[\#0e1217\],
 [data-admin-theme="light"] .bg-\[\#13171c\],
@@ -553,44 +544,70 @@ html:not(.dark) .admin-shell .text-slate-500,
   color: var(--admin-text-muted);
 }
 
-/* Ensure solid primary action buttons keep crisp white text */
+/* Ensure solid primary action buttons and active filter tabs keep crisp white text and solid dark backgrounds */
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-emerald-600,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-emerald-500,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-emerald-700,
-:root:not([data-admin-theme="dark"]) .admin-shell .bg-slate-900,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-blue-600,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-sky-600,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-rose-600,
+:root:not([data-admin-theme="dark"]) .admin-shell button.bg-slate-900,
+:root:not([data-admin-theme="dark"]) .admin-shell a.bg-slate-900,
+:root:not([data-admin-theme="dark"]) .admin-shell .admin-tab-active,
 html:not(.dark) .admin-shell .bg-emerald-600,
 html:not(.dark) .admin-shell .bg-emerald-500,
 html:not(.dark) .admin-shell .bg-emerald-700,
-html:not(.dark) .admin-shell .bg-slate-900,
 html:not(.dark) .admin-shell .bg-blue-600,
 html:not(.dark) .admin-shell .bg-sky-600,
 html:not(.dark) .admin-shell .bg-rose-600,
+html:not(.dark) .admin-shell button.bg-slate-900,
+html:not(.dark) .admin-shell a.bg-slate-900,
+html:not(.dark) .admin-shell .admin-tab-active,
 [data-admin-theme="light"] .bg-emerald-600,
 [data-admin-theme="light"] .bg-emerald-500,
 [data-admin-theme="light"] .bg-emerald-700,
-[data-admin-theme="light"] .bg-slate-900,
 [data-admin-theme="light"] .bg-blue-600,
 [data-admin-theme="light"] .bg-sky-600,
-[data-admin-theme="light"] .bg-rose-600 {
+[data-admin-theme="light"] .bg-rose-600,
+[data-admin-theme="light"] button.bg-slate-900,
+[data-admin-theme="light"] a.bg-slate-900,
+[data-admin-theme="light"] .admin-tab-active {
+  color: #ffffff !important;
+}
+
+:root:not([data-admin-theme="dark"]) .admin-shell button.bg-slate-900,
+:root:not([data-admin-theme="dark"]) .admin-shell a.bg-slate-900,
+:root:not([data-admin-theme="dark"]) .admin-shell .admin-tab-active,
+html:not(.dark) .admin-shell button.bg-slate-900,
+html:not(.dark) .admin-shell a.bg-slate-900,
+html:not(.dark) .admin-shell .admin-tab-active,
+[data-admin-theme="light"] button.bg-slate-900,
+[data-admin-theme="light"] a.bg-slate-900,
+[data-admin-theme="light"] .admin-tab-active {
+  background-color: #0f172a !important;
+  border-color: #0f172a !important;
   color: #ffffff !important;
 }
 
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-emerald-600 *,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-emerald-500 *,
-:root:not([data-admin-theme="dark"]) .admin-shell .bg-slate-900 *,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-rose-600 *,
+:root:not([data-admin-theme="dark"]) .admin-shell button.bg-slate-900 *,
+:root:not([data-admin-theme="dark"]) .admin-shell a.bg-slate-900 *,
+:root:not([data-admin-theme="dark"]) .admin-shell .admin-tab-active *,
 html:not(.dark) .admin-shell .bg-emerald-600 *,
 html:not(.dark) .admin-shell .bg-emerald-500 *,
-html:not(.dark) .admin-shell .bg-slate-900 *,
 html:not(.dark) .admin-shell .bg-rose-600 *,
+html:not(.dark) .admin-shell button.bg-slate-900 *,
+html:not(.dark) .admin-shell a.bg-slate-900 *,
+html:not(.dark) .admin-shell .admin-tab-active *,
 [data-admin-theme="light"] .bg-emerald-600 *,
 [data-admin-theme="light"] .bg-emerald-500 *,
-[data-admin-theme="light"] .bg-slate-900 *,
-[data-admin-theme="light"] .bg-rose-600 * {
-  color: #ffffff;
+[data-admin-theme="light"] .bg-rose-600 *,
+[data-admin-theme="light"] button.bg-slate-900 *,
+[data-admin-theme="light"] a.bg-slate-900 *,
+[data-admin-theme="light"] .admin-tab-active * {
+  color: #ffffff !important;
 }
 
 /* 4. Inputs, selects, and textareas */

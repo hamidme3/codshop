@@ -327,7 +327,7 @@ function CustomersContent() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`shrink-0 px-3 py-1.5 rounded-md font-medium whitespace-nowrap transition-colors cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-slate-900 text-white dark:bg-zinc-800 dark:text-white font-semibold shadow-xs'
+                  ? 'admin-tab-active bg-slate-900 text-white dark:bg-zinc-800 dark:text-white font-semibold shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/40'
               }`}
             >

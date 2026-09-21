@@ -587,7 +587,7 @@ function OrdersContent() {
                 onClick={() => handleFilterChange(tab.id)}
                 className={`shrink-0 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer text-xs ${
                   isTabActive
-                    ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white border border-slate-900 dark:border-slate-700/80 shadow-xs font-bold'
+                    ? 'admin-tab-active bg-slate-900 text-white dark:bg-slate-800 dark:text-white border border-slate-900 dark:border-slate-700/80 shadow-xs font-bold'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-slate-800/50'
                 }`}
               >
@@ -1145,47 +1145,47 @@ function OrdersContent() {
                               {isWaOpen && (
                                 <>
                                   <div className="fixed inset-0 z-20" onClick={() => setActiveWaOrderId(null)} />
-                                  <div className="absolute right-0 top-8 w-56 bg-slate-900 border border-slate-800 rounded-xl p-1.5 shadow-2xl z-30 text-[11px] space-y-1">
-                                  <div className="text-[9px] font-bold uppercase text-slate-500 px-2 py-1">
-                                    Modèles Darija WhatsApp
+                                  <div className="absolute right-0 top-8 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1.5 shadow-2xl z-30 text-[11px] space-y-1">
+                                    <div className="text-[9px] font-bold uppercase text-slate-500 dark:text-slate-400 px-2 py-1">
+                                      Modèles Darija WhatsApp
+                                    </div>
+                                    <a
+                                      href={buildWhatsAppLink(order, 'confirmation', storeSlug)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="block px-2 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 transition-colors"
+                                      onClick={() => setActiveWaOrderId(null)}
+                                    >
+                                      🟢 1. Confirmation Darija
+                                    </a>
+                                    <a
+                                      href={buildWhatsAppLink(order, 'unreachable', storeSlug)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="block px-2 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 transition-colors"
+                                      onClick={() => setActiveWaOrderId(null)}
+                                    >
+                                      📞 2. Relance Injoignable
+                                    </a>
+                                    <a
+                                      href={buildWhatsAppLink(order, 'gps_request', storeSlug)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="block px-2 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 transition-colors"
+                                      onClick={() => setActiveWaOrderId(null)}
+                                    >
+                                      📍 3. Demande Localisation GPS
+                                    </a>
+                                    <a
+                                      href={buildWhatsAppLink(order, 'shipped', storeSlug)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="block px-2 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 transition-colors"
+                                      onClick={() => setActiveWaOrderId(null)}
+                                    >
+                                      🚚 4. Avis d&apos;Expédition
+                                    </a>
                                   </div>
-                                  <a
-                                    href={buildWhatsAppLink(order, 'confirmation', storeSlug)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block px-2 py-1.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white"
-                                    onClick={() => setActiveWaOrderId(null)}
-                                  >
-                                    🟢 1. Confirmation Darija
-                                  </a>
-                                  <a
-                                    href={buildWhatsAppLink(order, 'unreachable', storeSlug)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block px-2 py-1.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white"
-                                    onClick={() => setActiveWaOrderId(null)}
-                                  >
-                                    📞 2. Relance Injoignable
-                                  </a>
-                                  <a
-                                    href={buildWhatsAppLink(order, 'gps_request', storeSlug)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block px-2 py-1.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white"
-                                    onClick={() => setActiveWaOrderId(null)}
-                                  >
-                                    📍 3. Demande Localisation GPS
-                                  </a>
-                                  <a
-                                    href={buildWhatsAppLink(order, 'shipped', storeSlug)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block px-2 py-1.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white"
-                                    onClick={() => setActiveWaOrderId(null)}
-                                  >
-                                    🚚 4. Avis d&apos;Expédition
-                                  </a>
-                                </div>
                               </>
                             )}
                             </div>
