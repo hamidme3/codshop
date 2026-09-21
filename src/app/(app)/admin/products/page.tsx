@@ -737,10 +737,10 @@ function ProductsContent() {
             <span className="text-zinc-600">•</span>
             <span className="text-[11px] text-zinc-400 font-mono tabular-nums">{products.length} références</span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-            <Package className="w-6 h-6 text-zinc-200" /> Catalogue Produits & Stocks
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
+            <Package className="w-6 h-6 text-slate-700 dark:text-zinc-200" /> Catalogue Produits & Stocks
           </h1>
-          <p className="text-zinc-400 text-xs mt-1">
+          <p className="text-slate-500 dark:text-zinc-400 text-xs mt-1">
             Gérez vos références, marges nettes unitaires et collections de vente.
           </p>
         </div>
@@ -748,13 +748,13 @@ function ProductsContent() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => handleOpenAICoach()}
-            className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-slate-700/80 font-medium px-3.5 py-2 rounded-lg text-xs transition-colors shadow-sm cursor-pointer"
+            className="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-200 dark:border-slate-700/80 font-medium px-3.5 py-2 rounded-lg text-xs transition-colors shadow-2xs cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> Coach IA Marocain
+            <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Coach IA Marocain
           </button>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black px-3.5 py-2 rounded-lg text-xs transition-colors shadow-sm shadow-emerald-500/20 cursor-pointer"
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-2 rounded-lg text-xs transition-colors shadow-xs shadow-emerald-500/20 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" /> Ajouter un Produit
           </button>
@@ -762,23 +762,23 @@ function ProductsContent() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1.5 p-1 bg-[#13171c] border border-slate-800/80 rounded-lg w-fit bento-card">
+      <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/80 rounded-lg w-fit shadow-2xs">
         <button
           onClick={() => setActiveTab('products')}
           className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
             activeTab === 'products'
-              ? 'bg-slate-800 text-white font-semibold shadow-sm'
-              : 'text-zinc-400 hover:text-zinc-200'
+              ? 'bg-white text-slate-900 dark:bg-slate-800 dark:text-white font-semibold shadow-xs border border-slate-200/60 dark:border-transparent'
+              : 'text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200'
           }`}
         >
           Tous les Produits ({products.length})
         </button>
         <button
           onClick={() => setActiveTab('categories')}
-          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
             activeTab === 'categories'
-              ? 'bg-zinc-800 text-white font-semibold shadow-sm'
-              : 'text-zinc-400 hover:text-zinc-200'
+              ? 'bg-white text-slate-900 dark:bg-zinc-800 dark:text-white font-semibold shadow-xs border border-slate-200/60 dark:border-transparent'
+              : 'text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200'
           }`}
         >
           Catégories & Collections ({categories.length})
@@ -788,28 +788,28 @@ function ProductsContent() {
       {activeTab === 'products' ? (
         <>
           {/* Search Bar */}
-          <div className="flex items-center justify-between gap-4 bg-[#121215] border border-zinc-800/80 rounded-xl p-3 shadow-sm">
+          <div className="flex items-center justify-between gap-4 bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 rounded-xl p-3 shadow-xs">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-500" />
+              <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher par titre, catégorie ou SKU..."
-                className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
+                className="w-full bg-slate-50 dark:bg-[#0d0d10] border border-slate-200 dark:border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-900 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
-            <div className="text-xs text-zinc-400 font-mono tabular-nums">
-              <strong className="text-zinc-200">{filteredProducts.length}</strong> article(s) trouvé(s)
+            <div className="text-xs text-slate-500 dark:text-zinc-400 font-mono tabular-nums">
+              <strong className="text-slate-900 dark:text-zinc-200">{filteredProducts.length}</strong> article(s) trouvé(s)
             </div>
           </div>
 
           {/* Products Table Container */}
-          <div className="bg-[#121215] border border-zinc-800/80 rounded-xl overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 rounded-xl overflow-hidden shadow-xs">
             {/* Mobile Product Cards Stream (screens < md) */}
-            <div className="block md:hidden divide-y divide-zinc-800/60 p-2 sm:p-3 space-y-3">
+            <div className="block md:hidden divide-y divide-slate-100 dark:divide-zinc-800/60 p-2 sm:p-3 space-y-3">
               {filteredProducts.length === 0 ? (
-                <div className="text-center py-10 text-zinc-500 text-xs">
+                <div className="text-center py-10 text-slate-500 dark:text-zinc-500 text-xs">
                   Aucun produit trouvé pour ce filtre.
                 </div>
               ) : (
@@ -819,81 +819,81 @@ function ProductsContent() {
                   const isLowStock = (p.stock ?? 0) <= 5;
 
                   return (
-                    <div key={`mobile-prod-${p.id}`} className="p-3 rounded-xl bg-[#0d0d10] border border-zinc-800/80 space-y-3">
+                    <div key={`mobile-prod-${p.id}`} className="p-3.5 rounded-xl bg-white dark:bg-[#0d0d10] border border-slate-200/90 dark:border-zinc-800/80 shadow-xs space-y-3">
                       {/* Top: Image + Title + Category + Status */}
                       <div className="flex items-start gap-3">
                         <img
                           src={p.images?.[0] ?? 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=800&auto=format&fit=crop'}
                           alt={p.title ?? 'Produit'}
-                          className="w-12 h-12 rounded-lg object-cover bg-zinc-950 border border-zinc-800 shrink-0"
+                          className="w-12 h-12 rounded-lg object-cover bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 shrink-0"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-1">
-                            <h4 className="font-bold text-white text-xs truncate">{p.title}</h4>
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
+                            <h4 className="font-bold text-slate-900 dark:text-white text-xs truncate">{p.title}</h4>
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0">
                               Actif
                             </span>
                           </div>
                           <div className="flex items-center gap-2 mt-1">
-                            <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/60 text-[10px] font-medium truncate">
+                            <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700/60 text-[10px] font-medium truncate">
                               {p.category}
                             </span>
-                            <span className="text-[10px] font-mono text-zinc-500 truncate">{p.sku}</span>
+                            <span className="text-[10px] font-mono text-slate-500 dark:text-zinc-500 truncate">{p.sku}</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Financial Economics Strip */}
-                      <div className="grid grid-cols-4 gap-1.5 p-2 rounded-lg bg-[#121215] border border-zinc-800/80 text-center">
+                      <div className="grid grid-cols-4 gap-1.5 p-2.5 rounded-lg bg-slate-50 dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 text-center">
                         <div>
-                          <div className="text-[10px] text-zinc-500">Prix Public</div>
-                          <div className="font-mono font-bold text-white text-xs tabular-nums">{p.price} DH</div>
+                          <div className="text-[10px] text-slate-500 dark:text-zinc-500">Prix Public</div>
+                          <div className="font-mono font-bold text-slate-900 dark:text-white text-xs tabular-nums">{p.price} DH</div>
                         </div>
                         <div>
-                          <div className="text-[10px] text-zinc-500">Coût Achat</div>
-                          <div className="font-mono font-semibold text-zinc-400 text-xs tabular-nums">{p.costPrice} DH</div>
+                          <div className="text-[10px] text-slate-500 dark:text-zinc-500">Coût Achat</div>
+                          <div className="font-mono font-semibold text-slate-600 dark:text-zinc-400 text-xs tabular-nums">{p.costPrice} DH</div>
                         </div>
                         <div>
-                          <div className="text-[10px] text-zinc-500">Marge Nette</div>
+                          <div className="text-[10px] text-slate-500 dark:text-zinc-500">Marge Nette</div>
                           <div className={`font-mono font-bold text-xs tabular-nums ${
-                            marginPercent >= 35 ? 'text-emerald-400' : marginPercent >= 15 ? 'text-sky-400' : 'text-rose-400'
+                            marginPercent >= 35 ? 'text-emerald-600 dark:text-emerald-400' : marginPercent >= 15 ? 'text-sky-600 dark:text-sky-400' : 'text-rose-600 dark:text-rose-400'
                           }`}>
                             +{margin} DH ({marginPercent}%)
                           </div>
                         </div>
                         <div>
-                          <div className="text-[10px] text-zinc-500">Visiteurs</div>
-                          <div className="font-mono font-bold text-sky-400 text-xs tabular-nums flex items-center justify-center gap-1">
-                            <Eye className="w-2.5 h-2.5 text-sky-400" />
+                          <div className="text-[10px] text-slate-500 dark:text-zinc-500">Visiteurs</div>
+                          <div className="font-mono font-bold text-sky-600 dark:text-sky-400 text-xs tabular-nums flex items-center justify-center gap-1">
+                            <Eye className="w-2.5 h-2.5 text-sky-500 dark:text-sky-400" />
                             <span>{Math.max(12, Math.floor(450 / (idx + 1) + (p.price % 37) * 4))}</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Stock Adjuster + Actions */}
-                      <div className="flex items-center justify-between pt-1 border-t border-zinc-800/60">
+                      <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-zinc-800/60">
                         <div className="flex items-center gap-1.5">
                           <button
                             type="button"
                             onClick={() => handleAdjustStock(p.id, -1)}
-                            className="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold flex items-center justify-center text-sm transition-colors border border-zinc-700 active:scale-95"
+                            className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 dark:border-zinc-700 font-bold flex items-center justify-center text-sm transition-colors active:scale-95 cursor-pointer"
                             title="Diminuer stock (-1)"
                           >
                             -
                           </button>
-                          <span className="font-mono tabular-nums font-bold text-xs text-white min-w-[50px] text-center">
+                          <span className="font-mono tabular-nums font-bold text-xs text-slate-900 dark:text-white min-w-[50px] text-center">
                             {p.stock} un.
                           </span>
                           <button
                             type="button"
                             onClick={() => handleAdjustStock(p.id, 1)}
-                            className="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold flex items-center justify-center text-sm transition-colors border border-zinc-700 active:scale-95"
+                            className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 dark:border-zinc-700 font-bold flex items-center justify-center text-sm transition-colors active:scale-95 cursor-pointer"
                             title="Augmenter stock (+1)"
                           >
                             +
                           </button>
                           {isLowStock && (
-                            <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/30 text-[10px] flex items-center gap-0.5">
+                            <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-[10px] flex items-center gap-0.5">
                               <AlertTriangle className="w-3 h-3" /> Faible
                             </span>
                           )}
@@ -903,7 +903,7 @@ function ProductsContent() {
                           <button
                             type="button"
                             onClick={() => handleOpenEditModal(p)}
-                            className="touch-target px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold flex items-center gap-1 transition-colors"
+                            className="touch-target px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 dark:border-zinc-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
                             <span>Modifier</span>
@@ -911,7 +911,7 @@ function ProductsContent() {
                           <button
                             type="button"
                             onClick={() => handleDeleteProduct(p)}
-                            className="touch-target p-2 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-950/40 border border-transparent hover:border-rose-800/40 transition-colors"
+                            className="touch-target p-2 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 dark:text-zinc-400 dark:hover:text-rose-400 dark:hover:bg-rose-950/40 dark:hover:border-rose-800/40 transition-colors cursor-pointer"
                             title="Supprimer"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -928,7 +928,7 @@ function ProductsContent() {
             <div className="hidden md:block overflow-x-auto admin-scrollbar">
               <table className="w-full text-left text-xs admin-table">
                 <thead>
-                  <tr className="border-b border-zinc-800/90 text-zinc-400 bg-[#0d0d10] font-semibold">
+                  <tr className="border-b border-slate-200 dark:border-zinc-800/90 text-slate-600 dark:text-zinc-400 bg-slate-50 dark:bg-[#0d0d10] font-semibold">
                     <th className="py-2.5 px-3">Produit</th>
                     <th className="py-2.5 px-3">Catégorie</th>
                     <th className="py-2.5 px-3">Prix Vente</th>
@@ -939,46 +939,46 @@ function ProductsContent() {
                     <th className="py-2.5 px-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-800/50">
+                <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/50">
                   {filteredProducts.map((p) => {
                     const margin = (p.price ?? 0) - (p.costPrice ?? 0);
                     const marginPercent = (p.price ?? 0) > 0 ? Math.round((margin / (p.price ?? 1)) * 100) : 0;
                     const isLowStock = p.stock <= 5;
 
                     return (
-                      <tr key={p.id} className="hover:bg-zinc-800/30 transition-colors">
+                      <tr key={p.id} className="hover:bg-slate-50/80 dark:hover:bg-zinc-800/30 transition-colors">
                         <td className="py-2.5 px-3 flex items-center gap-3">
                           <img
                             src={p.images?.[0] ?? 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=800&auto=format&fit=crop'}
                             alt={p.title ?? 'Produit'}
-                            className="w-9 h-9 rounded-md object-cover bg-zinc-950 border border-zinc-800 shrink-0"
+                            className="w-9 h-9 rounded-md object-cover bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 shrink-0"
                           />
                           <div>
-                            <div className="font-medium text-zinc-100 text-xs">{p.title}</div>
-                            <div className="text-[10px] font-mono text-zinc-400">{p.sku}</div>
+                            <div className="font-medium text-slate-900 dark:text-zinc-100 text-xs">{p.title}</div>
+                            <div className="text-[10px] font-mono text-slate-400 dark:text-zinc-400">{p.sku}</div>
                           </div>
                         </td>
 
-                        <td className="py-2.5 px-3 text-zinc-300">
-                          <span className="px-2 py-0.5 rounded bg-zinc-800/80 text-zinc-300 border border-zinc-700/60 text-[11px] font-medium">
+                        <td className="py-2.5 px-3 text-slate-700 dark:text-zinc-300">
+                          <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700/60 text-[11px] font-medium">
                             {p.category}
                           </span>
                         </td>
 
                         <td className="py-2.5 px-3">
-                          <div className="font-mono tabular-nums font-semibold text-zinc-100 text-xs">{p.price} MAD</div>
+                          <div className="font-mono tabular-nums font-semibold text-slate-900 dark:text-zinc-100 text-xs">{p.price} MAD</div>
                           {p.comparePrice && (
-                            <div className="text-[10px] font-mono tabular-nums text-zinc-400 line-through">{p.comparePrice} MAD</div>
+                            <div className="text-[10px] font-mono tabular-nums text-slate-400 dark:text-zinc-400 line-through">{p.comparePrice} MAD</div>
                           )}
                         </td>
 
-                        <td className="py-2.5 px-3 text-zinc-300 font-mono tabular-nums text-xs">
+                        <td className="py-2.5 px-3 text-slate-700 dark:text-zinc-300 font-mono tabular-nums text-xs">
                           {p.costPrice} MAD
                         </td>
 
                         <td className="py-2.5 px-3">
-                          <div className="font-mono tabular-nums font-semibold text-emerald-400 text-xs">+{margin} MAD</div>
-                          <div className="text-[10px] font-mono tabular-nums text-zinc-400">({marginPercent}% marge)</div>
+                          <div className="font-mono tabular-nums font-semibold text-emerald-600 dark:text-emerald-400 text-xs">+{margin} MAD</div>
+                          <div className="text-[10px] font-mono tabular-nums text-slate-500 dark:text-zinc-400">({marginPercent}% marge)</div>
                         </td>
 
                         <td className="py-2.5 px-3">
@@ -986,30 +986,30 @@ function ProductsContent() {
                             <button
                               type="button"
                               onClick={() => handleAdjustStock(p.id, -1)}
-                              className="w-5 h-5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold flex items-center justify-center text-xs transition-colors border border-zinc-700"
+                              className="w-5 h-5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-300 dark:border-zinc-700 font-bold flex items-center justify-center text-xs transition-colors cursor-pointer"
                               title="Diminuer stock (-1)"
                             >
                               -
                             </button>
-                            <span className="font-mono tabular-nums font-medium text-zinc-200 min-w-[48px] text-center text-xs">{p.stock} un.</span>
+                            <span className="font-mono tabular-nums font-medium text-slate-800 dark:text-zinc-200 min-w-[48px] text-center text-xs">{p.stock} un.</span>
                             <button
                               type="button"
                               onClick={() => handleAdjustStock(p.id, 1)}
-                              className="w-5 h-5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold flex items-center justify-center text-xs transition-colors border border-zinc-700"
+                              className="w-5 h-5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-300 dark:border-zinc-700 font-bold flex items-center justify-center text-xs transition-colors cursor-pointer"
                               title="Augmenter stock (+1)"
                             >
                               +
                             </button>
                             {isLowStock && (
-                              <span className="p-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/30 ml-0.5" title="Stock faible !">
-                                <AlertTriangle className="w-3 h-3 text-rose-400" />
+                              <span className="p-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30 ml-0.5" title="Stock faible !">
+                                <AlertTriangle className="w-3 h-3 text-rose-500 dark:text-rose-400" />
                               </span>
                             )}
                           </div>
                         </td>
 
                         <td className="py-2.5 px-3 text-center">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                             Actif
                           </span>
                         </td>
@@ -1019,16 +1019,16 @@ function ProductsContent() {
                             <button
                               type="button"
                               onClick={() => handleOpenEditModal(p)}
-                              className="p-1 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 border border-transparent hover:border-zinc-700 transition-colors inline-flex items-center cursor-pointer"
-                              title="Modifier ce produit (prix, stock, variantes)"
+                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-300 dark:border-zinc-700 transition-colors cursor-pointer"
+                              title="Modifier"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
                             </button>
                             <button
                               type="button"
                               onClick={() => handleDeleteProduct(p)}
-                              className="p-1 rounded text-zinc-400 hover:text-rose-400 hover:bg-rose-950/40 border border-transparent hover:border-rose-800/40 transition-colors inline-flex items-center cursor-pointer"
-                              title="Supprimer ce produit"
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 dark:text-zinc-400 dark:hover:text-rose-400 dark:hover:bg-rose-950/40 dark:hover:border-rose-800/40 transition-colors cursor-pointer"
+                              title="Supprimer"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -1046,17 +1046,17 @@ function ProductsContent() {
         /* Categories View */
         <div className="space-y-4">
           {/* Categories Toolbar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#121215] border border-zinc-800/80 rounded-xl p-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 rounded-xl p-4 shadow-xs">
             <div>
-              <h2 className="font-semibold text-white text-sm">Gestion des Catégories & Collections</h2>
-              <p className="text-zinc-400 text-xs mt-0.5">
+              <h2 className="font-semibold text-slate-900 dark:text-white text-sm">Gestion des Catégories & Collections</h2>
+              <p className="text-slate-500 dark:text-zinc-400 text-xs mt-0.5">
                 Créez de nouvelles collections et gérez les associations produits avec garde-fous de sécurité.
               </p>
             </div>
             <button
               type="button"
               onClick={() => setShowAddCategoryModal(true)}
-              className="inline-flex items-center gap-2 bg-zinc-100 hover:bg-white text-zinc-900 font-semibold px-3.5 py-2 rounded-lg text-xs transition-colors shadow-sm self-start sm:self-auto"
+              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-3.5 py-2 rounded-lg text-xs transition-colors shadow-xs self-start sm:self-auto cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" /> Nouvelle Catégorie
             </button>
@@ -1069,41 +1069,41 @@ function ProductsContent() {
                 <div 
                   key={c.id} 
                   data-category-card
-                  className="p-4 sm:p-5 rounded-xl bg-[#121215] border border-zinc-800/80 flex flex-col justify-between space-y-3 hover:border-zinc-700/80 transition-colors shadow-sm"
+                  className="p-4 sm:p-5 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 flex flex-col justify-between space-y-3 hover:border-slate-300 dark:hover:border-zinc-700/80 transition-colors shadow-xs"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="w-8 h-8 rounded-lg bg-zinc-800/80 border border-zinc-700/80 flex items-center justify-center text-base">
-                        {c.icon ? <span>{c.icon}</span> : <Tag className="w-3.5 h-3.5 text-zinc-300" />}
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700/80 flex items-center justify-center text-base">
+                        {c.icon ? <span>{c.icon}</span> : <Tag className="w-3.5 h-3.5 text-slate-600 dark:text-zinc-300" />}
                       </div>
                       <span className={`text-[11px] font-mono tabular-nums px-2 py-0.5 rounded border ${
                         hasProducts 
-                          ? 'bg-zinc-800/80 text-zinc-200 border-zinc-700/80' 
-                          : 'bg-zinc-900/60 text-zinc-500 border-zinc-800'
+                          ? 'bg-slate-100 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-200 border-slate-200 dark:border-zinc-700/80' 
+                          : 'bg-slate-50 dark:bg-zinc-900/60 text-slate-400 dark:text-zinc-500 border-slate-200 dark:border-zinc-800'
                       }`}>
                         {c.productCount} {c.productCount === 1 ? 'article' : 'articles'}
                       </span>
                     </div>
-                    <div className="font-medium text-white text-sm tracking-tight">{c.name}</div>
-                    <div className="text-[11px] font-mono text-zinc-500">slug: {c.slug}</div>
+                    <div className="font-medium text-slate-900 dark:text-white text-sm tracking-tight">{c.name}</div>
+                    <div className="text-[11px] font-mono text-slate-500 dark:text-zinc-500">slug: {c.slug}</div>
                     {c.description && (
-                      <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed mt-1">
+                      <p className="text-[11px] text-slate-600 dark:text-zinc-400 line-clamp-2 leading-relaxed mt-1">
                         {c.description}
                       </p>
                     )}
                   </div>
 
-                  <div className="pt-2.5 border-t border-zinc-800/80 flex items-center justify-between">
-                    <span className="text-[10px] text-zinc-400">
+                  <div className="pt-2.5 border-t border-slate-200 dark:border-zinc-800/80 flex items-center justify-between">
+                    <span className="text-[10px] text-slate-500 dark:text-zinc-400">
                       {hasProducts ? 'Catégorie active' : 'Aucun produit rattaché'}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleDeleteCategory(c)}
-                      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-colors ${
+                      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
                         hasProducts
-                          ? 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/60'
-                          : 'text-rose-400 hover:text-white hover:bg-rose-900/60 bg-rose-950/30 border border-rose-800/40'
+                          ? 'text-slate-400 hover:text-slate-600 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/60'
+                          : 'text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 border border-rose-200 dark:text-rose-400 dark:hover:bg-rose-900/60 dark:bg-rose-950/30 dark:border-rose-800/40'
                       }`}
                       title={hasProducts ? 'Protégée : contient des produits' : 'Supprimer cette catégorie vide'}
                     >

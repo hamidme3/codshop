@@ -250,8 +250,8 @@ function CustomersContent() {
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Actualiser</span>
           </button>
-          <div className="text-xs font-mono text-zinc-400 bg-[#13171c] px-3 py-1.5 rounded-lg border border-slate-800/80">
-            Base active: <strong className="text-zinc-200 tabular-nums">{totalCustomersCount}</strong>
+          <div className="text-xs font-mono text-slate-600 dark:text-zinc-400 bg-white dark:bg-[#13171c] px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800/80 shadow-xs">
+            Base active: <strong className="text-slate-900 dark:text-zinc-200 tabular-nums">{totalCustomersCount}</strong>
           </div>
         </div>
       </div>
@@ -259,52 +259,52 @@ function CustomersContent() {
       {/* 4 Synchronized KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Total Base */}
-        <div className="p-4 rounded-xl bg-[#13171c] border border-slate-800/70 bento-card space-y-1.5 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-zinc-400 font-medium">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 bento-card space-y-1.5 shadow-xs">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
             <span>Total Clients CRM</span>
-            <Users className="w-3.5 h-3.5 text-zinc-500" />
+            <Users className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" />
           </div>
-          <div className="text-2xl font-mono tabular-nums font-bold text-white tracking-tight">{totalCustomersCount}</div>
-          <div className="text-[11px] text-zinc-500">Identifiés par téléphone normalisé</div>
+          <div className="text-2xl font-mono tabular-nums font-bold text-slate-900 dark:text-white tracking-tight">{totalCustomersCount}</div>
+          <div className="text-[11px] text-slate-500 dark:text-zinc-500">Identifiés par téléphone normalisé</div>
         </div>
 
         {/* 1. Confirmer (Cyan) */}
-        <div className="p-4 rounded-xl bg-[#13171c] border border-slate-800/70 bento-card space-y-1.5 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-zinc-400 font-medium">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 bento-card space-y-1.5 shadow-xs">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+              <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
               Étape 1 : Confirmées
             </span>
-            <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
           </div>
-          <div className="text-2xl font-mono tabular-nums font-bold text-white tracking-tight">{confirmedPipelineCount}</div>
-          <div className="text-[11px] text-zinc-500">En cours de préparation / emballage</div>
+          <div className="text-2xl font-mono tabular-nums font-bold text-slate-900 dark:text-white tracking-tight">{confirmedPipelineCount}</div>
+          <div className="text-[11px] text-slate-500 dark:text-zinc-500">En cours de préparation / emballage</div>
         </div>
 
         {/* 2. Expédier (Sky Blue) */}
-        <div className="p-4 rounded-xl bg-[#13171c] border border-slate-800/70 bento-card space-y-1.5 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-zinc-400 font-medium">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 bento-card space-y-1.5 shadow-xs">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-sky-400"></span>
+              <span className="w-2 h-2 rounded-full bg-sky-500"></span>
               Étape 2 : En Expédition
             </span>
-            <Truck className="w-3.5 h-3.5 text-sky-400" />
+            <Truck className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
           </div>
-          <div className="text-2xl font-mono tabular-nums font-bold text-white tracking-tight">{shippedPipelineCount}</div>
-          <div className="text-[11px] text-zinc-500">En cours d&apos;acheminement transporteur</div>
+          <div className="text-2xl font-mono tabular-nums font-bold text-slate-900 dark:text-white tracking-tight">{shippedPipelineCount}</div>
+          <div className="text-[11px] text-slate-500 dark:text-zinc-500">En cours d&apos;acheminement transporteur</div>
         </div>
 
         {/* 3. Livrée & Cash Encaissé (Emerald) */}
-        <div className="p-4 rounded-xl bg-[#13171c] border border-slate-800/70 bento-card space-y-1.5 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-zinc-400 font-medium">
+        <div className="p-4 rounded-xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 bento-card space-y-1.5 shadow-xs">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
               Étape 3 : Cash Encaissé
             </span>
-            <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+            <DollarSign className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <div className="text-2xl font-mono tabular-nums font-bold text-emerald-400 tracking-tight">{totalDeliveredRevenue.toLocaleString()} MAD</div>
-          <div className="text-[11px] text-zinc-500">{deliveredPipelineCount} client(s) ayant réglé le COD</div>
+          <div className="text-2xl font-mono tabular-nums font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">{totalDeliveredRevenue.toLocaleString()} MAD</div>
+          <div className="text-[11px] text-slate-500 dark:text-zinc-500">{deliveredPipelineCount} client(s) ayant réglé le COD</div>
         </div>
       </div>
 
@@ -313,7 +313,7 @@ function CustomersContent() {
 
       {/* Tabs & Search */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-1 p-1 bg-[#121215] border border-zinc-800/80 rounded-lg overflow-x-auto admin-scrollbar no-scrollbar text-xs">
+        <div className="flex items-center gap-1 p-1 bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 rounded-lg overflow-x-auto admin-scrollbar no-scrollbar text-xs shadow-xs">
           {[
             { id: 'all', label: `Tous (${totalCustomersCount})` },
             { id: 'confirmed', label: `1. Confirmés (${confirmedPipelineCount})` },
@@ -327,8 +327,8 @@ function CustomersContent() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`shrink-0 px-3 py-1.5 rounded-md font-medium whitespace-nowrap transition-colors cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-zinc-800 text-white font-semibold shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-slate-900 text-white dark:bg-zinc-800 dark:text-white font-semibold shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/40'
               }`}
             >
               {tab.label}
@@ -337,23 +337,23 @@ function CustomersContent() {
         </div>
 
         <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-500" />
+          <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Nom, téléphone, N° commande, suivi..."
-            className="w-full bg-[#121215] border border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
+            className="w-full bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-900 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500 dark:focus:border-zinc-600 transition-colors shadow-xs"
           />
         </div>
       </div>
 
       {/* Synchronized Customers Table Container */}
-      <div className="bg-[#121215] border border-zinc-800/80 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 rounded-xl overflow-hidden shadow-xs">
         {/* Mobile Customer Cards Stream (screens < md) */}
-        <div className="block md:hidden divide-y divide-zinc-800/60 p-2 sm:p-3 space-y-3">
+        <div className="block md:hidden divide-y divide-slate-100 dark:divide-zinc-800/60 p-2 sm:p-3 space-y-3">
           {filteredCustomers.length === 0 ? (
-            <div className="text-center py-10 text-zinc-500 text-xs">
+            <div className="text-center py-10 text-slate-400 dark:text-zinc-500 text-xs">
               Aucun client trouvé pour ce filtre.
             </div>
           ) : (
@@ -364,17 +364,17 @@ function CustomersContent() {
               return (
                 <div
                   key={`mobile-cust-${c.id}`}
-                  className="p-3 rounded-xl bg-[#0d0d10] border border-zinc-800/80 space-y-3 cursor-pointer hover:border-zinc-700/80 transition-colors"
+                  className="p-3 rounded-xl bg-white dark:bg-[#0d0d10] border border-slate-200 dark:border-zinc-800/80 space-y-3 cursor-pointer hover:border-slate-300 dark:hover:border-zinc-700/80 transition-colors shadow-xs"
                   onClick={() => setSelectedCustomer(c)}
                 >
                   {/* Top row: Avatar + Name + VIP/Risk Badge + Total Spend */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-mono font-medium text-zinc-200 text-xs shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 flex items-center justify-center font-mono font-medium text-slate-700 dark:text-zinc-200 text-xs shrink-0">
                         {c.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <div className="font-bold text-white text-xs truncate">{c.name}</div>
+                        <div className="font-bold text-slate-900 dark:text-white text-xs truncate">{c.name}</div>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <CustomerRiskBadge customer={c} />
                         </div>
@@ -382,30 +382,30 @@ function CustomersContent() {
                     </div>
 
                     <div className="text-right shrink-0">
-                      <div className="font-mono font-bold text-sm text-white tabular-nums">
-                        {c.totalSpend} <span className="text-[10px] font-sans text-zinc-400">MAD</span>
+                      <div className="font-mono font-bold text-sm text-slate-900 dark:text-white tabular-nums">
+                        {c.totalSpend} <span className="text-[10px] font-sans text-slate-500 dark:text-zinc-400">MAD</span>
                       </div>
-                      <div className="text-[10px] text-zinc-500 font-mono">
+                      <div className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
                         {c.totalOrders} cmd{c.totalOrders > 1 ? 's' : ''}
                       </div>
                     </div>
                   </div>
 
                   {/* Middle row: Coordinates + Pipeline Status */}
-                  <div className="grid grid-cols-2 gap-2 p-2 rounded-lg bg-[#121215] border border-zinc-800/80 text-xs">
+                  <div className="grid grid-cols-2 gap-2 p-2 rounded-lg bg-slate-50 dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 text-xs">
                     <div>
-                      <div className="text-[10px] text-zinc-500">Ville & Tél</div>
-                      <div className="text-zinc-200 font-medium truncate">{c.city}</div>
+                      <div className="text-[10px] text-slate-400 dark:text-zinc-500">Ville & Tél</div>
+                      <div className="text-slate-800 dark:text-zinc-200 font-medium truncate">{c.city}</div>
                       <a
                         href={`tel:${c.phone}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="text-[11px] font-mono text-zinc-400 hover:text-white underline tabular-nums"
+                        className="text-[11px] font-mono text-slate-500 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-white underline tabular-nums"
                       >
                         {c.phone}
                       </a>
                     </div>
                     <div>
-                      <div className="text-[10px] text-zinc-500">Dernier Statut</div>
+                      <div className="text-[10px] text-slate-400 dark:text-zinc-500">Dernier Statut</div>
                       <div className="mt-0.5">
                         {c.lastOrderStatus === 'confirmed' ? (
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold stage-pill-confirmed font-mono">
@@ -419,27 +419,23 @@ function CustomersContent() {
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold stage-pill-delivered font-mono">
                             <DollarSign className="w-2.5 h-2.5" /> Livrée
                           </span>
-                        ) : c.lastOrderStatus === 'returned' || c.lastOrderStatus === 'canceled' ? (
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold stage-pill-returned font-mono">
-                            <AlertTriangle className="w-2.5 h-2.5" /> Retournée
-                          </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold stage-pill-to_confirm font-mono">
                             <Clock className="w-2.5 h-2.5" /> À Confirmer
                           </span>
                         )}
                       </div>
-                      <div className="text-[10px] text-zinc-400 font-mono mt-0.5">{deliveryRate}% livré</div>
+                      <div className="text-[10px] text-slate-400 dark:text-zinc-400 font-mono mt-0.5">{deliveryRate}% livré</div>
                     </div>
                   </div>
 
                   {/* Actions row: WhatsApp Darija + Open Timeline */}
-                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-zinc-800/60" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-zinc-800/60" onClick={(e) => e.stopPropagation()}>
                     <a
                       href={waUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="touch-target flex-1 px-3 py-1.5 rounded-lg bg-emerald-950/50 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/50 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                      className="touch-target flex-1 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:hover:bg-emerald-900 dark:text-emerald-300 dark:border-emerald-800/50 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
                     >
                       <MessageCircle className="w-3.5 h-3.5 fill-current" />
                       <span>
@@ -453,10 +449,10 @@ function CustomersContent() {
                     <button
                       type="button"
                       onClick={() => setSelectedCustomer(c)}
-                      className="touch-target px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold flex items-center gap-1 transition-colors shrink-0"
+                      className="touch-target px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 dark:border-zinc-700 text-xs font-semibold flex items-center gap-1 transition-colors shrink-0"
                     >
                       <span>Historique</span>
-                      <ChevronRight className="w-3 h-3 text-zinc-400" />
+                      <ChevronRight className="w-3 h-3 text-slate-400 dark:text-zinc-400" />
                     </button>
                   </div>
                 </div>
@@ -621,27 +617,27 @@ function CustomersContent() {
           onClick={() => setSelectedCustomer(null)}
         >
           <div 
-            className="w-full max-w-lg bg-[#121215] border-l border-zinc-800 p-4 sm:p-6 flex flex-col justify-between overflow-y-auto shadow-2xl admin-scrollbar cursor-default min-h-[100dvh]"
+            className="w-full max-w-lg bg-white dark:bg-[#121215] border-l border-slate-200 dark:border-zinc-800 p-4 sm:p-6 flex flex-col justify-between overflow-y-auto shadow-2xl admin-scrollbar cursor-default min-h-[100dvh]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-5">
               {/* Top Drawer Header */}
-              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3.5">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800/80 pb-3.5">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-mono font-medium text-sm text-zinc-200">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 flex items-center justify-center font-mono font-medium text-sm text-slate-700 dark:text-zinc-200">
                     {selectedCustomer.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-base font-semibold text-white">{selectedCustomer.name}</h2>
+                      <h2 className="text-base font-semibold text-slate-900 dark:text-white">{selectedCustomer.name}</h2>
                       <CustomerRiskBadge customer={selectedCustomer} showDescription />
                     </div>
-                    <p className="text-xs text-zinc-400 font-mono mt-0.5">{selectedCustomer.phone} • {selectedCustomer.city}</p>
+                    <p className="text-xs text-slate-500 dark:text-zinc-400 font-mono mt-0.5">{selectedCustomer.phone} • {selectedCustomer.city}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedCustomer(null)}
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-zinc-800 transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -649,17 +645,17 @@ function CustomersContent() {
 
               {/* Customer Metrics Grid */}
               <div className="grid grid-cols-3 gap-2.5">
-                <div className="p-3 bg-[#0d0d10] rounded-lg border border-zinc-800/80 text-center">
-                  <div className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Commandes</div>
-                  <div className="text-base font-mono tabular-nums font-bold text-white mt-0.5">{selectedCustomer.totalOrders}</div>
+                <div className="p-3 bg-slate-50 dark:bg-[#0d0d10] rounded-lg border border-slate-200 dark:border-zinc-800/80 text-center">
+                  <div className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase font-mono tracking-wider">Commandes</div>
+                  <div className="text-base font-mono tabular-nums font-bold text-slate-900 dark:text-white mt-0.5">{selectedCustomer.totalOrders}</div>
                 </div>
-                <div className="p-3 bg-[#0d0d10] rounded-lg border border-zinc-800/80 text-center">
-                  <div className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Encaissé</div>
-                  <div className="text-base font-mono tabular-nums font-bold text-emerald-400 mt-0.5">{selectedCustomer.totalSpend} MAD</div>
+                <div className="p-3 bg-slate-50 dark:bg-[#0d0d10] rounded-lg border border-slate-200 dark:border-zinc-800/80 text-center">
+                  <div className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase font-mono tracking-wider">Encaissé</div>
+                  <div className="text-base font-mono tabular-nums font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{selectedCustomer.totalSpend} MAD</div>
                 </div>
-                <div className="p-3 bg-[#0d0d10] rounded-lg border border-zinc-800/80 text-center">
-                  <div className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Taux Livré</div>
-                  <div className="text-base font-mono tabular-nums font-bold text-zinc-100 mt-0.5">{selectedCustomer.deliverySuccessRate ?? 100}%</div>
+                <div className="p-3 bg-slate-50 dark:bg-[#0d0d10] rounded-lg border border-slate-200 dark:border-zinc-800/80 text-center">
+                  <div className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase font-mono tracking-wider">Taux Livré</div>
+                  <div className="text-base font-mono tabular-nums font-bold text-slate-800 dark:text-zinc-100 mt-0.5">{selectedCustomer.deliverySuccessRate ?? 100}%</div>
                 </div>
               </div>
 

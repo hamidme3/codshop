@@ -582,10 +582,10 @@ function AdminNav({ children }: { children: React.ReactNode }) {
             {/* Slide-out Panel */}
             <aside 
               aria-label="Mobile Menu Navigation"
-              className="relative z-10 w-72 max-w-[85vw] h-full bg-[#101418] border-r border-slate-800/70 shadow-2xl flex flex-col animate-in slide-in-from-left duration-200"
+              className="relative z-10 w-72 max-w-[85vw] h-full bg-white dark:bg-[#101418] border-r border-slate-200 dark:border-slate-800/70 shadow-2xl flex flex-col animate-in slide-in-from-left duration-200"
             >
               {/* Drawer Top Header */}
-              <div className="h-14 px-4 flex items-center justify-between border-b border-slate-800/70 bg-[#0e1216]">
+              <div className="h-14 px-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800/70 bg-slate-50 dark:bg-[#0e1216]">
                 <Link 
                   href={`/admin?store=${storeSlug}`} 
                   onClick={() => setMobileMenuOpen(false)}
@@ -595,13 +595,13 @@ function AdminNav({ children }: { children: React.ReactNode }) {
                     C
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-extrabold text-white text-xs tracking-tight">CODShop Mobile</span>
-                    <span className="text-[8px] font-mono text-zinc-500 tracking-wider">MAROC ENTERPRISE</span>
+                    <span className="font-extrabold text-slate-900 dark:text-white text-xs tracking-tight">CODShop Mobile</span>
+                    <span className="text-[8px] font-mono text-slate-400 dark:text-zinc-500 tracking-wider">MAROC ENTERPRISE</span>
                   </div>
                 </Link>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="touch-target p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-slate-800"
+                  className="touch-target p-2 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800"
                   aria-label="Fermer le menu"
                 >
                   <X className="w-4 h-4" />
@@ -609,7 +609,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
               </div>
 
               {/* Store Switcher in Mobile Drawer */}
-              <div className="p-3 border-b border-slate-800/70 bg-[#0e1216] space-y-2">
+              <div className="p-3 border-b border-slate-200 dark:border-slate-800/70 bg-slate-50 dark:bg-[#0e1216] space-y-2">
                 <StoreSwitcher currentSlug={storeSlug} />
               </div>
 
@@ -617,7 +617,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
               <div className="flex-1 p-3 space-y-4 overflow-y-auto admin-scrollbar">
                 {navSections.map((sec) => (
                   <div key={sec.title} className="space-y-1">
-                    <div className="text-[10px] font-extrabold text-zinc-500 tracking-wider px-2.5 py-1">
+                    <div className="text-[10px] font-extrabold text-slate-400 dark:text-zinc-500 tracking-wider px-2.5 py-1">
                       {sec.title}
                     </div>
                     {sec.items.map((item) => {
@@ -636,18 +636,18 @@ function AdminNav({ children }: { children: React.ReactNode }) {
                               onClick={() => !isOrdersItem && setMobileMenuOpen(false)}
                               className={`flex-1 flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors min-h-[40px] ${
                                 isActive && !isOrdersItem
-                                  ? 'bg-emerald-500/10 text-white font-bold border-l-2 border-emerald-500'
+                                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-white font-bold border-l-2 border-emerald-500'
                                   : isActive && isOrdersItem
-                                  ? 'text-white font-bold bg-slate-800/60'
-                                  : 'text-zinc-300 hover:text-white hover:bg-slate-800/60'
+                                  ? 'text-slate-900 dark:text-white font-bold bg-slate-100 dark:bg-slate-800/60'
+                                  : 'text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
                               }`}
                             >
                               <div className="flex items-center gap-2.5">
-                                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-400' : 'text-zinc-400'}`} />
+                                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-zinc-400'}`} />
                                 <span className="truncate">{item.label}</span>
                               </div>
                               {item.badge && (
-                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                                   {item.badge}
                                 </span>
                               )}
@@ -747,16 +747,16 @@ function AdminNav({ children }: { children: React.ReactNode }) {
         {/* Mobile Bottom Thumb Quick-Action Bar */}
         <nav 
           aria-label="Barre de navigation rapide mobile" 
-          className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#101418]/95 backdrop-blur-md border-t border-slate-800/70 px-2 pt-1 pb-[max(0.4rem,env(safe-area-inset-bottom,0px))] flex items-center justify-around shadow-2xl"
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-[#101418]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800/70 px-2 pt-1 pb-[max(0.4rem,env(safe-area-inset-bottom,0px))] flex items-center justify-around shadow-lg"
         >
           {/* 1. Dashboard Overview */}
           <Link
             href={`/admin?store=${storeSlug}`}
             className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium transition-colors ${
-              pathname === '/admin' ? 'text-emerald-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              pathname === '/admin' ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200'
             }`}
           >
-            <LayoutDashboard className={`w-4 h-4 mb-0.5 ${pathname === '/admin' ? 'text-emerald-400' : 'text-zinc-400'}`} />
+            <LayoutDashboard className={`w-4 h-4 mb-0.5 ${pathname === '/admin' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-zinc-400'}`} />
             <span>Aperçu</span>
           </Link>
 
@@ -764,10 +764,10 @@ function AdminNav({ children }: { children: React.ReactNode }) {
           <Link
             href={`/admin/orders?store=${storeSlug}`}
             className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium transition-colors ${
-              pathname.startsWith('/admin/orders') ? 'text-emerald-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              pathname.startsWith('/admin/orders') ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200'
             }`}
           >
-            <ShoppingBag className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/orders') ? 'text-emerald-400' : 'text-zinc-400'}`} />
+            <ShoppingBag className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/orders') ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-zinc-400'}`} />
             <span>Commandes</span>
           </Link>
 
@@ -775,10 +775,10 @@ function AdminNav({ children }: { children: React.ReactNode }) {
           <Link
             href={`/admin/products?store=${storeSlug}`}
             className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium transition-colors ${
-              pathname.startsWith('/admin/products') ? 'text-emerald-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              pathname.startsWith('/admin/products') ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200'
             }`}
           >
-            <Package className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/products') ? 'text-emerald-400' : 'text-zinc-400'}`} />
+            <Package className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/products') ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-zinc-400'}`} />
             <span>Produits</span>
           </Link>
 
@@ -786,19 +786,19 @@ function AdminNav({ children }: { children: React.ReactNode }) {
           <Link
             href={`/admin/customers?store=${storeSlug}`}
             className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium transition-colors ${
-              pathname.startsWith('/admin/customers') ? 'text-emerald-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              pathname.startsWith('/admin/customers') ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200'
             }`}
           >
-            <Users className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/customers') ? 'text-emerald-400' : 'text-zinc-400'}`} />
+            <Users className={`w-4 h-4 mb-0.5 ${pathname.startsWith('/admin/customers') ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-zinc-400'}`} />
             <span>Clients</span>
           </Link>
 
           {/* 5. Menu Drawer Trigger */}
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium text-zinc-400 hover:text-white transition-colors"
+            className="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 text-[10px] font-medium text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white transition-colors"
           >
-            <Menu className="w-4 h-4 mb-0.5 text-zinc-400" />
+            <Menu className="w-4 h-4 mb-0.5 text-slate-400 dark:text-zinc-400" />
             <span>Menu</span>
           </button>
         </nav>
@@ -811,25 +811,25 @@ function AdminNav({ children }: { children: React.ReactNode }) {
           onClick={() => setShowCommandModal(false)}
         >
           <div 
-            className="bg-[#121215] border border-zinc-800 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150"
+            className="bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-zinc-800">
-              <Search className="w-4 h-4 text-zinc-500 shrink-0" />
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-slate-200 dark:border-zinc-800">
+              <Search className="w-4 h-4 text-slate-400 dark:text-zinc-500 shrink-0" />
               <input
                 type="text"
                 autoFocus
                 value={commandQuery}
                 onChange={(e) => setCommandQuery(e.target.value)}
                 placeholder="Accéder directement à une section (Commandes, Stocks, Thèmes...)"
-                className="w-full bg-transparent text-sm text-white placeholder-zinc-500 focus:outline-none"
+                className="w-full bg-transparent text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none"
               />
-              <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 text-[10px] font-mono text-zinc-400 border border-zinc-700">ESC</kbd>
+              <kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-[10px] font-mono text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700">ESC</kbd>
             </div>
 
             <div className="max-h-72 overflow-y-auto p-2 space-y-1 admin-scrollbar text-xs">
               {filteredCommandItems.length === 0 ? (
-                <div className="p-4 text-center text-zinc-500">
+                <div className="p-4 text-center text-slate-500 dark:text-zinc-500">
                   Aucune section trouvée pour &quot;{commandQuery}&quot;
                 </div>
               ) : (
@@ -840,19 +840,19 @@ function AdminNav({ children }: { children: React.ReactNode }) {
                       router.push(item.href);
                       setShowCommandModal(false);
                     }}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-zinc-300 hover:text-white hover:bg-zinc-800/80 transition-colors text-left group"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800/80 transition-colors text-left group"
                   >
                     <div className="flex items-center gap-2.5">
-                      <item.icon className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400" />
+                      <item.icon className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400" />
                       <span className="font-semibold">{item.label}</span>
                     </div>
-                    <ArrowRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-300" />
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-600 group-hover:text-slate-700 dark:group-hover:text-zinc-300" />
                   </button>
                 ))
               )}
             </div>
 
-            <div className="px-4 py-2 bg-slate-950 border-t border-slate-800/80 text-[11px] text-zinc-500 flex items-center justify-between">
+            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-zinc-500 flex items-center justify-between">
               <span>Navigation express CODShop</span>
               <span className="font-mono">Entrée ↵ pour ouvrir</span>
             </div>

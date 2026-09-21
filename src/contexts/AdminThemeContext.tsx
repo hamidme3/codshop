@@ -20,24 +20,34 @@ export function AdminThemeProvider({ children }: { children: React.ReactNode }) 
   const [mode, setModeState] = useState<AdminThemeMode>('light');
   const [mounted, setMounted] = useState(false);
 
+  const applyThemeToDOM = (themeMode: AdminThemeMode) => {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+    root.setAttribute('data-admin-theme', themeMode);
+    if (themeMode === 'dark') {
+      root.classList.add('dark');
+      root.classList.remove('light');
+      root.style.colorScheme = 'dark';
+    } else {
+      root.classList.remove('dark');
+      root.classList.add('light');
+      root.style.colorScheme = 'light';
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
     const saved = localStorage.getItem('codshop_admin_theme') as AdminThemeMode;
-    if (saved === 'dark' || saved === 'light') {
-      setModeState(saved);
-      document.documentElement.setAttribute('data-admin-theme', saved);
-    } else {
-      // Default to Shopify Polaris light mode
-      setModeState('light');
-      document.documentElement.setAttribute('data-admin-theme', 'light');
-    }
+    const initialMode: AdminThemeMode = (saved === 'dark' || saved === 'light') ? saved : 'light';
+    setModeState(initialMode);
+    applyThemeToDOM(initialMode);
   }, []);
 
   const setMode = (newMode: AdminThemeMode) => {
     setModeState(newMode);
     try {
       localStorage.setItem('codshop_admin_theme', newMode);
-      document.documentElement.setAttribute('data-admin-theme', newMode);
+      applyThemeToDOM(newMode);
     } catch {}
   };
 

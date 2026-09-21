@@ -176,7 +176,7 @@ function AnalyticsContent() {
       {activeTab === 'storefront' && (
         <div className="space-y-8">
           {/* Live Command Center Banner */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-[#0b1419] border border-emerald-500/40 shadow-2xl relative overflow-hidden text-white">
+          <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-[#0b1419] border border-emerald-500/30 dark:border-emerald-500/40 shadow-xs relative overflow-hidden text-slate-900 dark:text-white">
             <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
             
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -186,7 +186,7 @@ function AnalyticsContent() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500"></span>
                   </span>
-                  <span className="text-xs font-black tracking-widest uppercase text-emerald-400">
+                  <span className="text-xs font-black tracking-widest uppercase text-emerald-600 dark:text-emerald-400">
                     Radar en Direct • Boutique Active
                   </span>
                   {lastUpdated && (
@@ -197,27 +197,27 @@ function AnalyticsContent() {
                 </div>
 
                 <div className="flex items-baseline gap-3">
-                  <span className="text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-sm font-mono">
+                  <span className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight drop-shadow-xs font-mono">
                     {storefrontData?.live?.activeNow ?? 0}
                   </span>
-                  <span className="text-sm sm:text-base font-bold text-slate-300">
+                  <span className="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300">
                     acheteurs en ligne en ce moment
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 max-w-md">
+                <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md">
                   Clients naviguant sur votre storefront à la seconde près. Données ClickHouse actualisées toutes les 15 secondes.
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-3 text-xs">
-                <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-emerald-500/20 shadow-sm flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/90 border border-slate-200 dark:border-emerald-500/20 shadow-xs flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
                     <ShoppingCart className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase font-bold text-slate-400">En cours de checkout</div>
-                    <div className="text-lg font-black text-white font-mono">
-                      {storefrontData?.live?.inCheckout ?? 0} <span className="text-xs font-medium text-emerald-400">clients à l'Étape 2</span>
+                    <div className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">En cours de checkout</div>
+                    <div className="text-lg font-black text-slate-900 dark:text-white font-mono">
+                      {storefrontData?.live?.inCheckout ?? 0} <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">clients à l'Étape 2</span>
                     </div>
                   </div>
                 </div>
@@ -225,24 +225,24 @@ function AnalyticsContent() {
                 <button
                   onClick={fetchStorefrontAnalytics}
                   title="Actualiser les données"
-                  className="p-3 rounded-2xl bg-slate-950/90 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-all shadow-sm cursor-pointer active:scale-95"
+                  className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/90 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-xs cursor-pointer active:scale-95"
                 >
-                  <RefreshCw className={`w-5 h-5 ${loadingStorefront ? 'animate-spin text-emerald-400' : ''}`} />
+                  <RefreshCw className={`w-5 h-5 ${loadingStorefront ? 'animate-spin text-emerald-500' : ''}`} />
                 </button>
               </div>
             </div>
 
             {/* Currently viewed products strip */}
             {storefrontData?.live?.activeProducts && storefrontData.live.activeProducts.length > 0 && (
-              <div className="relative z-10 mt-6 pt-5 border-t border-slate-800/80 flex flex-wrap items-center gap-2 text-xs">
-                <span className="text-slate-400 text-xs font-bold flex items-center gap-1.5 mr-1">
-                  <Flame className="w-3.5 h-3.5 text-amber-400" /> Consultés en ce moment :
+              <div className="relative z-10 mt-6 pt-5 border-t border-slate-200 dark:border-slate-800/80 flex flex-wrap items-center gap-2 text-xs">
+                <span className="text-slate-600 dark:text-slate-400 text-xs font-bold flex items-center gap-1.5 mr-1">
+                  <Flame className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" /> Consultés en ce moment :
                 </span>
                 {storefrontData.live.activeProducts.map((ap, idx) => (
-                  <span key={idx} className="px-3 py-1.5 rounded-xl bg-slate-950/80 text-emerald-300 border border-emerald-500/20 text-xs font-semibold flex items-center gap-2 shadow-xs">
-                    <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                  <span key={idx} className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950/80 text-emerald-700 dark:text-emerald-300 border border-slate-200 dark:border-emerald-500/20 text-xs font-semibold flex items-center gap-2 shadow-2xs">
+                    <Eye className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                     <span className="max-w-[200px] truncate">{ap.title}</span>
-                    <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono text-[10px] font-bold">
+                    <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-mono text-[10px] font-bold">
                       {ap.activeViewers} en direct
                     </span>
                   </span>
@@ -740,24 +740,24 @@ function AnalyticsContent() {
           />
 
           {/* Net Profit Calculation Formula Breakdown */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-            <h2 className="text-base font-extrabold text-white">Décomposition du Bénéfice Réel</h2>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-xs">
+            <h2 className="text-base font-extrabold text-slate-900 dark:text-white">Décomposition du Bénéfice Réel</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800">
-                <div className="text-slate-400">CA Encaissé (Colis Livrés) :</div>
-                <div className="text-lg font-black text-white mt-1">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                <div className="text-slate-500 dark:text-slate-400">CA Encaissé (Colis Livrés) :</div>
+                <div className="text-lg font-black text-slate-900 dark:text-white mt-1">
                   +{analytics.totalRevenueDelivered.toLocaleString()} DH
                 </div>
               </div>
-              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800">
-                <div className="text-slate-400">Coût Marchandise & Packaging :</div>
-                <div className="text-lg font-black text-rose-400 mt-1">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                <div className="text-slate-500 dark:text-slate-400">Coût Marchandise & Packaging :</div>
+                <div className="text-lg font-black text-rose-600 dark:text-rose-400 mt-1">
                   -{(analytics.totalRevenueDelivered * 0.32).toFixed(0)} DH
                 </div>
               </div>
-              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800">
-                <div className="text-slate-400">Frais de Livraison & Retours :</div>
-                <div className="text-lg font-black text-rose-400 mt-1">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                <div className="text-slate-500 dark:text-slate-400">Frais de Livraison & Retours :</div>
+                <div className="text-lg font-black text-rose-600 dark:text-rose-400 mt-1">
                   -{(analytics.totalOrders * 22).toFixed(0)} DH
                 </div>
               </div>
@@ -765,12 +765,12 @@ function AnalyticsContent() {
           </div>
 
           {/* City by City Breakdown Table */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-xs">
             <div>
-              <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-sky-400" /> Taux de Livraison par Ville Marocaine
+              <h2 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-sky-500 dark:text-sky-400" /> Taux de Livraison par Ville Marocaine
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Identifiez les villes les plus rentables pour optimiser vos budgets publicitaires Facebook/TikTok.
               </p>
             </div>
@@ -778,7 +778,7 @@ function AnalyticsContent() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 bg-slate-950/50 font-semibold">
+                  <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/50 font-semibold">
                     <th className="py-3 px-4">Ville</th>
                     <th className="py-3 px-4">Volume Commandes</th>
                     <th className="py-3 px-4">Chiffre d&apos;Affaires</th>
@@ -786,7 +786,7 @@ function AnalyticsContent() {
                     <th className="py-3 px-4 text-right">Rentabilité</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                   {analytics.cityDistribution.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="py-8 text-center text-slate-500 font-medium">
@@ -795,29 +795,29 @@ function AnalyticsContent() {
                     </tr>
                   ) : (
                     analytics.cityDistribution.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-slate-800/40 transition-colors">
-                        <td className="py-3.5 px-4 font-bold text-white text-sm">
+                      <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                        <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white text-sm">
                           {item.city}
                         </td>
-                        <td className="py-3.5 px-4 text-slate-300">
+                        <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300">
                           {item.orders} colis
                         </td>
-                        <td className="py-3.5 px-4 font-extrabold text-white">
+                        <td className="py-3.5 px-4 font-extrabold text-slate-900 dark:text-white">
                           {item.revenue.toLocaleString()} DH
                         </td>
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-24 bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div className="w-24 bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                               <div
-                                className="bg-emerald-400 h-full rounded-full"
+                                className="bg-emerald-500 dark:bg-emerald-400 h-full rounded-full"
                                 style={{ width: `${item.rate}%` }}
                               />
                             </div>
-                            <span className="font-bold text-emerald-400">{item.rate}%</span>
+                            <span className="font-bold text-emerald-600 dark:text-emerald-400">{item.rate}%</span>
                           </div>
                         </td>
                         <td className="py-3.5 px-4 text-right">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                             Top Rentable
                           </span>
                         </td>

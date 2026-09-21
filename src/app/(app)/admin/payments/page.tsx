@@ -24,19 +24,19 @@ function PaymentsContent() {
     <div className="p-6 sm:p-10 space-y-8 max-w-5xl mx-auto font-sans">
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-3">
-          <CreditCard className="w-8 h-8 text-emerald-400" /> Passerelles & Méthodes de Paiement
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+          <CreditCard className="w-8 h-8 text-emerald-600 dark:text-emerald-400" /> Passerelles & Méthodes de Paiement
         </h1>
-        <p className="text-slate-400 text-xs sm:text-sm mt-1">
+        <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm mt-1">
           Activez et configurez le paiement en espèces à la livraison, les virements bancaires et le paiement en ligne par carte CMI.
         </p>
       </div>
 
       {/* Moroccan Payment Culture Alert */}
-      <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-3 text-xs text-slate-300">
-        <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+      <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 flex items-start gap-3 text-xs text-slate-700 dark:text-slate-300">
+        <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
         <div>
-          <strong className="text-white">Recommandation Maroc :</strong> Plus de 95% des transactions e-commerce au Maroc se font par <strong>Paiement à la livraison (Cash on Delivery)</strong>. Nous vous recommandons de toujours laisser le COD activé pour maximiser vos conversions publicitaires.
+          <strong className="text-slate-900 dark:text-white">Recommandation Maroc :</strong> Plus de 95% des transactions e-commerce au Maroc se font par <strong>Paiement à la livraison (Cash on Delivery)</strong>. Nous vous recommandons de toujours laisser le COD activé pour maximiser vos conversions publicitaires.
         </div>
       </div>
 
@@ -50,16 +50,16 @@ function PaymentsContent() {
               key={gw.id}
               className={`p-6 rounded-2xl border transition-all space-y-4 ${
                 isActive
-                  ? 'bg-slate-900 border-emerald-500/50 shadow-lg shadow-emerald-500/5'
-                  : 'bg-slate-900/50 border-slate-800 opacity-75'
+                  ? 'bg-white dark:bg-slate-900 border-emerald-500/50 shadow-md'
+                  : 'bg-white/70 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 opacity-75'
               }`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                    gw.type === 'cod' ? 'bg-emerald-500/10 text-emerald-400' :
-                    gw.type === 'virement' ? 'bg-sky-500/10 text-sky-400' :
-                    gw.type === 'card' ? 'bg-cyan-500/10 text-cyan-400' : 'bg-purple-500/10 text-purple-400'
+                    gw.type === 'cod' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
+                    gw.type === 'virement' ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400' :
+                    gw.type === 'card' ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400' : 'bg-purple-500/10 text-purple-600 dark:text-purple-400'
                   }`}>
                     {gw.type === 'cod' && <Banknote className="w-5 h-5" />}
                     {gw.type === 'virement' && <Building2 className="w-5 h-5" />}
@@ -67,25 +67,25 @@ function PaymentsContent() {
                     {gw.type === 'wallet' && <Wallet className="w-5 h-5" />}
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-white text-sm">{gw.name}</h3>
-                    <div className="text-[11px] text-slate-400">{gw.feeInfo}</div>
+                    <h3 className="font-extrabold text-slate-900 dark:text-white text-sm">{gw.name}</h3>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">{gw.feeInfo}</div>
                   </div>
                 </div>
 
                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                  isActive ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'
+                  isActive ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
                 }`}>
                   {isActive ? 'Actif' : 'Inactif'}
                 </span>
               </div>
 
-              <p className="text-xs text-slate-400 leading-relaxed">{gw.description}</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{gw.description}</p>
 
-              <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800/80">
                 <button
                   type="button"
                   onClick={() => setEditingGw(gw)}
-                  className="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-bold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1 cursor-pointer"
                 >
                   <Settings className="w-3.5 h-3.5" /> Réglages
                 </button>
@@ -95,8 +95,8 @@ function PaymentsContent() {
                   onClick={() => handleToggle(gw.id)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                     isActive
-                      ? 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                      : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-md shadow-emerald-500/10'
+                      ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/30'
+                      : 'bg-emerald-600 hover:bg-emerald-500 text-white dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:text-slate-950 shadow-md shadow-emerald-600/10'
                   }`}
                 >
                   {isActive ? 'Désactiver' : 'Activer'}
@@ -110,29 +110,29 @@ function PaymentsContent() {
       {/* Settings Modal */}
       {editingGw && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-              <h3 className="text-base font-bold text-white">Réglages : {editingGw.name}</h3>
-              <button onClick={() => setEditingGw(null)} className="text-slate-400 hover:text-white">✕</button>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Réglages : {editingGw.name}</h3>
+              <button onClick={() => setEditingGw(null)} className="text-slate-400 hover:text-slate-700 dark:hover:text-white">✕</button>
             </div>
 
             <div className="space-y-3 text-xs">
               {editingGw.type === 'virement' && (
                 <>
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Nom de la Banque :</label>
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Nom de la Banque :</label>
                     <input
                       type="text"
                       defaultValue="Attijariwafa Bank"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">RIB Bancaire (24 chiffres) :</label>
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">RIB Bancaire (24 chiffres) :</label>
                     <input
                       type="text"
                       defaultValue="007 780 0001234567890123 45"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono"
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-white font-mono"
                     />
                   </div>
                 </>
@@ -141,37 +141,37 @@ function PaymentsContent() {
               {editingGw.type === 'card' && (
                 <>
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Clé Publique Stripe (Publishable Key) :</label>
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Clé Publique Stripe (Publishable Key) :</label>
                     <input
                       type="text"
                       placeholder="pk_live_..."
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono"
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-white font-mono"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Clé Secrète Stripe (Secret Key) :</label>
+                    <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Clé Secrète Stripe (Secret Key) :</label>
                     <input
                       type="password"
                       placeholder="sk_live_..."
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono"
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-white font-mono"
                     />
                   </div>
                 </>
               )}
 
               {editingGw.type === 'cod' && (
-                <p className="text-slate-400">
+                <p className="text-slate-600 dark:text-slate-400">
                   Le paiement à la livraison ne requiert aucune clé API. Le montant est encaissé en espèces directement auprès du client à la réception.
                 </p>
               )}
 
               {editingGw.type === 'wallet' && (
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Email Client PayPal :</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Email Client PayPal :</label>
                   <input
                     type="email"
                     placeholder="paypal@votre-boutique.ma"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-white"
                   />
                 </div>
               )}
@@ -184,14 +184,14 @@ function PaymentsContent() {
                   alert('Réglages de paiement sauvegardés !');
                   setEditingGw(null);
                 }}
-                className="flex-1 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 cursor-pointer shadow-md shadow-emerald-500/10"
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:text-slate-950 font-bold text-xs cursor-pointer shadow-md shadow-emerald-600/10"
               >
                 Enregistrer
               </button>
               <button
                 type="button"
                 onClick={() => setEditingGw(null)}
-                className="py-2.5 px-4 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs hover:bg-slate-700"
+                className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 font-bold text-xs"
               >
                 Fermer
               </button>

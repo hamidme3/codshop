@@ -407,14 +407,14 @@ function OrdersContent() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
-              <ShoppingBag className="w-6 h-6 text-emerald-400" /> Pipeline Commandes COD Maroc
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
+              <ShoppingBag className="w-6 h-6 text-emerald-600 dark:text-emerald-400" /> Pipeline Commandes COD Maroc
             </h1>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-700 border border-cyan-500/20 dark:bg-cyan-500/15 dark:text-cyan-400 dark:border-cyan-500/30">
               5-ÉTAPES SYNCHRONISÉES
             </span>
           </div>
-          <p className="text-zinc-400 text-xs mt-1">
+          <p className="text-slate-500 dark:text-zinc-400 text-xs mt-1">
             Gestion des commandes, mise à jour manuelle des statuts et export CSV universel.
           </p>
         </div>
@@ -424,11 +424,11 @@ function OrdersContent() {
           <div className="relative">
             <button
               onClick={() => setIsExportOpen(!isExportOpen)}
-              className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center gap-2 border border-slate-700 shadow-md transition-colors cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white dark:border-slate-700 font-bold text-xs flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
             >
-              <Download className="w-4 h-4 text-emerald-400" />
+              <Download className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <span>Exporter CSV</span>
-              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 dark:text-slate-400 transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isExportOpen && (
@@ -542,23 +542,23 @@ function OrdersContent() {
           <div
             key={`bento-${col.id}`}
             onClick={() => handleFilterChange(col.id)}
-            className={`p-3.5 rounded-2xl bg-[#13171c] border transition-all cursor-pointer bento-card ${
+            className={`p-3.5 rounded-2xl bg-white dark:bg-[#13171c] border transition-all cursor-pointer bento-card shadow-xs ${
               activeFilter === col.id || (col.id === 'to_confirm' && (activeFilter === 'new' || activeFilter === 'to_confirm'))
                 ? 'border-emerald-500/60 shadow-md shadow-emerald-500/10 ring-1 ring-emerald-500/30'
-                : 'border-slate-800/70 hover:border-slate-700'
+                : 'border-slate-200 dark:border-slate-800/70 hover:border-slate-300 dark:hover:border-slate-700'
             }`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <span className={`w-2 h-2 rounded-full ${col.dot}`} />
-                <span className="text-[11px] font-bold text-zinc-300">{col.title}</span>
+                <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">{col.title}</span>
               </div>
               <span className={`px-1.5 py-0.2 rounded text-[10px] font-mono font-bold ${col.pillClass}`}>
                 {orders.filter((o) => col.statuses.includes(o.status)).length}
               </span>
             </div>
-            <div className="text-lg font-black text-white font-mono tabular-nums mt-2">
-              {col.totalMad.toLocaleString('fr-MA')} <span className="text-[10px] font-sans text-zinc-400">DH</span>
+            <div className="text-lg font-black text-slate-900 dark:text-white font-mono tabular-nums mt-2">
+              {col.totalMad.toLocaleString('fr-MA')} <span className="text-[10px] font-sans text-slate-500 dark:text-zinc-400">DH</span>
             </div>
           </div>
         ))}
@@ -566,7 +566,7 @@ function OrdersContent() {
 
       {/* Filter Tabs with Live Counts & Scroll Indicator */}
       <div className="relative">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 border-b border-slate-800/80 text-xs scrollbar-thin scrollbar-thumb-slate-800">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 border-b border-slate-200 dark:border-slate-800/80 text-xs scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-800">
           {[
             { id: 'all', label: `Toutes (${orders.length})` },
             { id: 'to_confirm', label: `À Confirmer (${newCount})` },
@@ -587,8 +587,8 @@ function OrdersContent() {
                 onClick={() => handleFilterChange(tab.id)}
                 className={`shrink-0 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg font-semibold whitespace-nowrap transition-colors cursor-pointer text-xs ${
                   isTabActive
-                    ? 'bg-slate-800 text-white border border-slate-700/80 shadow-sm font-bold'
-                    : 'text-zinc-400 hover:text-white hover:bg-slate-800/50'
+                    ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white border border-slate-900 dark:border-slate-700/80 shadow-xs font-bold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-slate-800/50'
                 }`}
               >
                 {tab.label}
@@ -597,30 +597,30 @@ function OrdersContent() {
           })}
         </div>
         {/* Subtle Right Gradient Hint indicating scrollability on mobile */}
-        <div className="pointer-events-none absolute right-0 top-0 bottom-1.5 w-6 bg-gradient-to-l from-[#0b0f17] to-transparent sm:hidden" />
+        <div className="pointer-events-none absolute right-0 top-0 bottom-1.5 w-6 bg-gradient-to-l from-slate-100 dark:from-[#0b0f17] to-transparent sm:hidden" />
       </div>
 
 
       {/* Search, View Switcher & Counter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#13171c] border border-slate-800/70 rounded-xl p-3 bento-card">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 rounded-xl p-3 bento-card shadow-xs">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
+          <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400 dark:text-zinc-500" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher par N° commande, client, téléphone (06...), ville..."
-            className="w-full bg-[#0c0f12] border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 font-medium"
+            className="w-full bg-slate-50 dark:bg-[#0c0f12] border border-slate-200 dark:border-slate-800 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500 font-medium transition-colors"
           />
         </div>
 
         <div className="flex items-center gap-3">
           {/* Dual-View Switcher: Table vs Kanban */}
-          <div className="hidden md:flex items-center p-0.5 bg-[#0c0f12] border border-slate-800 rounded-lg shrink-0">
+          <div className="hidden md:flex items-center p-0.5 bg-slate-100 dark:bg-[#0c0f12] border border-slate-200 dark:border-slate-800 rounded-lg shrink-0">
             <button
               onClick={() => setViewMode('table')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                viewMode === 'table' ? 'bg-emerald-500 text-zinc-950 shadow-sm font-black shadow-emerald-500/20' : 'text-zinc-400 hover:text-white'
+                viewMode === 'table' ? 'bg-emerald-500 text-zinc-950 shadow-sm font-black shadow-emerald-500/20' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
@@ -629,7 +629,7 @@ function OrdersContent() {
             <button
               onClick={() => setViewMode('kanban')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                viewMode === 'kanban' ? 'bg-emerald-500 text-zinc-950 shadow-sm font-black shadow-emerald-500/20' : 'text-zinc-400 hover:text-white'
+                viewMode === 'kanban' ? 'bg-emerald-500 text-zinc-950 shadow-sm font-black shadow-emerald-500/20' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <Columns className="w-3.5 h-3.5" />
@@ -637,8 +637,8 @@ function OrdersContent() {
             </button>
           </div>
 
-          <div className="text-xs text-zinc-400">
-            <strong className="text-white font-mono tabular-nums">{filteredOrders.length}</strong> commande(s) affichée(s)
+          <div className="text-xs text-slate-500 dark:text-zinc-400">
+            <strong className="text-slate-900 dark:text-white font-mono tabular-nums">{filteredOrders.length}</strong> commande(s) affichée(s)
           </div>
         </div>
       </div>
@@ -691,11 +691,11 @@ function OrdersContent() {
       )}
 
       {/* Orders Table Container */}
-      <div className="bg-[#13171c] border border-slate-800/70 rounded-xl overflow-hidden shadow-sm bento-card">
+      <div className="bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 rounded-xl overflow-hidden shadow-xs bento-card">
         {/* Mobile Stream (screens < md) */}
-        <div className="block md:hidden divide-y divide-slate-800/60 p-2 sm:p-3 space-y-3">
+        <div className="block md:hidden divide-y divide-slate-100 dark:divide-slate-800/60 p-2 sm:p-3 space-y-3">
           {filteredOrders.length === 0 ? (
-            <div className="text-center py-10 text-zinc-500 text-xs">
+            <div className="text-center py-10 text-slate-500 dark:text-zinc-500 text-xs">
               Aucune commande trouvée pour ce filtre.
             </div>
           ) : (
@@ -704,14 +704,14 @@ function OrdersContent() {
               return (
                 <div
                   key={`mobile-${order.id}`}
-                  className={`p-3 rounded-xl border transition-all space-y-2.5 ${
+                  className={`p-3 rounded-xl border transition-all space-y-2.5 shadow-xs ${
                     isSelected
                       ? 'bg-emerald-500/10 border-emerald-500/40'
-                      : 'bg-[#0e1217] border-slate-800/80'
+                      : 'bg-white dark:bg-[#0e1217] border-slate-200 dark:border-slate-800/80'
                   }`}
                 >
                   {/* Top row: Checkbox + Order # + Time + Status badge */}
-                  <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-800/60">
+                  <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-100 dark:border-slate-800/60">
                     <div className="flex items-center gap-2 min-w-0">
                       <input
                         type="checkbox"
@@ -721,13 +721,13 @@ function OrdersContent() {
                       />
                       <button
                         onClick={() => setSelectedOrder(order)}
-                        className="font-mono font-bold text-emerald-400 text-xs truncate tabular-nums text-left hover:underline"
+                        className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-xs truncate tabular-nums text-left hover:underline"
                       >
                         {order.orderNumber}
                       </button>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="text-[10px] text-zinc-500 font-mono tabular-nums">
+                      <span className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono tabular-nums">
                         {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                       {getStatusBadge(order.status)}
@@ -737,48 +737,48 @@ function OrdersContent() {
                   {/* Customer info & Amount */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <div className="font-bold text-white text-xs truncate">{order.customerName}</div>
+                      <div className="font-bold text-slate-900 dark:text-white text-xs truncate">{order.customerName}</div>
                       <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <a 
                           href={`tel:${order.phone}`} 
-                          className="text-[11px] font-mono text-zinc-300 hover:text-white tabular-nums underline"
+                          className="text-[11px] font-mono text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white tabular-nums underline"
                         >
                           {order.phone}
                         </a>
-                        <span className="text-zinc-600">•</span>
-                        <span className="text-[11px] text-zinc-300 font-medium">{order.city}</span>
+                        <span className="text-slate-300 dark:text-zinc-600">•</span>
+                        <span className="text-[11px] text-slate-600 dark:text-zinc-300 font-medium">{order.city}</span>
                         {order.deliveryType === 'stopdesk' && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/30">
                             Stopdesk
                           </span>
                         )}
                       </div>
-                      <div className="text-[10px] text-zinc-500 truncate mt-0.5">{order.address}</div>
+                      <div className="text-[10px] text-slate-500 dark:text-zinc-500 truncate mt-0.5">{order.address}</div>
                     </div>
 
                     <div className="text-right shrink-0">
-                      <div className="font-mono font-black text-sm text-white tabular-nums">
-                        {order.total} <span className="text-[10px] font-sans text-zinc-400">{order.currency || 'DH'}</span>
+                      <div className="font-mono font-black text-sm text-slate-900 dark:text-white tabular-nums">
+                        {order.total} <span className="text-[10px] font-sans text-slate-500 dark:text-zinc-400">{order.currency || 'DH'}</span>
                       </div>
-                      <div className="text-[9px] text-zinc-500 font-mono">
+                      <div className="text-[9px] text-slate-500 dark:text-zinc-500 font-mono">
                         Livraison {order.shippingFee} {order.currency || 'DH'}
                       </div>
                     </div>
                   </div>
 
                   {/* Items summary */}
-                  <div className="px-2.5 py-1.5 rounded-lg bg-zinc-900/80 border border-slate-800/80 text-[11px] text-zinc-300 flex items-center justify-between">
-                    <span className="truncate pr-2">{order.items[0]?.title}</span>
-                    <span className="font-mono text-[10px] text-zinc-400 shrink-0">x{order.items[0]?.quantity}</span>
+                  <div className="px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-900/80 border border-slate-200 dark:border-slate-800/80 text-[11px] text-slate-700 dark:text-zinc-300 flex items-center justify-between">
+                    <span className="truncate pr-2 font-medium">{order.items[0]?.title}</span>
+                    <span className="font-mono text-[10px] text-slate-500 dark:text-zinc-400 shrink-0">x{order.items[0]?.quantity}</span>
                   </div>
 
                   {/* Action buttons bar */}
-                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-800/60">
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-slate-800/60">
                     <a
                       href={buildWhatsAppLink(order, 'confirmation', storeSlug)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="touch-target px-2.5 py-1.5 rounded-lg bg-emerald-950/50 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/50 text-xs font-bold flex items-center gap-1"
+                      className="touch-target px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:hover:bg-emerald-900 dark:text-emerald-300 dark:border-emerald-800/50 text-xs font-bold flex items-center gap-1 transition-colors"
                     >
                       <MessageCircle className="w-3.5 h-3.5 fill-current" />
                       <span>WhatsApp</span>
@@ -788,7 +788,7 @@ function OrdersContent() {
                       {(order.status === 'new' || order.status === 'to_confirm') && (
                         <button
                           onClick={() => handleQuickTransition(order.id, 'confirmed')}
-                          className="touch-target px-2.5 py-1.5 rounded-lg bg-cyan-950/60 hover:bg-cyan-900 text-cyan-300 border border-cyan-800/50 text-xs font-bold flex items-center gap-1"
+                          className="touch-target px-2.5 py-1.5 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 dark:bg-cyan-950/60 dark:hover:bg-cyan-900 dark:text-cyan-300 dark:border-cyan-800/50 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
                         >
                           <Check className="w-3.5 h-3.5" />
                           <span>Confirmer</span>
@@ -798,9 +798,9 @@ function OrdersContent() {
                       {order.status === 'confirmed' && (
                         <button
                           onClick={() => handleQuickShip(order.id)}
-                          className="touch-target px-2.5 py-1.5 rounded-lg bg-sky-950/60 hover:bg-sky-900 text-sky-300 border border-sky-800/50 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                          className="touch-target px-2.5 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 dark:bg-sky-950/60 dark:hover:bg-sky-900 dark:text-sky-300 dark:border-sky-800/50 text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
                         >
-                          <Truck className="w-3.5 h-3.5 text-sky-400" />
+                          <Truck className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
                           <span>Expédier</span>
                         </button>
                       )}
@@ -809,14 +809,14 @@ function OrdersContent() {
                         <>
                           <button
                             onClick={() => handleQuickTransition(order.id, 'delivered')}
-                            className="touch-target px-2.5 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/50 text-xs font-bold flex items-center gap-1"
+                            className="touch-target px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900 dark:text-emerald-300 dark:border-emerald-800/50 text-xs font-bold flex items-center gap-1 transition-colors"
                           >
                             <DollarSign className="w-3.5 h-3.5" />
                             <span>Livrée</span>
                           </button>
                           <button
                             onClick={() => handleQuickTransition(order.id, 'returned')}
-                            className="touch-target p-1.5 rounded-lg bg-rose-950/60 hover:bg-rose-900 text-rose-400 border border-rose-800/50"
+                            className="touch-target p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950/60 dark:hover:bg-rose-900 dark:text-rose-400 dark:border-rose-800/50 transition-colors"
                             title="Retour"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
@@ -826,7 +826,7 @@ function OrdersContent() {
 
                       <button
                         onClick={() => setSelectedOrder(order)}
-                        className="touch-target px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium"
+                        className="touch-target px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 dark:border-transparent text-xs font-medium transition-colors cursor-pointer"
                       >
                         Détails
                       </button>
@@ -988,7 +988,7 @@ function OrdersContent() {
           ) : (
             <table className="w-full text-left text-xs admin-table">
               <thead>
-                <tr className="border-b border-slate-800/90 text-zinc-400 bg-[#0e1217] font-semibold">
+                <tr className="border-b border-slate-200 dark:border-slate-800/90 text-slate-600 dark:text-zinc-400 bg-slate-50 dark:bg-[#0e1217] font-semibold">
                   <th className="py-2.5 px-3 w-10 text-center">
                     <input
                       type="checkbox"
@@ -1006,10 +1006,10 @@ function OrdersContent() {
                   <th className="py-2.5 px-3 text-center">Actions Rapides 1-Clic</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/40">
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-800/40">
                 {filteredOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-10 text-zinc-500">
+                    <td colSpan={8} className="text-center py-10 text-slate-500 dark:text-zinc-500">
                       Aucune commande trouvée pour ce filtre.
                     </td>
                   </tr>
@@ -1021,7 +1021,7 @@ function OrdersContent() {
                     return (
                       <tr 
                         key={order.id} 
-                        className={`hover:bg-slate-800/30 transition-colors border-b border-slate-800/40 ${isSelected ? 'bg-emerald-500/5' : ''}`}
+                        className={`hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors border-b border-slate-200 dark:border-slate-800/40 ${isSelected ? 'bg-emerald-500/5' : ''}`}
                       >
                         <td className="py-2.5 px-3 text-center">
                           <input
@@ -1035,67 +1035,67 @@ function OrdersContent() {
                         <td className="py-2.5 px-3">
                           <button
                             onClick={() => setSelectedOrder(order)}
-                            className="font-mono font-bold text-emerald-400 hover:text-emerald-300 transition-colors tabular-nums cursor-pointer"
+                            className="font-mono font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 transition-colors tabular-nums cursor-pointer"
                           >
                             {order.orderNumber}
                           </button>
-                          <div className="text-[10px] text-zinc-500 mt-0.5 font-mono tabular-nums">
+                          <div className="text-[10px] text-slate-500 dark:text-zinc-500 mt-0.5 font-mono tabular-nums">
                             {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </div>
                         </td>
 
                         <td className="py-2.5 px-3">
-                          <div className="font-bold text-white">{order.customerName}</div>
-                          <div className="text-[11px] text-zinc-400 font-mono tabular-nums">{order.phone}</div>
+                          <div className="font-bold text-slate-900 dark:text-white">{order.customerName}</div>
+                          <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-mono tabular-nums">{order.phone}</div>
                         </td>
 
                         <td className="py-2.5 px-3">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="font-semibold text-zinc-200">{order.city}</span>
+                            <span className="font-semibold text-slate-800 dark:text-zinc-200">{order.city}</span>
                             {order.countryCode && order.countryCode !== 'MA' && (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30">
                                 {order.countryCode}
                               </span>
                             )}
                             {order.deliveryType === 'stopdesk' && (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/30">
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/30">
                                 🏢 Stopdesk
                               </span>
                             )}
                             {order.abVariant && (
                               <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold ${
                                 order.abVariant === 'waybill'
-                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                                  : 'bg-zinc-800 text-zinc-400'
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30'
+                                  : 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-transparent'
                               }`}>
                                 {order.abVariant}
                               </span>
                             )}
                           </div>
-                          <div className="text-[10px] text-zinc-500 truncate max-w-[200px]">{order.address}</div>
+                          <div className="text-[10px] text-slate-500 dark:text-zinc-500 truncate max-w-[200px]">{order.address}</div>
                         </td>
 
                         <td className="py-2.5 px-3">
-                          <div className="text-zinc-200 font-medium flex items-center gap-1.5 flex-wrap">
+                          <div className="text-slate-800 dark:text-zinc-200 font-medium flex items-center gap-1.5 flex-wrap">
                             <span>{order.items[0]?.title}</span>
                             {order.items[0]?.sku && (
-                              <span className="font-mono text-[9px] bg-zinc-800 text-emerald-400 px-1.5 py-0.5 rounded border border-zinc-700">
+                              <span className="font-mono text-[9px] bg-slate-100 dark:bg-zinc-800 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded border border-slate-200 dark:border-zinc-700">
                                 {order.items[0].sku}
                               </span>
                             )}
                           </div>
-                          <div className="text-[10px] text-zinc-400 mt-0.5 flex items-center gap-1 flex-wrap">
+                          <div className="text-[10px] text-slate-500 dark:text-zinc-400 mt-0.5 flex items-center gap-1 flex-wrap">
                             <span className="font-mono">x{order.items[0]?.quantity}</span>
-                            {order.items[0]?.variant && <span className="text-zinc-300">• {order.items[0].variant}</span>}
-                            {order.items[0]?.color && <span className="text-emerald-300/90">• {order.items[0].color}</span>}
-                            {order.items[0]?.size && <span className="bg-zinc-800 text-cyan-300 px-1 py-0.2 rounded text-[9px] font-bold">T.{order.items[0].size}</span>}
-                            {order.items.length > 1 && <span className="text-zinc-500 font-medium">(+{order.items.length - 1} autre)</span>}
+                            {order.items[0]?.variant && <span className="text-slate-600 dark:text-zinc-300">• {order.items[0].variant}</span>}
+                            {order.items[0]?.color && <span className="text-emerald-700 dark:text-emerald-300/90">• {order.items[0].color}</span>}
+                            {order.items[0]?.size && <span className="bg-cyan-50 dark:bg-zinc-800 text-cyan-700 dark:text-cyan-300 px-1 py-0.2 rounded text-[9px] font-bold border border-cyan-200 dark:border-transparent">T.{order.items[0].size}</span>}
+                            {order.items.length > 1 && <span className="text-slate-400 dark:text-zinc-500 font-medium">(+{order.items.length - 1} autre)</span>}
                           </div>
                         </td>
 
                         <td className="py-2.5 px-3">
-                          <div className="font-extrabold text-white text-sm font-mono tabular-nums">{order.total} {order.currency || 'DH'}</div>
-                          <div className="text-[10px] text-zinc-400 font-mono">Livraison : {order.shippingFee} {order.currency || 'DH'}</div>
+                          <div className="font-extrabold text-slate-900 dark:text-white text-sm font-mono tabular-nums">{order.total} {order.currency || 'DH'}</div>
+                          <div className="text-[10px] text-slate-500 dark:text-zinc-400 font-mono">Livraison : {order.shippingFee} {order.currency || 'DH'}</div>
                         </td>
 
                         <td className="py-2.5 px-3">
@@ -1303,17 +1303,17 @@ function OrdersContent() {
           onClick={() => setSelectedOrder(null)}
         >
           <div 
-            className="bg-[#13171c] border border-slate-800 rounded-2xl p-4 sm:p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto admin-scrollbar space-y-4 sm:space-y-5 shadow-2xl animate-in zoom-in-95 cursor-default bento-card"
+            className="bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto admin-scrollbar space-y-4 sm:space-y-5 shadow-2xl animate-in zoom-in-95 cursor-default bento-card"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800/80">
               <div>
-                <span className="text-[11px] text-zinc-400 font-mono tracking-wider uppercase">Détails de la commande</span>
-                <h3 className="text-lg font-mono font-bold text-white tracking-tight">{selectedOrder.orderNumber}</h3>
+                <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-mono tracking-wider uppercase">Détails de la commande</span>
+                <h3 className="text-lg font-mono font-bold text-slate-900 dark:text-white tracking-tight">{selectedOrder.orderNumber}</h3>
               </div>
               <button 
                 onClick={() => setSelectedOrder(null)} 
-                className="text-zinc-400 hover:text-white hover:bg-slate-800/80 p-1.5 rounded-lg transition-colors cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80 p-1.5 rounded-lg transition-colors cursor-pointer"
                 aria-label="Fermer"
               >
                 ✕
@@ -1321,33 +1321,33 @@ function OrdersContent() {
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="grid grid-cols-2 gap-4 p-3 rounded-lg bg-[#0e1217] border border-slate-800/80">
+              <div className="grid grid-cols-2 gap-4 p-3 rounded-lg bg-slate-50 dark:bg-[#0e1217] border border-slate-200 dark:border-slate-800/80">
                 <div>
-                  <div className="text-zinc-400 text-[11px] mb-0.5">Client</div>
-                  <div className="font-semibold text-white text-sm">{selectedOrder.customerName}</div>
-                  <div className="text-zinc-300 font-mono text-xs">{selectedOrder.phone}</div>
+                  <div className="text-slate-500 dark:text-zinc-400 text-[11px] mb-0.5">Client</div>
+                  <div className="font-semibold text-slate-900 dark:text-white text-sm">{selectedOrder.customerName}</div>
+                  <div className="text-slate-600 dark:text-zinc-300 font-mono text-xs">{selectedOrder.phone}</div>
                 </div>
                 <div>
-                  <div className="text-zinc-400 text-[11px] mb-0.5">Destination</div>
-                  <div className="font-semibold text-white text-sm flex items-center gap-1.5">
+                  <div className="text-slate-500 dark:text-zinc-400 text-[11px] mb-0.5">Destination</div>
+                  <div className="font-semibold text-slate-900 dark:text-white text-sm flex items-center gap-1.5">
                     <span>{selectedOrder.city}</span>
                     {selectedOrder.countryCode && selectedOrder.countryCode !== 'MA' && (
-                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30">
                         {selectedOrder.countryCode}
                       </span>
                     )}
                   </div>
-                  <div className="text-zinc-400 text-xs line-clamp-2">{selectedOrder.address}</div>
+                  <div className="text-slate-500 dark:text-zinc-400 text-xs line-clamp-2">{selectedOrder.address}</div>
                 </div>
               </div>
 
               {/* Status Update Dropdown */}
               <div>
-                <label className="block text-zinc-300 mb-1.5 text-xs font-medium">Mettre à jour le statut</label>
+                <label className="block text-slate-700 dark:text-zinc-300 mb-1.5 text-xs font-medium">Mettre à jour le statut</label>
                 <select
                   value={selectedOrder.status === 'shipping' ? 'shipped' : selectedOrder.status === 'canceled' ? 'returned' : selectedOrder.status}
                   onChange={(e) => handleQuickTransition(selectedOrder.id, e.target.value as OrderStatus)}
-                  className="w-full bg-[#0e1217] border border-slate-800 rounded-lg p-2.5 text-zinc-100 text-xs font-medium focus:border-emerald-500 focus:outline-none"
+                  className="w-full bg-slate-50 dark:bg-[#0e1217] border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-100 text-xs font-medium focus:border-emerald-500 focus:outline-none"
                 >
                   <option value="new">Nouvelle (À Valider)</option>
                   <option value="to_confirm">À Confirmer (Injoignable)</option>
@@ -1364,8 +1364,8 @@ function OrdersContent() {
                     onClick={() => handleQuickTransition(selectedOrder.id, 'confirmed')}
                     className={`py-1.5 px-1 rounded-md text-[10px] font-medium transition-colors text-center cursor-pointer ${
                       selectedOrder.status === 'confirmed'
-                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 font-bold'
-                        : 'bg-zinc-900/80 text-zinc-400 hover:text-cyan-300 hover:bg-cyan-950/40 border border-zinc-800'
+                        ? 'bg-cyan-50 text-cyan-700 border border-cyan-300 dark:bg-cyan-500/20 dark:text-cyan-300 dark:border-cyan-500/50 font-bold'
+                        : 'bg-slate-100 text-slate-600 hover:text-cyan-700 hover:bg-cyan-50 dark:bg-zinc-900/80 dark:text-zinc-400 dark:hover:text-cyan-300 dark:hover:bg-cyan-950/40 border border-slate-200 dark:border-zinc-800'
                     }`}
                   >
                     ✓ 1. Confirmer
@@ -1375,8 +1375,8 @@ function OrdersContent() {
                     onClick={() => handleQuickShip(selectedOrder.id)}
                     className={`py-1.5 px-1 rounded-md text-[10px] font-medium transition-colors text-center cursor-pointer ${
                       ['shipped', 'shipping'].includes(selectedOrder.status)
-                        ? 'bg-sky-500/20 text-sky-300 border border-sky-500/50 font-bold'
-                        : 'bg-zinc-900/80 text-zinc-400 hover:text-sky-300 hover:bg-sky-950/40 border border-zinc-800'
+                        ? 'bg-sky-50 text-sky-700 border border-sky-300 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/50 font-bold'
+                        : 'bg-slate-100 text-slate-600 hover:text-sky-700 hover:bg-sky-50 dark:bg-zinc-900/80 dark:text-zinc-400 dark:hover:text-sky-300 dark:hover:bg-sky-950/40 border border-slate-200 dark:border-zinc-800'
                     }`}
                   >
                     🚚 2. Expédier
@@ -1386,8 +1386,8 @@ function OrdersContent() {
                     onClick={() => handleQuickTransition(selectedOrder.id, 'delivered')}
                     className={`py-1.5 px-1 rounded-md text-[10px] font-medium transition-colors text-center cursor-pointer ${
                       selectedOrder.status === 'delivered'
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 font-bold'
-                        : 'bg-zinc-900/80 text-zinc-400 hover:text-emerald-300 hover:bg-emerald-950/40 border border-zinc-800'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/50 font-bold'
+                        : 'bg-slate-100 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 dark:bg-zinc-900/80 dark:text-zinc-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-950/40 border border-slate-200 dark:border-zinc-800'
                     }`}
                   >
                     💰 3. Livrée
@@ -1397,8 +1397,8 @@ function OrdersContent() {
                     onClick={() => handleQuickTransition(selectedOrder.id, selectedOrder.status === 'returned' || selectedOrder.status === 'canceled' ? 'new' : 'returned')}
                     className={`py-1.5 px-1 rounded-md text-[10px] font-medium transition-colors text-center cursor-pointer ${
                       selectedOrder.status === 'returned' || selectedOrder.status === 'canceled'
-                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/50 font-bold'
-                        : 'bg-zinc-900/80 text-zinc-400 hover:text-rose-300 hover:bg-rose-950/40 border border-zinc-800'
+                        ? 'bg-rose-50 text-rose-700 border border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/50 font-bold'
+                        : 'bg-slate-100 text-slate-600 hover:text-rose-700 hover:bg-rose-50 dark:bg-zinc-900/80 dark:text-zinc-400 dark:hover:text-rose-300 dark:hover:bg-rose-950/40 border border-slate-200 dark:border-zinc-800'
                     }`}
                   >
                     ↩ 4. Retournée
@@ -1407,47 +1407,47 @@ function OrdersContent() {
               </div>
 
               {/* Items Summary */}
-              <div className="p-3 rounded-lg bg-[#0e1217] border border-slate-800/80 space-y-2">
-                <div className="font-semibold text-zinc-300 text-xs flex items-center justify-between">
+              <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#0e1217] border border-slate-200 dark:border-slate-800/80 space-y-2">
+                <div className="font-semibold text-slate-700 dark:text-zinc-300 text-xs flex items-center justify-between">
                   <span>Articles à emballer</span>
-                  <span className="text-[10px] text-zinc-500 font-mono uppercase">Bordereau Colis</span>
+                  <span className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono uppercase">Bordereau Colis</span>
                 </div>
                 {selectedOrder.items?.map((item, i) => (
-                  <div key={i} className="flex justify-between items-center text-zinc-200 py-1.5 border-b border-zinc-800/60 last:border-0">
+                  <div key={i} className="flex justify-between items-center text-slate-800 dark:text-zinc-200 py-1.5 border-b border-slate-200 dark:border-zinc-800/60 last:border-0">
                     <div>
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-medium text-zinc-100">{item.title}</span>
+                        <span className="font-medium text-slate-900 dark:text-zinc-100">{item.title}</span>
                         {item.sku && (
-                          <span className="font-mono text-[9px] bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded border border-zinc-700">
+                          <span className="font-mono text-[9px] bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 px-1.5 py-0.5 rounded border border-slate-200 dark:border-zinc-700">
                             {item.sku}
                           </span>
                         )}
                       </div>
-                      <div className="text-[11px] text-zinc-400 flex items-center gap-1.5 mt-0.5">
+                      <div className="text-[11px] text-slate-500 dark:text-zinc-400 flex items-center gap-1.5 mt-0.5">
                         <span className="font-mono tabular-nums">Qté: x{item.quantity}</span>
                         {item.variant && <span>• {item.variant}</span>}
-                        {item.color && <span className="text-zinc-300">• Couleur: {item.color}</span>}
-                        {item.size && <span className="text-cyan-400 font-medium">• Taille: {item.size}</span>}
+                        {item.color && <span className="text-slate-600 dark:text-zinc-300">• Couleur: {item.color}</span>}
+                        {item.size && <span className="text-cyan-600 dark:text-cyan-400 font-medium">• Taille: {item.size}</span>}
                       </div>
                     </div>
-                    <span className="font-mono tabular-nums font-semibold text-sm text-zinc-100">{item.price * item.quantity} {selectedOrder.currency || 'MAD'}</span>
+                    <span className="font-mono tabular-nums font-semibold text-sm text-slate-900 dark:text-zinc-100">{item.price * item.quantity} {selectedOrder.currency || 'MAD'}</span>
                   </div>
                 ))}
-                <div className="border-t border-zinc-800/80 pt-2 flex justify-between items-center font-medium text-zinc-200 text-xs">
+                <div className="border-t border-slate-200 dark:border-zinc-800/80 pt-2 flex justify-between items-center font-medium text-slate-700 dark:text-zinc-200 text-xs">
                   <span>Total à encaisser (COD) :</span>
-                  <span className="text-white font-mono tabular-nums font-bold text-sm">{selectedOrder.total} {selectedOrder.currency || 'MAD'}</span>
+                  <span className="text-slate-900 dark:text-white font-mono tabular-nums font-bold text-sm">{selectedOrder.total} {selectedOrder.currency || 'MAD'}</span>
                 </div>
               </div>
 
               {selectedOrder.agentNotes && (
-                <div className="p-3 rounded-lg bg-[#0d0d10] border border-zinc-800/80">
-                  <div className="text-zinc-400 font-medium text-[11px] mb-1">Notes de l&apos;agent :</div>
-                  <div className="text-zinc-300 text-xs italic">{selectedOrder.agentNotes}</div>
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#0d0d10] border border-slate-200 dark:border-zinc-800/80">
+                  <div className="text-slate-500 dark:text-zinc-400 font-medium text-[11px] mb-1">Notes de l&apos;agent :</div>
+                  <div className="text-slate-700 dark:text-zinc-300 text-xs italic">{selectedOrder.agentNotes}</div>
                 </div>
               )}
             </div>
 
-            <div className="flex gap-2 pt-2 border-t border-zinc-800/80">
+            <div className="flex gap-2 pt-2 border-t border-slate-200 dark:border-zinc-800/80">
               <button
                 onClick={() => {
                   const result = exportOrdersToCsv([selectedOrder], `commande_${selectedOrder.orderNumber}`, storeSlug);
@@ -1462,21 +1462,21 @@ function OrdersContent() {
                   URL.revokeObjectURL(url);
                   showToast(`Commande ${selectedOrder.orderNumber} exportée en CSV`);
                 }}
-                className="flex-1 py-2 px-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 font-medium text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                className="flex-1 py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-100 dark:border-zinc-700 font-medium text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" /> Exporter CSV
               </button>
               <button
                 type="button"
                 onClick={() => handleDeleteSingleOrder(selectedOrder.id)}
-                className="py-2 px-3 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-white border border-rose-800/50 font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="py-2 px-3 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 dark:border-rose-800/50 font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
                 title="Supprimer définitivement cette commande"
               >
                 <Trash2 className="w-3.5 h-3.5" /> Supprimer
               </button>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="py-2 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 font-medium text-xs transition-colors cursor-pointer"
+                className="py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800 border border-slate-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200 dark:border-zinc-800 font-medium text-xs transition-colors cursor-pointer"
               >
                 Fermer
               </button>
