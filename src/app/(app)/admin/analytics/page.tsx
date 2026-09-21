@@ -648,65 +648,65 @@ function AnalyticsContent() {
           {/* 4 Moroccan Operational KPIs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Taux de Livraison */}
-            <div className="p-5 rounded-2xl bg-[#13171c] border border-slate-800/70 space-y-2 bento-card shadow-sm">
-              <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
+            <div className="p-5 rounded-2xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 space-y-2 bento-card shadow-xs">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-semibold">
                 <span>Taux de Livraison (Réussite)</span>
-                <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
+                <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                   <Truck className="w-4 h-4" />
                 </span>
               </div>
-              <div className="text-3xl font-black text-emerald-400">
+              <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400">
                 {analytics.deliveryRate}%
               </div>
-              <div className="text-[11px] text-slate-400">
+              <div className="text-[11px] text-slate-500 dark:text-slate-400">
                 Moyenne marché Maroc : 75-80%
               </div>
             </div>
 
             {/* Taux de Confirmation */}
-            <div className="p-5 rounded-2xl bg-[#13171c] border border-slate-800/70 space-y-2 bento-card shadow-sm">
-              <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
+            <div className="p-5 rounded-2xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 space-y-2 bento-card shadow-xs">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-semibold">
                 <span>Taux de Confirmation</span>
-                <span className="p-1.5 rounded-lg bg-sky-500/10 text-sky-400">
+                <span className="p-1.5 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
                   <Phone className="w-4 h-4" />
                 </span>
               </div>
-              <div className="text-3xl font-black text-white">
+              <div className="text-3xl font-black text-slate-900 dark:text-white">
                 {analytics.confirmationRate}%
               </div>
-              <div className="text-[11px] text-emerald-400 flex items-center gap-1">
+              <div className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                 <ArrowUpRight className="w-3.5 h-3.5" /> Performance call center excellente
               </div>
             </div>
 
             {/* Taux de Retour */}
-            <div className="p-5 rounded-2xl bg-[#13171c] border border-slate-800/70 space-y-2 bento-card shadow-sm">
-              <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
+            <div className="p-5 rounded-2xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 space-y-2 bento-card shadow-xs">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-semibold">
                 <span>Taux de Retour</span>
-                <span className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400">
+                <span className="p-1.5 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400">
                   <AlertOctagon className="w-4 h-4" />
                 </span>
               </div>
-              <div className="text-3xl font-black text-rose-400">
+              <div className="text-3xl font-black text-rose-600 dark:text-rose-400">
                 {analytics.returnRate}%
               </div>
-              <div className="text-[11px] text-slate-400">
+              <div className="text-[11px] text-slate-500 dark:text-slate-400">
                 Contrôlé grâce à la vérification WhatsApp
               </div>
             </div>
 
             {/* Bénéfice Net Estimé */}
-            <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2 bento-card shadow-sm">
-              <div className="flex items-center justify-between text-xs text-emerald-300 font-semibold">
+            <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 dark:border-emerald-500/30 space-y-2 bento-card shadow-xs">
+              <div className="flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-300 font-semibold">
                 <span>Bénéfice Net Réel</span>
-                <span className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400">
+                <span className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
                   <Wallet className="w-4 h-4" />
                 </span>
               </div>
-              <div className="text-3xl font-black text-emerald-400">
-                {analytics.netProfit.toLocaleString()} <span className="text-sm font-semibold text-slate-400">DH</span>
+              <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400">
+                {analytics.netProfit.toLocaleString()} <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">DH</span>
               </div>
-              <div className="text-[11px] text-emerald-300">
+              <div className="text-[11px] text-emerald-700 dark:text-emerald-300">
                 Après déduction coût produit & transporteurs
               </div>
             </div>

@@ -53,20 +53,20 @@ export default function LuckyWheelWidget() {
   return (
     <>
       {/* Banner in admin dashboard */}
-      <div className="bg-[#13171c] border border-slate-800/70 bento-card rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+      <div className="bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 bento-card rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-2xl shrink-0">
             🎡
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Événement Exclusif Marchand</span>
-              <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 text-[10px] font-bold border border-rose-500/30 animate-pulse">
+              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Événement Exclusif Marchand</span>
+              <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-[10px] font-bold border border-rose-200 dark:border-rose-500/30 animate-pulse">
                 Gratuit
               </span>
             </div>
-            <h3 className="text-sm font-bold text-white mt-0.5">Roue de la Récompense CODShop Maroc</h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">Roue de la Récompense CODShop Maroc</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Faites tourner la roue pour remporter crédits publicitaires, livraisons gratuites et réductions.
             </p>
           </div>
@@ -75,7 +75,7 @@ export default function LuckyWheelWidget() {
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className="w-full sm:w-auto px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-xs rounded-xl shadow-lg shadow-emerald-500/10 transition shrink-0 flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:text-zinc-950 font-black text-xs rounded-xl shadow-lg shadow-emerald-500/10 transition shrink-0 flex items-center justify-center gap-2 cursor-pointer"
         >
           <Gift className="w-4 h-4" />
           <span>Tourner la Roue</span>
@@ -84,22 +84,22 @@ export default function LuckyWheelWidget() {
 
       {/* Interactive Spin Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl relative space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl relative space-y-5">
             <button
               onClick={() => setModalOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 cursor-pointer"
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold mb-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-xs font-bold mb-2">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Roue de la Fortune</span>
               </div>
-              <h3 className="text-xl font-bold text-white">Tentez Votre Chance !</h3>
-              <p className="text-xs text-slate-400 mt-1">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Tentez Votre Chance !</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Gagnez instantanément des avantages pour accélérer votre boutique COD.
               </p>
             </div>

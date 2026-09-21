@@ -439,18 +439,18 @@ function OrdersContent() {
                   onClick={() => setIsExportOpen(false)}
                 />
 
-                <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2.5 z-50 space-y-1 text-xs max-h-[calc(100vh-14rem)] overflow-y-auto admin-scrollbar animate-in fade-in zoom-in-95 duration-150">
-                  <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 flex items-center justify-between">
+                <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-2.5 z-50 space-y-1 text-xs max-h-[calc(100vh-14rem)] overflow-y-auto admin-scrollbar animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                     <span>Export des Commandes (CSV)</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-400 font-mono text-[10px]">Excel / Sheets UTF-8</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-mono text-[10px]">Excel / Sheets UTF-8</span>
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           setIsExportOpen(false);
                         }}
-                        className="p-0.5 rounded text-slate-400 hover:text-white hover:bg-slate-800"
+                        className="p-0.5 rounded text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
                         title="Fermer"
                         aria-label="Fermer"
                       >
@@ -462,64 +462,64 @@ function OrdersContent() {
                   {selectedOrderIds.length > 0 && (
                     <button
                       onClick={() => handleExportCsv('selected')}
-                      className="w-full text-left px-3 py-2 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 font-bold flex items-center justify-between transition-colors cursor-pointer"
+                      className="w-full text-left px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40 font-bold flex items-center justify-between transition-colors cursor-pointer"
                     >
                       <span>Sélection ({selectedOrderIds.length})</span>
-                      <Download className="w-3.5 h-3.5 text-emerald-400" />
+                      <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                     </button>
                   )}
 
                   <button
                     onClick={() => handleExportCsv('confirmed')}
-                    className="w-full text-left px-3 py-2 rounded-xl bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-300 font-bold flex items-center justify-between transition-colors cursor-pointer"
+                    className="w-full text-left px-3 py-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 dark:bg-cyan-950/40 dark:hover:bg-cyan-900/60 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/40 font-bold flex items-center justify-between transition-colors cursor-pointer"
                   >
                     <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+                      <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
                       <span>Confirmées ({confirmedCount})</span>
                     </span>
-                    <Download className="w-3.5 h-3.5 text-cyan-400" />
+                    <Download className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
                   </button>
                   <button
                     onClick={() => handleExportCsv('shipped')}
-                    className="w-full text-left px-3 py-2 rounded-xl bg-sky-950/40 hover:bg-sky-900/60 text-sky-300 font-bold flex items-center justify-between transition-colors cursor-pointer"
+                    className="w-full text-left px-3 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:hover:bg-sky-900/60 dark:text-sky-300 border border-sky-200 dark:border-sky-800/40 font-bold flex items-center justify-between transition-colors cursor-pointer"
                   >
                     <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-sky-400"></span>
+                      <span className="w-2 h-2 rounded-full bg-sky-500"></span>
                       <span>Expédiées ({shippedCount})</span>
                     </span>
-                    <Download className="w-3.5 h-3.5 text-sky-400" />
+                    <Download className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
                   </button>
                   <button
                     onClick={() => handleExportCsv('delivered')}
-                    className="w-full text-left px-3 py-2 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 font-bold flex items-center justify-between transition-colors cursor-pointer"
+                    className="w-full text-left px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40 font-bold flex items-center justify-between transition-colors cursor-pointer"
                   >
                     <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                       <span>Livrées ({deliveredCount})</span>
                     </span>
-                    <Download className="w-3.5 h-3.5 text-emerald-400" />
+                    <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   </button>
                   <button
                     onClick={() => handleExportCsv('returned')}
-                    className="w-full text-left px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 font-bold flex items-center justify-between transition-colors cursor-pointer"
+                    className="w-full text-left px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800/40 font-bold flex items-center justify-between transition-colors cursor-pointer"
                   >
                     <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-rose-400"></span>
+                      <span className="w-2 h-2 rounded-full bg-rose-500"></span>
                       <span>Retournées ({returnedCount})</span>
                     </span>
-                    <Download className="w-3.5 h-3.5 text-rose-400" />
+                    <Download className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                   </button>
                   <button
                     onClick={() => handleExportCsv('current')}
-                    className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-300 flex items-center justify-between cursor-pointer"
+                    className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-between cursor-pointer"
                   >
                     <span>Filtre Actuel ({filteredOrders.length})</span>
                     <Download className="w-3.5 h-3.5 text-slate-400" />
                   </button>
-                  <div className="border-t border-slate-800 pt-1 mt-1">
+                  <div className="border-t border-slate-100 dark:border-slate-800 pt-1 mt-1">
                     <button
                       onClick={() => handleExportCsv('all')}
-                      className="w-full text-left px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-white font-bold flex items-center justify-between cursor-pointer"
+                      className="w-full text-left px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-800/80 dark:hover:bg-slate-700 font-bold flex items-center justify-between cursor-pointer shadow-xs"
                     >
                       <span>Toutes les commandes ({orders.length})</span>
                       <Download className="w-3.5 h-3.5 text-emerald-400" />
@@ -530,8 +530,8 @@ function OrdersContent() {
             )}
           </div>
 
-          <div className="text-xs font-mono text-zinc-400 bg-[#13171c] px-3 py-2 rounded-xl border border-slate-800/70">
-            Total : <strong className="text-white tabular-nums font-mono">{orders.length}</strong> ({deliveredCount} Livrées, {returnedCount} Retournées)
+          <div className="text-xs font-mono text-slate-600 dark:text-zinc-400 bg-white dark:bg-[#13171c] px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800/70 shadow-xs">
+            Total : <strong className="text-slate-900 dark:text-white tabular-nums font-mono">{orders.length}</strong> ({deliveredCount} Livrées, {returnedCount} Retournées)
           </div>
         </div>
       </div>
@@ -645,12 +645,12 @@ function OrdersContent() {
 
       {/* Bulk Action Bar (Appears when items are selected) */}
       {selectedOrderIds.length > 0 && (
-        <div className="fixed bottom-16 sm:static left-3 right-3 z-40 sm:z-auto bg-zinc-900/95 backdrop-blur-md border border-zinc-700/80 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-2xl animate-in fade-in slide-in-from-bottom-2">
-          <div className="flex items-center gap-2.5 text-xs text-zinc-200">
-            <span className="min-w-5 h-5 px-1.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-100 font-mono text-[11px] font-bold flex items-center justify-center">
+        <div className="fixed bottom-16 sm:static left-3 right-3 z-40 sm:z-auto bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-300 dark:border-zinc-700/80 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-2xl animate-in fade-in slide-in-from-bottom-2">
+          <div className="flex items-center gap-2.5 text-xs text-slate-800 dark:text-zinc-200">
+            <span className="min-w-5 h-5 px-1.5 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-900 dark:text-zinc-100 font-mono text-[11px] font-bold flex items-center justify-center">
               {selectedOrderIds.length}
             </span>
-            <span className="font-medium text-zinc-300">commandes sélectionnées</span>
+            <span className="font-medium text-slate-600 dark:text-zinc-300">commandes sélectionnées</span>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
@@ -848,13 +848,13 @@ function OrdersContent() {
                 return (
                   <div
                     key={`kanban-col-${col.id}`}
-                    className="bg-[#0e1217] rounded-xl border border-slate-800/80 flex flex-col max-h-[750px] overflow-hidden shadow-sm"
+                    className="bg-white dark:bg-[#0e1217] rounded-xl border border-slate-200 dark:border-slate-800/80 flex flex-col max-h-[750px] overflow-hidden shadow-xs"
                   >
                     {/* Column Header */}
-                    <div className="p-3 border-b border-slate-800/80 bg-[#13171c] flex items-center justify-between shrink-0">
+                    <div className="p-3 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-[#13171c] flex items-center justify-between shrink-0">
                       <div className="flex items-center gap-2">
                         <span className={`w-2 h-2 rounded-full ${col.dot}`} />
-                        <span className="text-xs font-bold text-zinc-200">{col.title}</span>
+                        <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">{col.title}</span>
                       </div>
                       <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${col.pillClass}`}>
                         {columnOrders.length}
@@ -904,13 +904,13 @@ function OrdersContent() {
                               </div>
 
                               {/* Item Summary */}
-                              <div className="text-[10px] text-zinc-300 bg-[#0c0f12] px-2 py-1 rounded border border-slate-800/60 flex items-center justify-between">
+                              <div className="text-[10px] text-slate-700 dark:text-zinc-300 bg-slate-50 dark:bg-[#0c0f12] px-2 py-1 rounded border border-slate-200 dark:border-slate-800/60 flex items-center justify-between">
                                 <span className="truncate pr-1">{order.items[0]?.title}</span>
-                                <span className="font-mono text-zinc-400 shrink-0">x{order.items[0]?.quantity}</span>
+                                <span className="font-mono text-slate-500 dark:text-zinc-400 shrink-0">x{order.items[0]?.quantity}</span>
                               </div>
 
                               {/* Footer: WhatsApp + Direct Call + Quick Action button */}
-                              <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t border-slate-800/60" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t border-slate-200 dark:border-slate-800/60" onClick={(e) => e.stopPropagation()}>
                                 <a
                                   href={buildWhatsAppLink(order, 'confirmation', storeSlug)}
                                   target="_blank"

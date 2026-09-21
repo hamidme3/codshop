@@ -364,7 +364,23 @@ h1 {
 
 /* ── Comprehensive Polaris Light Mode Engine for Admin Shell ── */
 
-/* 1. All dark surface hexes mapped to crisp white cards */
+/* 1. All dark surfaces (named Tailwind zinc/slate + hexes) mapped to crisp white cards */
+/* 1. All dark surfaces (named Tailwind zinc/slate + hexes) mapped to crisp white cards */
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-950,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-950\/95,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-900,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-900\/90,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-900\/80,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-900\/70,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-900\/60,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-900\/50,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-900\/40,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-slate-950,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-slate-950\/80,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-slate-900,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-slate-900\/90,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-slate-900\/80,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-black,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#0e1217\],
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#13171c\],
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#121215\],
@@ -374,6 +390,21 @@ h1 {
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#101418\],
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#0e1216\],
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#18181b\],
+html:not(.dark) .admin-shell .bg-zinc-950,
+html:not(.dark) .admin-shell .bg-zinc-950\/95,
+html:not(.dark) .admin-shell .bg-zinc-900,
+html:not(.dark) .admin-shell .bg-zinc-900\/90,
+html:not(.dark) .admin-shell .bg-zinc-900\/80,
+html:not(.dark) .admin-shell .bg-zinc-900\/70,
+html:not(.dark) .admin-shell .bg-zinc-900\/60,
+html:not(.dark) .admin-shell .bg-zinc-900\/50,
+html:not(.dark) .admin-shell .bg-zinc-900\/40,
+html:not(.dark) .admin-shell .bg-slate-950,
+html:not(.dark) .admin-shell .bg-slate-950\/80,
+html:not(.dark) .admin-shell .bg-slate-900,
+html:not(.dark) .admin-shell .bg-slate-900\/90,
+html:not(.dark) .admin-shell .bg-slate-900\/80,
+html:not(.dark) .admin-shell .bg-black,
 html:not(.dark) .admin-shell .bg-\[\#0e1217\],
 html:not(.dark) .admin-shell .bg-\[\#13171c\],
 html:not(.dark) .admin-shell .bg-\[\#121215\],
@@ -382,24 +413,91 @@ html:not(.dark) .admin-shell .bg-\[\#181e25\],
 html:not(.dark) .admin-shell .bg-\[\#161b22\],
 html:not(.dark) .admin-shell .bg-\[\#101418\],
 html:not(.dark) .admin-shell .bg-\[\#0e1216\],
-html:not(.dark) .admin-shell .bg-\[\#18181b\] {
+html:not(.dark) .admin-shell .bg-\[\#18181b\],
+[data-admin-theme="light"] .bg-zinc-950,
+[data-admin-theme="light"] .bg-zinc-950\/95,
+[data-admin-theme="light"] .bg-zinc-900,
+[data-admin-theme="light"] .bg-zinc-900\/90,
+[data-admin-theme="light"] .bg-zinc-900\/80,
+[data-admin-theme="light"] .bg-zinc-900\/70,
+[data-admin-theme="light"] .bg-zinc-900\/60,
+[data-admin-theme="light"] .bg-zinc-900\/50,
+[data-admin-theme="light"] .bg-zinc-900\/40,
+[data-admin-theme="light"] .bg-slate-950,
+[data-admin-theme="light"] .bg-slate-950\/80,
+[data-admin-theme="light"] .bg-slate-900,
+[data-admin-theme="light"] .bg-slate-900\/90,
+[data-admin-theme="light"] .bg-slate-900\/80,
+[data-admin-theme="light"] .bg-black,
+[data-admin-theme="light"] .bg-\[\#0e1217\],
+[data-admin-theme="light"] .bg-\[\#13171c\],
+[data-admin-theme="light"] .bg-\[\#121215\],
+[data-admin-theme="light"] .bg-\[\#0d0d10\],
+[data-admin-theme="light"] .bg-\[\#181e25\],
+[data-admin-theme="light"] .bg-\[\#161b22\],
+[data-admin-theme="light"] .bg-\[\#101418\],
+[data-admin-theme="light"] .bg-\[\#0e1216\],
+[data-admin-theme="light"] .bg-\[\#18181b\] {
   background-color: var(--admin-bg-surface) !important;
   border-color: var(--admin-border) !important;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
 }
 
 /* 2. Nested subtle wells & item containers */
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-800,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-800\/80,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-800\/60,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-slate-800,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-slate-800\/80,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#0c0f12\],
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#0f0f12\],
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#09090b\],
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#0b1419\],
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-\[\#090d16\],
+html:not(.dark) .admin-shell .bg-zinc-800,
+html:not(.dark) .admin-shell .bg-zinc-800\/80,
+html:not(.dark) .admin-shell .bg-zinc-800\/60,
+html:not(.dark) .admin-shell .bg-slate-800,
+html:not(.dark) .admin-shell .bg-slate-800\/80,
 html:not(.dark) .admin-shell .bg-\[\#0c0f12\],
 html:not(.dark) .admin-shell .bg-\[\#0f0f12\],
 html:not(.dark) .admin-shell .bg-\[\#09090b\],
 html:not(.dark) .admin-shell .bg-\[\#0b1419\],
-html:not(.dark) .admin-shell .bg-\[\#090d16\] {
+html:not(.dark) .admin-shell .bg-\[\#090d16\],
+[data-admin-theme="light"] .bg-zinc-800,
+[data-admin-theme="light"] .bg-zinc-800\/80,
+[data-admin-theme="light"] .bg-zinc-800\/60,
+[data-admin-theme="light"] .bg-slate-800,
+[data-admin-theme="light"] .bg-slate-800\/80,
+[data-admin-theme="light"] .bg-\[\#0c0f12\],
+[data-admin-theme="light"] .bg-\[\#0f0f12\],
+[data-admin-theme="light"] .bg-\[\#09090b\],
+[data-admin-theme="light"] .bg-\[\#0b1419\],
+[data-admin-theme="light"] .bg-\[\#090d16\] {
   background-color: var(--admin-bg-subtle) !important;
+  border-color: var(--admin-border) !important;
+}
+
+/* Semi-transparent dropzone washes mapped to clean off-white in light mode */
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-950\/40,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-zinc-900\/40,
+html:not(.dark) .admin-shell .bg-zinc-950\/40,
+html:not(.dark) .admin-shell .bg-zinc-900\/40,
+[data-admin-theme="light"] .bg-zinc-950\/40,
+[data-admin-theme="light"] .bg-zinc-900\/40 {
+  background-color: #f8fafc !important;
+  border-color: var(--admin-border) !important;
+}
+
+/* Secondary cancel/action buttons with dark utility classes mapped to clean light buttons */
+:root:not([data-admin-theme="dark"]) .admin-shell button.bg-zinc-900,
+:root:not([data-admin-theme="dark"]) .admin-shell button.bg-zinc-800,
+html:not(.dark) .admin-shell button.bg-zinc-900,
+html:not(.dark) .admin-shell button.bg-zinc-800,
+[data-admin-theme="light"] button.bg-zinc-900,
+[data-admin-theme="light"] button.bg-zinc-800 {
+  background-color: var(--admin-bg-subtle) !important;
+  color: var(--admin-text-primary) !important;
   border-color: var(--admin-border) !important;
 }
 
@@ -423,21 +521,35 @@ html:not(.dark) .admin-shell .text-zinc-100:not([class*="bg-emerald"]):not([clas
 html:not(.dark) .admin-shell .text-zinc-200:not([class*="bg-emerald"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-rose"]):not([class*="bg-slate-9"]),
 html:not(.dark) .admin-shell .text-zinc-300:not([class*="bg-emerald"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-rose"]):not([class*="bg-slate-9"]),
 html:not(.dark) .admin-shell .text-slate-100,
-html:not(.dark) .admin-shell .text-slate-200 {
+html:not(.dark) .admin-shell .text-slate-200,
+[data-admin-theme="light"] h1,
+[data-admin-theme="light"] h2,
+[data-admin-theme="light"] h3,
+[data-admin-theme="light"] h4,
+[data-admin-theme="light"] .text-white:not([class*="bg-emerald"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-rose"]):not([class*="bg-slate-9"]):not([class*="bg-black"]):not([class*="bg-cyan"]):not([class*="bg-teal"]):not(.keep-white),
+[data-admin-theme="light"] .text-zinc-100:not([class*="bg-emerald"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-rose"]):not([class*="bg-slate-9"]),
+[data-admin-theme="light"] .text-zinc-200:not([class*="bg-emerald"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-rose"]):not([class*="bg-slate-9"]),
+[data-admin-theme="light"] .text-zinc-300:not([class*="bg-emerald"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-rose"]):not([class*="bg-slate-9"]),
+[data-admin-theme="light"] .text-slate-100,
+[data-admin-theme="light"] .text-slate-200 {
   color: var(--admin-text-primary);
 }
 
 :root:not([data-admin-theme="dark"]) .admin-shell .text-zinc-400,
 :root:not([data-admin-theme="dark"]) .admin-shell .text-slate-400,
 html:not(.dark) .admin-shell .text-zinc-400,
-html:not(.dark) .admin-shell .text-slate-400 {
+html:not(.dark) .admin-shell .text-slate-400,
+[data-admin-theme="light"] .text-zinc-400,
+[data-admin-theme="light"] .text-slate-400 {
   color: var(--admin-text-secondary);
 }
 
 :root:not([data-admin-theme="dark"]) .admin-shell .text-zinc-500,
 :root:not([data-admin-theme="dark"]) .admin-shell .text-slate-500,
 html:not(.dark) .admin-shell .text-zinc-500,
-html:not(.dark) .admin-shell .text-slate-500 {
+html:not(.dark) .admin-shell .text-slate-500,
+[data-admin-theme="light"] .text-zinc-500,
+[data-admin-theme="light"] .text-slate-500 {
   color: var(--admin-text-muted);
 }
 
@@ -455,7 +567,14 @@ html:not(.dark) .admin-shell .bg-emerald-700,
 html:not(.dark) .admin-shell .bg-slate-900,
 html:not(.dark) .admin-shell .bg-blue-600,
 html:not(.dark) .admin-shell .bg-sky-600,
-html:not(.dark) .admin-shell .bg-rose-600 {
+html:not(.dark) .admin-shell .bg-rose-600,
+[data-admin-theme="light"] .bg-emerald-600,
+[data-admin-theme="light"] .bg-emerald-500,
+[data-admin-theme="light"] .bg-emerald-700,
+[data-admin-theme="light"] .bg-slate-900,
+[data-admin-theme="light"] .bg-blue-600,
+[data-admin-theme="light"] .bg-sky-600,
+[data-admin-theme="light"] .bg-rose-600 {
   color: #ffffff !important;
 }
 
@@ -466,7 +585,11 @@ html:not(.dark) .admin-shell .bg-rose-600 {
 html:not(.dark) .admin-shell .bg-emerald-600 *,
 html:not(.dark) .admin-shell .bg-emerald-500 *,
 html:not(.dark) .admin-shell .bg-slate-900 *,
-html:not(.dark) .admin-shell .bg-rose-600 * {
+html:not(.dark) .admin-shell .bg-rose-600 *,
+[data-admin-theme="light"] .bg-emerald-600 *,
+[data-admin-theme="light"] .bg-emerald-500 *,
+[data-admin-theme="light"] .bg-slate-900 *,
+[data-admin-theme="light"] .bg-rose-600 * {
   color: #ffffff;
 }
 
@@ -476,7 +599,10 @@ html:not(.dark) .admin-shell .bg-rose-600 * {
 :root:not([data-admin-theme="dark"]) .admin-shell textarea,
 html:not(.dark) .admin-shell input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="range"]),
 html:not(.dark) .admin-shell select,
-html:not(.dark) .admin-shell textarea {
+html:not(.dark) .admin-shell textarea,
+[data-admin-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="range"]),
+[data-admin-theme="light"] select,
+[data-admin-theme="light"] textarea {
   background-color: #ffffff !important;
   border-color: #cbd5e1 !important;
   color: #0f172a !important;
@@ -485,12 +611,15 @@ html:not(.dark) .admin-shell textarea {
 :root:not([data-admin-theme="dark"]) .admin-shell input::placeholder,
 :root:not([data-admin-theme="dark"]) .admin-shell textarea::placeholder,
 html:not(.dark) .admin-shell input::placeholder,
-html:not(.dark) .admin-shell textarea::placeholder {
+html:not(.dark) .admin-shell textarea::placeholder,
+[data-admin-theme="light"] input::placeholder,
+[data-admin-theme="light"] textarea::placeholder {
   color: #94a3b8 !important;
 }
 
 :root:not([data-admin-theme="dark"]) .admin-shell select option,
-html:not(.dark) .admin-shell select option {
+html:not(.dark) .admin-shell select option,
+[data-admin-theme="light"] select option {
   background-color: #ffffff !important;
   color: #0f172a !important;
 }
@@ -525,7 +654,22 @@ html:not(.dark) .admin-shell .border-zinc-800\/80,
 html:not(.dark) .admin-shell .border-zinc-800\/90,
 html:not(.dark) .admin-shell .border-zinc-700,
 html:not(.dark) .admin-shell .border-zinc-700\/60,
-html:not(.dark) .admin-shell .border-zinc-700\/80 {
+html:not(.dark) .admin-shell .border-zinc-700\/80,
+[data-admin-theme="light"] .border-slate-800,
+[data-admin-theme="light"] .border-slate-800\/60,
+[data-admin-theme="light"] .border-slate-800\/70,
+[data-admin-theme="light"] .border-slate-800\/80,
+[data-admin-theme="light"] .border-slate-800\/90,
+[data-admin-theme="light"] .border-slate-700,
+[data-admin-theme="light"] .border-slate-700\/60,
+[data-admin-theme="light"] .border-zinc-800,
+[data-admin-theme="light"] .border-zinc-800\/60,
+[data-admin-theme="light"] .border-zinc-800\/70,
+[data-admin-theme="light"] .border-zinc-800\/80,
+[data-admin-theme="light"] .border-zinc-800\/90,
+[data-admin-theme="light"] .border-zinc-700,
+[data-admin-theme="light"] .border-zinc-700\/60,
+[data-admin-theme="light"] .border-zinc-700\/80 {
   border-color: var(--admin-border) !important;
 }
 

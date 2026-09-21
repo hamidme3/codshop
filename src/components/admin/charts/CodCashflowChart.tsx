@@ -56,40 +56,40 @@ export default function CodCashflowChart({ data = DEFAULT_DATA, currency = 'MAD'
 
   if (!mounted) {
     return (
-      <div className="rounded-xl border border-zinc-800/80 bg-zinc-950 p-5 h-[380px] flex items-center justify-center text-zinc-500 text-xs font-mono">
+      <div className="rounded-xl border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 p-5 h-[380px] flex items-center justify-center text-slate-400 dark:text-zinc-500 text-xs font-mono">
         Chargement de la réconciliation financière...
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-zinc-800/80 bg-zinc-950 p-5 transition-all">
+    <div className="rounded-xl border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 p-5 transition-all shadow-xs">
       {/* Header with Title & Range Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-zinc-800/60 mb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-zinc-800/60 mb-5">
         <div>
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <h3 className="text-sm font-semibold text-zinc-100 tracking-tight">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100 tracking-tight">
               Réconciliation & Flux de Trésorerie COD
             </h3>
-            <span className="text-[10px] font-medium bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded">
+            <span className="text-[10px] font-medium bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 px-2 py-0.5 rounded">
               Temps Réel
             </span>
           </div>
-          <p className="text-xs text-zinc-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
             Cash encaissé à la livraison vs fonds en transit chez les transporteurs
           </p>
         </div>
 
-        <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-0.5 rounded-lg self-start sm:self-auto">
+        <div className="flex items-center gap-1 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-0.5 rounded-lg self-start sm:self-auto">
           {(['7D', '14D', '30D'] as const).map((r) => (
             <button
               key={r}
               onClick={() => setRange(r)}
               className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
                 range === r
-                  ? 'bg-zinc-800 text-white shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-white text-slate-900 dark:bg-zinc-800 dark:text-white shadow-xs font-semibold'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200'
               }`}
             >
               {r === '7D' ? '7 Jours' : r === '14D' ? '14 Jours' : '30 Jours'}
@@ -100,42 +100,42 @@ export default function CodCashflowChart({ data = DEFAULT_DATA, currency = 'MAD'
 
       {/* KPI Micro-Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-        <div className="bg-zinc-900/60 border border-emerald-500/20 rounded-lg p-3">
-          <div className="flex items-center justify-between text-xs text-zinc-400 mb-1">
-            <span className="flex items-center gap-1.5 font-medium">
-              <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+        <div className="bg-emerald-50/50 dark:bg-zinc-900/60 border border-emerald-500/20 rounded-lg p-3">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 mb-1">
+            <span className="flex items-center gap-1.5 font-medium text-emerald-800 dark:text-emerald-400">
+              <DollarSign className="w-3.5 h-3.5" />
               Cash Encaissé (Livré)
             </span>
-            <span className="text-emerald-400 font-mono text-[11px] font-semibold">+18.4%</span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-mono text-[11px] font-semibold">+18.4%</span>
           </div>
-          <div className="text-xl font-bold font-mono text-zinc-100 tabular-nums">
-            {totals.delivered.toLocaleString()} <span className="text-xs text-zinc-500 font-normal">{currency}</span>
+          <div className="text-xl font-bold font-mono text-slate-900 dark:text-zinc-100 tabular-nums">
+            {totals.delivered.toLocaleString()} <span className="text-xs text-slate-500 dark:text-zinc-500 font-normal">{currency}</span>
           </div>
         </div>
 
-        <div className="bg-zinc-900/60 border border-amber-500/20 rounded-lg p-3">
-          <div className="flex items-center justify-between text-xs text-zinc-400 mb-1">
-            <span className="flex items-center gap-1.5 font-medium">
-              <Clock className="w-3.5 h-3.5 text-amber-400" />
+        <div className="bg-amber-50/50 dark:bg-zinc-900/60 border border-amber-500/20 rounded-lg p-3">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 mb-1">
+            <span className="flex items-center gap-1.5 font-medium text-amber-800 dark:text-amber-400">
+              <Clock className="w-3.5 h-3.5" />
               En Transit Transporteurs
             </span>
-            <span className="text-amber-400 font-mono text-[11px]">En cours</span>
+            <span className="text-amber-600 dark:text-amber-400 font-mono text-[11px]">En cours</span>
           </div>
-          <div className="text-xl font-bold font-mono text-amber-300 tabular-nums">
-            {totals.inTransit.toLocaleString()} <span className="text-xs text-zinc-500 font-normal">{currency}</span>
+          <div className="text-xl font-bold font-mono text-slate-900 dark:text-amber-300 tabular-nums">
+            {totals.inTransit.toLocaleString()} <span className="text-xs text-slate-500 dark:text-zinc-500 font-normal">{currency}</span>
           </div>
         </div>
 
-        <div className="bg-zinc-900/60 border border-rose-500/20 rounded-lg p-3">
-          <div className="flex items-center justify-between text-xs text-zinc-400 mb-1">
-            <span className="flex items-center gap-1.5 font-medium">
-              <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+        <div className="bg-rose-50/50 dark:bg-zinc-900/60 border border-rose-500/20 rounded-lg p-3">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 mb-1">
+            <span className="flex items-center gap-1.5 font-medium text-rose-800 dark:text-rose-400">
+              <AlertTriangle className="w-3.5 h-3.5" />
               Pertes Retours
             </span>
-            <span className="text-rose-400 font-mono text-[11px]">Frais transport</span>
+            <span className="text-rose-600 dark:text-rose-400 font-mono text-[11px]">Frais transport</span>
           </div>
-          <div className="text-xl font-bold font-mono text-rose-300 tabular-nums">
-            {totals.losses.toLocaleString()} <span className="text-xs text-zinc-500 font-normal">{currency}</span>
+          <div className="text-xl font-bold font-mono text-slate-900 dark:text-rose-300 tabular-nums">
+            {totals.losses.toLocaleString()} <span className="text-xs text-slate-500 dark:text-zinc-500 font-normal">{currency}</span>
           </div>
         </div>
       </div>
@@ -158,16 +158,16 @@ export default function CodCashflowChart({ data = DEFAULT_DATA, currency = 'MAD'
                 <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" vertical={false} />
             <XAxis 
               dataKey="date" 
-              stroke="#71717a" 
+              stroke="#64748b" 
               fontSize={11} 
               tickLine={false} 
-              axisLine={{ stroke: '#27272a' }}
+              axisLine={{ stroke: '#cbd5e1' }}
             />
             <YAxis 
-              stroke="#71717a" 
+              stroke="#64748b" 
               fontSize={11} 
               tickLine={false} 
               axisLine={false}
@@ -177,15 +177,15 @@ export default function CodCashflowChart({ data = DEFAULT_DATA, currency = 'MAD'
               content={({ active, payload, label }) => {
                 if (active && payload && payload.length) {
                   return (
-                    <div className="rounded-lg border border-zinc-800 bg-zinc-950/95 p-3 shadow-2xl backdrop-blur-md text-xs font-mono">
-                      <p className="font-semibold text-zinc-300 mb-2 border-b border-zinc-800 pb-1">{label}</p>
+                    <div className="rounded-lg border border-slate-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/95 p-3 shadow-xl backdrop-blur-md text-xs font-mono">
+                      <p className="font-semibold text-slate-900 dark:text-zinc-300 mb-2 border-b border-slate-100 dark:border-zinc-800 pb-1">{label}</p>
                       {payload.map((entry: any, i: number) => (
                         <div key={i} className="flex items-center justify-between gap-4 py-0.5">
                           <span className="flex items-center gap-1.5" style={{ color: entry.color }}>
                             <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: entry.color }} />
                             {entry.name}
                           </span>
-                          <span className="font-bold text-zinc-100 tabular-nums">
+                          <span className="font-bold text-slate-900 dark:text-zinc-100 tabular-nums">
                             {Number(entry.value).toLocaleString()} {currency}
                           </span>
                         </div>

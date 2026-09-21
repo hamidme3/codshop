@@ -58,36 +58,36 @@ export default function StoreSwitcher({ currentSlug }: { currentSlug: string }) 
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800/90 border border-slate-700/60 hover:border-slate-600 transition-all text-left group cursor-pointer"
+        className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 hover:border-slate-300 dark:bg-slate-800/60 dark:hover:bg-slate-800/90 dark:border-slate-700/60 dark:hover:border-slate-600 transition-all text-left group cursor-pointer"
       >
         <div className="flex items-center gap-2.5 min-w-0 pr-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
             <Store className="w-4 h-4" />
           </div>
           <div className="min-w-0">
-            <p className="font-bold text-xs text-white truncate group-hover:text-emerald-300 transition-colors">
+            <p className="font-bold text-xs text-slate-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">
               {currentStore.name}
             </p>
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
               <span className="truncate">Boutique en ligne</span>
             </div>
           </div>
         </div>
         <ChevronDown
           className={`w-4 h-4 text-slate-400 transition-transform shrink-0 ${
-            isOpen ? 'rotate-180 text-emerald-400' : ''
+            isOpen ? 'rotate-180 text-emerald-500' : ''
           }`}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 z-50 rounded-2xl bg-slate-900 border border-slate-700/80 shadow-2xl shadow-black/80 overflow-hidden text-xs">
-          <div className="p-2.5 border-b border-slate-800 bg-slate-950/60 flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        <div className="absolute top-full left-0 right-0 mt-2 z-50 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 shadow-2xl overflow-hidden text-xs">
+          <div className="p-2.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Mes Boutiques ({stores.length})
             </span>
-            <span className="text-[10px] text-emerald-400 font-medium">Connecté</span>
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Connecté</span>
           </div>
 
           <div className="max-h-60 overflow-y-auto p-1.5 space-y-1">
@@ -99,46 +99,46 @@ export default function StoreSwitcher({ currentSlug }: { currentSlug: string }) 
                   onClick={() => handleSwitch(s.url)}
                   className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-colors cursor-pointer ${
                     isSelected
-                      ? 'bg-emerald-500/15 text-emerald-300 font-bold border border-emerald-500/30'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-500/30'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0 pr-2">
                     <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs shrink-0 ${
-                      isSelected ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'
+                      isSelected ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                     }`}>
                       <Store className="w-3 h-3" />
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-xs font-semibold">{s.name}</p>
-                      <p className="text-[10px] text-slate-400 truncate">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
                         {isSelected ? 'Boutique actuelle' : 'Changer de boutique'}
                       </p>
                     </div>
                   </div>
-                  {isSelected && <Check className="w-4 h-4 text-emerald-400 shrink-0" />}
+                  {isSelected && <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />}
                 </button>
               );
             })}
 
             {managedStores.length > 0 && (
               <>
-                <div className="p-2 pt-3 border-t border-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <div className="p-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   Boutiques Collaborateur ({managedStores.length})
                 </div>
                 {managedStores.map((s) => (
                   <button
                     key={s.id}
                     onClick={() => handleSwitch(s.url)}
-                    className="w-full flex items-center justify-between p-2 rounded-xl text-left text-slate-300 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
+                    className="w-full flex items-center justify-between p-2 rounded-xl text-left text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
                   >
                     <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                      <div className="w-6 h-6 rounded-md bg-slate-800 text-slate-400 flex items-center justify-center text-xs shrink-0">
+                      <div className="w-6 h-6 rounded-md bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 flex items-center justify-center text-xs shrink-0">
                         <Store className="w-3 h-3" />
                       </div>
                       <div className="min-w-0">
                         <p className="truncate text-xs font-semibold">{s.name}</p>
-                        <p className="text-[10px] text-slate-400 truncate">Accès délégué</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">Accès délégué</p>
                       </div>
                     </div>
                   </button>
@@ -147,7 +147,7 @@ export default function StoreSwitcher({ currentSlug }: { currentSlug: string }) 
             )}
           </div>
 
-          <div className="p-2 border-t border-slate-800 bg-slate-950/60">
+          <div className="p-2 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60">
             <button
               type="button"
               onClick={() => {
@@ -157,7 +157,7 @@ export default function StoreSwitcher({ currentSlug }: { currentSlug: string }) 
                   window.location.href = `/onboarding?store=${slug}`;
                 }
               }}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-bold text-[11px] transition-colors border border-emerald-500/30 cursor-pointer"
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold text-[11px] transition-colors border border-emerald-500/30 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" /> Créer une nouvelle boutique
             </button>
