@@ -600,54 +600,6 @@ function OrdersContent() {
         <div className="pointer-events-none absolute right-0 top-0 bottom-1.5 w-6 bg-gradient-to-l from-[#0b0f17] to-transparent sm:hidden" />
       </div>
 
-      {/* 1-Click Status Export Toolbar (Direct filtered exports) */}
-      <div className="flex items-center justify-between gap-2 p-2.5 bg-[#13171c] border border-slate-800/70 rounded-xl text-xs overflow-x-auto bento-card no-scrollbar">
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 pl-1 shrink-0">
-            <Download className="w-3.5 h-3.5 text-emerald-400" /> Export 1-Clic :
-          </span>
-          <button
-            onClick={() => handleExportCsv('confirmed')}
-            className="shrink-0 px-3 py-1.5 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-800/50 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-            title="Télécharger immédiatement toutes les commandes confirmées prêtes pour expédition"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-            <span>Confirmées ({confirmedCount})</span>
-            <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
-          </button>
-          <button
-            onClick={() => handleExportCsv('shipped')}
-            className="shrink-0 px-3 py-1.5 rounded-lg bg-sky-950/40 hover:bg-sky-900/60 border border-sky-800/50 text-sky-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-            title="Télécharger immédiatement toutes les commandes expédiées en cours de livraison"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
-            <span>Expédiées ({shippedCount})</span>
-            <Truck className="w-3.5 h-3.5 text-sky-400" />
-          </button>
-          <button
-            onClick={() => handleExportCsv('delivered')}
-            className="shrink-0 px-3 py-1.5 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/50 text-emerald-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-            title="Télécharger immédiatement toutes les commandes livrées et encaissées (CRBT)"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            <span>Livrées ({deliveredCount})</span>
-            <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
-          </button>
-          <button
-            onClick={() => handleExportCsv('returned')}
-            className="shrink-0 px-3 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 text-rose-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-            title="Télécharger immédiatement toutes les commandes retournées ou annulées au format CSV"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-            <span>Retournées ({returnedCount})</span>
-            <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
-          </button>
-        </div>
-
-        <div className="text-[11px] text-zinc-500 pr-2 shrink-0 hidden lg:block font-mono">
-          ⚡ Windows Excel UTF-8 BOM
-        </div>
-      </div>
 
       {/* Search, View Switcher & Counter Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#13171c] border border-slate-800/70 rounded-xl p-3 bento-card">
