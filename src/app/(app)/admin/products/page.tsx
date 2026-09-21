@@ -1267,7 +1267,8 @@ function ProductsContent() {
                         <select
                           value={category}
                           onChange={(e) => setCategory(e.target.value)}
-                          className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 focus:outline-none focus:border-emerald-500/60 font-medium cursor-pointer"
+                          className="w-full bg-white dark:bg-[#0d0d10] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-emerald-500/60 font-medium cursor-pointer"
+                          style={{ colorScheme: 'light' }}
                         >
                           {categories.map((c) => (
                             <option key={c.id} value={c.name}>
@@ -1278,11 +1279,12 @@ function ProductsContent() {
                       </div>
 
                       <div>
-                        <label className="block text-zinc-300 font-medium mb-1">Badge Commercial :</label>
+                        <label className="block text-slate-700 dark:text-zinc-300 font-medium mb-1">Badge Commercial :</label>
                         <select
                           value={addBadge}
                           onChange={(e) => setAddBadge(e.target.value)}
-                          className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 focus:outline-none focus:border-emerald-500/60 font-medium cursor-pointer"
+                          className="w-full bg-white dark:bg-[#0d0d10] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-emerald-500/60 font-medium cursor-pointer"
+                          style={{ colorScheme: 'light' }}
                         >
                           <option value="100% Cuir Véritable">100% Cuir Véritable</option>
                           <option value="Bordereau Express">Bordereau Express</option>
@@ -2057,6 +2059,7 @@ function ProductsContent() {
                     value={editCategory}
                     onChange={(e) => setEditCategory(e.target.value)}
                     className="w-full bg-slate-50 dark:bg-[#0d0d10] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-emerald-500 font-medium"
+                    style={{ colorScheme: 'light' }}
                   >
                     {categories.map((c) => (
                       <option key={c.id} value={c.name}>{c.name}</option>
@@ -2826,6 +2829,7 @@ function ProductsContent() {
                   value={targetReassignCatId}
                   onChange={(e) => setTargetReassignCatId(e.target.value)}
                   className="w-full bg-white dark:bg-[#0d0d10] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-200 text-xs focus:outline-none focus:border-emerald-500"
+                  style={{ colorScheme: 'light' }}
                 >
                   {categories
                     .filter((c) => c.id !== categoryToReassign.id)
@@ -2862,9 +2866,9 @@ function ProductsContent() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-zinc-900/95 backdrop-blur-md border border-zinc-700/80 text-zinc-100 px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2.5 text-xs font-medium animate-in fade-in slide-in-from-bottom-2 duration-200">
-          <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{toastMessage}</span>
+        <div className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 z-50 bg-white dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200 dark:border-zinc-700/80 text-slate-900 dark:text-zinc-100 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 text-xs font-semibold animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+          <span className="text-slate-900 dark:text-zinc-100">{toastMessage}</span>
         </div>
       )}
     </div>

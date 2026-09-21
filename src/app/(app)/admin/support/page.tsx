@@ -384,7 +384,8 @@ export default function SupportDeskPage() {
                   <select
                     value={department}
                     onChange={(e) => setDepartment(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                    style={{ colorScheme: 'light' }}
                   >
                     <option value="cod_orders">Commandes & Livraisons COD</option>
                     <option value="pixels_ads">Pixels & Publicités (Meta/TikTok)</option>
@@ -401,7 +402,8 @@ export default function SupportDeskPage() {
                   <select
                     value={priority}
                     onChange={(e) => setPriority(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                    style={{ colorScheme: 'light' }}
                   >
                     <option value="low">Faible (Question générale)</option>
                     <option value="normal">Normale (Configuration)</option>

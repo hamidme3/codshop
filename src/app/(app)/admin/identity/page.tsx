@@ -409,7 +409,8 @@ export default function IdentityPage() {
                 disabled={isLocked}
                 value={bankName}
                 onChange={(e) => setBankName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-emerald-500"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-500"
+                style={{ colorScheme: 'light' }}
               >
                 {MOROCCAN_BANKS.map((b) => (
                   <option key={b} value={b}>{b}</option>

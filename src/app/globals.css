@@ -904,4 +904,52 @@ html:not(.dark) .admin-shell .admin-table tr:hover td {
   border: 1px solid rgba(225, 29, 72, 0.4);
 }
 
+/* ==========================================================================
+   NATIVE FORM CONTROLS & PICKERS (COLOR SCHEME CONTROL)
+   Prevents mobile operating systems (Android / iOS) from rendering
+   dark system dialogs, radio sheets, or native dropdown pickers.
+   ========================================================================== */
+:root:not([data-admin-theme="dark"]),
+html:not(.dark),
+html[data-admin-theme="light"],
+[data-admin-theme="light"],
+body:not(.dark) {
+  color-scheme: light !important;
+}
+
+:root:not([data-admin-theme="dark"]) select,
+:root:not([data-admin-theme="dark"]) option,
+:root:not([data-admin-theme="dark"]) optgroup,
+:root:not([data-admin-theme="dark"]) input,
+:root:not([data-admin-theme="dark"]) textarea,
+html:not(.dark) select,
+html:not(.dark) option,
+html:not(.dark) optgroup,
+html:not(.dark) input,
+html:not(.dark) textarea,
+[data-admin-theme="light"] select,
+[data-admin-theme="light"] option,
+[data-admin-theme="light"] optgroup,
+[data-admin-theme="light"] input,
+[data-admin-theme="light"] textarea {
+  color-scheme: light !important;
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+:root[data-admin-theme="dark"],
+.dark[data-admin-theme="dark"] {
+  color-scheme: dark !important;
+}
+
+:root[data-admin-theme="dark"] select,
+:root[data-admin-theme="dark"] option,
+.dark select,
+.dark option {
+  color-scheme: dark !important;
+  background-color: #0e1217;
+  color: #f1f5f9;
+}
+
+
 

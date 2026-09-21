@@ -18,6 +18,15 @@ import {
   exportOrdersToCsv 
 } from '@/lib/courier-manifest';
 
+const STATUS_OPTIONS: { value: OrderStatus; label: string; dotColor: string }[] = [
+  { value: 'new', label: 'Nouvelle (À Valider)', dotColor: 'bg-slate-400' },
+  { value: 'to_confirm', label: 'À Confirmer (Injoignable)', dotColor: 'bg-blue-500' },
+  { value: 'confirmed', label: 'Confirmée', dotColor: 'bg-cyan-500' },
+  { value: 'shipped', label: 'Expédiée (En Livraison)', dotColor: 'bg-sky-500' },
+  { value: 'delivered', label: 'Livrée & Encaissée', dotColor: 'bg-emerald-500' },
+  { value: 'returned', label: 'Retournée (Refus / Annulation)', dotColor: 'bg-rose-500' },
+];
+
 function OrdersContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -30,6 +39,7 @@ function OrdersContent() {
   const [activeFilter, setActiveFilter] = useState<string>(() => (urlFilter === 'new' ? 'to_confirm' : urlFilter));
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
 
   useEffect(() => {
@@ -87,6 +97,7 @@ function OrdersContent() {
         setSelectedOrder(null);
         setIsExportOpen(false);
         setActiveWaOrderId(null);
+        setIsStatusDropdownOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -397,9 +408,9 @@ function OrdersContent() {
     <div className="p-4 sm:p-6 md:p-10 space-y-6 max-w-7xl mx-auto font-sans relative">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-5 right-5 z-50 bg-[#121215] border border-emerald-500/40 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-2xl flex items-center gap-2.5 animate-in fade-in slide-in-from-top-3">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{toastMessage}</span>
+        <div className="fixed top-5 left-4 right-4 sm:left-auto sm:right-5 z-50 bg-white dark:bg-[#121215] border border-slate-200 dark:border-emerald-500/40 text-slate-900 dark:text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-2xl flex items-center gap-2.5 animate-in fade-in slide-in-from-top-3">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+          <span className="text-slate-900 dark:text-white">{toastMessage}</span>
         </div>
       )}
 
@@ -1342,20 +1353,63 @@ function OrdersContent() {
               </div>
 
               {/* Status Update Dropdown */}
-              <div>
+              <div className="relative">
                 <label className="block text-slate-700 dark:text-zinc-300 mb-1.5 text-xs font-medium">Mettre à jour le statut</label>
-                <select
-                  value={selectedOrder.status === 'shipping' ? 'shipped' : selectedOrder.status === 'canceled' ? 'returned' : selectedOrder.status}
-                  onChange={(e) => handleQuickTransition(selectedOrder.id, e.target.value as OrderStatus)}
-                  className="w-full bg-slate-50 dark:bg-[#0e1217] border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-100 text-xs font-medium focus:border-emerald-500 focus:outline-none"
+                
+                {/* Custom Accessible Light-Themed Status Selector */}
+                <button
+                  type="button"
+                  onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                  className="w-full bg-white hover:bg-slate-50 dark:bg-[#0e1217] dark:hover:bg-[#161b22] border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 flex items-center justify-between text-xs font-medium text-slate-900 dark:text-zinc-100 shadow-2xs transition-colors cursor-pointer"
                 >
-                  <option value="new">Nouvelle (À Valider)</option>
-                  <option value="to_confirm">À Confirmer (Injoignable)</option>
-                  <option value="confirmed">Confirmée</option>
-                  <option value="shipped">Expédiée (En Livraison)</option>
-                  <option value="delivered">Livrée & Encaissée</option>
-                  <option value="returned">Retournée (Refus / Annulation)</option>
-                </select>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                      STATUS_OPTIONS.find((o) => o.value === (selectedOrder.status === 'shipping' ? 'shipped' : selectedOrder.status === 'canceled' ? 'returned' : selectedOrder.status))?.dotColor || 'bg-slate-400'
+                    }`} />
+                    <span className="font-semibold text-slate-900 dark:text-white">
+                      {STATUS_OPTIONS.find((o) => o.value === (selectedOrder.status === 'shipping' ? 'shipped' : selectedOrder.status === 'canceled' ? 'returned' : selectedOrder.status))?.label || selectedOrder.status}
+                    </span>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-slate-500 dark:text-slate-400 transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Dropdown Menu Popover */}
+                {isStatusDropdownOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setIsStatusDropdownOpen(false)} 
+                    />
+                    <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white dark:bg-[#12161f] border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden py-1 divide-y divide-slate-100 dark:divide-slate-800/60 animate-in fade-in zoom-in-95 duration-100">
+                      {STATUS_OPTIONS.map((opt) => {
+                        const isCurrent = (selectedOrder.status === 'shipping' ? 'shipped' : selectedOrder.status === 'canceled' ? 'returned' : selectedOrder.status) === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => {
+                              handleQuickTransition(selectedOrder.id, opt.value);
+                              setIsStatusDropdownOpen(false);
+                            }}
+                            className={`w-full min-h-[44px] flex items-center justify-between px-3.5 py-2.5 text-left text-xs transition-colors cursor-pointer ${
+                              isCurrent
+                                ? 'bg-slate-100/90 dark:bg-slate-800/70 font-bold text-slate-900 dark:text-white'
+                                : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-slate-800/40 font-medium'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${opt.dotColor}`} />
+                              <span>{opt.label}</span>
+                            </div>
+                            {isCurrent && (
+                              <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
 
                 {/* Quick 4-Stage Transition Switches */}
                 <div className="grid grid-cols-4 gap-1.5 mt-2">

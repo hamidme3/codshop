@@ -33,6 +33,15 @@ export function AdminThemeProvider({ children }: { children: React.ReactNode }) 
       root.classList.add('light');
       root.style.colorScheme = 'light';
     }
+    try {
+      let meta = document.querySelector('meta[name="color-scheme"]');
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute('name', 'color-scheme');
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', themeMode === 'dark' ? 'dark' : 'light');
+    } catch {}
   };
 
   useEffect(() => {

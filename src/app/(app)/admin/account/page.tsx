@@ -247,13 +247,14 @@ export default function AccountProfilePage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1">Langue de l’Interface</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">Langue de l’Interface</label>
               <div className="relative">
-                <Globe className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Globe className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
                 <select
                   value={preferredLocale}
                   onChange={(e) => setPreferredLocale(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
+                  className="w-full pl-8 pr-3 py-2 bg-white dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 rounded-lg text-xs text-slate-900 dark:text-zinc-200 focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
+                  style={{ colorScheme: 'light' }}
                 >
                   <option value="fr">Français</option>
                   <option value="ar">العربية (RTL)</option>
@@ -322,7 +323,8 @@ export default function AccountProfilePage() {
               <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-lg text-xs text-slate-900 dark:text-zinc-200 focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
+                className="w-full px-3 py-2 bg-white dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 rounded-lg text-xs text-slate-900 dark:text-zinc-200 focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
+                style={{ colorScheme: 'light' }}
               >
                 {ALL_COUNTRIES.map((c) => (
                   <option key={c.code} value={c.code}>
