@@ -781,6 +781,40 @@ STATUS: PERMANENT CORE MANDATE COMPLIANT & PRODUCTION VERIFIED (0 ERRORS, 100% S
 - Live Domain: `https://codshop.vipone.site` (HTTP/2 200 via Cloudflare and Traefik).
 - Git Repository: Synchronized with `origin/main`.
 
+=== ROUND 22: Mobile Light Theme, Native OS Select Hijacking Elimination & Floating Toast Hardening ===
+
+DATE: 2026-09-22
+STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% TEST SUITE PASS, LIVE PLAYWRIGHT VERIFIED)
+
+1. MOBILE LIGHT THEME & OS HIJACKING DEFENSE:
+- Native Android Dark Sheet Elimination (Order Details Drawer):
+  * Identified root cause of Android OS Dark Mode overriding web styling: unstyled HTML `<select>` triggers Android framework's native `AlertDialog` / radio sheet in device dark theme (`#1e293b`).
+  * Replaced native select in `src/app/(app)/admin/orders/page.tsx` with an in-DOM accessible React status dropdown menu.
+  * Styled in pure light theme (`bg-white border-slate-200 shadow-xl`) with semantic status dots (Nouvelle, À Confirmer, Confirmée, Expédiée, Livrée, Retournée), active checkmark (`✓`), and ergonomic $\ge 44$px touch targets.
+  * Added global CSS enforcement (`color-scheme: light !important`) in `src/app/globals.css` and dynamic `<meta name="color-scheme">` in `src/contexts/AdminThemeContext.tsx` and `src/app/(app)/layout.tsx`.
+  * Hardened all remaining admin `<select>` elements (`products`, `identity`, `account`, `support`) with dual light/dark classes and explicit `colorScheme: 'light'`.
+
+2. FLOATING TOAST NOTIFICATION ELEVATION:
+- Product Variants & Orders Batch Toast:
+  * Eliminated hardcoded dark backgrounds (`bg-zinc-900/95`) on floating action feedback toasts in `src/app/(app)/admin/products/page.tsx` and `src/app/(app)/admin/orders/page.tsx`.
+  * Elevated toasts to crisp dual light/dark styling: `bg-white dark:bg-zinc-900/95 border border-slate-200 dark:border-zinc-700/80 text-slate-900 dark:text-zinc-100 font-semibold shadow-2xl`.
+  * Added vibrant emerald checkmark icon (`text-emerald-600 dark:text-emerald-400`).
+  * Mobile viewport centering and safe margins (`fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6`).
+
+3. VERIFICATION & LIVE ASSURANCE:
+- TypeScript Compilation: `npx tsc --noEmit` PASSED with 0 ERRORS.
+- Production Build: `npm run build` compiled 74/74 routes cleanly.
+- Automated Test Suite: `tests/order-pipeline-4stage.test.ts` PASSED with 100% success rate.
+- Live Headless Playwright Verification:
+  * `fixed_orders_drawer_status_dropdown_open.png`: Verified in-DOM white dropdown with colored dots and active checkmark.
+  * `fixed_product_batch_stock_toast.png`: Verified white floating batch stock toast with dark legible text and emerald checkmark.
+
+4. PRODUCTION DEPLOYMENT & SYNC:
+- Docker Container: `codshop-app` running healthy at `http://172.18.1.9:3000`.
+- Live Production Domain: `https://codshop.vipone.site` (HTTP/2 200 via Cloudflare and Traefik).
+- Git Repository: Synchronized with `origin/main`.
+
 <!-- GOAL_COMPLETE -->
+
 
 
