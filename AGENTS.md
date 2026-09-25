@@ -814,7 +814,44 @@ STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% TEST SUITE PASS, LIVE PLAYWRIGHT VER
 - Live Production Domain: `https://codshop.vipone.site` (HTTP/2 200 via Cloudflare and Traefik).
 - Git Repository: Synchronized with `origin/main`.
 
+=== ROUND 23: Moroccan COD Customer Logistics Timeline & End-to-End Order Flow Hardening ===
+
+DATE: 2026-09-25
+STATUS: PRODUCTION VERIFIED (0 ERRORS, 100% SUITE PASS, 12/12 CHROME BACKOFFICE PASS, LIVE CHECKOUT PASS)
+
+1. MOROCCAN COD LOGISTICS & CUSTOMER TIMELINE HARDENING:
+- Customer Details Drawer Consolidation:
+  * Consolidated customer order drawer timeline from an ambiguous 5-step view down to the canonical 4 operational fulfillment stages matching `/admin/orders` (`to_confirm` -> `confirmed` -> `shipped` -> `delivered` / `returned`).
+  * Eliminated artificial "Hub Casablanca" step and premature in-transit tracking on unconfirmed orders.
+  * Replaced 5-order tab truncation with full history count (`Historique (X sur Y totales)`) and colored semantic status dots.
+  * Clarified delivery success rate with `delivered/totalResolved` sub-caption (e.g. `18/18 traitées`).
+- COD Cash Accounting Integrity:
+  * Updated `src/lib/db-repository.ts` so `totalSpend` strictly aggregates cash from `delivered` orders, preventing unconfirmed or in-transit orders from falsely inflating collected COD funds.
+  * Updated customer classification: `'risk'` on returns, `'returning'` (VIP) on >= 2 delivered orders, and `'active'` on pending orders.
+- Automated Courier & Tracking Fallbacks:
+  * Auto-assigned authentic Moroccan tracking number (`EXP-MA-XXXXXX`) and default courier in both manual and 1-click status transitions in `/admin/orders`, `/api/admin/orders`, and `mocks.ts`.
+
+2. VERIFICATION & ZERO-REGRESSION ASSURANCE:
+- TypeScript Compilation: `npx tsc --noEmit` PASSED with 0 ERRORS.
+- Production Build: `npm run build` compiled 74/74 routes cleanly.
+- Automated Test Suites:
+  * `tests/customer-timeline-logic.test.ts`: PASSED (100% success across all 5 lifecycle states).
+  * `tests/orders-live-sync.test.ts`: PASSED (100% success with subdomain tenant isolation).
+  * `tests/order-pipeline-4stage.test.ts`: PASSED (100% success with warehouse restoration on return).
+  * `tests/crm-pipeline-sync.test.ts`: PASSED (100% success).
+  * `tests/saas-pipeline.test.ts`: PASSED (100% success).
+  * `tests/challenger-qa.test.ts`: PASSED (100% success).
+- Live Headless Chrome E2E Suite:
+  * `scripts/live-chrome-tester.js --suite=admin`: 12/12 backoffice sections passed with HTTP 200 and 0 console errors.
+  * `scripts/live-chrome-tester.js --suite=checkout`: COD order submitted, landed on `/order-success/CMD-XXXX` with WhatsApp trigger and 0 console errors.
+
+3. PRODUCTION DEPLOYMENT & SYNC:
+- Docker Container: `codshop-app` rebuilt on Debian Slim runner, running healthy at `http://172.18.1.9:3000`.
+- Live Production Domain: `https://codshop.vipone.site` (HTTP/2 200 via Cloudflare and Traefik).
+- Git Repository: Synchronized with `origin/main` (`b724673`).
+
 <!-- GOAL_COMPLETE -->
+
 
 
 
