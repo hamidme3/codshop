@@ -817,7 +817,7 @@ function CustomersContent() {
                                 </p>
                               </div>
 
-                              {/* Step 3: Courier Handover & Tracking */}
+                              {/* Step 3: Courier Handover, Tracking & Routing */}
                               <div className="relative space-y-1.5">
                                 <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
                                   isShipped
@@ -833,73 +833,57 @@ function CustomersContent() {
                                   )}
                                 </div>
                                 <div className="flex items-center justify-between text-xs">
-                                  <span className="font-semibold text-zinc-200">3. Expédition & Suivi</span>
+                                  <span className="font-semibold text-zinc-200">3. Expédition & Acheminement</span>
                                   <span className={`text-[10px] font-mono uppercase ${
                                     isShipped ? 'text-emerald-400' : isConfirmed ? 'text-sky-400' : 'text-zinc-500'
                                   }`}>
-                                    {isShipped ? (activeOrder.trackingNumber ? 'Expédiée' : 'Prise en charge') : isConfirmed ? 'En préparation ⏳' : 'En attente'}
+                                    {isShipped ? (activeOrder.trackingNumber ? 'Expédiée' : 'En transit') : isConfirmed ? 'En préparation ⏳' : 'En attente'}
                                   </span>
                                 </div>
                                 {isShipped && activeOrder.trackingNumber ? (
-                                  <div className="flex items-center gap-2 pt-0.5">
-                                    <span className="font-mono text-[11px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 text-sky-300">
-                                      {activeOrder.trackingNumber}
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleCopyTracking(activeOrder.trackingNumber!)}
-                                      className="p-1 rounded text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
-                                      title="Copier le numéro de suivi"
-                                    >
-                                      {copiedTracking === activeOrder.trackingNumber ? (
-                                        <Check className="w-3 h-3 text-emerald-400" />
-                                      ) : (
-                                        <Copy className="w-3 h-3" />
+                                  <div className="space-y-1 pt-0.5">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-mono text-[11px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 text-sky-300">
+                                        {activeOrder.trackingNumber}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleCopyTracking(activeOrder.trackingNumber!)}
+                                        className="p-1 rounded text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                                        title="Copier le numéro de suivi"
+                                      >
+                                        {copiedTracking === activeOrder.trackingNumber ? (
+                                          <Check className="w-3 h-3 text-emerald-400" />
+                                        ) : (
+                                          <Copy className="w-3 h-3" />
+                                        )}
+                                      </button>
+                                      {activeOrder.courier && activeOrder.courier !== 'manual' && (
+                                        <span className="text-[10px] font-mono uppercase text-zinc-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">
+                                          {activeOrder.courier}
+                                        </span>
                                       )}
-                                    </button>
+                                    </div>
+                                    <p className="text-[11px] text-zinc-400">
+                                      Acheminement en cours vers le secteur de {selectedCustomer.city}.
+                                    </p>
                                   </div>
                                 ) : isShipped ? (
-                                  <p className="text-[11px] text-zinc-400">Colis confié au transporteur pour expédition.</p>
+                                  <p className="text-[11px] text-zinc-400">
+                                    Colis confié au transporteur pour acheminement vers {selectedCustomer.city}.
+                                  </p>
                                 ) : isConfirmed ? (
-                                  <p className="text-[11px] text-zinc-400">Bordereau en cours de génération avec le transporteur.</p>
+                                  <p className="text-[11px] text-zinc-400">
+                                    Bordereau transporteur en cours d&apos;attribution pour livraison à {selectedCustomer.city}.
+                                  </p>
                                 ) : (
-                                  <p className="text-[11px] text-zinc-500">En attente de confirmation téléphonique avant expédition.</p>
+                                  <p className="text-[11px] text-zinc-500">
+                                    Acheminement vers {selectedCustomer.city} programmé après validation téléphonique.
+                                  </p>
                                 )}
                               </div>
 
-                              {/* Step 4: Regional Hub & Dispatch */}
-                              <div className="relative space-y-1">
-                                <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
-                                  isDelivered || isReturned
-                                    ? 'bg-emerald-500/20 border border-emerald-500'
-                                    : isShipped
-                                    ? 'bg-sky-500/20 border border-sky-500 animate-pulse'
-                                    : 'bg-zinc-800 border border-zinc-700'
-                                }`}>
-                                  {isDelivered || isReturned ? (
-                                    <Check className="w-2.5 h-2.5 text-emerald-400" />
-                                  ) : (
-                                    <MapPin className={`w-2.5 h-2.5 ${isShipped ? 'text-sky-400' : 'text-zinc-500'}`} />
-                                  )}
-                                </div>
-                                <div className="flex items-center justify-between text-xs">
-                                  <span className="font-semibold text-zinc-200">4. Acheminement Régional</span>
-                                  <span className={`text-[10px] font-mono ${
-                                    isDelivered || isReturned ? 'text-emerald-400' : isShipped ? 'text-sky-400' : 'text-zinc-500'
-                                  }`}>
-                                    {isShipped || isDelivered || isReturned ? `Hub ${selectedCustomer.city}` : 'En attente'}
-                                  </span>
-                                </div>
-                                <p className={`text-[11px] ${isShipped || isDelivered || isReturned ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                                  {isDelivered || isReturned
-                                    ? `Colis acheminé et distribué via le secteur de ${selectedCustomer.city}.`
-                                    : isShipped
-                                    ? `Attribution au livreur du secteur pour livraison à domicile ou agence à ${selectedCustomer.city}.`
-                                    : `Attribution au livreur du secteur programmée après expédition.`}
-                                </p>
-                              </div>
-
-                              {/* Step 5: Final Delivery or Return */}
+                              {/* Step 4: Final Delivery or Return */}
                               <div className="relative space-y-1">
                                 <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
                                   isDelivered
@@ -919,7 +903,7 @@ function CustomersContent() {
                                   )}
                                 </div>
                                 <div className="flex items-center justify-between text-xs">
-                                  <span className="font-semibold text-zinc-200">5. Remise du Colis & Encaissement</span>
+                                  <span className="font-semibold text-zinc-200">4. Livraison & Encaissement COD</span>
                                   <span className={`text-[10px] font-mono font-medium ${
                                     isDelivered ? 'text-emerald-400' :
                                     isReturned ? 'text-rose-400' :
@@ -928,25 +912,25 @@ function CustomersContent() {
                                   }`}>
                                     {isDelivered ? 'Encaissé ✓' :
                                      isReturned ? 'Retourné ✕' :
-                                     isShipped ? 'En attente de remise' :
+                                     isShipped ? 'En cours de distribution' :
                                      'En attente'}
                                   </span>
                                 </div>
                                 {isDelivered ? (
                                   <div className="p-2 rounded-lg bg-emerald-950/30 border border-emerald-800/40 text-[11px] text-emerald-300">
-                                    Colis remis et vérifié par l&apos;acheteur. Montant de <span className="font-mono font-bold">{activeOrder.total} MAD</span> collecté en espèces.
+                                    Colis remis et vérifié par l&apos;acheteur à {selectedCustomer.city}. Montant de <span className="font-mono font-bold">{activeOrder.total} MAD</span> collecté en espèces.
                                   </div>
                                 ) : isReturned ? (
                                   <div className="p-2 rounded-lg bg-rose-950/30 border border-rose-800/40 text-[11px] text-rose-300">
-                                    Échec de livraison ou refus de commande. Colis réintégré dans votre stock d&apos;entrepôt.
+                                    Échec de livraison ou refus de commande à {selectedCustomer.city}. Colis réintégré dans votre stock d&apos;entrepôt.
                                   </div>
                                 ) : isShipped ? (
                                   <p className="text-[11px] text-zinc-400">
-                                    Paiement en espèces de <span className="font-mono font-semibold">{activeOrder.total} MAD</span> prévu à la livraison en main propre.
+                                    Distribution en cours par le livreur. Montant de <span className="font-mono font-semibold">{activeOrder.total} MAD</span> à collecter en espèces à la livraison.
                                   </p>
                                 ) : (
                                   <p className="text-[11px] text-zinc-500">
-                                    Paiement à la livraison après confirmation et acheminement du colis.
+                                    Paiement à la livraison après confirmation et expédition du colis.
                                   </p>
                                 )}
                               </div>
