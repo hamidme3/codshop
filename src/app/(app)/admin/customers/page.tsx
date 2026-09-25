@@ -655,7 +655,12 @@ function CustomersContent() {
                 </div>
                 <div className="p-3 bg-slate-50 dark:bg-[#0d0d10] rounded-lg border border-slate-200 dark:border-zinc-800/80 text-center">
                   <div className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase font-mono tracking-wider">Taux Livré</div>
-                  <div className="text-base font-mono tabular-nums font-bold text-slate-800 dark:text-zinc-100 mt-0.5">{selectedCustomer.deliverySuccessRate ?? 100}%</div>
+                  <div className="text-base font-mono tabular-nums font-bold text-slate-800 dark:text-zinc-100 mt-0.5" title="Taux de succès sur les livraisons traitées">
+                    {selectedCustomer.deliverySuccessRate !== undefined ? `${selectedCustomer.deliverySuccessRate}%` : '—'}
+                  </div>
+                  <div className="text-[9px] text-zinc-500 font-mono mt-0.5">
+                    {selectedCustomer.deliveredOrders || 0}/{((selectedCustomer.deliveredOrders || 0) + (selectedCustomer.returnedOrders || 0)) || (selectedCustomer.totalOrders > 0 ? 0 : 1)} traitées
+                  </div>
                 </div>
               </div>
 
@@ -689,28 +694,50 @@ function CustomersContent() {
                         </h3>
                         {activeOrder && (
                           <span className="font-mono text-[11px] text-zinc-400">
-                            {activeOrder.orderNumber}
+                            {customerOrders.length > 1
+                              ? `${activeOrder.orderNumber} (${customerOrders.findIndex((o) => o.id === activeOrder.id) + 1}/${customerOrders.length})`
+                              : activeOrder.orderNumber}
                           </span>
                         )}
                       </div>
 
                       {/* Multi-Order Tabs */}
                       {customerOrders.length > 1 && (
-                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 admin-scrollbar">
-                          {customerOrders.map((ord) => (
-                            <button
-                              key={ord.id}
-                              type="button"
-                              onClick={() => setActiveOrderId(ord.id)}
-                              className={`px-2.5 py-1 rounded-md text-[11px] font-mono whitespace-nowrap transition-all border cursor-pointer ${
-                                (activeOrder?.id === ord.id)
-                                  ? 'bg-sky-500/15 border-sky-500/40 text-sky-300 font-semibold shadow-xs'
-                                  : 'bg-[#0d0d10] border-zinc-800 text-zinc-400 hover:text-zinc-200'
-                              }`}
-                            >
-                              {ord.orderNumber} ({ord.total} MAD)
-                            </button>
-                          ))}
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400">
+                            <span>Historique ({customerOrders.length}{selectedCustomer.totalOrders > customerOrders.length ? ` sur ${selectedCustomer.totalOrders} totales` : ' commandes'})</span>
+                            {selectedCustomer.totalOrders > customerOrders.length && (
+                              <span className="text-[10px] text-zinc-500">Affichage des plus récentes</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 admin-scrollbar">
+                            {customerOrders.map((ord) => {
+                              const isSelected = activeOrder?.id === ord.id;
+                              const statusDot = 
+                                ord.status === 'confirmed' ? 'bg-cyan-400' :
+                                ['shipped', 'shipping'].includes(ord.status) ? 'bg-sky-400' :
+                                ord.status === 'delivered' ? 'bg-emerald-400' :
+                                ['returned', 'canceled'].includes(ord.status) ? 'bg-rose-400' :
+                                'bg-zinc-500';
+
+                              return (
+                                <button
+                                  key={ord.id}
+                                  type="button"
+                                  onClick={() => setActiveOrderId(ord.id)}
+                                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono whitespace-nowrap transition-all border cursor-pointer ${
+                                    isSelected
+                                      ? 'bg-sky-500/15 border-sky-500/40 text-sky-300 font-semibold shadow-xs'
+                                      : 'bg-[#0d0d10] border-zinc-800 text-zinc-400 hover:text-zinc-200'
+                                  }`}
+                                >
+                                  <span className={`w-1.5 h-1.5 rounded-full ${statusDot}`} />
+                                  <span>{ord.orderNumber}</span>
+                                  <span className="text-zinc-500">({ord.total} MAD)</span>
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -740,157 +767,192 @@ function CustomersContent() {
                         </div>
 
                         {/* Visual Step Timeline Rail */}
-                        <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-zinc-800">
-                          {/* Step 1: Storefront Order */}
-                          <div className="relative space-y-1">
-                            <div className="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center">
-                              <Check className="w-2.5 h-2.5 text-emerald-400" />
-                            </div>
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="font-semibold text-zinc-200">1. Commande Enregistrée (COD)</span>
-                              <span className="text-[10px] font-mono text-zinc-500">{activeOrder.createdAt ? new Date(activeOrder.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Storefront'}</span>
-                            </div>
-                            <p className="text-[11px] text-zinc-400 line-clamp-1">
-                              {activeOrder.itemsSummary || 'Articles enregistrés avec paiement à la livraison.'}
-                            </p>
-                          </div>
+                        {(() => {
+                          const isConfirmed = activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm';
+                          const isShipped = ['shipped', 'shipping', 'delivered', 'returned'].includes(activeOrder.status);
+                          const isDelivered = activeOrder.status === 'delivered';
+                          const isReturned = activeOrder.status === 'returned' || activeOrder.status === 'canceled';
 
-                          {/* Step 2: Phone Confirmation */}
-                          <div className="relative space-y-1">
-                            <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
-                              activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm'
-                                ? 'bg-emerald-500/20 border border-emerald-500'
-                                : 'bg-sky-500/20 border border-sky-500 animate-pulse'
-                            }`}>
-                              {activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm' ? (
-                                <Check className="w-2.5 h-2.5 text-emerald-400" />
-                              ) : (
-                                <Clock className="w-2.5 h-2.5 text-sky-400" />
-                              )}
-                            </div>
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="font-semibold text-zinc-200">2. Confirmation & Qualification</span>
-                              <span className={`text-[10px] font-mono ${
-                                activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm' ? 'text-emerald-400' : 'text-sky-400'
-                              }`}>
-                                {activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm' ? 'Validée ✓' : 'En attente ⏳'}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-zinc-400">
-                              Appel téléphonique en Darija pour valider l&apos;adresse à {selectedCustomer.city}.
-                            </p>
-                          </div>
+                          return (
+                            <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-zinc-800">
+                              {/* Step 1: Storefront Order */}
+                              <div className="relative space-y-1">
+                                <div className="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center">
+                                  <Check className="w-2.5 h-2.5 text-emerald-400" />
+                                </div>
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-semibold text-zinc-200">1. Commande Enregistrée (COD)</span>
+                                  <span className="text-[10px] font-mono text-zinc-500">{activeOrder.createdAt ? new Date(activeOrder.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Storefront'}</span>
+                                </div>
+                                <p className="text-[11px] text-zinc-400 line-clamp-1">
+                                  {activeOrder.itemsSummary || 'Articles enregistrés avec paiement à la livraison.'}
+                                </p>
+                              </div>
 
-                          {/* Step 3: Courier Handover & Tracking */}
-                          <div className="relative space-y-1.5">
-                            <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
-                              ['shipped', 'shipping', 'delivered', 'returned'].includes(activeOrder.status)
-                                ? 'bg-emerald-500/20 border border-emerald-500'
-                                : 'bg-zinc-800 border border-zinc-700'
-                            }`}>
-                              {['shipped', 'shipping', 'delivered', 'returned'].includes(activeOrder.status) ? (
-                                <Check className="w-2.5 h-2.5 text-emerald-400" />
-                              ) : (
-                                <Truck className="w-2.5 h-2.5 text-zinc-500" />
-                              )}
-                            </div>
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="font-semibold text-zinc-200">3. Expédition & Suivi</span>
-                              <span className="text-[10px] font-mono uppercase text-zinc-400">
-                                {activeOrder.trackingNumber ? 'Expédiée' : 'En cours'}
-                              </span>
-                            </div>
-                            {activeOrder.trackingNumber ? (
-                              <div className="flex items-center gap-2 pt-0.5">
-                                <span className="font-mono text-[11px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 text-sky-300">
-                                  {activeOrder.trackingNumber}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleCopyTracking(activeOrder.trackingNumber!)}
-                                  className="p-1 rounded text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
-                                  title="Copier le numéro de suivi"
-                                >
-                                  {copiedTracking === activeOrder.trackingNumber ? (
-                                    <Check className="w-3 h-3 text-emerald-400" />
+                              {/* Step 2: Phone Confirmation */}
+                              <div className="relative space-y-1">
+                                <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
+                                  isConfirmed
+                                    ? 'bg-emerald-500/20 border border-emerald-500'
+                                    : 'bg-sky-500/20 border border-sky-500 animate-pulse'
+                                }`}>
+                                  {isConfirmed ? (
+                                    <Check className="w-2.5 h-2.5 text-emerald-400" />
                                   ) : (
-                                    <Copy className="w-3 h-3" />
+                                    <Clock className="w-2.5 h-2.5 text-sky-400" />
                                   )}
-                                </button>
+                                </div>
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-semibold text-zinc-200">2. Confirmation & Qualification</span>
+                                  <span className={`text-[10px] font-mono ${
+                                    isConfirmed ? 'text-emerald-400' : 'text-sky-400'
+                                  }`}>
+                                    {isConfirmed ? 'Validée ✓' : 'En attente ⏳'}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-zinc-400">
+                                  {isConfirmed
+                                    ? `Confirmation validée pour l'adresse à ${selectedCustomer.city}.`
+                                    : `Appel téléphonique en Darija pour valider l'adresse à ${selectedCustomer.city}.`}
+                                </p>
                               </div>
-                            ) : (
-                              <p className="text-[11px] text-zinc-500">Bordereau en cours de génération.</p>
-                            )}
-                          </div>
 
-                          {/* Step 4: Regional Hub & Dispatch */}
-                          <div className="relative space-y-1">
-                            <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
-                              ['delivered', 'returned'].includes(activeOrder.status)
-                                ? 'bg-emerald-500/20 border border-emerald-500'
-                                : ['shipped', 'shipping'].includes(activeOrder.status)
-                                ? 'bg-sky-500/20 border border-sky-500 animate-pulse'
-                                : 'bg-zinc-800 border border-zinc-700'
-                            }`}>
-                              {['delivered', 'returned'].includes(activeOrder.status) ? (
-                                <Check className="w-2.5 h-2.5 text-emerald-400" />
-                              ) : (
-                                <MapPin className="w-2.5 h-2.5 text-zinc-500" />
-                              )}
-                            </div>
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="font-semibold text-zinc-200">4. Acheminement Régional</span>
-                              <span className="text-[10px] font-mono text-zinc-500">Hub {selectedCustomer.city}</span>
-                            </div>
-                            <p className="text-[11px] text-zinc-400">
-                              Attribution au livreur du secteur pour livraison à domicile ou agence.
-                            </p>
-                          </div>
+                              {/* Step 3: Courier Handover & Tracking */}
+                              <div className="relative space-y-1.5">
+                                <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
+                                  isShipped
+                                    ? 'bg-emerald-500/20 border border-emerald-500'
+                                    : isConfirmed
+                                    ? 'bg-sky-500/20 border border-sky-500 animate-pulse'
+                                    : 'bg-zinc-800 border border-zinc-700'
+                                }`}>
+                                  {isShipped ? (
+                                    <Check className="w-2.5 h-2.5 text-emerald-400" />
+                                  ) : (
+                                    <Truck className={`w-2.5 h-2.5 ${isConfirmed ? 'text-sky-400' : 'text-zinc-500'}`} />
+                                  )}
+                                </div>
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-semibold text-zinc-200">3. Expédition & Suivi</span>
+                                  <span className={`text-[10px] font-mono uppercase ${
+                                    isShipped ? 'text-emerald-400' : isConfirmed ? 'text-sky-400' : 'text-zinc-500'
+                                  }`}>
+                                    {isShipped ? (activeOrder.trackingNumber ? 'Expédiée' : 'Prise en charge') : isConfirmed ? 'En préparation ⏳' : 'En attente'}
+                                  </span>
+                                </div>
+                                {isShipped && activeOrder.trackingNumber ? (
+                                  <div className="flex items-center gap-2 pt-0.5">
+                                    <span className="font-mono text-[11px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 text-sky-300">
+                                      {activeOrder.trackingNumber}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCopyTracking(activeOrder.trackingNumber!)}
+                                      className="p-1 rounded text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                                      title="Copier le numéro de suivi"
+                                    >
+                                      {copiedTracking === activeOrder.trackingNumber ? (
+                                        <Check className="w-3 h-3 text-emerald-400" />
+                                      ) : (
+                                        <Copy className="w-3 h-3" />
+                                      )}
+                                    </button>
+                                  </div>
+                                ) : isShipped ? (
+                                  <p className="text-[11px] text-zinc-400">Colis confié au transporteur pour expédition.</p>
+                                ) : isConfirmed ? (
+                                  <p className="text-[11px] text-zinc-400">Bordereau en cours de génération avec le transporteur.</p>
+                                ) : (
+                                  <p className="text-[11px] text-zinc-500">En attente de confirmation téléphonique avant expédition.</p>
+                                )}
+                              </div>
 
-                          {/* Step 5: Final Delivery or Return */}
-                          <div className="relative space-y-1">
-                            <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
-                              activeOrder.status === 'delivered'
-                                ? 'bg-emerald-500/20 border border-emerald-500'
-                                : activeOrder.status === 'returned'
-                                ? 'bg-rose-500/20 border border-rose-500'
-                                : 'bg-zinc-800 border border-zinc-700'
-                            }`}>
-                              {activeOrder.status === 'delivered' ? (
-                                <DollarSign className="w-2.5 h-2.5 text-emerald-400" />
-                              ) : activeOrder.status === 'returned' ? (
-                                <AlertTriangle className="w-2.5 h-2.5 text-rose-400" />
-                              ) : (
-                                <Clock className="w-2.5 h-2.5 text-zinc-500" />
-                              )}
-                            </div>
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="font-semibold text-zinc-200">5. Remise du Colis & Encaissement</span>
-                              <span className={`text-[10px] font-mono font-medium ${
-                                activeOrder.status === 'delivered' ? 'text-emerald-400' :
-                                activeOrder.status === 'returned' ? 'text-rose-400' :
-                                'text-zinc-500'
-                              }`}>
-                                {activeOrder.status === 'delivered' ? 'Encaissé ✓' :
-                                 activeOrder.status === 'returned' ? 'Retourné ✕' :
-                                 'En attente'}
-                              </span>
-                            </div>
-                            {activeOrder.status === 'delivered' ? (
-                              <div className="p-2 rounded-lg bg-emerald-950/30 border border-emerald-800/40 text-[11px] text-emerald-300">
-                                Colis remis et vérifié par l&apos;acheteur. Montant de <span className="font-mono font-bold">{activeOrder.total} MAD</span> collecté en espèces.
+                              {/* Step 4: Regional Hub & Dispatch */}
+                              <div className="relative space-y-1">
+                                <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
+                                  isDelivered || isReturned
+                                    ? 'bg-emerald-500/20 border border-emerald-500'
+                                    : isShipped
+                                    ? 'bg-sky-500/20 border border-sky-500 animate-pulse'
+                                    : 'bg-zinc-800 border border-zinc-700'
+                                }`}>
+                                  {isDelivered || isReturned ? (
+                                    <Check className="w-2.5 h-2.5 text-emerald-400" />
+                                  ) : (
+                                    <MapPin className={`w-2.5 h-2.5 ${isShipped ? 'text-sky-400' : 'text-zinc-500'}`} />
+                                  )}
+                                </div>
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-semibold text-zinc-200">4. Acheminement Régional</span>
+                                  <span className={`text-[10px] font-mono ${
+                                    isDelivered || isReturned ? 'text-emerald-400' : isShipped ? 'text-sky-400' : 'text-zinc-500'
+                                  }`}>
+                                    {isShipped || isDelivered || isReturned ? `Hub ${selectedCustomer.city}` : 'En attente'}
+                                  </span>
+                                </div>
+                                <p className={`text-[11px] ${isShipped || isDelivered || isReturned ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                                  {isDelivered || isReturned
+                                    ? `Colis acheminé et distribué via le secteur de ${selectedCustomer.city}.`
+                                    : isShipped
+                                    ? `Attribution au livreur du secteur pour livraison à domicile ou agence à ${selectedCustomer.city}.`
+                                    : `Attribution au livreur du secteur programmée après expédition.`}
+                                </p>
                               </div>
-                            ) : activeOrder.status === 'returned' ? (
-                              <div className="p-2 rounded-lg bg-rose-950/30 border border-rose-800/40 text-[11px] text-rose-300">
-                                Échec de livraison ou refus de commande. Colis réintégré dans votre stock d&apos;entrepôt.
+
+                              {/* Step 5: Final Delivery or Return */}
+                              <div className="relative space-y-1">
+                                <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
+                                  isDelivered
+                                    ? 'bg-emerald-500/20 border border-emerald-500'
+                                    : isReturned
+                                    ? 'bg-rose-500/20 border border-rose-500'
+                                    : isShipped
+                                    ? 'bg-sky-500/20 border border-sky-500 animate-pulse'
+                                    : 'bg-zinc-800 border border-zinc-700'
+                                }`}>
+                                  {isDelivered ? (
+                                    <DollarSign className="w-2.5 h-2.5 text-emerald-400" />
+                                  ) : isReturned ? (
+                                    <AlertTriangle className="w-2.5 h-2.5 text-rose-400" />
+                                  ) : (
+                                    <Clock className={`w-2.5 h-2.5 ${isShipped ? 'text-sky-400' : 'text-zinc-500'}`} />
+                                  )}
+                                </div>
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-semibold text-zinc-200">5. Remise du Colis & Encaissement</span>
+                                  <span className={`text-[10px] font-mono font-medium ${
+                                    isDelivered ? 'text-emerald-400' :
+                                    isReturned ? 'text-rose-400' :
+                                    isShipped ? 'text-sky-400' :
+                                    'text-zinc-500'
+                                  }`}>
+                                    {isDelivered ? 'Encaissé ✓' :
+                                     isReturned ? 'Retourné ✕' :
+                                     isShipped ? 'En attente de remise' :
+                                     'En attente'}
+                                  </span>
+                                </div>
+                                {isDelivered ? (
+                                  <div className="p-2 rounded-lg bg-emerald-950/30 border border-emerald-800/40 text-[11px] text-emerald-300">
+                                    Colis remis et vérifié par l&apos;acheteur. Montant de <span className="font-mono font-bold">{activeOrder.total} MAD</span> collecté en espèces.
+                                  </div>
+                                ) : isReturned ? (
+                                  <div className="p-2 rounded-lg bg-rose-950/30 border border-rose-800/40 text-[11px] text-rose-300">
+                                    Échec de livraison ou refus de commande. Colis réintégré dans votre stock d&apos;entrepôt.
+                                  </div>
+                                ) : isShipped ? (
+                                  <p className="text-[11px] text-zinc-400">
+                                    Paiement en espèces de <span className="font-mono font-semibold">{activeOrder.total} MAD</span> prévu à la livraison en main propre.
+                                  </p>
+                                ) : (
+                                  <p className="text-[11px] text-zinc-500">
+                                    Paiement à la livraison après confirmation et acheminement du colis.
+                                  </p>
+                                )}
                               </div>
-                            ) : (
-                              <p className="text-[11px] text-zinc-500">
-                                En attente de finalisation par le livreur local.
-                              </p>
-                            )}
-                          </div>
-                        </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     ) : (
                       <div className="p-4 bg-[#0d0d10] rounded-xl border border-zinc-800 text-center text-xs text-zinc-500">

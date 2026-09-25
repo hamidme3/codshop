@@ -1149,7 +1149,7 @@ export async function getCustomers(storeSlug: string): Promise<Customer[]> {
         deliveredOrders: delivered,
         returnedOrders: returned,
         canceledOrders: custOrders.filter((o) => o.status === 'canceled').length,
-        recentOrders: custOrders.slice(0, 5).map((o) => ({
+        recentOrders: custOrders.slice(0, 50).map((o) => ({
           id: o.id,
           orderNumber: o.orderNumber,
           createdAt: o.createdAt?.toISOString() || new Date().toISOString(),
