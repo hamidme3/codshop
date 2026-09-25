@@ -97,17 +97,6 @@ export async function PATCH(req: Request) {
       if (db) {
         const { eq, or } = await import('drizzle-orm');
         const now = new Date();
-        const updatePayload: any = {
-          status,
-          updatedAt: now,
-        };
-        if (trackingNumber) updatePayload.trackingNumber = trackingNumber;
-        if (courier) updatePayload.courier = courier;
-        if (status === 'confirmed') updatePayload.confirmedAt = now;
-        if (status === 'shipped') updatePayload.shippedAt = now;
-        if (status === 'delivered') updatePayload.deliveredAt = now;
-        if (status === 'canceled') updatePayload.canceledAt = now;
-        if (status === 'returned') updatePayload.returnedAt = now;
 
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
         const whereClause = isUuid ? eq(schema.orders.id, orderId) : eq(schema.orders.orderNumber, orderId);
@@ -115,6 +104,26 @@ export async function PATCH(req: Request) {
         const existingOrder = await db.query.orders.findFirst({
           where: whereClause,
         });
+
+        const updatePayload: any = {
+          status,
+          updatedAt: now,
+        };
+        if (trackingNumber) {
+          updatePayload.trackingNumber = trackingNumber;
+        } else if ((status === 'shipped' || status === 'shipping') && !existingOrder?.trackingNumber) {
+          updatePayload.trackingNumber = `EXP-MA-${Math.floor(100000 + Math.random() * 900000)}`;
+        }
+        if (courier) {
+          updatePayload.courier = courier;
+        } else if ((status === 'shipped' || status === 'shipping') && (!existingOrder?.courier || existingOrder.courier === 'manual')) {
+          updatePayload.courier = 'standard';
+        }
+        if (status === 'confirmed') updatePayload.confirmedAt = now;
+        if (status === 'shipped') updatePayload.shippedAt = now;
+        if (status === 'delivered') updatePayload.deliveredAt = now;
+        if (status === 'canceled') updatePayload.canceledAt = now;
+        if (status === 'returned') updatePayload.returnedAt = now;
 
         // Restore DB stock if transitioning to canceled or returned from active state
         if (existingOrder && (status === 'canceled' || status === 'returned') && existingOrder.status !== 'canceled' && existingOrder.status !== 'returned') {

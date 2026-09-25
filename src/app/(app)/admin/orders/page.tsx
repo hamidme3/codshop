@@ -228,7 +228,10 @@ function OrdersContent() {
 
   // 1-Click Fast Manual Transitions
   const handleQuickShip = (orderId: string) => {
-    handleQuickTransition(orderId, 'shipped');
+    const existing = orders.find((o) => o.id === orderId || o.orderNumber === orderId);
+    const tracking = existing?.trackingNumber || `EXP-MA-${Math.floor(100000 + Math.random() * 900000)}`;
+    const courier = existing?.courier && existing.courier !== 'manual' ? existing.courier : 'standard';
+    handleQuickTransition(orderId, 'shipped', tracking, courier);
   };
 
   // Bulk Operations

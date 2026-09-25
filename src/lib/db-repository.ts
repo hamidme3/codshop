@@ -1125,7 +1125,8 @@ export async function getCustomers(storeSlug: string): Promise<Customer[]> {
       const delivered = custOrders.filter((o) => o.status === 'delivered').length;
       const returned = custOrders.filter((o) => o.status === 'returned').length;
       const totalResolved = delivered + returned;
-      const deliverySuccessRate = totalResolved > 0 ? Math.round((delivered / totalResolved) * 100) : 100;
+      const deliverySuccessRate = totalResolved > 0 ? Math.round((delivered / totalResolved) * 100) : (delivered > 0 ? 100 : undefined);
+      const deliveredSpend = custOrders.filter((o) => o.status === 'delivered').reduce((sum, o) => sum + Number(o.total), 0);
 
       return {
         id: c.id,
@@ -1135,10 +1136,10 @@ export async function getCustomers(storeSlug: string): Promise<Customer[]> {
         email: c.email || '',
         city: c.city,
         totalOrders: Math.max(c.totalOrders, custOrders.length),
-        totalSpend: Math.max(c.totalSpend, custOrders.reduce((sum, o) => sum + Number(o.total), 0)),
-        averageBasket: c.averageBasket || Math.round(c.totalSpend / Math.max(1, c.totalOrders)),
-        status: (c.status as any) || (custOrders.length > 1 ? 'returning' : 'new'),
-        riskScore: 'low' as const,
+        totalSpend: deliveredSpend > 0 ? deliveredSpend : (delivered > 0 ? (c.totalSpend || 0) : 0),
+        averageBasket: Math.round((deliveredSpend > 0 ? deliveredSpend : (c.totalSpend || 0)) / Math.max(1, delivered)),
+        status: (c.status as any) || (returned > 0 ? 'risk' : (delivered >= 2 || (custOrders.length >= 2 && delivered >= 1)) ? 'returning' : custOrders.length > 0 ? 'active' : 'new'),
+        riskScore: (returned > 0 ? 'high' : 'low') as any,
         lastOrderDate: (c.lastOrderAt || lastOrd?.createdAt || c.createdAt)?.toISOString() || new Date().toISOString(),
         lastOrderNumber: lastOrd?.orderNumber,
         lastOrderStatus: (lastOrd?.status as any) || 'new',

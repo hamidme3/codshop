@@ -532,8 +532,16 @@ export function updateOrderStatus(orderId: string, status: Order['status'], trac
 
   const previousStatus = order.status;
   order.status = status;
-  if (trackingNumber) order.trackingNumber = trackingNumber;
-  if (courier) order.courier = courier;
+  if (trackingNumber) {
+    order.trackingNumber = trackingNumber;
+  } else if ((status === 'shipped' || status === 'shipping') && !order.trackingNumber) {
+    order.trackingNumber = `EXP-MA-${Math.floor(100000 + Math.random() * 900000)}`;
+  }
+  if (courier) {
+    order.courier = courier;
+  } else if ((status === 'shipped' || status === 'shipping') && (!order.courier || order.courier === 'manual')) {
+    order.courier = 'standard';
+  }
 
   // Add contextual timestamps for pipeline audit
   const nowIso = new Date().toISOString();
