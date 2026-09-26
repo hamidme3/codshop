@@ -1514,8 +1514,8 @@ export async function getConsolidatedShopStats(accountId: string): Promise<{
   formatted_aov: string;
 }> {
   const db = getDb();
-  let totalSales = 369; // default Ottavio delivered revenue
-  let totalOrders = 3;
+  let totalSales = 0;
+  let totalOrders = 0;
 
   if (db) {
     try {

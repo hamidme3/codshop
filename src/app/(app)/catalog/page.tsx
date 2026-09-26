@@ -477,7 +477,7 @@ export default function CatalogPage() {
               className="px-5 py-2.5 rounded-xl text-white font-bold text-xs shadow-sm cursor-pointer"
               style={{ backgroundColor: theme.colors.primary }}
             >
-              Voir tous les produits ({MOCK_PRODUCTS.length})
+              Voir tous les produits ({allProducts.length})
             </button>
           </div>
         ) : (

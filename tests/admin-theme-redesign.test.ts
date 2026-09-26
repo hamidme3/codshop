@@ -27,7 +27,10 @@ function runTests() {
 
   // Test 3: Verify Overview Page (admin/page.tsx) uses clean e-commerce styling
   console.log('3. Verifying Overview Command Center (admin/page.tsx)...');
-  const overviewPage = fs.readFileSync(path.join(process.cwd(), 'src/app/admin/page.tsx'), 'utf-8');
+  const overviewPagePath = fs.existsSync(path.join(process.cwd(), 'src/app/(app)/admin/page.tsx'))
+    ? path.join(process.cwd(), 'src/app/(app)/admin/page.tsx')
+    : path.join(process.cwd(), 'src/app/admin/page.tsx');
+  const overviewPage = fs.readFileSync(overviewPagePath, 'utf-8');
   assert(!overviewPage.includes('Tableau de Bord Exécutif —'), 'Removed sysadmin-style header');
   assert(!overviewPage.includes('● TEMPS RÉEL'), 'Removed sysadmin-style green telemetry badge');
   assert(overviewPage.includes('Tableau de bord —'), 'Uses clean merchant welcome header');
@@ -37,7 +40,10 @@ function runTests() {
 
   // Test 4: Verify Admin Theme Toggle component exists and layout includes it
   console.log('4. Verifying AdminThemeToggle & AdminThemeProvider...');
-  const layoutPage = fs.readFileSync(path.join(process.cwd(), 'src/app/admin/layout.tsx'), 'utf-8');
+  const layoutPagePath = fs.existsSync(path.join(process.cwd(), 'src/app/(app)/admin/layout.tsx'))
+    ? path.join(process.cwd(), 'src/app/(app)/admin/layout.tsx')
+    : path.join(process.cwd(), 'src/app/admin/layout.tsx');
+  const layoutPage = fs.readFileSync(layoutPagePath, 'utf-8');
   assert(layoutPage.includes('AdminThemeProvider'), 'Layout must wrap with AdminThemeProvider');
   assert(layoutPage.includes('AdminThemeToggle'), 'Layout must include theme toggle in header');
   assert(!layoutPage.includes('● Opérationnel'), 'Layout must not show server daemon pulse status');

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getStoreBySlug } from '@/lib/db-repository';
-import { getProducts } from '@/lib/backoffice';
+import { getStoreBySlug, getProducts, getStorefrontAnalyticsFromDb } from '@/lib/db-repository';
 import { isValidStoreSlug } from '@/lib/sanitizer';
 
 interface ProductStats {
@@ -30,10 +29,9 @@ export async function GET(req: Request) {
     }
 
     // 1. Fetch store products to align metrics
-    const storeProducts = getProducts(storeSlug);
+    const storeProducts = await getProducts(storeSlug);
 
     // 2. Query Real Multi-Tenant Analytics from Database
-    const { getStorefrontAnalyticsFromDb } = await import('@/lib/db-repository');
     const dbAnalytics = await getStorefrontAnalyticsFromDb(storeSlug);
 
     if (dbAnalytics) {

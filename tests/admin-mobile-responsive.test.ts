@@ -30,8 +30,10 @@ assert.ok(globalsCss.includes('.admin-shell'), 'admin-shell overflow rule must b
 console.log('  ✓ globals.css verified: 6-stage semantic tokens, iOS zoom prevention, and touch targets present.');
 
 // ── Test 2: Verify Mobile Shell, Drawer & Bottom Quick Bar in layout.tsx ──
-console.log('  2. Testing src/app/admin/layout.tsx for mobile navigation & drawer...');
-const layoutPath = path.join(process.cwd(), 'src', 'app', 'admin', 'layout.tsx');
+console.log('  2. Testing admin layout.tsx for mobile navigation & drawer...');
+const layoutPath = fs.existsSync(path.join(process.cwd(), 'src', 'app', '(app)', 'admin', 'layout.tsx'))
+  ? path.join(process.cwd(), 'src', 'app', '(app)', 'admin', 'layout.tsx')
+  : path.join(process.cwd(), 'src', 'app', 'admin', 'layout.tsx');
 const layoutCode = fs.readFileSync(layoutPath, 'utf-8');
 
 assert.ok(layoutCode.includes('Barre de navigation rapide mobile'), 'Mobile bottom quick bar must be rendered in layout');
@@ -42,8 +44,10 @@ assert.ok(layoutCode.includes('pb-20 lg:pb-8'), 'Main viewport must have bottom 
 console.log('  ✓ layout.tsx verified: Responsive mobile shell, sliding drawer, and bottom quick bar present.');
 
 // ── Test 3: Verify Orders Table-to-Card Responsive Transformation ──
-console.log('  3. Testing src/app/admin/orders/page.tsx for mobile card stream...');
-const ordersPagePath = path.join(process.cwd(), 'src', 'app', 'admin', 'orders/page.tsx');
+console.log('  3. Testing admin orders/page.tsx for mobile card stream...');
+const ordersPagePath = fs.existsSync(path.join(process.cwd(), 'src', 'app', '(app)', 'admin', 'orders', 'page.tsx'))
+  ? path.join(process.cwd(), 'src', 'app', '(app)', 'admin', 'orders', 'page.tsx')
+  : path.join(process.cwd(), 'src', 'app', 'admin', 'orders', 'page.tsx');
 const ordersCode = fs.readFileSync(ordersPagePath, 'utf-8');
 
 assert.ok(ordersCode.includes('block md:hidden'), 'Mobile cards stream must be visible on screens < md');
@@ -61,8 +65,10 @@ console.log('  ✓ Exporter CSV dropdown verified: mobile safe-alignment, viewpo
 console.log('  ✓ orders/page.tsx verified: Adaptive mobile card stream, click-to-call, and WhatsApp actions present.');
 
 // ── Test 4: Verify Products Catalog Table-to-Card Responsive Transformation ──
-console.log('  4. Testing src/app/admin/products/page.tsx for mobile product card stream...');
-const productsPagePath = path.join(process.cwd(), 'src', 'app', 'admin', 'products/page.tsx');
+console.log('  4. Testing admin products/page.tsx for mobile product card stream...');
+const productsPagePath = fs.existsSync(path.join(process.cwd(), 'src', 'app', '(app)', 'admin', 'products', 'page.tsx'))
+  ? path.join(process.cwd(), 'src', 'app', '(app)', 'admin', 'products', 'page.tsx')
+  : path.join(process.cwd(), 'src', 'app', 'admin', 'products', 'page.tsx');
 const productsCode = fs.readFileSync(productsPagePath, 'utf-8');
 
 assert.ok(productsCode.includes('block md:hidden'), 'Mobile product cards must be visible on screens < md');
@@ -72,8 +78,10 @@ assert.ok(productsCode.includes('handleOpenEditModal'), 'Edit action must be acc
 console.log('  ✓ products/page.tsx verified: Mobile product card stream with quick stock adjusters present.');
 
 // ── Test 5: Verify Customers CRM Table-to-Card Responsive Transformation ──
-console.log('  5. Testing src/app/admin/customers/page.tsx for mobile customer card stream...');
-const customersPagePath = path.join(process.cwd(), 'src', 'app', 'admin', 'customers/page.tsx');
+console.log('  5. Testing admin customers/page.tsx for mobile customer card stream...');
+const customersPagePath = fs.existsSync(path.join(process.cwd(), 'src', 'app', '(app)', 'admin', 'customers', 'page.tsx'))
+  ? path.join(process.cwd(), 'src', 'app', '(app)', 'admin', 'customers', 'page.tsx')
+  : path.join(process.cwd(), 'src', 'app', 'admin', 'customers', 'page.tsx');
 const customersCode = fs.readFileSync(customersPagePath, 'utf-8');
 
 assert.ok(customersCode.includes('block md:hidden'), 'Mobile customer cards must be visible on screens < md');

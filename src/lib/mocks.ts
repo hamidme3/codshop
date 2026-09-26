@@ -1,5 +1,6 @@
 import type { Order, Product, Category, Customer, PaymentGateway, OrderStatus, CustomerOrderSummary } from './types';
 import { restoreMockProductStock, decrementMockProductStock } from './mockProducts';
+import { generateCourierTrackingNumber, normalizeCourierKey } from './carrier-tracking';
 
 // ── Seed Moroccan Orders ────────────────────────────────────────
 export let ORDERS: Order[] = [
@@ -532,15 +533,17 @@ export function updateOrderStatus(orderId: string, status: Order['status'], trac
 
   const previousStatus = order.status;
   order.status = status;
+  const resolvedCourier = courier || (order.courier && order.courier !== 'manual' && order.courier !== 'standard' ? order.courier : 'ozon');
+  if (courier) {
+    order.courier = courier;
+  } else if ((status === 'shipped' || status === 'shipping') && (!order.courier || order.courier === 'manual' || order.courier === 'standard')) {
+    order.courier = resolvedCourier;
+  }
+
   if (trackingNumber) {
     order.trackingNumber = trackingNumber;
   } else if ((status === 'shipped' || status === 'shipping') && !order.trackingNumber) {
-    order.trackingNumber = `EXP-MA-${Math.floor(100000 + Math.random() * 900000)}`;
-  }
-  if (courier) {
-    order.courier = courier;
-  } else if ((status === 'shipped' || status === 'shipping') && (!order.courier || order.courier === 'manual')) {
-    order.courier = 'standard';
+    order.trackingNumber = generateCourierTrackingNumber(order.courier || resolvedCourier);
   }
 
   // Add contextual timestamps for pipeline audit

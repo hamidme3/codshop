@@ -17,6 +17,7 @@ import {
 import { 
   exportOrdersToCsv 
 } from '@/lib/courier-manifest';
+import { generateCourierTrackingNumber } from '@/lib/carrier-tracking';
 
 const STATUS_OPTIONS: { value: OrderStatus; label: string; dotColor: string }[] = [
   { value: 'new', label: 'Nouvelle (À Valider)', dotColor: 'bg-slate-400' },
@@ -229,8 +230,8 @@ function OrdersContent() {
   // 1-Click Fast Manual Transitions
   const handleQuickShip = (orderId: string) => {
     const existing = orders.find((o) => o.id === orderId || o.orderNumber === orderId);
-    const tracking = existing?.trackingNumber || `EXP-MA-${Math.floor(100000 + Math.random() * 900000)}`;
-    const courier = existing?.courier && existing.courier !== 'manual' ? existing.courier : 'standard';
+    const courier = existing?.courier && existing.courier !== 'manual' && existing.courier !== 'standard' ? existing.courier : 'ozon';
+    const tracking = existing?.trackingNumber || generateCourierTrackingNumber(courier);
     handleQuickTransition(orderId, 'shipped', tracking, courier);
   };
 

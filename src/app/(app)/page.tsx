@@ -191,7 +191,7 @@ function StorefrontHome({ storeSlug }: { storeSlug?: string }) {
                 backgroundColor: 'var(--theme-card-bg)',
               }}
             >
-              <span>Voir tout ({MOCK_PRODUCTS.length})</span>
+              <span>Voir tout ({products.length})</span>
               <ArrowRight className="w-3 h-3" />
             </a>
           </div>
