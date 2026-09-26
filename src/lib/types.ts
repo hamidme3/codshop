@@ -105,6 +105,7 @@ export interface CustomerOrderSummary {
   trackingNumber?: string;
   countryCode?: string;
   currency?: string;
+  shippedAt?: string;
 }
 
 export interface Customer {

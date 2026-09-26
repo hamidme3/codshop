@@ -7,7 +7,6 @@ import {
   ORDERS 
 } from '@/lib/mocks';
 import { isValidStoreSlug } from '@/lib/sanitizer';
-import { generateCourierTrackingNumber } from '@/lib/carrier-tracking';
 
 export async function GET(req: Request) {
   try {
@@ -110,17 +109,11 @@ export async function PATCH(req: Request) {
           status,
           updatedAt: now,
         };
-        const resolvedCourier = courier || (existingOrder?.courier && existingOrder.courier !== 'manual' && existingOrder.courier !== 'standard' ? existingOrder.courier : 'ozon');
-        if (courier) {
+        if (courier !== undefined) {
           updatePayload.courier = courier;
-        } else if ((status === 'shipped' || status === 'shipping') && (!existingOrder?.courier || existingOrder.courier === 'manual' || existingOrder.courier === 'standard')) {
-          updatePayload.courier = resolvedCourier;
         }
-
-        if (trackingNumber) {
+        if (trackingNumber !== undefined) {
           updatePayload.trackingNumber = trackingNumber;
-        } else if ((status === 'shipped' || status === 'shipping') && !existingOrder?.trackingNumber) {
-          updatePayload.trackingNumber = generateCourierTrackingNumber(updatePayload.courier || resolvedCourier);
         }
         if (status === 'confirmed') updatePayload.confirmedAt = now;
         if (status === 'shipped') updatePayload.shippedAt = now;

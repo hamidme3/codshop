@@ -1,6 +1,5 @@
 import type { Order, Product, Category, Customer, PaymentGateway, OrderStatus, CustomerOrderSummary } from './types';
 import { restoreMockProductStock, decrementMockProductStock } from './mockProducts';
-import { generateCourierTrackingNumber, normalizeCourierKey } from './carrier-tracking';
 
 // ── Seed Moroccan Orders ────────────────────────────────────────
 export let ORDERS: Order[] = [
@@ -18,8 +17,6 @@ export let ORDERS: Order[] = [
     subtotal: 1047,
     shippingFee: 0,
     total: 1047,
-    courier: 'ozon',
-    trackingNumber: 'OZON-MA-774419',
     agentNotes: 'Commande VIP Pack Trio livrée avec succès.',
   },
   {
@@ -36,7 +33,6 @@ export let ORDERS: Order[] = [
     subtotal: 598,
     shippingFee: 20,
     total: 618,
-    courier: 'ozon',
     agentNotes: 'Client a commandé le Pack Duo.',
   },
   {
@@ -53,7 +49,6 @@ export let ORDERS: Order[] = [
     subtotal: 299,
     shippingFee: 25,
     total: 324,
-    courier: 'ozon',
     agentNotes: 'Ne répond pas au 1er appel. Rappeler vers 16h.',
   },
   {
@@ -70,7 +65,6 @@ export let ORDERS: Order[] = [
     subtotal: 349,
     shippingFee: 30,
     total: 379,
-    courier: 'ozon',
     agentNotes: 'Confirmé par agent Salma. Expédition prête.',
   },
   {
@@ -87,8 +81,6 @@ export let ORDERS: Order[] = [
     subtotal: 360,
     shippingFee: 30,
     total: 390,
-    courier: 'ozon',
-    trackingNumber: 'OZON-MA-948291',
   },
   {
     id: 'ord_105',
@@ -104,9 +96,7 @@ export let ORDERS: Order[] = [
     subtotal: 349,
     shippingFee: 20,
     total: 369,
-    courier: 'ozon',
-    trackingNumber: 'OZON-MA-948102',
-    agentNotes: 'Colis livré et fonds encaissés par le coursier.',
+    agentNotes: 'Colis livré et fonds encaissés.',
   },
   {
     id: 'ord_106',
@@ -122,8 +112,6 @@ export let ORDERS: Order[] = [
     subtotal: 299,
     shippingFee: 30,
     total: 329,
-    courier: 'sendit',
-    trackingNumber: 'SENDIT-992182',
     agentNotes: 'Client injoignable après 3 tentatives de passage.',
   },
 ];
@@ -533,17 +521,11 @@ export function updateOrderStatus(orderId: string, status: Order['status'], trac
 
   const previousStatus = order.status;
   order.status = status;
-  const resolvedCourier = courier || (order.courier && order.courier !== 'manual' && order.courier !== 'standard' ? order.courier : 'ozon');
-  if (courier) {
+  if (courier !== undefined) {
     order.courier = courier;
-  } else if ((status === 'shipped' || status === 'shipping') && (!order.courier || order.courier === 'manual' || order.courier === 'standard')) {
-    order.courier = resolvedCourier;
   }
-
-  if (trackingNumber) {
+  if (trackingNumber !== undefined) {
     order.trackingNumber = trackingNumber;
-  } else if ((status === 'shipped' || status === 'shipping') && !order.trackingNumber) {
-    order.trackingNumber = generateCourierTrackingNumber(order.courier || resolvedCourier);
   }
 
   // Add contextual timestamps for pipeline audit

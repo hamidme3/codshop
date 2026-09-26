@@ -15,7 +15,6 @@ import { normalizeMoroccanPhone } from '@/lib/whatsapp-templates';
 import { normalizePhoneForWhatsApp, COUNTRIES } from '@/lib/geo';
 import CustomerRiskBadge, { deriveCustomerSegment } from '@/components/admin/crm/CustomerRiskBadge';
 import CustomerRetentionChart from '@/components/admin/charts/CustomerRetentionChart';
-import { getCourierMeta, getCourierTrackingUrl, MOROCCAN_COURIERS, MoroccanCourier, generateCourierTrackingNumber } from '@/lib/carrier-tracking';
 
 function getContextualWhatsAppUrl(customer: Customer, storeSlug: string): string {
   const countryCode = ((customer.recentOrders?.[0] as any)?.countryCode || (customer as any)?.country || 'MA').toUpperCase();
@@ -25,8 +24,6 @@ function getContextualWhatsAppUrl(customer: Customer, storeSlug: string): string
   const orderNum = customer.lastOrderNumber || 'votre commande';
   const totalVal = customer.recentOrders?.[0]?.total || customer.totalSpend || 0;
   const status = customer.lastOrderStatus;
-  const courier = customer.recentOrders?.[0]?.courier || 'transporteur';
-  const tracking = customer.lastTrackingNumber;
   const curr = customer.recentOrders?.[0]?.currency || (COUNTRIES[countryCode] || COUNTRIES.MA).currency.symbol;
 
   let message = '';
@@ -35,8 +32,7 @@ function getContextualWhatsAppUrl(customer: Customer, storeSlug: string): string
     if (status === 'confirmed') {
       message = `السلام عليكم ورحمة الله وبركاته يا ${customer.name} 👋، معك متجر ${storeName}. تم تأكيد طلبكم ${orderNum} بقيمة ${totalVal} ${curr} بنجاح! نقوم حالياً بتجهيز الشحنة لإرسالها إليكم في ${customer.city}.`;
     } else if (status === 'shipped' || status === 'shipping') {
-      const trackingTxt = tracking ? ` (رقم التتبع: ${tracking})` : '';
-      message = `السلام عليكم يا ${customer.name} 👋، تم شحن طلبكم ${orderNum} مع ${courier.toUpperCase()}${trackingTxt}. سيتواصل معكم مندوب التوصيل قريباً. يرجى تجهيز ${totalVal} ${curr} نقداً عند الاستلام.`;
+      message = `السلام عليكم يا ${customer.name} 👋، تم شحن طلبكم ${orderNum} وهو في الطريق إليكم. سيتواصل معكم المندوب قريباً. يرجى تجهيز ${totalVal} ${curr} نقداً عند الاستلام.`;
     } else if (status === 'delivered') {
       message = `السلام عليكم يا ${customer.name} 👋، شكراً لثقتكم بنا! تم تسليم طلبكم ${orderNum} بنجاح. يسعدنا تقديم خصم 15% على طلبكم القادم بكود: VIP15!`;
     } else if (status === 'returned' || status === 'canceled') {
@@ -48,8 +44,7 @@ function getContextualWhatsAppUrl(customer: Customer, storeSlug: string): string
     if (status === 'confirmed') {
       message = `أهلاً بحضرتك يا ${customer.name} 👋، معاك متجر ${storeName}. أوردرك ${orderNum} بقيمة ${totalVal} ${curr} تم تأكيده بنجاح! وجاري تجهيزه للشحن إلى ${customer.city}.`;
     } else if (status === 'shipped' || status === 'shipping') {
-      const trackingTxt = tracking ? ` (رقم البوليصة: ${tracking})` : '';
-      message = `أهلاً بحضرتك يا ${customer.name} 👋، أوردرك ${orderNum} خرج مع المندوب دلوقتي عبر ${courier.toUpperCase()}${trackingTxt}. المندوب هيتصل بحضرتك قريباً. يرجى تجهيز ${totalVal} ${curr} كاش عند الاستلام.`;
+      message = `أهلاً بحضرتك يا ${customer.name} 👋، أوردرك ${orderNum} خرج للتوصيل وهو في الطريق لحضرتك. المندوب هيتصل بحضرتك قريباً. يرجى تجهيز ${totalVal} ${curr} كاش عند الاستلام.`;
     } else if (status === 'delivered') {
       message = `أهلاً بحضرتك يا ${customer.name} 👋، شكراً لثقتك فينا! أوردرك ${orderNum} وصل بسلامة. هدية لحضرتك خصم 15% على الأوردر القادم بكود: VIP15!`;
     } else if (status === 'returned' || status === 'canceled') {
@@ -61,8 +56,7 @@ function getContextualWhatsAppUrl(customer: Customer, storeSlug: string): string
     if (status === 'confirmed') {
       message = `Bonjour ${customer.name} 👋, de la part de la boutique ${storeName}. Votre commande ${orderNum} d'un montant de ${totalVal} ${curr} est bien confirmée ! Notre équipe prépare votre colis pour expédition à ${customer.city}.`;
     } else if (status === 'shipped' || status === 'shipping') {
-      const trackingTxt = tracking ? ` (N° Suivi : ${tracking})` : '';
-      message = `Bonjour ${customer.name} 👋, votre colis ${orderNum} est expédié avec ${courier.toUpperCase()}${trackingTxt}. Le livreur va vous contacter très prochainement. Merci de préparer ${totalVal} ${curr} à la livraison.`;
+      message = `Bonjour ${customer.name} 👋, votre commande ${orderNum} est expédiée et en cours de livraison à ${customer.city}. Notre livreur va vous contacter très prochainement. Merci de préparer ${totalVal} ${curr} à la livraison.`;
     } else if (status === 'delivered') {
       message = `Bonjour ${customer.name} 👋, merci pour votre confiance ! Votre commande ${orderNum} a bien été livrée. Profitez de -15% sur votre prochain achat avec le code : VIP15 !`;
     } else if (status === 'returned' || status === 'canceled') {
@@ -75,17 +69,13 @@ function getContextualWhatsAppUrl(customer: Customer, storeSlug: string): string
     if (status === 'confirmed') {
       message = `Salam ${customer.name}, m3ak la boutique ${storeName}. Votre commande ${orderNum} de ${totalVal} ${curr} est bien confirmée ! Notre équipe prépare actuellement votre colis pour expédition rapide à ${customer.city}.`;
     } else if (status === 'shipped' || status === 'shipping') {
-      const courierMeta = getCourierMeta(courier, tracking);
-      const trackingUrl = getCourierTrackingUrl(courier, tracking);
-      const trackingTxt = tracking ? ` (N° Suivi : ${tracking}${trackingUrl ? ` - Suivi direct : ${trackingUrl}` : ''})` : '';
-      message = `Salam ${customer.name}, votre colis ${orderNum} est expédié avec ${courierMeta.name}${trackingTxt}. Le livreur va vous contacter très prochainement. Merci de bien vouloir préparer ${totalVal} ${curr} en espèces à la livraison.`;
+      message = `Salam ${customer.name}, m3ak la boutique ${storeName}. Votre commande ${orderNum} de ${totalVal} ${curr} est expédiée et en cours d'acheminement vers ${customer.city}. Notre livreur va vous contacter par téléphone avant son passage. Merci de préparer ${totalVal} ${curr} en espèces à la livraison.`;
     } else if (status === 'delivered') {
-      message = `Salam ${customer.name}, merci pour votre confiance ! Votre commande ${orderNum} a bien été livrée. Pour vous remercier de votre fidélité chez ${storeName}, profitez de -15% sur votre prochaine commande avec le code : VIP15 !`;
+      message = `Salam ${customer.name}, choukran bzaf 3la ti9a dialek fi ${storeName} ! Votre commande ${orderNum} a bien été livrée. Bghina nhediw lik remise de 15% 3la votre prochain achat m3ana avec le code promo : VIP15 !`;
     } else if (status === 'returned' || status === 'canceled') {
-      message = `Salam ${customer.name}, nous avons constaté que votre commande ${orderNum} n'a pas pu vous être remise par le livreur à ${customer.city} (Colis retourné). Souhaitez-vous reprogrammer votre livraison à une autre date ?`;
+      message = `Salam ${customer.name}, chejna bli la commande ${orderNum} matsalmatch lik fi ${customer.city}. Wach bghiti n3awdou nseftouha lik fi wa9t akhor li ynassbek ?`;
     } else {
-      // new / to_confirm
-      message = `Salam ${customer.name}, m3ak la boutique ${storeName}. Nous avons bien reçu votre commande ${orderNum} d'un montant de ${totalVal} ${curr}. Confirmez-vous l'envoi à votre adresse à ${customer.city} ?`;
+      message = `Salam ${customer.name}, m3ak la boutique ${storeName}. Nous avons bien reçu votre commande ${orderNum} de ${totalVal} ${curr}. Wach kat2akdou l'envoi dialha à votre adresse fi ${customer.city} ?`;
     }
   }
 
@@ -103,20 +93,11 @@ function CustomersContent() {
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
   const [customerNotes, setCustomerNotes] = useState<Record<string, string>>({});
   const [notesSaved, setNotesSaved] = useState(false);
-  const [copiedTracking, setCopiedTracking] = useState<string | null>(null);
-
-  // Carrier & Tracking Editor in Customer Drawer
-  const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
-  const [editCourier, setEditCourier] = useState<string>('ozon');
-  const [editTrackingNum, setEditTrackingNum] = useState<string>('');
-  const [isUpdatingTracking, setIsUpdatingTracking] = useState(false);
-  const [trackingSaveSuccess, setTrackingSaveSuccess] = useState(false);
 
   // Sync selected customer's active order & notes when drawer opens
   React.useEffect(() => {
     if (selectedCustomer) {
       setActiveOrderId(selectedCustomer.recentOrders?.[0]?.id || null);
-      setEditingOrderId(null);
       if (typeof window !== 'undefined') {
         const localSaved = localStorage.getItem(`cod_customer_notes_${selectedCustomer.phone}`);
         if (localSaved !== null) {
@@ -163,56 +144,6 @@ function CustomersContent() {
     setSelectedCustomer({ ...selectedCustomer, addressNotes: notesToSave });
     setNotesSaved(true);
     setTimeout(() => setNotesSaved(false), 2500);
-  };
-
-  const handleCopyTracking = (trackNum: string) => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(trackNum);
-      setCopiedTracking(trackNum);
-      setTimeout(() => setCopiedTracking(null), 2000);
-    }
-  };
-
-  const handleSaveOrderTracking = async (orderId: string) => {
-    if (!orderId) return;
-    setIsUpdatingTracking(true);
-    try {
-      const res = await fetch('/api/admin/orders', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          storeSlug,
-          orderId,
-          status: 'shipped',
-          courier: editCourier,
-          trackingNumber: editTrackingNum.trim(),
-        }),
-      });
-      if (res.ok) {
-        if (selectedCustomer && selectedCustomer.recentOrders) {
-          const updated = selectedCustomer.recentOrders.map((o) =>
-            o.id === orderId || o.orderNumber === orderId
-              ? { ...o, status: 'shipped' as const, courier: editCourier as any, trackingNumber: editTrackingNum.trim() }
-              : o
-          );
-          setSelectedCustomer({
-            ...selectedCustomer,
-            recentOrders: updated,
-            lastTrackingNumber: editTrackingNum.trim(),
-          });
-        }
-        setTrackingSaveSuccess(true);
-        setTimeout(() => {
-          setTrackingSaveSuccess(false);
-          setEditingOrderId(null);
-        }, 1500);
-        fetchLiveCustomers();
-      }
-    } catch (err) {
-      console.error('[Admin Customers] Update tracking error:', err);
-    } finally {
-      setIsUpdatingTracking(false);
-    }
   };
 
   const refreshCustomers = () => {
@@ -920,181 +851,27 @@ function CustomersContent() {
                                   <span className={`text-[10px] font-mono uppercase ${
                                     isShipped ? 'text-emerald-400' : isConfirmed ? 'text-sky-400' : 'text-zinc-500'
                                   }`}>
-                                    {isShipped ? (activeOrder.trackingNumber ? 'Expédiée' : 'En transit') : isConfirmed ? 'En préparation ⏳' : 'En attente'}
+                                    {isShipped ? 'Expédiée ✓' : isConfirmed ? 'En préparation ⏳' : 'En attente'}
                                   </span>
                                 </div>
-                                {isShipped && activeOrder.trackingNumber ? (
-                                  <div className="space-y-2 pt-1">
-                                    {/* Tracking info row */}
-                                    <div className="flex flex-wrap items-center gap-2">
-                                      {/* Courier Brand Badge */}
-                                      {(() => {
-                                        const cMeta = getCourierMeta(activeOrder.courier, activeOrder.trackingNumber);
-                                        return (
-                                          <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border font-semibold ${cMeta.badgeClass}`}>
-                                            {cMeta.name}
-                                          </span>
-                                        );
-                                      })()}
-
-                                      {/* Tracking Number Pill */}
-                                      <div className="flex items-center gap-1 bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800">
-                                        <span className="font-mono text-[11px] text-sky-300 font-semibold tracking-wide">
-                                          {activeOrder.trackingNumber}
-                                        </span>
-                                        <button
-                                          type="button"
-                                          onClick={() => handleCopyTracking(activeOrder.trackingNumber!)}
-                                          className="p-1 rounded text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
-                                          title="Copier le numéro de suivi"
-                                        >
-                                          {copiedTracking === activeOrder.trackingNumber ? (
-                                            <Check className="w-3 h-3 text-emerald-400" />
-                                          ) : (
-                                            <Copy className="w-3 h-3" />
-                                          )}
-                                        </button>
-                                      </div>
-
-                                      {/* Direct Courier Live Tracking Portal Link */}
-                                      {(() => {
-                                        const trackUrl = getCourierTrackingUrl(activeOrder.courier, activeOrder.trackingNumber);
-                                        const cMeta = getCourierMeta(activeOrder.courier, activeOrder.trackingNumber);
-                                        if (!trackUrl) return null;
-                                        return (
-                                          <a
-                                            href={trackUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-medium bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 transition-colors shadow-xs"
-                                            title={`Ouvrir le portail officiel de suivi ${cMeta.name}`}
-                                          >
-                                            <span>Suivre le colis</span>
-                                            <ExternalLink className="w-3 h-3" />
-                                          </a>
-                                        );
-                                      })()}
-
-                                      {/* Quick Edit Carrier / Tracking Button */}
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          if (editingOrderId === activeOrder.id) {
-                                            setEditingOrderId(null);
-                                          } else {
-                                            setEditingOrderId(activeOrder.id);
-                                            setEditCourier(activeOrder.courier || 'ozon');
-                                            setEditTrackingNum(activeOrder.trackingNumber || '');
-                                          }
-                                        }}
-                                        className="inline-flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white px-2 py-0.5 rounded hover:bg-zinc-800 transition-colors cursor-pointer"
-                                        title="Modifier le transporteur ou le numéro de bordereau"
-                                      >
-                                        <Edit3 className="w-3 h-3" />
-                                        <span>Modifier</span>
-                                      </button>
-                                    </div>
-
-                                    {/* Inline Edit Form when toggled */}
-                                    {editingOrderId === activeOrder.id && (
-                                      <div className="p-3 rounded-lg bg-zinc-950/80 border border-zinc-800 space-y-2.5 animate-in fade-in duration-150">
-                                        <div className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
-                                          Transporteur & Bordereau d&apos;expédition
-                                        </div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                          <div>
-                                            <label className="text-[10px] text-zinc-400 block mb-1">Transporteur Partenaire</label>
-                                            <select
-                                              value={editCourier}
-                                              onChange={(e) => setEditCourier(e.target.value)}
-                                              className="w-full bg-[#121215] border border-zinc-700 text-xs text-white rounded px-2.5 py-1.5 focus:outline-none focus:border-sky-500"
-                                            >
-                                              <option value="ozon">Ozon Express (N°1 COD Maroc)</option>
-                                              <option value="sendit">SendIt Express</option>
-                                              <option value="cathedis">Cathedis Messagerie</option>
-                                              <option value="amana">Amana Express (Poste Maroc)</option>
-                                              <option value="manual">Livreur Interne / Flotte Propre</option>
-                                            </select>
-                                          </div>
-                                          <div>
-                                            <label className="text-[10px] text-zinc-400 block mb-1">N° de Suivi / Bordereau</label>
-                                            <input
-                                              type="text"
-                                              value={editTrackingNum}
-                                              onChange={(e) => setEditTrackingNum(e.target.value)}
-                                              placeholder="Ex: OZON-MA-123456"
-                                              className="w-full bg-[#121215] border border-zinc-700 text-xs font-mono text-white rounded px-2.5 py-1.5 focus:outline-none focus:border-sky-500 placeholder-zinc-600"
-                                            />
-                                          </div>
-                                        </div>
-                                        <div className="flex items-center justify-end gap-2 pt-1">
-                                          <button
-                                            type="button"
-                                            onClick={() => setEditingOrderId(null)}
-                                            className="px-2.5 py-1 text-xs text-zinc-400 hover:text-white rounded transition-colors"
-                                          >
-                                            Annuler
-                                          </button>
-                                          <button
-                                            type="button"
-                                            disabled={isUpdatingTracking}
-                                            onClick={() => handleSaveOrderTracking(activeOrder.id)}
-                                            className="px-3 py-1 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-xs font-semibold text-white rounded transition-colors flex items-center gap-1.5 cursor-pointer"
-                                          >
-                                            {trackingSaveSuccess ? (
-                                              <>
-                                                <Check className="w-3 h-3 text-emerald-300" />
-                                                <span>Enregistré !</span>
-                                              </>
-                                            ) : (
-                                              <span>{isUpdatingTracking ? 'Enregistrement...' : 'Enregistrer'}</span>
-                                            )}
-                                          </button>
-                                        </div>
-                                      </div>
+                                {isShipped ? (
+                                  <div className="pt-0.5 space-y-1">
+                                    <p className="text-[11px] text-zinc-300">
+                                      Colis expédié et en cours d&apos;acheminement vers <span className="font-semibold text-white">{selectedCustomer.city}</span>.
+                                    </p>
+                                    {activeOrder.shippedAt && (
+                                      <p className="text-[10px] text-zinc-500 font-mono">
+                                        Expédié le {new Date(activeOrder.shippedAt).toLocaleDateString('fr-FR')} à {new Date(activeOrder.shippedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                      </p>
                                     )}
-
-                                    <p className="text-[11px] text-zinc-400">
-                                      Colis confié à {getCourierMeta(activeOrder.courier, activeOrder.trackingNumber).name} pour acheminement vers le secteur de {selectedCustomer.city}.
-                                    </p>
-                                  </div>
-                                ) : isShipped ? (
-                                  <div className="space-y-1.5 pt-0.5">
-                                    <p className="text-[11px] text-zinc-400">
-                                      Colis expédié vers {selectedCustomer.city}. N° de suivi en attente d&apos;attribution.
-                                    </p>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setEditingOrderId(activeOrder.id);
-                                        setEditCourier('ozon');
-                                        setEditTrackingNum(generateCourierTrackingNumber('ozon'));
-                                      }}
-                                      className="inline-flex items-center gap-1 text-[11px] text-sky-400 hover:text-sky-300 underline cursor-pointer"
-                                    >
-                                      + Attribuer un N° de suivi transporteur
-                                    </button>
                                   </div>
                                 ) : isConfirmed ? (
-                                  <div className="space-y-1.5 pt-0.5">
-                                    <p className="text-[11px] text-zinc-400">
-                                      Bordereau transporteur en cours d&apos;attribution pour livraison à {selectedCustomer.city}.
-                                    </p>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setEditingOrderId(activeOrder.id);
-                                        setEditCourier('ozon');
-                                        setEditTrackingNum(generateCourierTrackingNumber('ozon'));
-                                      }}
-                                      className="inline-flex items-center gap-1 text-[11px] text-sky-400 hover:text-sky-300 underline cursor-pointer"
-                                    >
-                                      + Expédier avec numéro de suivi transporteur
-                                    </button>
-                                  </div>
+                                  <p className="text-[11px] text-zinc-400 pt-0.5">
+                                    Commande validée. Préparation du colis pour acheminement direct vers {selectedCustomer.city}.
+                                  </p>
                                 ) : (
-                                  <p className="text-[11px] text-zinc-500">
-                                    Acheminement vers {selectedCustomer.city} programmé après validation téléphonique.
+                                  <p className="text-[11px] text-zinc-500 pt-0.5">
+                                    Acheminement vers {selectedCustomer.city} programmé après confirmation.
                                   </p>
                                 )}
                               </div>

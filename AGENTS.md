@@ -3,6 +3,12 @@ RULE: NO FRENCH LANGUAGE
 - NEVER use French in assistant responses, explanations, summaries, or communication with the user.
 - Always communicate strictly in English (or Arabic if explicitly requested by the user).
 - Technical terms, commit messages, and documentation must be written in English.
+
+RULE: NO CARRIERS IN CODSHOP (PERMANENT RULE)
+- CODShop does NOT support 3rd-party shipping carriers or courier services (NO Ozon Express, SendIt, Cathedis, Amana, or any courier aggregations).
+- CODShop is an independent Cash-on-Delivery (COD) software platform. Deliveries are managed directly by merchants and their own delivery staff.
+- NEVER add carrier selection dropdowns, carrier pickers, courier tracking numbers, external carrier portal links, or courier branding to CODShop.
+- Order and customer delivery statuses must remain clean internal merchant operational statuses (Confirmed, Shipped / In Transit, Delivered & Paid, Returned) without carrier metadata or carrier tracking codes.
 === END GLOBAL CORE RULES ===
 
 === ROUND 1: Theme Customization Initiative ===

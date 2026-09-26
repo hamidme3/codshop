@@ -17,7 +17,6 @@ import {
 import { 
   exportOrdersToCsv 
 } from '@/lib/courier-manifest';
-import { generateCourierTrackingNumber } from '@/lib/carrier-tracking';
 
 const STATUS_OPTIONS: { value: OrderStatus; label: string; dotColor: string }[] = [
   { value: 'new', label: 'Nouvelle (À Valider)', dotColor: 'bg-slate-400' },
@@ -229,10 +228,7 @@ function OrdersContent() {
 
   // 1-Click Fast Manual Transitions
   const handleQuickShip = (orderId: string) => {
-    const existing = orders.find((o) => o.id === orderId || o.orderNumber === orderId);
-    const courier = existing?.courier && existing.courier !== 'manual' && existing.courier !== 'standard' ? existing.courier : 'ozon';
-    const tracking = existing?.trackingNumber || generateCourierTrackingNumber(courier);
-    handleQuickTransition(orderId, 'shipped', tracking, courier);
+    handleQuickTransition(orderId, 'shipped');
   };
 
   // Bulk Operations
@@ -377,16 +373,6 @@ function OrdersContent() {
     setIsExportOpen(false);
   };
 
-  // Copy Tracking Number State
-  const [copiedTracking, setCopiedTracking] = useState<string | null>(null);
-  const copyTracking = (tracking: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(tracking);
-      setCopiedTracking(tracking);
-      setTimeout(() => setCopiedTracking(null), 2000);
-    }
-  };
 
   const getStatusBadge = (status: OrderStatus) => {
     switch (status) {
@@ -1115,25 +1101,6 @@ function OrdersContent() {
 
                         <td className="py-2.5 px-3">
                           {getStatusBadge(order.status)}
-                          {order.trackingNumber && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/40 px-1.5 py-0.5 rounded border border-cyan-800/40 tabular-nums">
-                                {order.trackingNumber}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={(e) => copyTracking(order.trackingNumber!, e)}
-                                className="text-zinc-500 hover:text-white p-0.5 rounded transition-colors"
-                                title="Copier le numéro de suivi"
-                              >
-                                {copiedTracking === order.trackingNumber ? (
-                                  <Check className="w-3 h-3 text-emerald-400" />
-                                ) : (
-                                  <Copy className="w-3 h-3" />
-                                )}
-                              </button>
-                            </div>
-                          )}
                         </td>
 
                         <td className="py-2.5 px-3">
