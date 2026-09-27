@@ -449,7 +449,7 @@ function CustomersContent() {
         <div className="hidden md:block overflow-x-auto admin-scrollbar">
           <table className="w-full text-left text-xs admin-table">
             <thead>
-              <tr className="border-b border-zinc-800/90 text-zinc-400 bg-[#0d0d10] font-semibold">
+              <tr className="border-b border-slate-200 dark:border-zinc-800/90 text-slate-500 dark:text-zinc-400 bg-slate-50 dark:bg-[#0d0d10] font-semibold">
                 <th className="py-2.5 px-3">Client</th>
                 <th className="py-2.5 px-3">Dernière Commande & Étape</th>
                 <th className="py-2.5 px-3">Coordonnées</th>
@@ -459,10 +459,10 @@ function CustomersContent() {
                 <th className="py-2.5 px-3 text-right">Relance WhatsApp</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800/50">
+            <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/50">
               {filteredCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-10 text-center text-zinc-500">
+                  <td colSpan={7} className="py-10 text-center text-slate-500 dark:text-zinc-500">
                     Aucun client trouvé pour ce filtre.
                   </td>
                 </tr>
@@ -475,15 +475,15 @@ function CustomersContent() {
                     <tr 
                       key={c.id} 
                       onClick={() => setSelectedCustomer(c)}
-                      className="hover:bg-zinc-800/30 transition-colors cursor-pointer"
+                      className="hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors cursor-pointer"
                     >
                       {/* Client info */}
                       <td className="py-2.5 px-3 flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-mono font-medium text-zinc-200 text-xs shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 flex items-center justify-center font-mono font-medium text-slate-700 dark:text-zinc-200 text-xs shrink-0">
                           {c.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-medium text-zinc-100 text-xs">{c.name}</div>
+                          <div className="font-medium text-slate-900 dark:text-zinc-100 text-xs">{c.name}</div>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <CustomerRiskBadge customer={c} />
                           </div>
@@ -494,77 +494,77 @@ function CustomersContent() {
                       <td className="py-2.5 px-3">
                         {c.lastOrderStatus === 'confirmed' ? (
                           <div className="space-y-0.5">
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30">
                               <CheckCircle2 className="w-3 h-3" /> 1. Confirmée
                             </span>
-                            <div className="font-mono text-[11px] text-zinc-300">{c.lastOrderNumber}</div>
+                            <div className="font-mono text-[11px] text-slate-600 dark:text-zinc-300">{c.lastOrderNumber}</div>
                           </div>
                         ) : c.lastOrderStatus === 'shipped' || c.lastOrderStatus === 'shipping' ? (
                           <div className="space-y-0.5">
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-sky-500/10 text-sky-300 border border-sky-500/30">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/30">
                               <Truck className="w-3 h-3" /> 2. Expédiée
                             </span>
-                            <div className="font-mono text-[10px] text-zinc-400">{c.lastTrackingNumber || c.lastOrderNumber}</div>
+                            <div className="font-mono text-[10px] text-slate-500 dark:text-zinc-400">{c.lastOrderNumber}</div>
                           </div>
                         ) : c.lastOrderStatus === 'delivered' ? (
                           <div className="space-y-0.5">
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
                               <DollarSign className="w-3 h-3" /> 3. Livrée (Payée)
                             </span>
-                            <div className="font-mono text-[11px] text-zinc-400">{c.lastOrderNumber}</div>
+                            <div className="font-mono text-[11px] text-slate-500 dark:text-zinc-400">{c.lastOrderNumber}</div>
                           </div>
                         ) : c.lastOrderStatus === 'returned' || c.lastOrderStatus === 'canceled' ? (
                           <div className="space-y-0.5">
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-rose-500/10 text-rose-300 border border-rose-500/30">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30">
                               <AlertTriangle className="w-3 h-3" /> 4. Retournée
                             </span>
-                            <div className="font-mono text-[11px] text-zinc-400">{c.lastOrderNumber}</div>
+                            <div className="font-mono text-[11px] text-slate-500 dark:text-zinc-400">{c.lastOrderNumber}</div>
                           </div>
                         ) : (
                           <div className="space-y-0.5">
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-300 dark:border-zinc-700">
                               <Clock className="w-3 h-3" /> À Confirmer
                             </span>
-                            <div className="font-mono text-[11px] text-zinc-300">{c.lastOrderNumber}</div>
+                            <div className="font-mono text-[11px] text-slate-600 dark:text-zinc-300">{c.lastOrderNumber}</div>
                           </div>
                         )}
                       </td>
 
                       {/* Phone & email */}
-                      <td className="py-2.5 px-3 text-zinc-300">
-                        <div className="font-mono tabular-nums text-xs text-zinc-200">{c.phone}</div>
-                        <div className="text-[11px] text-zinc-500 truncate max-w-[150px]">{c.email}</div>
+                      <td className="py-2.5 px-3 text-slate-600 dark:text-zinc-300">
+                        <div className="font-mono tabular-nums text-xs text-slate-900 dark:text-zinc-200">{c.phone}</div>
+                        <div className="text-[11px] text-slate-500 dark:text-zinc-500 truncate max-w-[150px]">{c.email}</div>
                       </td>
 
                       {/* City */}
-                      <td className="py-2.5 px-3 font-medium text-zinc-200">
+                      <td className="py-2.5 px-3 font-medium text-slate-800 dark:text-zinc-200">
                         <div>{c.city}</div>
                         {c.address && (
-                          <div className="text-[10px] text-zinc-500 truncate max-w-[130px]">{c.address}</div>
+                          <div className="text-[10px] text-slate-500 dark:text-zinc-500 truncate max-w-[130px]">{c.address}</div>
                         )}
                       </td>
 
                       {/* Orders & Delivery Rate */}
                       <td className="py-2.5 px-3">
-                        <div className="font-mono tabular-nums text-zinc-200 font-medium">
+                        <div className="font-mono tabular-nums text-slate-800 dark:text-zinc-200 font-medium">
                           {c.totalOrders} commande(s)
                         </div>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <span className={`px-1.5 py-0.2 rounded text-[10px] font-mono tabular-nums font-medium ${
-                            deliveryRate >= 80 ? 'text-emerald-400 bg-emerald-950/40 border border-emerald-800/40' : deliveryRate >= 50 ? 'text-sky-400 bg-sky-950/40 border border-sky-800/40' : 'text-rose-400 bg-rose-950/40 border border-rose-800/40'
+                            deliveryRate >= 80 ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40' : deliveryRate >= 50 ? 'text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/40' : 'text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40'
                           }`}>
                             {deliveryRate}% Livré
                           </span>
-                          <span className="text-[10px] text-zinc-500">• {c.lastOrderDate}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-zinc-500">• {c.lastOrderDate}</span>
                         </div>
                       </td>
 
                       {/* Total Spend */}
                       <td className="py-2.5 px-3">
-                        <div className="font-mono tabular-nums font-semibold text-zinc-100 text-xs">
+                        <div className="font-mono tabular-nums font-semibold text-slate-900 dark:text-zinc-100 text-xs">
                           {c.totalSpend} MAD
                         </div>
-                        <div className="text-[10px] text-zinc-500 font-mono tabular-nums">Panier : {c.averageBasket} MAD</div>
+                        <div className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono tabular-nums">Panier : {c.averageBasket} MAD</div>
                       </td>
 
                       {/* Contextual WhatsApp Button */}
@@ -573,7 +573,7 @@ function CustomersContent() {
                           href={waUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-800/50 font-medium text-[11px] transition-colors"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 dark:text-emerald-300 dark:border-emerald-800/50 font-medium text-[11px] transition-colors"
                           title="Envoyer un message WhatsApp contextuel basé sur l'étape de commande"
                         >
                           <MessageCircle className="w-3 h-3 fill-current" />
@@ -665,8 +665,6 @@ function CustomersContent() {
                       status: selectedCustomer.lastOrderStatus || 'delivered',
                       total: selectedCustomer.totalSpend || 349,
                       itemsSummary: 'Sac Cuir Artisanal Marrakech (Marron Vintage) x1',
-                      courier: 'ozon',
-                      trackingNumber: selectedCustomer.lastTrackingNumber || 'OZON-MA-774419',
                     }];
                 const activeOrder = 
                   customerOrders.find((o) => o.id === activeOrderId) || 
@@ -678,12 +676,12 @@ function CustomersContent() {
                     {/* Header with order switcher */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                          <Clock className="w-3.5 h-3.5 text-sky-400" />
+                        <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center gap-2">
+                          <Clock className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
                           <span>Chronologie Logistique & Livraison</span>
                         </h3>
                         {activeOrder && (
-                          <span className="font-mono text-[11px] text-zinc-400">
+                          <span className="font-mono text-[11px] text-slate-500 dark:text-zinc-400">
                             {customerOrders.length > 1
                               ? `${activeOrder.orderNumber} (${customerOrders.findIndex((o) => o.id === activeOrder.id) + 1}/${customerOrders.length})`
                               : activeOrder.orderNumber}
@@ -694,10 +692,10 @@ function CustomersContent() {
                       {/* Multi-Order Tabs */}
                       {customerOrders.length > 1 && (
                         <div className="space-y-2">
-                          <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400">
+                          <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-zinc-400">
                             <span>Historique ({customerOrders.length}{selectedCustomer.totalOrders > customerOrders.length ? ` sur ${selectedCustomer.totalOrders} totales` : ' commandes'})</span>
                             {selectedCustomer.totalOrders > customerOrders.length && (
-                              <span className="text-[10px] text-zinc-500">Affichage des plus récentes</span>
+                              <span className="text-[10px] text-slate-400 dark:text-zinc-500">Affichage des plus récentes</span>
                             )}
                           </div>
 
@@ -707,7 +705,7 @@ function CustomersContent() {
                               <select
                                 value={activeOrder?.id || ''}
                                 onChange={(e) => setActiveOrderId(e.target.value)}
-                                className="w-full bg-[#0d0d10] border border-zinc-800 text-xs text-white rounded-lg px-2.5 py-2 font-mono focus:outline-none focus:border-sky-500 shadow-xs"
+                                className="w-full bg-slate-50 dark:bg-[#0d0d10] border border-slate-200 dark:border-zinc-800 text-xs text-slate-900 dark:text-white rounded-lg px-2.5 py-2 font-mono focus:outline-none focus:border-sky-500 shadow-xs"
                               >
                                 {customerOrders.map((ord, idx) => (
                                   <option key={ord.id} value={ord.id}>
@@ -728,11 +726,11 @@ function CustomersContent() {
                             {customerOrders.map((ord) => {
                               const isSelected = activeOrder?.id === ord.id;
                               const statusDot = 
-                                ord.status === 'confirmed' ? 'bg-cyan-400' :
-                                ['shipped', 'shipping'].includes(ord.status) ? 'bg-sky-400' :
-                                ord.status === 'delivered' ? 'bg-emerald-400' :
-                                ['returned', 'canceled'].includes(ord.status) ? 'bg-rose-400' :
-                                'bg-zinc-500';
+                                ord.status === 'confirmed' ? 'bg-cyan-500 dark:bg-cyan-400' :
+                                ['shipped', 'shipping'].includes(ord.status) ? 'bg-sky-500 dark:bg-sky-400' :
+                                ord.status === 'delivered' ? 'bg-emerald-500 dark:bg-emerald-400' :
+                                ['returned', 'canceled'].includes(ord.status) ? 'bg-rose-500 dark:bg-rose-400' :
+                                'bg-slate-400 dark:bg-zinc-500';
 
                               return (
                                 <button
@@ -741,13 +739,13 @@ function CustomersContent() {
                                   onClick={() => setActiveOrderId(ord.id)}
                                   className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono whitespace-nowrap transition-all border cursor-pointer ${
                                     isSelected
-                                      ? 'bg-sky-500/20 border-sky-500/50 text-sky-300 font-bold shadow-xs'
-                                      : 'bg-[#0d0d10] border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+                                      ? 'bg-sky-500/10 dark:bg-sky-500/20 border-sky-500/40 dark:border-sky-500/50 text-sky-700 dark:text-sky-300 font-bold shadow-xs'
+                                      : 'bg-slate-50 dark:bg-[#0d0d10] border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:border-slate-300 dark:hover:border-zinc-700'
                                   }`}
                                 >
                                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot}`} />
                                   <span>{ord.orderNumber}</span>
-                                  <span className="text-zinc-500 font-normal">({ord.total} MAD)</span>
+                                  <span className="text-slate-400 dark:text-zinc-500 font-normal">({ord.total} MAD)</span>
                                 </button>
                               );
                             })}
@@ -758,19 +756,19 @@ function CustomersContent() {
 
                     {/* Historical Timeline Steps */}
                     {activeOrder ? (
-                      <div className="p-4 bg-[#0d0d10] rounded-xl border border-zinc-800/80 space-y-4">
-                        <div className="flex items-center justify-between pb-2 border-b border-zinc-800/60">
+                      <div className="p-4 bg-slate-50 dark:bg-[#0d0d10] rounded-xl border border-slate-200 dark:border-zinc-800/80 space-y-4">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-zinc-800/60">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-xs font-bold text-white">{activeOrder.orderNumber}</span>
-                            <span className="text-zinc-500">•</span>
-                            <span className="text-xs font-mono tabular-nums text-zinc-300 font-semibold">{activeOrder.total} MAD</span>
+                            <span className="font-mono text-xs font-bold text-slate-900 dark:text-white">{activeOrder.orderNumber}</span>
+                            <span className="text-slate-400 dark:text-zinc-500">•</span>
+                            <span className="text-xs font-mono tabular-nums text-slate-700 dark:text-zinc-300 font-semibold">{activeOrder.total} MAD</span>
                           </div>
                           <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
-                            activeOrder.status === 'confirmed' ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/30' :
-                            activeOrder.status === 'shipped' || activeOrder.status === 'shipping' ? 'bg-sky-500/10 text-sky-300 border border-sky-500/30' :
-                            activeOrder.status === 'delivered' ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30' :
-                            activeOrder.status === 'returned' ? 'bg-rose-500/10 text-rose-300 border border-rose-500/30' :
-                            'bg-zinc-800 text-zinc-300'
+                            activeOrder.status === 'confirmed' ? 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30' :
+                            activeOrder.status === 'shipped' || activeOrder.status === 'shipping' ? 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/30' :
+                            activeOrder.status === 'delivered' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30' :
+                            activeOrder.status === 'returned' ? 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30' :
+                            'bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'
                           }`}>
                             {activeOrder.status === 'confirmed' ? '1. Confirmée' :
                              activeOrder.status === 'shipped' || activeOrder.status === 'shipping' ? '2. Expédiée' :
@@ -788,17 +786,17 @@ function CustomersContent() {
                           const isReturned = activeOrder.status === 'returned' || activeOrder.status === 'canceled';
 
                           return (
-                            <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-zinc-800">
+                            <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-200 dark:before:bg-zinc-800">
                               {/* Step 1: Storefront Order */}
                               <div className="relative space-y-1">
-                                <div className="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center">
-                                  <Check className="w-2.5 h-2.5 text-emerald-400" />
+                                <div className="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-emerald-500/15 dark:bg-emerald-500/20 border border-emerald-500 flex items-center justify-center">
+                                  <Check className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" />
                                 </div>
                                 <div className="flex items-center justify-between text-xs">
-                                  <span className="font-semibold text-zinc-200">1. Commande Enregistrée (COD)</span>
-                                  <span className="text-[10px] font-mono text-zinc-500">{activeOrder.createdAt ? new Date(activeOrder.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Storefront'}</span>
+                                  <span className="font-semibold text-slate-900 dark:text-zinc-200">1. Commande Enregistrée (COD)</span>
+                                  <span className="text-[10px] font-mono text-slate-500 dark:text-zinc-500">{activeOrder.createdAt ? new Date(activeOrder.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Storefront'}</span>
                                 </div>
-                                <p className="text-[11px] text-zinc-400 line-clamp-1">
+                                <p className="text-[11px] text-slate-600 dark:text-zinc-400 line-clamp-1">
                                   {activeOrder.itemsSummary || 'Articles enregistrés avec paiement à la livraison.'}
                                 </p>
                               </div>
@@ -807,70 +805,70 @@ function CustomersContent() {
                               <div className="relative space-y-1">
                                 <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
                                   isConfirmed
-                                    ? 'bg-emerald-500/20 border border-emerald-500'
-                                    : 'bg-sky-500/20 border border-sky-500 animate-pulse'
+                                    ? 'bg-emerald-500/15 dark:bg-emerald-500/20 border border-emerald-500'
+                                    : 'bg-sky-500/15 dark:bg-sky-500/20 border border-sky-500 animate-pulse'
                                 }`}>
                                   {isConfirmed ? (
-                                    <Check className="w-2.5 h-2.5 text-emerald-400" />
+                                    <Check className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" />
                                   ) : (
-                                    <Clock className="w-2.5 h-2.5 text-sky-400" />
+                                    <Clock className="w-2.5 h-2.5 text-sky-600 dark:text-sky-400" />
                                   )}
                                 </div>
                                 <div className="flex items-center justify-between text-xs">
-                                  <span className="font-semibold text-zinc-200">2. Confirmation & Qualification</span>
+                                  <span className="font-semibold text-slate-900 dark:text-zinc-200">2. Confirmation & Qualification</span>
                                   <span className={`text-[10px] font-mono ${
-                                    isConfirmed ? 'text-emerald-400' : 'text-sky-400'
+                                    isConfirmed ? 'text-emerald-600 dark:text-emerald-400' : 'text-sky-600 dark:text-sky-400'
                                   }`}>
                                     {isConfirmed ? 'Validée ✓' : 'En attente ⏳'}
                                   </span>
                                 </div>
-                                <p className="text-[11px] text-zinc-400">
+                                <p className="text-[11px] text-slate-600 dark:text-zinc-400">
                                   {isConfirmed
                                     ? `Confirmation validée pour l'adresse à ${selectedCustomer.city}.`
                                     : `Appel téléphonique en Darija pour valider l'adresse à ${selectedCustomer.city}.`}
                                 </p>
                               </div>
 
-                              {/* Step 3: Courier Handover, Tracking & Routing */}
+                              {/* Step 3: Dispatch & In-Transit Routing */}
                               <div className="relative space-y-1.5">
                                 <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
                                   isShipped
-                                    ? 'bg-emerald-500/20 border border-emerald-500'
+                                    ? 'bg-emerald-500/15 dark:bg-emerald-500/20 border border-emerald-500'
                                     : isConfirmed
-                                    ? 'bg-sky-500/20 border border-sky-500 animate-pulse'
-                                    : 'bg-zinc-800 border border-zinc-700'
+                                    ? 'bg-sky-500/15 dark:bg-sky-500/20 border border-sky-500 animate-pulse'
+                                    : 'bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700'
                                 }`}>
                                   {isShipped ? (
-                                    <Check className="w-2.5 h-2.5 text-emerald-400" />
+                                    <Check className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" />
                                   ) : (
-                                    <Truck className={`w-2.5 h-2.5 ${isConfirmed ? 'text-sky-400' : 'text-zinc-500'}`} />
+                                    <Truck className={`w-2.5 h-2.5 ${isConfirmed ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400 dark:text-zinc-500'}`} />
                                   )}
                                 </div>
                                 <div className="flex items-center justify-between text-xs">
-                                  <span className="font-semibold text-zinc-200">3. Expédition & Acheminement</span>
+                                  <span className="font-semibold text-slate-900 dark:text-zinc-200">3. Expédition & Acheminement</span>
                                   <span className={`text-[10px] font-mono uppercase ${
-                                    isShipped ? 'text-emerald-400' : isConfirmed ? 'text-sky-400' : 'text-zinc-500'
+                                    isShipped ? 'text-emerald-600 dark:text-emerald-400' : isConfirmed ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400 dark:text-zinc-500'
                                   }`}>
                                     {isShipped ? 'Expédiée ✓' : isConfirmed ? 'En préparation ⏳' : 'En attente'}
                                   </span>
                                 </div>
                                 {isShipped ? (
                                   <div className="pt-0.5 space-y-1">
-                                    <p className="text-[11px] text-zinc-300">
-                                      Colis expédié et en cours d&apos;acheminement vers <span className="font-semibold text-white">{selectedCustomer.city}</span>.
+                                    <p className="text-[11px] text-slate-700 dark:text-zinc-300">
+                                      Colis expédié et en cours d&apos;acheminement vers <span className="font-semibold text-slate-900 dark:text-white">{selectedCustomer.city}</span>.
                                     </p>
                                     {activeOrder.shippedAt && (
-                                      <p className="text-[10px] text-zinc-500 font-mono">
+                                      <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono">
                                         Expédié le {new Date(activeOrder.shippedAt).toLocaleDateString('fr-FR')} à {new Date(activeOrder.shippedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                                       </p>
                                     )}
                                   </div>
                                 ) : isConfirmed ? (
-                                  <p className="text-[11px] text-zinc-400 pt-0.5">
+                                  <p className="text-[11px] text-slate-600 dark:text-zinc-400 pt-0.5">
                                     Commande validée. Préparation du colis pour acheminement direct vers {selectedCustomer.city}.
                                   </p>
                                 ) : (
-                                  <p className="text-[11px] text-zinc-500 pt-0.5">
+                                  <p className="text-[11px] text-slate-500 dark:text-zinc-500 pt-0.5">
                                     Acheminement vers {selectedCustomer.city} programmé après confirmation.
                                   </p>
                                 )}
@@ -880,28 +878,28 @@ function CustomersContent() {
                               <div className="relative space-y-1">
                                 <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
                                   isDelivered
-                                    ? 'bg-emerald-500/20 border border-emerald-500'
+                                    ? 'bg-emerald-500/15 dark:bg-emerald-500/20 border border-emerald-500'
                                     : isReturned
-                                    ? 'bg-rose-500/20 border border-rose-500'
+                                    ? 'bg-rose-500/15 dark:bg-rose-500/20 border border-rose-500'
                                     : isShipped
-                                    ? 'bg-sky-500/20 border border-sky-500 animate-pulse'
-                                    : 'bg-zinc-800 border border-zinc-700'
+                                    ? 'bg-sky-500/15 dark:bg-sky-500/20 border border-sky-500 animate-pulse'
+                                    : 'bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700'
                                 }`}>
                                   {isDelivered ? (
-                                    <DollarSign className="w-2.5 h-2.5 text-emerald-400" />
+                                    <DollarSign className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" />
                                   ) : isReturned ? (
-                                    <AlertTriangle className="w-2.5 h-2.5 text-rose-400" />
+                                    <AlertTriangle className="w-2.5 h-2.5 text-rose-600 dark:text-rose-400" />
                                   ) : (
-                                    <Clock className={`w-2.5 h-2.5 ${isShipped ? 'text-sky-400' : 'text-zinc-500'}`} />
+                                    <Clock className={`w-2.5 h-2.5 ${isShipped ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400 dark:text-zinc-500'}`} />
                                   )}
                                 </div>
                                 <div className="flex items-center justify-between text-xs">
-                                  <span className="font-semibold text-zinc-200">4. Livraison & Encaissement COD</span>
+                                  <span className="font-semibold text-slate-900 dark:text-zinc-200">4. Livraison & Encaissement COD</span>
                                   <span className={`text-[10px] font-mono font-medium ${
-                                    isDelivered ? 'text-emerald-400' :
-                                    isReturned ? 'text-rose-400' :
-                                    isShipped ? 'text-sky-400' :
-                                    'text-zinc-500'
+                                    isDelivered ? 'text-emerald-600 dark:text-emerald-400' :
+                                    isReturned ? 'text-rose-600 dark:text-rose-400' :
+                                    isShipped ? 'text-sky-600 dark:text-sky-400' :
+                                    'text-slate-400 dark:text-zinc-500'
                                   }`}>
                                     {isDelivered ? 'Encaissé ✓' :
                                      isReturned ? 'Retourné ✕' :
@@ -910,19 +908,19 @@ function CustomersContent() {
                                   </span>
                                 </div>
                                 {isDelivered ? (
-                                  <div className="p-2 rounded-lg bg-emerald-950/30 border border-emerald-800/40 text-[11px] text-emerald-300">
-                                    Colis remis et vérifié par l&apos;acheteur à {selectedCustomer.city}. Montant de <span className="font-mono font-bold">{activeOrder.total} MAD</span> collecté en espèces.
+                                  <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-emerald-900 dark:text-emerald-200 font-medium leading-relaxed">
+                                    Colis remis et vérifié par l&apos;acheteur à {selectedCustomer.city}. Montant de <span className="font-mono font-bold text-emerald-950 dark:text-emerald-100">{activeOrder.total} MAD</span> collecté en espèces.
                                   </div>
                                 ) : isReturned ? (
-                                  <div className="p-2 rounded-lg bg-rose-950/30 border border-rose-800/40 text-[11px] text-rose-300">
+                                  <div className="p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-[11px] text-rose-900 dark:text-rose-200 font-medium leading-relaxed">
                                     Échec de livraison ou refus de commande à {selectedCustomer.city}. Colis réintégré dans votre stock d&apos;entrepôt.
                                   </div>
                                 ) : isShipped ? (
-                                  <p className="text-[11px] text-zinc-400">
-                                    Distribution en cours par le livreur. Montant de <span className="font-mono font-semibold">{activeOrder.total} MAD</span> à collecter en espèces à la livraison.
+                                  <p className="text-[11px] text-slate-600 dark:text-zinc-400">
+                                    Distribution en cours par le livreur. Montant de <span className="font-mono font-semibold text-slate-900 dark:text-zinc-200">{activeOrder.total} MAD</span> à collecter en espèces à la livraison.
                                   </p>
                                 ) : (
-                                  <p className="text-[11px] text-zinc-500">
+                                  <p className="text-[11px] text-slate-500 dark:text-zinc-500">
                                     Paiement à la livraison après confirmation et expédition du colis.
                                   </p>
                                 )}
@@ -932,32 +930,32 @@ function CustomersContent() {
                         })()}
                       </div>
                     ) : (
-                      <div className="p-4 bg-[#0d0d10] rounded-xl border border-zinc-800 text-center text-xs text-zinc-500">
+                      <div className="p-4 bg-slate-50 dark:bg-[#0d0d10] rounded-xl border border-slate-200 dark:border-zinc-800 text-center text-xs text-slate-500 dark:text-zinc-500">
                         Aucune commande passée par ce client.
                       </div>
                     )}
 
                     {/* Address & Moroccan Delivery Notes Section */}
-                    <div className="p-4 bg-[#0d0d10] rounded-xl border border-zinc-800/80 space-y-3">
+                    <div className="p-4 bg-slate-50 dark:bg-[#0d0d10] rounded-xl border border-slate-200 dark:border-zinc-800/80 space-y-3">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
-                          <MapPin className="w-3.5 h-3.5 text-sky-400" />
+                        <div className="flex items-center gap-2 text-xs font-semibold text-slate-900 dark:text-zinc-200">
+                          <MapPin className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
                           <span>Adresse & Repères de Livraison</span>
                         </div>
-                        <span className="text-[10px] font-mono text-zinc-500">{selectedCustomer.city}, Maroc</span>
+                        <span className="text-[10px] font-mono text-slate-500 dark:text-zinc-500">{selectedCustomer.city}, Maroc</span>
                       </div>
 
-                      <div className="text-xs text-zinc-300 font-mono bg-zinc-950 p-2.5 rounded-lg border border-zinc-800/70">
+                      <div className="text-xs text-slate-800 dark:text-zinc-300 font-mono bg-white dark:bg-zinc-950 p-2.5 rounded-lg border border-slate-200 dark:border-zinc-800/70">
                         {selectedCustomer.address || `Adresse principale enregistrée à ${selectedCustomer.city}`}
                       </div>
 
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <label className="text-[11px] font-medium text-zinc-400">
+                          <label className="text-[11px] font-medium text-slate-600 dark:text-zinc-400">
                             Notes & Repères pour le Livreur :
                           </label>
                           {notesSaved && (
-                            <span className="text-[11px] text-emerald-400 flex items-center gap-1 font-mono animate-in fade-in">
+                            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-mono animate-in fade-in">
                               <CheckCircle2 className="w-3 h-3" /> Note enregistrée ✓
                             </span>
                           )}
@@ -970,15 +968,15 @@ function CustomersContent() {
                           }}
                           placeholder="Ex: En face de la pharmacie, appeler avant de venir, code interphone 14B..."
                           rows={2}
-                          className="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 text-xs font-sans placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 resize-none"
+                          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs font-sans placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 resize-none"
                         />
                         <div className="flex justify-end">
                           <button
                             type="button"
                             onClick={handleSaveNotes}
-                            className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium transition-colors border border-zinc-700/80 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                            className="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 text-xs font-medium transition-colors border border-slate-300 dark:border-zinc-700/80 flex items-center gap-1.5 cursor-pointer shadow-xs"
                           >
-                            <Save className="w-3.5 h-3.5 text-emerald-400" />
+                            <Save className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                             <span>Enregistrer Note</span>
                           </button>
                         </div>
@@ -990,7 +988,7 @@ function CustomersContent() {
             </div>
 
             {/* Bottom Drawer Action */}
-            <div className="pt-4 border-t border-zinc-800/80 mt-5 space-y-2">
+            <div className="pt-4 border-t border-slate-200 dark:border-zinc-800/80 mt-5 space-y-2">
               <a
                 href={getContextualWhatsAppUrl(selectedCustomer, storeSlug)}
                 target="_blank"
@@ -1002,7 +1000,7 @@ function CustomersContent() {
               </a>
               <button
                 onClick={() => setSelectedCustomer(null)}
-                className="w-full py-2 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 font-medium text-xs transition-colors cursor-pointer"
+                className="w-full py-2 px-4 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-slate-700 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200 border border-slate-200 dark:border-zinc-800 font-medium text-xs transition-colors cursor-pointer"
               >
                 Fermer
               </button>

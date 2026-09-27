@@ -691,9 +691,13 @@ html:not(.dark) .admin-shell .border-zinc-700\/80,
 }
 
 /* 6. Dark 950 status buttons converted to vibrant Polaris pastels */
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-emerald-950\/20,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-emerald-950\/30,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-emerald-950\/40,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-emerald-950\/50,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-emerald-950\/60,
+html:not(.dark) .admin-shell .bg-emerald-950\/20,
+html:not(.dark) .admin-shell .bg-emerald-950\/30,
 html:not(.dark) .admin-shell .bg-emerald-950\/40,
 html:not(.dark) .admin-shell .bg-emerald-950\/50,
 html:not(.dark) .admin-shell .bg-emerald-950\/60 {
@@ -702,9 +706,13 @@ html:not(.dark) .admin-shell .bg-emerald-950\/60 {
   color: #047857 !important;
 }
 
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-cyan-950\/20,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-cyan-950\/30,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-cyan-950\/40,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-cyan-950\/50,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-cyan-950\/60,
+html:not(.dark) .admin-shell .bg-cyan-950\/20,
+html:not(.dark) .admin-shell .bg-cyan-950\/30,
 html:not(.dark) .admin-shell .bg-cyan-950\/40,
 html:not(.dark) .admin-shell .bg-cyan-950\/50,
 html:not(.dark) .admin-shell .bg-cyan-950\/60 {
@@ -713,9 +721,13 @@ html:not(.dark) .admin-shell .bg-cyan-950\/60 {
   color: #0e7490 !important;
 }
 
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-sky-950\/20,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-sky-950\/30,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-sky-950\/40,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-sky-950\/50,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-sky-950\/60,
+html:not(.dark) .admin-shell .bg-sky-950\/20,
+html:not(.dark) .admin-shell .bg-sky-950\/30,
 html:not(.dark) .admin-shell .bg-sky-950\/40,
 html:not(.dark) .admin-shell .bg-sky-950\/50,
 html:not(.dark) .admin-shell .bg-sky-950\/60 {
@@ -724,9 +736,13 @@ html:not(.dark) .admin-shell .bg-sky-950\/60 {
   color: #0369a1 !important;
 }
 
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-rose-950\/20,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-rose-950\/30,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-rose-950\/40,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-rose-950\/50,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-rose-950\/60,
+html:not(.dark) .admin-shell .bg-rose-950\/20,
+html:not(.dark) .admin-shell .bg-rose-950\/30,
 html:not(.dark) .admin-shell .bg-rose-950\/40,
 html:not(.dark) .admin-shell .bg-rose-950\/50,
 html:not(.dark) .admin-shell .bg-rose-950\/60 {
@@ -735,9 +751,13 @@ html:not(.dark) .admin-shell .bg-rose-950\/60 {
   color: #be123c !important;
 }
 
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-amber-950\/20,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-amber-950\/30,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-amber-950\/40,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-amber-950\/50,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-amber-950\/60,
+html:not(.dark) .admin-shell .bg-amber-950\/20,
+html:not(.dark) .admin-shell .bg-amber-950\/30,
 html:not(.dark) .admin-shell .bg-amber-950\/40,
 html:not(.dark) .admin-shell .bg-amber-950\/50,
 html:not(.dark) .admin-shell .bg-amber-950\/60 {
@@ -746,9 +766,13 @@ html:not(.dark) .admin-shell .bg-amber-950\/60 {
   color: #b45309 !important;
 }
 
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-purple-950\/20,
+:root:not([data-admin-theme="dark"]) .admin-shell .bg-purple-950\/30,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-purple-950\/40,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-purple-950\/50,
 :root:not([data-admin-theme="dark"]) .admin-shell .bg-purple-950\/60,
+html:not(.dark) .admin-shell .bg-purple-950\/20,
+html:not(.dark) .admin-shell .bg-purple-950\/30,
 html:not(.dark) .admin-shell .bg-purple-950\/40,
 html:not(.dark) .admin-shell .bg-purple-950\/50,
 html:not(.dark) .admin-shell .bg-purple-950\/60 {
