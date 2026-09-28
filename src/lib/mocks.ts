@@ -4,6 +4,22 @@ import { restoreMockProductStock, decrementMockProductStock } from './mockProduc
 // ── Seed Moroccan Orders ────────────────────────────────────────
 export let ORDERS: Order[] = [
   {
+    id: 'ord_abn_1',
+    orderNumber: 'CMD-5231',
+    storeSlug: 'ottavio',
+    createdAt: new Date(Date.now() - 22 * 60000).toISOString(),
+    customerName: 'Karim Bennani',
+    phone: '0612345678',
+    city: 'Tanger',
+    address: 'Quartier Malabata, Résidence Les Fleurs',
+    status: 'abandoned',
+    items: [{ id: 'it_1', title: 'Chaussures Cuir Ottavio', quantity: 1, price: 299, variant: 'Marron (42)' }],
+    subtotal: 299,
+    shippingFee: 0,
+    total: 299,
+    agentNotes: 'Abandon à l’étape 2 (Coordonnées). Numéro valide à relancer.',
+  },
+  {
     id: 'ord_100',
     orderNumber: 'CMD-84925',
     storeSlug: 'ottavio',
@@ -513,7 +529,7 @@ export function syncCustomersFromOrders(storeSlug: string): Customer[] {
   return result;
 }
 
-export const VALID_STATUSES: Order['status'][] = ['new', 'to_confirm', 'confirmed', 'shipped', 'shipping', 'delivered', 'returned', 'canceled'] as const;
+export const VALID_STATUSES: Order['status'][] = ['new', 'to_confirm', 'confirmed', 'shipped', 'shipping', 'delivered', 'returned', 'canceled', 'abandoned'] as const;
 
 export function updateOrderStatus(orderId: string, status: Order['status'], trackingNumber?: string, courier?: Order['courier']): boolean {
   if (!VALID_STATUSES.includes(status)) return false;
@@ -538,7 +554,7 @@ export function updateOrderStatus(orderId: string, status: Order['status'], trac
   if (status === 'returned' && !order.returnedAt) order.returnedAt = nowIso;
 
   // Restore inventory if transitioned to canceled or returned from an active state
-  if ((status === 'canceled' || status === 'returned') && previousStatus !== 'canceled' && previousStatus !== 'returned') {
+  if ((status === 'canceled' || status === 'returned') && previousStatus !== 'canceled' && previousStatus !== 'returned' && previousStatus !== 'abandoned') {
     for (const item of order.items) {
       const prod = PRODUCTS.find((p) => p.id === item.id);
       if (prod) {
@@ -546,8 +562,8 @@ export function updateOrderStatus(orderId: string, status: Order['status'], trac
       }
       restoreMockProductStock(item.id, item.quantity, { variant: item.variant });
     }
-  } else if ((previousStatus === 'canceled' || previousStatus === 'returned') && status !== 'canceled' && status !== 'returned') {
-    // Re-decrement inventory when transitioning back to an active state
+  } else if ((previousStatus === 'canceled' || previousStatus === 'returned' || previousStatus === 'abandoned') && status !== 'canceled' && status !== 'returned' && status !== 'abandoned') {
+    // Re-decrement inventory when transitioning back to an active state (including converting from abandoned)
     for (const item of order.items) {
       const prod = PRODUCTS.find((p) => p.id === item.id);
       if (prod) {

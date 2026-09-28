@@ -6,7 +6,8 @@ export type OrderStatus =
   | 'shipping' // Alias rétrocompatible pour shipped
   | 'delivered' // Livrée & Encaissée (Cash collecté)
   | 'returned' // Colis refusé ou retourné
-  | 'canceled'; // Annulée
+  | 'canceled' // Annulée
+  | 'abandoned'; // Panier abandonné récupérable
 
 export type CourierName = 'manual' | 'standard' | 'ozon' | 'sendit' | 'cathedis' | 'amana' | string;
 

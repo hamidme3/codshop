@@ -270,22 +270,6 @@ export function CodCheckoutModal({
   // Abandonment & order submission tracking
   const [isOrderSubmitted, setIsOrderSubmitted] = useState(false);
 
-  const handleClose = () => {
-    if (!isOrderSubmitted) {
-      trackPostHogCodAbandoned(effectiveStoreSlug, {
-        productId: product.id,
-        productTitle: product.title,
-        step,
-        hasName: Boolean(fullName.trim()),
-        hasPhone: Boolean(phone.trim()),
-        phone: phone.trim() || undefined,
-        hasAddress: Boolean(address.trim()),
-        city,
-      });
-    }
-    onClose();
-  };
-
   // Reset or initialize on modal open
   useEffect(() => {
     if (isOpen) {
@@ -326,6 +310,56 @@ export function CodCheckoutModal({
   const isFreeShipping = selectedTier.quantity >= 2 || selectedTier.freeDelivery || deliveryEstimate.isFree;
   const effectiveShippingFee = isFreeShipping ? 0 : deliveryEstimate.shippingFee;
   const finalTotal = selectedTier.totalPrice + effectiveShippingFee;
+
+  const handleClose = () => {
+    if (!isOrderSubmitted) {
+      trackPostHogCodAbandoned(effectiveStoreSlug, {
+        productId: product.id,
+        productTitle: product.title,
+        step,
+        hasName: Boolean(fullName.trim()),
+        hasPhone: Boolean(phone.trim()),
+        phone: phone.trim() || undefined,
+        hasAddress: Boolean(address.trim()),
+        city,
+      });
+
+      // Save abandoned checkout order in background if phone was entered
+      if (phone.trim().length >= 8) {
+        try {
+          fetch('/api/order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              storeSlug: effectiveStoreSlug,
+              store: effectiveStoreSlug,
+              status: 'abandoned',
+              customerName: fullName.trim() || 'Prospect Anonyme',
+              phone: phone.trim(),
+              city: city || 'Non spécifié',
+              address: address.trim() || 'Coordonnées incomplètes',
+              countryCode: effectiveCountryCode,
+              total: finalTotal,
+              subtotal: selectedTier.totalPrice,
+              shippingFee: effectiveShippingFee,
+              items: [{
+                id: product.id,
+                title: product.title,
+                quantity: selectedTier.quantity,
+                price: selectedTier.unitPrice,
+                variant: selectedVariant || undefined,
+                sku: selectedSku || undefined,
+              }],
+              source: 'web',
+            }),
+          }).catch(() => {});
+        } catch {
+          // Non-blocking
+        }
+      }
+    }
+    onClose();
+  };
 
   if (!isOpen) return null;
 

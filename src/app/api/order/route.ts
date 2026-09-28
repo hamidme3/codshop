@@ -121,28 +121,35 @@ export async function POST(req: Request) {
       ? { isValid: true, cleanPhone: orderCountryCode === 'MA' ? '0600000000' : '0500000000', type: 'mobile' as const }
       : (orderCountryCode === 'MA' ? validateAndNormalizeMoroccanPhone(rawPhone) : validateCountryPhone(rawPhone, orderCountryCode));
 
+    const isAbandoned = body.status === 'abandoned';
+    let phone = phoneResult.isValid ? phoneResult.cleanPhone : rawPhone.replace(/\D/g, '');
     if (!phoneResult.isValid) {
-      return NextResponse.json(
-        { success: false, message: (phoneResult as any).error || `Invalid phone number (${orderCountryCode})` },
-        { status: 400 }
-      );
+      if (isAbandoned && rawPhone.replace(/\D/g, '').length >= 8) {
+        phone = rawPhone.replace(/\D/g, '');
+      } else {
+        return NextResponse.json(
+          { success: false, message: (phoneResult as any).error || `Invalid phone number (${orderCountryCode})` },
+          { status: 400 }
+        );
+      }
     }
-    const phone = phoneResult.cleanPhone;
 
-    // 4. CGNAT-Safe Composite Rate Limiting
-    const forwarded = req.headers.get('x-forwarded-for') || '';
-    const clientIp = forwarded.split(',')[0].trim() || '127.0.0.1';
-    const rateCheck = checkOrderRateLimit(clientIp, phone);
-    if (!rateCheck.allowed) {
-      return NextResponse.json(
-        { success: false, message: rateCheck.reason || 'Too many requests, please slow down.' },
-        { status: 429 }
-      );
+    // 4. CGNAT-Safe Composite Rate Limiting (Skip for abandoned background captures)
+    if (!isAbandoned) {
+      const forwarded = req.headers.get('x-forwarded-for') || '';
+      const clientIp = forwarded.split(',')[0].trim() || '127.0.0.1';
+      const rateCheck = checkOrderRateLimit(clientIp, phone);
+      if (!rateCheck.allowed) {
+        return NextResponse.json(
+          { success: false, message: rateCheck.reason || 'Too many requests, please slow down.' },
+          { status: 429 }
+        );
+      }
     }
 
     // 5. Server-Side Price Verification, Exact Tier Pricing Recalculation & Input Sanitization
     const pricingResult = await verifyAndRecalculateOrder(body, storeSlug, orderCountryCode);
-    if (!pricingResult.success) {
+    if (!pricingResult.success && !isAbandoned) {
       return NextResponse.json(
         { success: false, message: pricingResult.error || 'Error calculating order price' },
         { status: 400 }
@@ -150,7 +157,7 @@ export async function POST(req: Request) {
     }
 
     // 5b. Reject explicit price tampering (e.g. submitting 1 DH for 699 DH items)
-    if (pricingResult.tamperingDetected && body.total !== undefined && Math.abs(Number(body.total) - pricingResult.total) > 2) {
+    if (!isAbandoned && pricingResult.tamperingDetected && body.total !== undefined && Math.abs(Number(body.total) - pricingResult.total) > 2) {
       return NextResponse.json(
         {
           success: false,
@@ -172,12 +179,12 @@ export async function POST(req: Request) {
     try {
       savedOrder = await createOrder({
         storeSlug,
-        customerName: pricingResult.customerName,
+        customerName: pricingResult.customerName || body.customerName || 'Prospect Anonyme',
         email: customerEmail,
         phone,
-        city: pricingResult.city,
-        address: pricingResult.address,
-        items: pricingResult.items.map((it) => ({
+        city: pricingResult.city || body.city || 'Casablanca',
+        address: pricingResult.address || body.address || 'Coordonnées incomplètes',
+        items: (pricingResult.items || []).map((it) => ({
           id: it.id,
           title: it.title,
           quantity: it.quantity,
@@ -187,16 +194,17 @@ export async function POST(req: Request) {
           color: it.color,
           size: it.size,
         })),
-        subtotal: pricingResult.subtotal,
-        shippingFee: pricingResult.shippingFee,
-        total: pricingResult.total,
+        subtotal: pricingResult.subtotal || body.subtotal || 0,
+        shippingFee: pricingResult.shippingFee || body.shippingFee || 0,
+        total: pricingResult.total || body.total || 0,
         courier: 'manual',
         abVariant,
-        deliveryType: pricingResult.deliveryType,
+        deliveryType: pricingResult.deliveryType || 'home',
         agencyName: pricingResult.agencyName || undefined,
         source,
         countryCode: orderCountryCode,
         currency: countryConfig.currency.code,
+        status: isAbandoned ? 'abandoned' : 'new',
       });
     } catch (orderErr: any) {
       const errMsg = orderErr?.message || '';

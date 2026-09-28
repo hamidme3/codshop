@@ -1,6 +1,6 @@
 import { getDb, schema } from '@/db';
 import { eq, desc, asc, and, ne, gte } from 'drizzle-orm';
-import type { Order, Product, Customer, CourierName } from './types';
+import type { Order, Product, Customer, CourierName, OrderStatus } from './types';
 import {
   ORDERS,
   PRODUCTS,
@@ -634,9 +634,11 @@ export async function createOrder(data: {
   source?: 'web' | 'whatsapp';
   countryCode?: string;
   currency?: string;
+  status?: OrderStatus;
 }) {
   const db = getDb();
   const orderNumber = `CMD-${Math.floor(1000 + Math.random() * 9000)}`;
+  const isAbandoned = data.status === 'abandoned';
 
   // 1. Store verification & scoping
   const store = await getStoreBySlug(data.storeSlug);
@@ -664,38 +666,40 @@ export async function createOrder(data: {
     size: it.size ? sanitizeText(it.size, 50) : undefined,
   }));
 
-  // 3. Stock Status Check & Inventory Reservation
-  const invCheck = checkInventory(data.storeSlug, cleanItems);
-  if (!invCheck.available) {
-    throw new Error(invCheck.error || 'Stock insuffisant pour satisfaire cette commande.');
-  }
+  // 3. Stock Status Check & Inventory Reservation (Skip for abandoned carts)
+  if (!isAbandoned) {
+    const invCheck = checkInventory(data.storeSlug, cleanItems);
+    if (!invCheck.available) {
+      throw new Error(invCheck.error || 'Stock insuffisant pour satisfaire cette commande.');
+    }
 
-  for (const it of cleanItems) {
-    const isMock = MOCK_PRODUCTS.some((p) => p.id === it.id || p.slug === it.id || p.sku === it.id);
-    if (isMock) {
-      const mockCheck = checkMockProductStock(it.id, it.quantity, {
-        color: it.color,
-        size: it.size,
-        variant: it.variant,
-        sku: it.sku,
-      });
-      if (!mockCheck.available) {
-        throw new Error(mockCheck.error || `Stock insuffisant pour ${it.title} (${it.sku || it.variant})`);
+    for (const it of cleanItems) {
+      const isMock = MOCK_PRODUCTS.some((p) => p.id === it.id || p.slug === it.id || p.sku === it.id);
+      if (isMock) {
+        const mockCheck = checkMockProductStock(it.id, it.quantity, {
+          color: it.color,
+          size: it.size,
+          variant: it.variant,
+          sku: it.sku,
+        });
+        if (!mockCheck.available) {
+          throw new Error(mockCheck.error || `Stock insuffisant pour ${it.title} (${it.sku || it.variant})`);
+        }
       }
     }
-  }
 
-  // 4. Inventory Decrement Execution (Reservation)
-  decrementInventory(data.storeSlug, cleanItems);
-  for (const it of cleanItems) {
-    const isMock = MOCK_PRODUCTS.some((p) => p.id === it.id || p.slug === it.id || p.sku === it.id);
-    if (isMock) {
-      decrementMockProductStock(it.id, it.quantity, {
-        color: it.color,
-        size: it.size,
-        variant: it.variant,
-        sku: it.sku,
-      });
+    // 4. Inventory Decrement Execution (Reservation)
+    decrementInventory(data.storeSlug, cleanItems);
+    for (const it of cleanItems) {
+      const isMock = MOCK_PRODUCTS.some((p) => p.id === it.id || p.slug === it.id || p.sku === it.id);
+      if (isMock) {
+        decrementMockProductStock(it.id, it.quantity, {
+          color: it.color,
+          size: it.size,
+          variant: it.variant,
+          sku: it.sku,
+        });
+      }
     }
   }
 
@@ -727,7 +731,7 @@ export async function createOrder(data: {
       source: data.source || 'web',
       countryCode: cleanCountryCode,
       currency: cleanCurrency,
-      status: 'new' as const,
+      status: (data.status || 'new') as OrderStatus,
       createdAt: new Date().toISOString(),
     };
     ORDERS.unshift(newOrder);
@@ -736,59 +740,61 @@ export async function createOrder(data: {
   }
 
   try {
-    // 1. Decrement product stock in Payload CMS (single source of truth)
-    try {
-      const { decrementPayloadStock } = await import('./payload-products');
-      for (const it of cleanItems) {
-        await decrementPayloadStock(it.id, it.quantity, { size: it.size, color: it.color });
-      }
-    } catch (payloadStockErr) {
-      console.warn('[DbRepo] Non-fatal Payload stock decrement warning:', payloadStockErr);
-    }
-
-    // 2. Also decrement in Drizzle Postgres for backward-compatibility during migration
-    try {
-      const allStoreProds = await db.query.products.findMany({
-        where: eq(schema.products.storeId, store.id),
-      });
-      for (const it of cleanItems) {
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(it.id);
-        const targetSku = (it.sku || it.id || '').trim().toLowerCase();
-        const targetSkuClean = targetSku.replace(/^prod_/, '');
-        const prod = allStoreProds.find(
-          (p) =>
-            (isUuid && p.id === it.id) ||
-            p.sku.toLowerCase() === targetSku ||
-            p.sku.toLowerCase() === targetSkuClean ||
-            targetSku.startsWith(p.sku.toLowerCase()) ||
-            p.sku.toLowerCase().startsWith(targetSku) ||
-            p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSku ||
-            p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSkuClean
-        );
-        if (prod) {
-          let updatedVariants = prod.variants;
-          if (Array.isArray(updatedVariants)) {
-            updatedVariants = updatedVariants.map((v) => {
-              const matchColor = it.color ? v.color?.toLowerCase() === it.color.toLowerCase() : true;
-              const matchSize = it.size ? v.size?.toLowerCase() === it.size.toLowerCase() : true;
-              if (matchColor && matchSize) {
-                return { ...v, stock: Math.max(0, (v.stock || 0) - it.quantity) };
-              }
-              return v;
-            });
-          }
-          await db
-            .update(schema.products)
-            .set({
-              stock: Math.max(0, prod.stock - it.quantity),
-              variants: updatedVariants,
-              updatedAt: new Date(),
-            })
-            .where(eq(schema.products.id, prod.id));
+    if (!isAbandoned) {
+      // 1. Decrement product stock in Payload CMS (single source of truth)
+      try {
+        const { decrementPayloadStock } = await import('./payload-products');
+        for (const it of cleanItems) {
+          await decrementPayloadStock(it.id, it.quantity, { size: it.size, color: it.color });
         }
+      } catch (payloadStockErr) {
+        console.warn('[DbRepo] Non-fatal Payload stock decrement warning:', payloadStockErr);
       }
-    } catch (invDbErr) {
-      console.warn('[DbRepo] Non-fatal DB stock decrement warning:', invDbErr);
+
+      // 2. Also decrement in Drizzle Postgres for backward-compatibility during migration
+      try {
+        const allStoreProds = await db.query.products.findMany({
+          where: eq(schema.products.storeId, store.id),
+        });
+        for (const it of cleanItems) {
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(it.id);
+          const targetSku = (it.sku || it.id || '').trim().toLowerCase();
+          const targetSkuClean = targetSku.replace(/^prod_/, '');
+          const prod = allStoreProds.find(
+            (p) =>
+              (isUuid && p.id === it.id) ||
+              p.sku.toLowerCase() === targetSku ||
+              p.sku.toLowerCase() === targetSkuClean ||
+              targetSku.startsWith(p.sku.toLowerCase()) ||
+              p.sku.toLowerCase().startsWith(targetSku) ||
+              p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSku ||
+              p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSkuClean
+          );
+          if (prod) {
+            let updatedVariants = prod.variants;
+            if (Array.isArray(updatedVariants)) {
+              updatedVariants = updatedVariants.map((v) => {
+                const matchColor = it.color ? v.color?.toLowerCase() === it.color.toLowerCase() : true;
+                const matchSize = it.size ? v.size?.toLowerCase() === it.size.toLowerCase() : true;
+                if (matchColor && matchSize) {
+                  return { ...v, stock: Math.max(0, (v.stock || 0) - it.quantity) };
+                }
+                return v;
+              });
+            }
+            await db
+              .update(schema.products)
+              .set({
+                stock: Math.max(0, prod.stock - it.quantity),
+                variants: updatedVariants,
+                updatedAt: new Date(),
+              })
+              .where(eq(schema.products.id, prod.id));
+          }
+        }
+      } catch (invDbErr) {
+        console.warn('[DbRepo] Non-fatal DB stock decrement warning:', invDbErr);
+      }
     }
 
     const [newOrder] = await db.insert(schema.orders).values({
@@ -799,7 +805,7 @@ export async function createOrder(data: {
       phone: data.phone,
       city: cleanCity,
       address: cleanAddress,
-      status: 'new',
+      status: (data.status || 'new') as any,
       items: cleanItems,
       subtotal: cleanSubtotal,
       shippingFee: cleanShippingFee,
@@ -838,7 +844,7 @@ export async function createOrder(data: {
         source: newOrder.source as any,
         countryCode: newOrder.countryCode || cleanCountryCode,
         currency: newOrder.currency || cleanCurrency,
-        status: 'new' as const,
+        status: (newOrder.status || data.status || 'new') as any,
         createdAt: new Date().toISOString(),
       };
       ORDERS.unshift(memoryOrder);

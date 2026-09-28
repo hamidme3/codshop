@@ -118,13 +118,14 @@ function OrdersContent() {
   };
 
   const filterMap: Record<string, OrderStatus[]> = {
-    all: ['new', 'to_confirm', 'confirmed', 'shipped', 'shipping', 'delivered', 'returned', 'canceled'],
+    all: ['new', 'to_confirm', 'confirmed', 'shipped', 'shipping', 'delivered', 'returned', 'canceled', 'abandoned'],
     new: ['new', 'to_confirm'],
     to_confirm: ['new', 'to_confirm'],
     confirmed: ['confirmed'],
     shipped: ['shipped', 'shipping'],
     delivered: ['delivered'],
     returned: ['returned', 'canceled'],
+    abandoned: ['abandoned'],
   };
 
   const filteredOrders = useMemo(() => {
@@ -146,6 +147,7 @@ function OrdersContent() {
   const deliveredCount = useMemo(() => orders.filter((o) => o.status === 'delivered').length, [orders]);
   const returnedCount = useMemo(() => orders.filter((o) => ['returned', 'canceled'].includes(o.status)).length, [orders]);
   const newCount = useMemo(() => orders.filter((o) => ['new', 'to_confirm'].includes(o.status)).length, [orders]);
+  const abandonedCount = useMemo(() => orders.filter((o) => o.status === 'abandoned').length, [orders]);
 
   // Kanban Stage Columns for Tactical Pipeline View
   const kanbanColumns = useMemo(() => [
@@ -395,6 +397,8 @@ function OrdersContent() {
         return <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-shipped font-mono">2. Expédiée</span>;
       case 'delivered':
         return <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-delivered font-mono">3. Livrée</span>;
+      case 'abandoned':
+        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-mono">Panier Abandonné</span>;
       case 'returned':
       case 'canceled':
       default:
@@ -583,6 +587,7 @@ function OrdersContent() {
             { id: 'shipped', label: `En Transit (${shippedCount})` },
             { id: 'delivered', label: `Livrées (${deliveredCount})` },
             { id: 'returned', label: `Retours (${returnedCount})` },
+            { id: 'abandoned', label: `Paniers Abandonnés (${abandonedCount})` },
           ].map((tab) => {
             const isTabActive = tab.id === 'all'
               ? activeFilter === 'all'
@@ -794,13 +799,21 @@ function OrdersContent() {
                     </a>
 
                     <div className="flex items-center gap-1.5">
-                      {(order.status === 'new' || order.status === 'to_confirm') && (
+                      <a
+                        href={`tel:${order.phone}`}
+                        className="touch-target p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-bold flex items-center transition-colors"
+                        title="Appeler directement"
+                      >
+                        <Phone className="w-3.5 h-3.5" />
+                      </a>
+
+                      {(order.status === 'new' || order.status === 'to_confirm' || order.status === 'abandoned') && (
                         <button
                           onClick={() => handleQuickTransition(order.id, 'confirmed')}
                           className="touch-target px-2.5 py-1.5 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 dark:bg-cyan-950/60 dark:hover:bg-cyan-900 dark:text-cyan-300 dark:border-cyan-800/50 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
                         >
                           <Check className="w-3.5 h-3.5" />
-                          <span>Confirmer</span>
+                          <span>{order.status === 'abandoned' ? 'Convertir' : 'Confirmer'}</span>
                         </button>
                       )}
 

@@ -50,6 +50,7 @@ export async function GET(req: Request) {
       shipped: combined.filter((o) => ['shipped', 'shipping'].includes(o.status)).length,
       delivered: combined.filter((o) => o.status === 'delivered').length,
       returned: combined.filter((o) => ['returned', 'canceled'].includes(o.status)).length,
+      abandoned: combined.filter((o) => o.status === 'abandoned').length,
     };
 
     if (searchParams.get('countsOnly') === 'true') {

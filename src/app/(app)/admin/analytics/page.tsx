@@ -7,9 +7,10 @@ import {
   MapPin, DollarSign, Wallet, ShieldCheck, ArrowUpRight,
   Users, Eye, ShoppingCart, Filter, ArrowRight, MessageCircle,
   Activity, Sparkles, RefreshCw, Search, UserX, AlertTriangle, CheckCircle2,
-  Package, Compass, Flame, Clock
+  Package, Compass, Flame, Clock, X, Zap
 } from 'lucide-react';
 import { getAnalytics } from '@/lib/backoffice';
+import { buildWhatsAppLink } from '@/lib/whatsapp-templates';
 import CodCashflowChart from '@/components/admin/charts/CodCashflowChart';
 import CodFunnelChart from '@/components/admin/charts/CodFunnelChart';
 import OrderVelocityChart, { PipelineStageMetric } from '@/components/admin/charts/OrderVelocityChart';
@@ -86,6 +87,12 @@ function AnalyticsContent() {
   const [loadingOperations, setLoadingOperations] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<string>('');
 
+  // Abandoned Checkouts Lead Recovery State
+  const [abandonedOrders, setAbandonedOrders] = useState<any[]>([]);
+  const [isRecoveryOpen, setIsRecoveryOpen] = useState(false);
+  const [convertingOrderId, setConvertingOrderId] = useState<string | null>(null);
+  const [convertedOrderIds, setConvertedOrderIds] = useState<Set<string>>(new Set());
+
   // Synchronous fallback from memory
   const fallbackAnalytics = getAnalytics(storeSlug);
   const analytics = operationsData || fallbackAnalytics;
@@ -118,12 +125,51 @@ function AnalyticsContent() {
       .finally(() => setLoadingOperations(false));
   };
 
+  const fetchAbandonedOrders = () => {
+    fetch(`/api/admin/orders?store=${encodeURIComponent(storeSlug)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.orders)) {
+          const abns = data.orders.filter((o: any) => o.status === 'abandoned');
+          setAbandonedOrders(abns);
+        }
+      })
+      .catch((err) => console.warn('[Analytics] Error fetching abandoned orders:', err));
+  };
+
+  const handleConvertLead = async (orderId: string) => {
+    setConvertingOrderId(orderId);
+    try {
+      const res = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId,
+          status: 'confirmed',
+          storeSlug,
+        }),
+      });
+      if (res.ok) {
+        setConvertedOrderIds((prev) => new Set([...prev, orderId]));
+        fetchAbandonedOrders();
+        fetchStorefrontAnalytics();
+        fetchOperationsAnalytics();
+      }
+    } catch (err) {
+      console.error('[Analytics] Failed to convert order:', err);
+    } finally {
+      setConvertingOrderId(null);
+    }
+  };
+
   useEffect(() => {
     fetchStorefrontAnalytics();
     fetchOperationsAnalytics();
+    fetchAbandonedOrders();
     const interval = setInterval(() => {
       fetchStorefrontAnalytics();
       fetchOperationsAnalytics();
+      fetchAbandonedOrders();
     }, 15000);
     return () => clearInterval(interval);
   }, [storeSlug]);
@@ -415,23 +461,29 @@ function AnalyticsContent() {
               </div>
 
               {/* Recoverable Phone Leads Banner */}
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-4">
+              <div 
+                onClick={() => setIsRecoveryOpen(true)}
+                className="p-4 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-between gap-4 transition cursor-pointer"
+              >
                 <div className="space-y-0.5">
                   <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5" />
-                    <span>{storefrontData?.abandonment?.recoverableLeads ?? 0} Prospects Récupérables</span>
+                    <span>{Math.max(abandonedOrders.length, storefrontData?.abandonment?.recoverableLeads ?? 0)} Prospects Récupérables</span>
                   </div>
                   <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                    Ces clients ont saisi leur numéro WhatsApp avant d'abandonner.
+                    Paniers abandonnés avec numéro de contact. Cliquez pour relancer en 1 clic.
                   </p>
                 </div>
                 <button
                   type="button"
-                  onClick={() => window.open(`https://wa.me/`, '_blank')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsRecoveryOpen(true);
+                  }}
                   className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold flex items-center gap-1.5 transition shadow-sm cursor-pointer shrink-0 active:scale-95"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
-                  <span>Relance WhatsApp</span>
+                  <span>Relancer ({Math.max(abandonedOrders.length, storefrontData?.abandonment?.recoverableLeads ?? 0)})</span>
                 </button>
               </div>
             </div>
@@ -826,6 +878,158 @@ function AnalyticsContent() {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Actionable Lead Recovery Slide-Over Drawer ── */}
+      {isRecoveryOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden bg-black/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200">
+          <div className="w-full max-w-lg bg-white dark:bg-[#0e1217] border-l border-slate-200 dark:border-slate-800 h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-250">
+            {/* Drawer Header */}
+            <div className="p-5 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                  <Phone className="w-3.5 h-3.5" />
+                  <span>Relance Paniers Abandonnés</span>
+                </div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white mt-0.5">
+                  {abandonedOrders.length} {abandonedOrders.length === 1 ? 'Prospect Récupérable' : 'Prospects Récupérables'}
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsRecoveryOpen(false)}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Leads List */}
+            <div className="p-5 flex-1 overflow-y-auto space-y-3.5">
+              {abandonedOrders.length === 0 ? (
+                <div className="text-center py-16 px-4 space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">Aucun panier abandonné en attente</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+                    Tous vos prospects ont complété leur commande ou ont déjà été convertis !
+                  </p>
+                </div>
+              ) : (
+                abandonedOrders.map((lead) => {
+                  const isConverted = convertedOrderIds.has(lead.id);
+                  const isConverting = convertingOrderId === lead.id;
+                  const item = lead.items?.[0];
+
+                  return (
+                    <div
+                      key={lead.id}
+                      className="p-4 rounded-2xl bg-slate-50 dark:bg-[#151921] border border-slate-200 dark:border-slate-800/80 space-y-3 shadow-xs"
+                    >
+                      {/* Top Row: Customer & Time */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                            <span>{lead.customerName || 'Prospect Anonyme'}</span>
+                            {lead.countryCode && (
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
+                                {lead.countryCode}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">
+                            {lead.phone}
+                          </div>
+                        </div>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                          {new Date(lead.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+
+                      {/* City & Address */}
+                      <div className="text-xs text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="font-semibold">{lead.city}</span>
+                        {lead.address && lead.address !== 'Coordonnées incomplètes' && (
+                          <span className="text-slate-400 dark:text-slate-500 truncate max-w-[200px]">• {lead.address}</span>
+                        )}
+                      </div>
+
+                      {/* Product & Price */}
+                      <div className="p-2.5 rounded-xl bg-white dark:bg-[#0c0f14] border border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between text-xs">
+                        <div className="truncate pr-2">
+                          <span className="font-bold text-slate-900 dark:text-white">{item?.title || 'Produit'}</span>
+                          {item?.variant && <span className="text-slate-500 text-[11px] block">{item.variant}</span>}
+                        </div>
+                        <div className="font-mono font-black text-slate-900 dark:text-white shrink-0 text-sm">
+                          {lead.total} <span className="text-xs text-emerald-600 dark:text-emerald-400 font-sans">{lead.currency || 'DH'}</span>
+                        </div>
+                      </div>
+
+                      {/* 1-Click Action Buttons */}
+                      {isConverted ? (
+                        <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center justify-center gap-1.5">
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Commande Confirmée ✓ ({lead.orderNumber})</span>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-3 gap-2 pt-1">
+                          <a
+                            href={buildWhatsAppLink(lead, 'abandoned', storeSlug)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer active:scale-95"
+                            title="Ouvrir WhatsApp avec script pré-rempli"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                            <span>WhatsApp</span>
+                          </a>
+
+                          <a
+                            href={`tel:${lead.phone}`}
+                            className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-black flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer active:scale-95"
+                            title="Appeler directement le client"
+                          >
+                            <Phone className="w-3.5 h-3.5" />
+                            <span>Appeler</span>
+                          </a>
+
+                          <button
+                            type="button"
+                            onClick={() => handleConvertLead(lead.id)}
+                            disabled={isConverting}
+                            className="px-3 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-black flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer active:scale-95 disabled:opacity-50"
+                            title="Créer la commande officielle"
+                          >
+                            <Zap className="w-3.5 h-3.5 fill-current" />
+                            <span>{isConverting ? '...' : 'Convertir'}</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Drawer Footer */}
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-[#0c0f14] flex items-center justify-between">
+              <a
+                href={`/admin/orders?store=${encodeURIComponent(storeSlug)}&filter=abandoned`}
+                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+              >
+                <span>Voir tous les abandons dans Commandes</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+              <button
+                onClick={() => setIsRecoveryOpen(false)}
+                className="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition cursor-pointer"
+              >
+                Fermer
+              </button>
             </div>
           </div>
         </div>

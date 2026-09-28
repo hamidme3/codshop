@@ -6,7 +6,7 @@
 import { Order } from './types';
 import { normalizePhoneForWhatsApp, COUNTRIES } from './geo';
 
-export type WhatsAppTemplateType = 'confirmation' | 'unreachable' | 'gps_request' | 'shipped';
+export type WhatsAppTemplateType = 'confirmation' | 'unreachable' | 'gps_request' | 'shipped' | 'abandoned';
 
 export interface NormalizedPhone {
   international: string; // e.g. "212661234567" for WhatsApp wa.me
@@ -135,6 +135,12 @@ export function getCountryWhatsAppMessage(
           (order.trackingNumber ? `🔍 رقم التتبع: *${order.trackingNumber}*\n` : '') +
           `سيتواصل معكم مندوب التوصيل قبل التوصيل في ${city}.`
         );
+      case 'abandoned':
+        return (
+          `مرحباً ${clientName} 👋\n` +
+          `معك متجر ${brand}. لاحظنا اهتمامك بطلب *${itemsText}* (${total} ${curr})، ولكن لم يكتمل الطلب.\n\n` +
+          `هل تود تأكيد شحنه إلى *${city}* مع توصيل سريع مجاني والدفع عند الاستلام؟ يرجى الرد بكلمة *"نعم"* لتأكيد شحن طلبك فوراً!`
+        );
       default:
         return `السلام عليكم يا ${clientName}، معك متجر ${brand}. نود تأكيد طلبكم رقم ${order.orderNumber} بمبلغ ${total} ${curr}.`;
     }
@@ -174,6 +180,12 @@ export function getCountryWhatsAppMessage(
           (order.trackingNumber ? `🔍 رقم البوليصة: *${order.trackingNumber}*\n` : '') +
           `المندوب هيتصل بحضرتك قبل ما يوصل في ${city}.`
         );
+      case 'abandoned':
+        return (
+          `أهلاً بحضرتك يا ${clientName} 👋\n` +
+          `معاك متجر ${brand}. شفنا إنك كنت مهتم بأوردر *${itemsText}* (${total} ${curr}) وما كملتش الطلب.\n\n` +
+          `تحب نأكد الأوردر ونبعتهولك في *${city}* مع شحن مجاني والدفع عند الاستلام؟ رد علينا بكلمة *"تمام"* ونبعتهولك فوراً!`
+        );
       default:
         return `أهلاً بحضرتك يا ${clientName}، معاك ${brand}. بخصوص أوردرك رقم ${order.orderNumber} (${total} ${curr}).`;
     }
@@ -211,6 +223,12 @@ export function getCountryWhatsAppMessage(
           `💵 Montant à régler à la livraison : *${total} ${curr}*.\n` +
           (order.trackingNumber ? `🔍 N° de suivi : *${order.trackingNumber}*\n` : '') +
           `Le livreur vous contactera par téléphone avant son passage à ${city}.`
+        );
+      case 'abandoned':
+        return (
+          `Bonjour ${clientName} 👋\n` +
+          `De la part de la boutique ${brand}. Nous avons remarqué que vous n'avez pas finalisé votre commande pour *${itemsText}* (${total} ${curr}).\n\n` +
+          `Souhaitez-vous que nous vous l'expédions à *${city}* avec la livraison offerte ? Répondez-nous simplement *"OUI"* pour valider. Merci !`
         );
       default:
         return `Bonjour ${clientName}, de la part de ${brand}. Concernant votre commande n° ${order.orderNumber} (${total} ${curr}).`;
@@ -271,6 +289,13 @@ export function getDarijaMessage(
         `Livreur ghadi y3eyet lik 9bel ma yji 3ndk f ${city}.`
       );
 
+    case 'abandoned':
+      return (
+        `Salam ${clientName} 👋\n` +
+        `M3ak boutique ${brand}. Cheft bli bghiti tcommander *${itemsText}* (${totalDh} DH) walakin ma kmltich la commande.\n\n` +
+        `Wach bghiti nseftouha lik l *${city}* m3a livraison express gratuite ? Jawbna b *"OUI"* bach nsayftouha lik daba. Chokran !`
+      );
+
     default:
       return `Salam ${clientName}, m3ak ${brand}. Bghina nconfirmew la commande dialk ${order.orderNumber} (${totalDh} DH).`;
   }
@@ -281,13 +306,14 @@ export function getDarijaMessage(
  */
 export function buildWhatsAppLink(
   order: Order,
-  template: WhatsAppTemplateType = 'confirmation',
+  template?: WhatsAppTemplateType,
   storeName: string = 'CODShop',
   countryCode: string = 'MA'
 ): string {
   const code = ((order as any)?.country || (order as any)?.countryCode || countryCode || 'MA').toUpperCase();
+  const effectiveTemplate = template || (order.status === 'abandoned' ? 'abandoned' : 'confirmation');
   const phoneNormalized = code === 'MA' ? normalizeMoroccanPhone(order.phone) : normalizePhoneForWhatsApp(order.phone, code);
-  const message = getCountryWhatsAppMessage(order, template, storeName, code);
+  const message = getCountryWhatsAppMessage(order, effectiveTemplate, storeName, code);
   return `https://wa.me/${phoneNormalized}?text=${encodeURIComponent(message)}`;
 }
 
