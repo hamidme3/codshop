@@ -24,6 +24,7 @@ export {
   reassignAndDeleteCategory,
   getCustomers,
   updateCustomerNotes,
+  updateOrderNotes,
   getPaymentGateways,
   togglePaymentGateway,
   checkInventory,

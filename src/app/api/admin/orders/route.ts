@@ -3,6 +3,7 @@ import { getOrders } from '@/lib/db-repository';
 import { 
   getOrders as getMockOrders, 
   updateOrderStatus as updateMockOrderStatus, 
+  updateOrderNotes as updateMockOrderNotes,
   deleteOrder as deleteMockOrder, 
   ORDERS 
 } from '@/lib/mocks';
@@ -78,24 +79,37 @@ export async function GET(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const body = await req.json();
-    const { storeSlug = 'ottavio', orderId, status, trackingNumber, courier } = body;
+    const { storeSlug = 'ottavio', orderId, status, trackingNumber, courier, agentNotes, notes } = body;
+    const finalNotes = agentNotes !== undefined ? agentNotes : notes;
 
-    if (!orderId || !status) {
+    if (!orderId) {
       return NextResponse.json(
-        { success: false, message: 'orderId and status are required' }, 
+        { success: false, message: 'orderId is required' }, 
+        { status: 400 }
+      );
+    }
+
+    if (!status && finalNotes === undefined && courier === undefined && trackingNumber === undefined) {
+      return NextResponse.json(
+        { success: false, message: 'At least one field (status, agentNotes, courier, trackingNumber) is required' }, 
         { status: 400 }
       );
     }
 
     // 1. Update in-memory / mock state
-    updateMockOrderStatus(orderId, status, trackingNumber, courier);
+    if (status) {
+      updateMockOrderStatus(orderId, status, trackingNumber, courier);
+    }
+    if (finalNotes !== undefined) {
+      updateMockOrderNotes(orderId, finalNotes);
+    }
 
     // 2. Update PostgreSQL database if available
     try {
       const { getDb, schema } = await import('@/db');
       const db = getDb();
       if (db) {
-        const { eq, or } = await import('drizzle-orm');
+        const { eq } = await import('drizzle-orm');
         const now = new Date();
 
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
@@ -106,23 +120,28 @@ export async function PATCH(req: Request) {
         });
 
         const updatePayload: any = {
-          status,
           updatedAt: now,
         };
+        if (status) {
+          updatePayload.status = status;
+          if (status === 'confirmed') updatePayload.confirmedAt = now;
+          if (status === 'shipped') updatePayload.shippedAt = now;
+          if (status === 'delivered') updatePayload.deliveredAt = now;
+          if (status === 'canceled') updatePayload.canceledAt = now;
+          if (status === 'returned') updatePayload.returnedAt = now;
+        }
+        if (finalNotes !== undefined) {
+          updatePayload.agentNotes = finalNotes;
+        }
         if (courier !== undefined) {
           updatePayload.courier = courier;
         }
         if (trackingNumber !== undefined) {
           updatePayload.trackingNumber = trackingNumber;
         }
-        if (status === 'confirmed') updatePayload.confirmedAt = now;
-        if (status === 'shipped') updatePayload.shippedAt = now;
-        if (status === 'delivered') updatePayload.deliveredAt = now;
-        if (status === 'canceled') updatePayload.canceledAt = now;
-        if (status === 'returned') updatePayload.returnedAt = now;
 
         // Restore DB stock if transitioning to canceled or returned from active state
-        if (existingOrder && (status === 'canceled' || status === 'returned') && existingOrder.status !== 'canceled' && existingOrder.status !== 'returned') {
+        if (status && existingOrder && (status === 'canceled' || status === 'returned') && existingOrder.status !== 'canceled' && existingOrder.status !== 'returned') {
           const { restoreDbProductStock } = await import('@/lib/db-repository');
           await restoreDbProductStock(existingOrder.storeId, existingOrder.items as any);
         }
@@ -136,7 +155,7 @@ export async function PATCH(req: Request) {
       console.warn('[API Admin Orders] Warning updating order in DB:', dbErr);
     }
 
-    return NextResponse.json({ success: true, message: 'Order status updated successfully' });
+    return NextResponse.json({ success: true, message: 'Order updated successfully' });
   } catch (error: any) {
     console.error('[API Admin Orders] PATCH error:', error);
     return NextResponse.json(

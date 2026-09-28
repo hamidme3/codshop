@@ -6,7 +6,7 @@ import {
   ShoppingBag, Search, Phone, MessageCircle, Truck, 
   CheckCircle2, Clock, Download, Check, X, DollarSign,
   RotateCcw, FileSpreadsheet, ChevronDown, ChevronUp, AlertCircle, Trash2, Copy,
-  Columns, Layers, Printer
+  Columns, Layers, Printer, Save, FileText
 } from 'lucide-react';
 import { getOrders, updateOrderStatus, deleteOrder, Order, OrderStatus } from '@/lib/backoffice';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -39,8 +39,16 @@ function OrdersContent() {
   const [activeFilter, setActiveFilter] = useState<string>(() => (urlFilter === 'new' ? 'to_confirm' : urlFilter));
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [orderNoteDraft, setOrderNoteDraft] = useState('');
+  const [isSavingNote, setIsSavingNote] = useState(false);
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
+
+  useEffect(() => {
+    if (selectedOrder) {
+      setOrderNoteDraft(selectedOrder.agentNotes || '');
+    }
+  }, [selectedOrder]);
 
   useEffect(() => {
     setActiveFilter(urlFilter === 'new' ? 'to_confirm' : urlFilter);
@@ -1464,12 +1472,54 @@ function OrdersContent() {
                 </div>
               </div>
 
-              {selectedOrder.agentNotes && (
-                <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#0d0d10] border border-slate-200 dark:border-zinc-800/80">
-                  <div className="text-slate-500 dark:text-zinc-400 font-medium text-[11px] mb-1">Notes de l&apos;agent :</div>
-                  <div className="text-slate-700 dark:text-zinc-300 text-xs italic">{selectedOrder.agentNotes}</div>
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#0d0d10] border border-slate-200 dark:border-zinc-800/80 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="text-slate-700 dark:text-zinc-300 font-semibold text-xs flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-sky-500" />
+                    <span>Notes & Repères pour le Livreur :</span>
+                  </div>
+                  {isSavingNote && (
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1 animate-in fade-in">
+                      <Check className="w-3 h-3" /> Enregistré ✓
+                    </span>
+                  )}
                 </div>
-              )}
+                <textarea
+                  value={orderNoteDraft}
+                  onChange={(e) => setOrderNoteDraft(e.target.value)}
+                  placeholder="Repères pour le livreur (ex: en face de la pharmacie, appeler avant de venir, code interphone 14B...)"
+                  rows={2}
+                  className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs focus:outline-none focus:border-sky-500 resize-none font-sans"
+                />
+                <div className="flex items-center justify-between gap-2 pt-0.5">
+                  <span className="text-[10px] text-slate-500 dark:text-zinc-500">Transmis sur le bon de livraison transporteur</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!selectedOrder) return;
+                      const newNotes = orderNoteDraft.trim();
+                      fetch('/api/admin/orders', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ storeSlug, orderId: selectedOrder.id, agentNotes: newNotes }),
+                      }).catch(() => {});
+                      if (typeof window !== 'undefined') {
+                        localStorage.setItem(`cod_order_notes_${selectedOrder.id}`, newNotes);
+                        localStorage.setItem(`cod_order_notes_${selectedOrder.orderNumber}`, newNotes);
+                      }
+                      setSelectedOrder({ ...selectedOrder, agentNotes: newNotes });
+                      setOrders((prev) => prev.map((o) => (o.id === selectedOrder.id ? { ...o, agentNotes: newNotes } : o)));
+                      setIsSavingNote(true);
+                      setTimeout(() => setIsSavingNote(false), 2000);
+                      showToast(`Note livreur enregistrée pour ${selectedOrder.orderNumber}`);
+                    }}
+                    className="px-2.5 py-1 rounded-md bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 text-xs font-medium transition-colors border border-slate-300 dark:border-zinc-700/80 flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+                  >
+                    <Save className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>Enregistrer Note</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-2 pt-2 border-t border-slate-200 dark:border-zinc-800/80">

@@ -10,7 +10,7 @@ import {
   Save, Copy, Check, ShieldCheck, ArrowRight, CornerDownRight,
   Crown, Repeat, ExternalLink, Edit3
 } from 'lucide-react';
-import { getCustomers, updateCustomerNotes, Customer, OrderStatus } from '@/lib/backoffice';
+import { getCustomers, updateCustomerNotes, updateOrderNotes, Customer, OrderStatus } from '@/lib/backoffice';
 import { normalizeMoroccanPhone } from '@/lib/whatsapp-templates';
 import { normalizePhoneForWhatsApp, COUNTRIES } from '@/lib/geo';
 import CustomerRiskBadge, { deriveCustomerSegment } from '@/components/admin/crm/CustomerRiskBadge';
@@ -91,19 +91,38 @@ function CustomersContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
+  const [orderNotes, setOrderNotes] = useState<Record<string, string>>({});
   const [customerNotes, setCustomerNotes] = useState<Record<string, string>>({});
   const [notesSaved, setNotesSaved] = useState(false);
 
   // Sync selected customer's active order & notes when drawer opens
   React.useEffect(() => {
     if (selectedCustomer) {
-      setActiveOrderId(selectedCustomer.recentOrders?.[0]?.id || null);
+      const firstOrderId = selectedCustomer.recentOrders?.[0]?.id || null;
+      setActiveOrderId(firstOrderId);
       if (typeof window !== 'undefined') {
         const localSaved = localStorage.getItem(`cod_customer_notes_${selectedCustomer.phone}`);
         if (localSaved !== null) {
           setCustomerNotes((prev) => ({ ...prev, [selectedCustomer.id]: localSaved }));
         } else if (selectedCustomer.addressNotes) {
           setCustomerNotes((prev) => ({ ...prev, [selectedCustomer.id]: selectedCustomer.addressNotes || '' }));
+        }
+
+        // Cache order-specific notes from localStorage or recentOrders
+        if (selectedCustomer.recentOrders) {
+          const notesMap: Record<string, string> = {};
+          for (const ord of selectedCustomer.recentOrders) {
+            const savedOrderNote = 
+              localStorage.getItem(`cod_order_notes_${ord.id}`) ||
+              localStorage.getItem(`cod_order_notes_${ord.orderNumber}`) ||
+              ord.agentNotes;
+            if (savedOrderNote) {
+              notesMap[ord.id] = savedOrderNote;
+            }
+          }
+          if (Object.keys(notesMap).length > 0) {
+            setOrderNotes((prev) => ({ ...prev, ...notesMap }));
+          }
         }
       }
     }
@@ -127,21 +146,39 @@ function CustomersContent() {
     fetchLiveCustomers();
   }, [storeSlug, fetchLiveCustomers]);
 
-  const handleSaveNotes = () => {
-    if (!selectedCustomer) return;
-    const notesToSave = customerNotes[selectedCustomer.id] ?? selectedCustomer.addressNotes ?? '';
-    updateCustomerNotes(selectedCustomer.phone, notesToSave, storeSlug);
+  const handleSaveOrderNotes = (targetOrder: any) => {
+    if (!targetOrder) return;
+    const orderId = targetOrder.id;
+    const notesToSave = orderNotes[orderId] !== undefined ? orderNotes[orderId] : (targetOrder.agentNotes || '');
+
+    // 1. Persist locally keyed by order ID and orderNumber
     if (typeof window !== 'undefined') {
-      localStorage.setItem(`cod_customer_notes_${selectedCustomer.phone}`, notesToSave);
+      localStorage.setItem(`cod_order_notes_${orderId}`, notesToSave);
+      if (targetOrder.orderNumber) {
+        localStorage.setItem(`cod_order_notes_${targetOrder.orderNumber}`, notesToSave);
+      }
     }
-    // Persist customer notes to database asynchronously
-    fetch('/api/admin/customers', {
+
+    // 2. Persist to orders database via PATCH /api/admin/orders
+    fetch('/api/admin/orders', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: selectedCustomer.phone, notes: notesToSave, storeSlug }),
-    }).catch((err) => console.warn('[Admin Customers] Save notes error:', err));
+      body: JSON.stringify({ 
+        orderId: targetOrder.id, 
+        agentNotes: notesToSave, 
+        storeSlug 
+      }),
+    }).catch((err) => console.warn('[Admin Customers] Save order notes error:', err));
 
-    setSelectedCustomer({ ...selectedCustomer, addressNotes: notesToSave });
+    // 3. Update in-memory mock and order reference
+    updateOrderNotes(targetOrder.id, notesToSave);
+    targetOrder.agentNotes = notesToSave;
+    if (selectedCustomer?.recentOrders) {
+      const found = selectedCustomer.recentOrders.find((o) => o.id === targetOrder.id);
+      if (found) found.agentNotes = notesToSave;
+    }
+
+    setOrderNotes((prev) => ({ ...prev, [orderId]: notesToSave }));
     setNotesSaved(true);
     setTimeout(() => setNotesSaved(false), 2500);
   };
@@ -669,7 +706,16 @@ function CustomersContent() {
                 const activeOrder = 
                   customerOrders.find((o) => o.id === activeOrderId) || 
                   customerOrders[0];
-                const currentNotes = customerNotes[selectedCustomer.id] ?? selectedCustomer.addressNotes ?? '';
+                const currentNotes = 
+                  activeOrder
+                    ? (orderNotes[activeOrder.id] !== undefined
+                        ? orderNotes[activeOrder.id]
+                        : (activeOrder.agentNotes || 
+                           (typeof window !== 'undefined' 
+                             ? localStorage.getItem(`cod_order_notes_${activeOrder.id}`) || 
+                               localStorage.getItem(`cod_order_notes_${activeOrder.orderNumber}`) || '' 
+                             : '')))
+                    : '';
 
                 return (
                   <div className="space-y-4">
@@ -949,35 +995,70 @@ function CustomersContent() {
                         {selectedCustomer.address || `Adresse principale enregistrée à ${selectedCustomer.city}`}
                       </div>
 
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <label className="text-[11px] font-medium text-slate-600 dark:text-zinc-400">
-                            Notes & Repères pour le Livreur :
+                      <div className="space-y-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                          <label className="text-[11px] font-medium text-slate-700 dark:text-zinc-300 flex items-center gap-1.5 flex-wrap">
+                            <span>Notes & Repères pour le Livreur :</span>
+                            {activeOrder && (
+                              <span className="font-mono text-sky-700 dark:text-sky-300 font-semibold bg-sky-50 dark:bg-sky-950/60 px-1.5 py-0.5 rounded border border-sky-200 dark:border-sky-800/60 text-[10px]">
+                                {activeOrder.orderNumber}
+                              </span>
+                            )}
                           </label>
                           {notesSaved && (
                             <span className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-mono animate-in fade-in">
-                              <CheckCircle2 className="w-3 h-3" /> Note enregistrée ✓
+                              <CheckCircle2 className="w-3 h-3" /> Note enregistrée pour {activeOrder?.orderNumber} ✓
                             </span>
                           )}
                         </div>
+
+                        {/* Quick-copy default customer address landmark if order note is empty */}
+                        {selectedCustomer.addressNotes && !currentNotes && activeOrder && (
+                          <div className="flex items-center justify-between p-2 rounded-lg bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/70 dark:border-sky-800/40 text-[11px]">
+                            <span className="text-sky-800 dark:text-sky-300 truncate mr-2">
+                              💡 Repère habituel : <em>&quot;{selectedCustomer.addressNotes}&quot;</em>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOrderNotes((prev) => ({ ...prev, [activeOrder.id]: selectedCustomer.addressNotes || '' }));
+                              }}
+                              className="shrink-0 px-2 py-0.5 rounded bg-sky-600 hover:bg-sky-500 text-white font-medium text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
+                            >
+                              <Copy className="w-2.5 h-2.5" />
+                              <span>Copier pour {activeOrder.orderNumber}</span>
+                            </button>
+                          </div>
+                        )}
+
                         <textarea
                           value={currentNotes}
                           onChange={(e) => {
                             const val = e.target.value;
-                            setCustomerNotes((prev) => ({ ...prev, [selectedCustomer.id]: val }));
+                            if (activeOrder) {
+                              setOrderNotes((prev) => ({ ...prev, [activeOrder.id]: val }));
+                            }
                           }}
-                          placeholder="Ex: En face de la pharmacie, appeler avant de venir, code interphone 14B..."
+                          placeholder={activeOrder ? `Instructions spécifiques pour le livreur de la commande ${activeOrder.orderNumber} (ex: En face de la pharmacie, appeler avant de venir, code interphone 14B...)` : 'Instructions spécifiques pour le livreur...'}
                           rows={2}
                           className="w-full px-3 py-2 rounded-lg bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs font-sans placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 resize-none"
                         />
-                        <div className="flex justify-end">
+                        <div className="flex items-center justify-between gap-2 pt-0.5">
+                          <p className="text-[10px] text-slate-500 dark:text-zinc-500 truncate">
+                            {activeOrder ? (
+                              <span>Lié à <strong className="font-mono text-slate-700 dark:text-zinc-300">{activeOrder.orderNumber}</strong> • Transmis au livreur</span>
+                            ) : (
+                              <span>Transmis au livreur</span>
+                            )}
+                          </p>
                           <button
                             type="button"
-                            onClick={handleSaveNotes}
-                            className="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 text-xs font-medium transition-colors border border-slate-300 dark:border-zinc-700/80 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                            onClick={() => handleSaveOrderNotes(activeOrder)}
+                            disabled={!activeOrder}
+                            className="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 text-xs font-medium transition-colors border border-slate-300 dark:border-zinc-700/80 flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
                           >
                             <Save className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                            <span>Enregistrer Note</span>
+                            <span>Enregistrer pour {activeOrder ? activeOrder.orderNumber : 'cette commande'}</span>
                           </button>
                         </div>
                       </div>

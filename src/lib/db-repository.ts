@@ -8,6 +8,7 @@ import {
   getProducts as getMockProducts,
   getCustomers as getMockCustomers,
   updateCustomerNotes as updateMockCustomerNotes,
+  updateOrderNotes as updateMockOrderNotes,
   syncCustomersFromOrders,
   addProduct as addMockProduct,
   updateProduct as updateMockProduct,
@@ -1161,6 +1162,7 @@ export async function getCustomers(storeSlug: string): Promise<Customer[]> {
           trackingNumber: o.trackingNumber || undefined,
           countryCode: o.countryCode || 'MA',
           currency: o.currency || 'MAD',
+          agentNotes: o.agentNotes || undefined,
         })),
       };
     });
@@ -1172,6 +1174,19 @@ export async function getCustomers(storeSlug: string): Promise<Customer[]> {
 
 export async function updateCustomerNotes(phone: string, notes: string, storeSlug: string) {
   updateMockCustomerNotes(phone, notes, storeSlug);
+}
+
+export async function updateOrderNotes(orderId: string, notes: string, storeSlug?: string) {
+  updateMockOrderNotes(orderId, notes);
+  const db = getDb();
+  if (!db) return;
+  try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
+    const whereClause = isUuid ? eq(schema.orders.id, orderId) : eq(schema.orders.orderNumber, orderId);
+    await db.update(schema.orders).set({ agentNotes: notes, updatedAt: new Date() }).where(whereClause);
+  } catch (err) {
+    console.warn('[DbRepo] Error updating order notes in DB:', err);
+  }
 }
 
 // ── User Authentication Repository ────────────────────────────

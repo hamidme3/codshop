@@ -444,6 +444,7 @@ export function syncCustomersFromOrders(storeSlug: string): Customer[] {
       itemsSummary,
       courier: order.courier,
       trackingNumber: order.trackingNumber,
+      agentNotes: order.agentNotes,
     });
 
     // Count 3-stage switch pipeline statuses
@@ -949,6 +950,24 @@ export function updateCustomerNotes(phoneOrId: string, notes: string, storeSlug:
   );
   if (c) {
     c.addressNotes = notes;
+    return true;
+  }
+  return false;
+}
+
+/** Update delivery and agent notes for a specific order */
+export function updateOrderNotes(orderId: string, notes: string): boolean {
+  const order = ORDERS.find((o) => o.id === orderId || o.orderNumber === orderId);
+  if (order) {
+    order.agentNotes = notes;
+    for (const cust of CUSTOMERS) {
+      if (cust.recentOrders) {
+        const found = cust.recentOrders.find((ro) => ro.id === orderId || ro.orderNumber === orderId);
+        if (found) {
+          found.agentNotes = notes;
+        }
+      }
+    }
     return true;
   }
   return false;

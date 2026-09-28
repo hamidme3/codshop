@@ -106,6 +106,7 @@ export interface CustomerOrderSummary {
   countryCode?: string;
   currency?: string;
   shippedAt?: string;
+  agentNotes?: string;
 }
 
 export interface Customer {
