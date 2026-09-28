@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, Suspense, useEffect, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   Package, Plus, Search, Tag, AlertTriangle, 
   Layers, Check, Trash2, Edit3, ArrowUpRight,
@@ -45,8 +45,21 @@ function ProductsContent() {
   useEffect(() => {
     setCategories(getCategories(storeSlug, products));
   }, [products, storeSlug]);
+
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'products' | 'categories'>('products');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || '');
+
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (val.trim()) {
+      newParams.set('q', val.trim());
+    } else {
+      newParams.delete('q');
+    }
+    router.replace(`/admin/products?${newParams.toString()}`, { scroll: false });
+  };
   const [showAddModal, setShowAddModal] = useState(false);
 
   // Edit Product Modal State
@@ -794,10 +807,20 @@ function ProductsContent() {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder="Rechercher par titre, catégorie ou SKU..."
-                className="w-full bg-slate-50 dark:bg-[#0d0d10] border border-slate-200 dark:border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-900 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                className="w-full bg-slate-50 dark:bg-[#0d0d10] border border-slate-200 dark:border-zinc-800 rounded-lg pl-9 pr-8 py-1.5 text-xs text-slate-900 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500 transition-colors"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => handleSearchChange('')}
+                  aria-label="Effacer la recherche"
+                  className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition p-0.5"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
             <div className="text-xs text-slate-500 dark:text-zinc-400 font-mono tabular-nums">
               <strong className="text-slate-900 dark:text-zinc-200">{filteredProducts.length}</strong> article(s) trouvé(s)

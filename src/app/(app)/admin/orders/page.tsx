@@ -37,7 +37,7 @@ function OrdersContent() {
   const [orders, setOrders] = useState<Order[]>(() => getOrders(storeSlug));
   const [isLoadingLive, setIsLoadingLive] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string>(() => (urlFilter === 'new' ? 'to_confirm' : urlFilter));
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || '');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderNoteDraft, setOrderNoteDraft] = useState('');
   const [isSavingNote, setIsSavingNote] = useState(false);
@@ -53,6 +53,17 @@ function OrdersContent() {
   useEffect(() => {
     setActiveFilter(urlFilter === 'new' ? 'to_confirm' : urlFilter);
   }, [urlFilter]);
+
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (val.trim()) {
+      newParams.set('q', val.trim());
+    } else {
+      newParams.delete('q');
+    }
+    router.replace(`/admin/orders?${newParams.toString()}`, { scroll: false });
+  };
 
   const handleFilterChange = (filterId: string) => {
     const canonicalId = filterId === 'new' ? 'to_confirm' : filterId;
@@ -622,10 +633,20 @@ function OrdersContent() {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Rechercher par N° commande, client, téléphone (06...), ville..."
-            className="w-full bg-slate-50 dark:bg-[#0c0f12] border border-slate-200 dark:border-slate-800 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500 font-medium transition-colors"
+            className="w-full bg-slate-50 dark:bg-[#0c0f12] border border-slate-200 dark:border-slate-800 rounded-lg pl-9 pr-8 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500 font-medium transition-colors"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => handleSearchChange('')}
+              aria-label="Effacer la recherche"
+              className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-white transition p-0.5"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-3">

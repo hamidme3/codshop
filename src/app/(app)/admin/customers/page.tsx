@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   Users, Search, Phone, Mail, MapPin, 
   ShoppingBag, MessageCircle, Heart, UserPlus, 
@@ -83,13 +83,25 @@ function getContextualWhatsAppUrl(customer: Customer, storeSlug: string): string
 }
 
 function CustomersContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [activeTab, setActiveTab] = useState<'all' | 'confirmed' | 'shipped' | 'delivered' | 'returning' | 'risk'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || '');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (val.trim()) {
+      newParams.set('q', val.trim());
+    } else {
+      newParams.delete('q');
+    }
+    router.replace(`/admin/customers?${newParams.toString()}`, { scroll: false });
+  };
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
   const [orderNotes, setOrderNotes] = useState<Record<string, string>>({});
   const [customerNotes, setCustomerNotes] = useState<Record<string, string>>({});
@@ -362,10 +374,20 @@ function CustomersContent() {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Nom, téléphone, N° commande, suivi..."
-            className="w-full bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-900 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500 dark:focus:border-zinc-600 transition-colors shadow-xs"
+            className="w-full bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 rounded-lg pl-9 pr-8 py-1.5 text-xs text-slate-900 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500 dark:focus:border-zinc-600 transition-colors shadow-xs"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => handleSearchChange('')}
+              aria-label="Effacer la recherche"
+              className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition p-0.5"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
 

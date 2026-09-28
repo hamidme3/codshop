@@ -33,6 +33,7 @@ export default function CatalogPage() {
   const [sortBy, setSortBy] = useState<SortOption>('featured');
   const [inStockOnly, setInStockOnly] = useState(false);
   const [isSubdomain, setIsSubdomain] = useState(false);
+  const [currentStoreSlug, setCurrentStoreSlug] = useState<string>('ottavio');
   const [storeProducts, setStoreProducts] = useState<any[]>([]);
 
   React.useEffect(() => {
@@ -51,6 +52,9 @@ export default function CatalogPage() {
         detected = urlParams.get('store') || '';
       }
 
+      const fetchSlug = detected || 'ottavio';
+      setCurrentStoreSlug(fetchSlug);
+
       const urlParams = new URLSearchParams(window.location.search);
       const catParam = urlParams.get('category');
       if (catParam) {
@@ -61,7 +65,6 @@ export default function CatalogPage() {
         setSearchQuery(qParam);
       }
 
-      const fetchSlug = detected || 'storet1';
       fetch(`/api/products?store=${encodeURIComponent(fetchSlug)}`)
         .then((r) => r.json())
         .then((data) => {
@@ -181,24 +184,23 @@ export default function CatalogPage() {
 
   // Track Catalog View
   React.useEffect(() => {
-    const activeStore = (storeProducts[0] as any)?.storeSlug || 'ottavio';
-    trackCatalogView(activeStore, {
+    trackCatalogView(currentStoreSlug, {
       category: selectedCategory,
       sort: sortBy,
       resultsCount: filteredProducts.length,
     });
-    trackStorePageView(activeStore, '/catalog');
-  }, [selectedCategory, sortBy, storeProducts, filteredProducts.length]);
+    trackStorePageView(currentStoreSlug, '/catalog');
+  }, [selectedCategory, sortBy, filteredProducts.length, currentStoreSlug]);
 
-  // Track Searches with 800ms debounce
+  // Track Searches with 600ms debounce
   React.useEffect(() => {
-    if (!searchQuery.trim() || searchQuery.trim().length < 2) return;
-    const activeStore = (storeProducts[0] as any)?.storeSlug || 'ottavio';
+    const trimmed = searchQuery.trim();
+    if (!trimmed || trimmed.length < 2) return;
     const timer = setTimeout(() => {
-      trackSearch(activeStore, searchQuery.trim(), filteredProducts.length);
-    }, 800);
+      trackSearch(currentStoreSlug, trimmed, filteredProducts.length);
+    }, 600);
     return () => clearTimeout(timer);
-  }, [searchQuery, filteredProducts.length, storeProducts]);
+  }, [searchQuery, filteredProducts.length, currentStoreSlug]);
 
   const resetFilters = () => {
     setSearchQuery('');
@@ -326,6 +328,11 @@ export default function CatalogPage() {
                 placeholder="Rechercher un produit, référence ou mot-clé..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && searchQuery.trim()) {
+                    trackSearch(currentStoreSlug, searchQuery.trim(), filteredProducts.length);
+                  }
+                }}
                 className="w-full pl-10 pr-10 py-2.5 text-xs rounded-xl border transition focus:outline-none focus:ring-2 bg-white text-zinc-900 placeholder:text-zinc-400"
                 style={{
                   borderColor: 'var(--theme-border)',

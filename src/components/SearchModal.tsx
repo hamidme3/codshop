@@ -5,6 +5,7 @@ import { useSearch } from '@/context/SearchContext';
 import { useTheme } from '@/context/ThemeContext';
 import { MOCK_PRODUCTS, Product } from '@/lib/mockProducts';
 import { THEMES } from '@/lib/themes';
+import { trackSearch } from '@/lib/posthog';
 import {
   Search,
   X,
@@ -38,6 +39,7 @@ export function SearchModal() {
   const { theme, formatPrice, countryCode } = useTheme();
   const [query, setQuery] = useState('');
   const [storeProducts, setStoreProducts] = useState<Product[]>([]);
+  const [currentStoreSlug, setCurrentStoreSlug] = useState<string>('ottavio');
   const [isSubdomain, setIsSubdomain] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
 
@@ -62,7 +64,8 @@ export function SearchModal() {
         detected = urlParams.get('store') || '';
       }
 
-      const fetchSlug = detected || 'storet1';
+      const fetchSlug = detected || 'ottavio';
+      setCurrentStoreSlug(fetchSlug);
       fetch(`/api/products?store=${encodeURIComponent(fetchSlug)}`)
         .then((r) => r.json())
         .then((data) => {
@@ -131,6 +134,16 @@ export function SearchModal() {
       .slice(0, 8); // top 8 results for ultra-fast predictive browsing
   }, [catalog, query]);
 
+  // Track searches with 700ms debounce
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!trimmed || trimmed.length < 2) return;
+    const timer = setTimeout(() => {
+      trackSearch(currentStoreSlug, trimmed, filteredResults.length);
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [query, filteredResults.length, currentStoreSlug]);
+
   // Build link preserving store parameter when not on subdomain
   const getProductHref = (slug: string) => {
     let url = `/product/${encodeURIComponent(slug)}`;
@@ -169,6 +182,9 @@ export function SearchModal() {
       setSelectedIndex((prev) => (prev > 0 ? prev - 1 : filteredResults.length - 1));
     } else if (e.key === 'Enter') {
       e.preventDefault();
+      if (query.trim()) {
+        trackSearch(currentStoreSlug, query.trim(), filteredResults.length);
+      }
       if (selectedIndex >= 0 && selectedIndex < filteredResults.length) {
         const item = filteredResults[selectedIndex];
         closeSearch();
@@ -248,6 +264,11 @@ export function SearchModal() {
                       type="button"
                       onClick={() => {
                         setQuery(item);
+                        const matchCount = catalog.filter((p) => {
+                          const q = item.toLowerCase();
+                          return (p.title?.toLowerCase() || '').includes(q) || (p.tagline?.toLowerCase() || '').includes(q);
+                        }).length;
+                        trackSearch(currentStoreSlug, item, matchCount);
                         inputRef.current?.focus();
                       }}
                       className="px-3 py-1.5 text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 rounded-xl transition cursor-pointer"
@@ -388,7 +409,12 @@ export function SearchModal() {
             </span>
             <a
               href={getCatalogHref(undefined, query.trim())}
-              onClick={() => closeSearch()}
+              onClick={() => {
+                if (query.trim()) {
+                  trackSearch(currentStoreSlug, query.trim(), filteredResults.length);
+                }
+                closeSearch();
+              }}
               className="inline-flex items-center gap-1.5 font-bold text-emerald-600 hover:text-emerald-700 transition"
             >
               <span>Voir tous les résultats dans le catalogue</span>
