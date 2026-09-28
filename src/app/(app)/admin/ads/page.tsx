@@ -780,7 +780,7 @@ export default function AdsHubPage() {
         </div>
 
         {testEventStatus && (
-          <div className="p-3 rounded-xl bg-zinc-950 border border-sky-500/30 text-sky-400 text-xs font-mono">
+          <div className="p-3 rounded-xl bg-sky-50 dark:bg-zinc-950 border border-sky-200 dark:border-sky-500/30 text-sky-800 dark:text-sky-400 text-xs font-mono">
             {testEventStatus}
           </div>
         )}

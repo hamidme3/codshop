@@ -1121,16 +1121,16 @@ function ProductsContent() {
       {/* Add Product Command Modal (Linear x Stripe x Shopify Polaris Standard) */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
-          <div className="bg-[#121215] border border-zinc-800 rounded-2xl max-w-4xl w-full max-h-[94vh] flex flex-col shadow-2xl overflow-hidden font-sans">
+          <div className="bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 rounded-2xl max-w-4xl w-full max-h-[94vh] flex flex-col shadow-2xl overflow-hidden font-sans">
             {/* Modal Header */}
-            <div className="px-5 py-4 border-b border-zinc-800/80 flex items-center justify-between bg-[#0f0f12]">
+            <div className="px-5 py-4 border-b border-slate-200 dark:border-zinc-800/80 flex items-center justify-between bg-slate-50 dark:bg-[#0f0f12]">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-zinc-800/90 border border-zinc-700/80 flex items-center justify-center text-emerald-400">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-zinc-800/90 border border-emerald-200 dark:border-zinc-700/80 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                   <Package className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-white tracking-tight">Ajouter un Nouveau Produit</h3>
-                  <p className="text-[11px] text-zinc-400">
+                  <h3 className="text-base font-semibold text-slate-900 dark:text-white tracking-tight">Ajouter un Nouveau Produit</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-zinc-400">
                     Configuration unifiée : Médias, Tarification COD, Matrice de Variantes et Packs Upsell.
                   </p>
                 </div>
@@ -1139,14 +1139,14 @@ function ProductsContent() {
                 <button
                   type="button"
                   onClick={() => handleOpenAICoach(category, title, price)}
-                  className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span className="hidden sm:inline">Coach IA Maroc</span>
                 </button>
                 <button 
                   onClick={() => setShowAddModal(false)} 
-                  className="text-zinc-400 hover:text-white p-1.5 rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer"
+                  className="text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-white p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                 >
                   ✕
                 </button>
@@ -1155,15 +1155,15 @@ function ProductsContent() {
 
             {/* Draft Restore Alert Banner */}
             {draftLoaded && (
-              <div className="px-5 py-2 bg-emerald-500/10 border-b border-emerald-500/20 text-emerald-300 text-xs flex items-center justify-between">
+              <div className="px-5 py-2 bg-emerald-50 dark:bg-emerald-500/10 border-b border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <Clock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>Brouillon restauré automatiquement depuis votre session précédente.</span>
                 </span>
                 <button
                   type="button"
                   onClick={handleClearDraft}
-                  className="text-emerald-400 hover:text-white font-medium underline text-[11px] cursor-pointer"
+                  className="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-white font-medium underline text-[11px] cursor-pointer"
                 >
                   Effacer le brouillon
                 </button>
@@ -1171,17 +1171,17 @@ function ProductsContent() {
             )}
 
             {/* Segmented Tab Navigation Bar */}
-            <div className="flex items-center gap-1 p-2 bg-[#09090b] border-b border-zinc-800/80 overflow-x-auto admin-scrollbar no-scrollbar">
+            <div className="flex items-center gap-1 p-2 bg-slate-100 dark:bg-[#09090b] border-b border-slate-200 dark:border-zinc-800/80 overflow-x-auto admin-scrollbar no-scrollbar">
               <button
                 type="button"
                 onClick={() => setAddModalTab('general')}
                 className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                   addModalTab === 'general'
-                    ? 'bg-zinc-800 text-white font-semibold shadow-xs'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white font-semibold shadow-xs border border-slate-200/80 dark:border-zinc-700/60'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-900'
                 }`}
               >
-                <Package className="w-3.5 h-3.5 text-zinc-400" />
+                <Package className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
                 <span>1. Général & Médias</span>
               </button>
               <button
@@ -1189,11 +1189,11 @@ function ProductsContent() {
                 onClick={() => setAddModalTab('pricing')}
                 className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                   addModalTab === 'pricing'
-                    ? 'bg-zinc-800 text-white font-semibold shadow-xs'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white font-semibold shadow-xs border border-slate-200/80 dark:border-zinc-700/60'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-900'
                 }`}
               >
-                <Calculator className="w-3.5 h-3.5 text-emerald-400" />
+                <Calculator className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>2. Tarification & Marge COD</span>
               </button>
               <button
@@ -1201,11 +1201,11 @@ function ProductsContent() {
                 onClick={() => setAddModalTab('variants')}
                 className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                   addModalTab === 'variants'
-                    ? 'bg-zinc-800 text-white font-semibold shadow-xs'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white font-semibold shadow-xs border border-slate-200/80 dark:border-zinc-700/60'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-900'
                 }`}
               >
-                <Layers className="w-3.5 h-3.5 text-blue-400" />
+                <Layers className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 <span>3. Variantes & Matrice SKU ({useAddVariants ? addVariants.length : 'Simple'})</span>
               </button>
               <button
@@ -1213,11 +1213,11 @@ function ProductsContent() {
                 onClick={() => setAddModalTab('packs')}
                 className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                   addModalTab === 'packs'
-                    ? 'bg-zinc-800 text-white font-semibold shadow-xs'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white font-semibold shadow-xs border border-slate-200/80 dark:border-zinc-700/60'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-900'
                 }`}
               >
-                <Gift className="w-3.5 h-3.5 text-emerald-400" />
+                <Gift className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>4. Packs Upsell Maroc</span>
               </button>
               <button
@@ -1225,11 +1225,11 @@ function ProductsContent() {
                 onClick={() => setAddModalTab('preview')}
                 className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                   addModalTab === 'preview'
-                    ? 'bg-zinc-800 text-white font-semibold shadow-xs'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white font-semibold shadow-xs border border-slate-200/80 dark:border-zinc-700/60'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-900'
                 }`}
               >
-                <Smartphone className="w-3.5 h-3.5 text-purple-400" />
+                <Smartphone className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
                 <span>5. Aperçu Mobile (375px)</span>
               </button>
             </div>
@@ -1241,25 +1241,25 @@ function ProductsContent() {
                 {addModalTab === 'general' && (
                   <div className="space-y-4 text-xs">
                     <div>
-                      <label className="block text-zinc-300 font-medium mb-1">Titre du Produit * :</label>
+                      <label className="block text-slate-700 dark:text-zinc-300 font-medium mb-1">Titre du Produit * :</label>
                       <input
                         type="text"
                         required
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Ex: Sacoche Cuir Artisanal Marrakech — Édition Atlas"
-                        className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 font-medium placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/20"
+                        className="w-full bg-white dark:bg-[#0d0d10] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-100 font-medium placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/20"
                       />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <div className="flex items-center justify-between mb-1">
-                          <label className="block text-zinc-300 font-medium">Catégorie :</label>
+                          <label className="block text-slate-700 dark:text-zinc-300 font-medium">Catégorie :</label>
                           <button
                             type="button"
                             onClick={() => setShowAddCategoryModal(true)}
-                            className="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium inline-flex items-center gap-0.5 cursor-pointer"
+                            className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium inline-flex items-center gap-0.5 cursor-pointer"
                           >
                             <Plus className="w-3 h-3" /> + Nouvelle Catégorie
                           </button>
@@ -1297,26 +1297,26 @@ function ProductsContent() {
                     </div>
 
                     <div>
-                      <label className="block text-zinc-300 font-medium mb-1">Description / Points Forts :</label>
+                      <label className="block text-slate-700 dark:text-zinc-300 font-medium mb-1">Description / Points Forts :</label>
                       <textarea
                         value={addDescription}
                         onChange={(e) => setAddDescription(e.target.value)}
                         rows={2}
                         placeholder="Présentez l'authenticité, la confection artisanale ou les bénéfices clés pour l'acheteur marocain..."
-                        className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 leading-relaxed font-sans"
+                        className="w-full bg-white dark:bg-[#0d0d10] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 leading-relaxed font-sans"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-zinc-300 font-medium mb-1.5">Statut de Publication :</label>
+                      <label className="block text-slate-700 dark:text-zinc-300 font-medium mb-1.5">Statut de Publication :</label>
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => setAddStatus('active')}
                           className={`px-3 py-1.5 rounded-lg text-xs font-medium border cursor-pointer transition-colors flex items-center gap-1.5 ${
                             addStatus === 'active'
-                              ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 font-semibold'
-                              : 'bg-[#0d0d10] border-zinc-800 text-zinc-400 hover:text-zinc-200'
+                              ? 'bg-emerald-50 dark:bg-emerald-500/15 border-emerald-300 dark:border-emerald-500/40 text-emerald-800 dark:text-emerald-400 font-semibold'
+                              : 'bg-white dark:bg-[#0d0d10] border-slate-300 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
                           }`}
                         >
                           <Check className="w-3.5 h-3.5" /> Actif (Visible sur la boutique)
@@ -1326,8 +1326,8 @@ function ProductsContent() {
                           onClick={() => setAddStatus('draft')}
                           className={`px-3 py-1.5 rounded-lg text-xs font-medium border cursor-pointer transition-colors flex items-center gap-1.5 ${
                             addStatus === 'draft'
-                              ? 'bg-zinc-800 border-zinc-700 text-zinc-200 font-semibold'
-                              : 'bg-[#0d0d10] border-zinc-800 text-zinc-400 hover:text-zinc-200'
+                              ? 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700 text-slate-900 dark:text-zinc-200 font-semibold'
+                              : 'bg-white dark:bg-[#0d0d10] border-slate-300 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
                           }`}
                         >
                           Brouillon (Non visible)
@@ -1336,15 +1336,15 @@ function ProductsContent() {
                     </div>
 
                     {/* Multi-Image Manager */}
-                    <div className="space-y-3 pt-3 border-t border-zinc-800/80">
+                    <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-zinc-800/80">
                       <div className="flex items-center justify-between">
                         <div>
-                          <label className="block text-zinc-200 font-medium text-xs flex items-center gap-1.5">
-                            <ImageIcon className="w-3.5 h-3.5 text-emerald-400" />
+                          <label className="text-slate-800 dark:text-zinc-200 font-medium text-xs flex items-center gap-1.5">
+                            <ImageIcon className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                             <span>Portfolio Photos & Médias</span>
-                            <span className="text-zinc-500 font-mono text-[11px]">({addImages.length} photo{addImages.length !== 1 ? 's' : ''})</span>
+                            <span className="text-slate-500 dark:text-zinc-500 font-mono text-[11px]">({addImages.length} photo{addImages.length !== 1 ? 's' : ''})</span>
                           </label>
-                          <p className="text-[11px] text-zinc-500">
+                          <p className="text-[11px] text-slate-500 dark:text-zinc-500">
                             La première photo est l&apos;image principale affichée sur la boutique et le bon de livraison.
                           </p>
                         </div>
@@ -1352,13 +1352,13 @@ function ProductsContent() {
 
                       {/* 1-Click Moroccan Curated Presets */}
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">Packs Photos 1-Clic :</span>
+                        <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-mono uppercase tracking-wider">Packs Photos 1-Clic :</span>
                         {MOROCCAN_PRODUCT_IMAGE_PRESETS.map((preset) => (
                           <button
                             key={preset.id}
                             type="button"
                             onClick={() => handleApplyAddImagePreset(preset)}
-                            className="px-2 py-0.5 rounded text-[10px] bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition-colors cursor-pointer"
+                            className="px-2 py-0.5 rounded text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-300 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-300 dark:hover:text-white dark:border-zinc-800 transition-colors cursor-pointer"
                             title={preset.title}
                           >
                             + {preset.niche}
@@ -1375,8 +1375,8 @@ function ProductsContent() {
                               <div
                                 key={idx}
                                 className={`relative rounded-xl overflow-hidden border ${
-                                  isPrimary ? 'border-emerald-500/80 ring-1 ring-emerald-500/50' : 'border-zinc-800'
-                                } bg-zinc-900 group shadow-xs`}
+                                  isPrimary ? 'border-emerald-500 ring-1 ring-emerald-500/50' : 'border-slate-200 dark:border-zinc-800'
+                                } bg-slate-100 dark:bg-zinc-900 group shadow-xs`}
                               >
                                 <img
                                   src={imgUrl}
@@ -1531,31 +1531,31 @@ function ProductsContent() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-zinc-300 font-medium mb-1 text-xs">Prix Vente Public (DH) * :</label>
+                        <label className="block text-slate-700 dark:text-zinc-300 font-medium mb-1 text-xs">Prix Vente Public (DH) * :</label>
                         <input
                           type="number"
                           required
                           value={price}
                           onChange={(e) => handlePriceChange(Number(e.target.value))}
-                          className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 font-mono tabular-nums font-semibold text-xs focus:outline-none focus:border-emerald-500/60"
+                          className="w-full bg-white dark:bg-[#0d0d10] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-100 font-mono tabular-nums font-semibold text-xs focus:outline-none focus:border-emerald-500/60"
                         />
                       </div>
                       <div>
-                        <label className="block text-zinc-300 font-medium mb-1 text-xs">Prix Barré / Comparé (DH) :</label>
+                        <label className="block text-slate-700 dark:text-zinc-300 font-medium mb-1 text-xs">Prix Barré / Comparé (DH) :</label>
                         <input
                           type="number"
                           value={comparePrice}
                           onChange={(e) => setComparePrice(Number(e.target.value))}
-                          className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-400 font-mono tabular-nums text-xs focus:outline-none focus:border-zinc-600"
+                          className="w-full bg-white dark:bg-[#0d0d10] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-500 dark:text-zinc-400 font-mono tabular-nums text-xs focus:outline-none focus:border-slate-400 dark:focus:border-zinc-600"
                         />
                       </div>
                       <div>
-                        <label className="block text-zinc-300 font-medium mb-1 text-xs">Coût Achat Fournisseur / COGS (DH) :</label>
+                        <label className="block text-slate-700 dark:text-zinc-300 font-medium mb-1 text-xs">Coût Achat Fournisseur / COGS (DH) :</label>
                         <input
                           type="number"
                           value={costPrice}
                           onChange={(e) => setCostPrice(Number(e.target.value))}
-                          className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-emerald-400 font-mono tabular-nums font-semibold text-xs focus:outline-none focus:border-emerald-500/60"
+                          className="w-full bg-white dark:bg-[#0d0d10] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-emerald-600 dark:text-emerald-400 font-mono tabular-nums font-semibold text-xs focus:outline-none focus:border-emerald-500/60"
                         />
                       </div>
                     </div>
@@ -1577,13 +1577,13 @@ function ProductsContent() {
                 {/* TAB 3: VARIANTES & MATRICE SKU */}
                 {addModalTab === 'variants' && (
                   <div className="space-y-4">
-                    <div className="p-4 rounded-xl bg-[#0f0f12] border border-zinc-800 flex items-center justify-between">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0f0f12] border border-slate-200 dark:border-zinc-800 flex items-center justify-between">
                       <div>
-                        <h4 className="text-xs font-semibold text-white flex items-center gap-2">
-                          <Layers className="w-4 h-4 text-blue-400" />
+                        <h4 className="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                          <Layers className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                           <span>Activer la Matrice Multi-Variantes (Couleurs / Tailles)</span>
                         </h4>
-                        <p className="text-[11px] text-zinc-400 mt-0.5">
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
                           Permet de gérer des stocks distincts par taille et coloris avec génération cartésienne automatique des SKUs.
                         </p>
                       </div>
@@ -1593,42 +1593,42 @@ function ProductsContent() {
                         aria-checked={useAddVariants}
                         onClick={() => setUseAddVariants(!useAddVariants)}
                         className={`w-10 h-6 flex items-center rounded-full p-0.5 transition-colors cursor-pointer border ${
-                          useAddVariants ? 'bg-blue-600/30 border-blue-500' : 'bg-zinc-800 border-zinc-700'
+                          useAddVariants ? 'bg-blue-100 dark:bg-blue-600/30 border-blue-400 dark:border-blue-500' : 'bg-slate-200 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700'
                         }`}
                       >
                         <span
                           className={`w-4 h-4 rounded-full transition-transform transform shadow-sm ${
-                            useAddVariants ? 'translate-x-4 bg-blue-400' : 'translate-x-0 bg-zinc-400'
+                            useAddVariants ? 'translate-x-4 bg-blue-600 dark:bg-blue-400' : 'translate-x-0 bg-slate-400 dark:bg-zinc-400'
                           }`}
                         />
                       </button>
                     </div>
 
                     {!useAddVariants ? (
-                      <div className="p-5 rounded-xl bg-[#0d0d10] border border-zinc-800/80 space-y-3">
-                        <label className="block text-zinc-300 font-medium text-xs">Stock Global Disponible (Unités) :</label>
+                      <div className="p-5 rounded-xl bg-slate-50 dark:bg-[#0d0d10] border border-slate-200 dark:border-zinc-800/80 space-y-3">
+                        <label className="block text-slate-700 dark:text-zinc-300 font-medium text-xs">Stock Global Disponible (Unités) :</label>
                         <input
                           type="number"
                           value={stock}
                           onChange={(e) => setStock(Number(e.target.value))}
-                          className="w-48 bg-[#121215] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 font-mono tabular-nums text-xs font-semibold"
+                          className="w-48 bg-white dark:bg-[#121215] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-100 font-mono tabular-nums text-xs font-semibold"
                         />
-                        <p className="text-[11px] text-zinc-500">
+                        <p className="text-[11px] text-slate-500 dark:text-zinc-500">
                           Ce produit ne possède pas de déclinaison. Activez le bouton ci-dessus pour ajouter des tailles et couleurs.
                         </p>
                       </div>
                     ) : (
                       <div className="space-y-4">
                         {/* Matrix Generator Controls */}
-                        <div className="p-4 rounded-xl bg-[#0d0d10] border border-zinc-800/80 space-y-3">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0d0d10] border border-slate-200 dark:border-zinc-800/80 space-y-3">
                           <div className="flex items-center justify-between text-xs">
-                            <span className="font-semibold text-zinc-200">⚡ Générateur Cartésien de SKUs</span>
-                            <span className="text-[11px] text-zinc-500">Séparez les valeurs par des virgules</span>
+                            <span className="font-semibold text-slate-900 dark:text-zinc-200">⚡ Générateur Cartésien de SKUs</span>
+                            <span className="text-[11px] text-slate-500 dark:text-zinc-500">Séparez les valeurs par des virgules</span>
                           </div>
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                             <div>
-                              <label className="block text-[11px] text-zinc-400 font-medium mb-1">
+                              <label className="block text-[11px] text-slate-600 dark:text-zinc-400 font-medium mb-1">
                                 Couleurs / Déclinaisons :
                               </label>
                               <input
@@ -1636,11 +1636,11 @@ function ProductsContent() {
                                 value={addColorsInput}
                                 onChange={(e) => setAddColorsInput(e.target.value)}
                                 placeholder="Noir Ébène, Marron Vintage, Camel"
-                                className="w-full bg-[#121215] border border-zinc-800 rounded-lg p-2 text-zinc-100 placeholder-zinc-600 text-xs focus:outline-none focus:border-blue-500/60"
+                                className="w-full bg-white dark:bg-[#121215] border border-slate-300 dark:border-zinc-800 rounded-lg p-2 text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-600 text-xs focus:outline-none focus:border-blue-500/60"
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] text-zinc-400 font-medium mb-1">
+                              <label className="block text-[11px] text-slate-600 dark:text-zinc-400 font-medium mb-1">
                                 Tailles / Pointures :
                               </label>
                               <input
@@ -1648,25 +1648,25 @@ function ProductsContent() {
                                 value={addSizesInput}
                                 onChange={(e) => setAddSizesInput(e.target.value)}
                                 placeholder="40, 41, 42, 43 ou S, M, L"
-                                className="w-full bg-[#121215] border border-zinc-800 rounded-lg p-2 text-zinc-100 placeholder-zinc-600 text-xs focus:outline-none focus:border-blue-500/60"
+                                className="w-full bg-white dark:bg-[#121215] border border-slate-300 dark:border-zinc-800 rounded-lg p-2 text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-600 text-xs focus:outline-none focus:border-blue-500/60"
                               />
                             </div>
                           </div>
 
-                          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-zinc-800/80">
+                          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-200 dark:border-zinc-800/80">
                             <div className="flex items-center gap-2">
-                              <label className="text-[11px] text-zinc-400">Stock par défaut :</label>
+                              <label className="text-[11px] text-slate-600 dark:text-zinc-400">Stock par défaut :</label>
                               <input
                                 type="number"
                                 value={addBatchStock}
                                 onChange={(e) => setAddBatchStock(Number(e.target.value))}
-                                className="w-16 bg-[#121215] border border-zinc-800 rounded-md p-1 text-center font-mono tabular-nums text-xs text-zinc-100"
+                                className="w-16 bg-white dark:bg-[#121215] border border-slate-300 dark:border-zinc-800 rounded-md p-1 text-center font-mono tabular-nums text-xs text-slate-900 dark:text-zinc-100 font-semibold"
                               />
                               <button
                                 type="button"
                                 onClick={handleApplyAddBatchStock}
                                 disabled={addVariants.length === 0}
-                                className="px-2.5 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-300 text-xs font-medium border border-zinc-700 cursor-pointer"
+                                className="px-2.5 py-1 rounded-md bg-white hover:bg-slate-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 disabled:opacity-40 text-slate-700 dark:text-zinc-300 text-xs font-medium border border-slate-300 dark:border-zinc-700 cursor-pointer shadow-xs"
                               >
                                 Appliquer à tous (1-clic)
                               </button>
@@ -1684,20 +1684,20 @@ function ProductsContent() {
 
                         {/* Variants Table */}
                         {addVariants.length > 0 && (
-                          <div className="rounded-xl border border-zinc-800 overflow-hidden bg-[#0d0d10]">
-                            <div className="p-3 bg-[#0f0f12] border-b border-zinc-800 flex items-center justify-between text-xs">
-                              <span className="font-semibold text-zinc-300">
+                          <div className="rounded-xl border border-slate-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-[#0d0d10]">
+                            <div className="p-3 bg-slate-50 dark:bg-[#0f0f12] border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between text-xs">
+                              <span className="font-semibold text-slate-900 dark:text-zinc-300">
                                 Variantes Définies ({addVariants.length})
                               </span>
-                              <span className="font-mono text-zinc-400">
-                                Stock Total : <strong className="text-emerald-400">{computeTotalStock(addVariants)}</strong> unités
+                              <span className="font-mono text-slate-600 dark:text-zinc-400">
+                                Stock Total : <strong className="text-emerald-600 dark:text-emerald-400">{computeTotalStock(addVariants)}</strong> unités
                               </span>
                             </div>
 
                             <div className="max-h-60 overflow-y-auto admin-scrollbar">
                               <table className="w-full text-left text-xs admin-table">
                                 <thead>
-                                  <tr className="border-b border-zinc-800/90 text-zinc-400 bg-zinc-950/60 font-semibold">
+                                  <tr className="border-b border-slate-200 dark:border-zinc-800/90 text-slate-600 dark:text-zinc-400 bg-slate-50 dark:bg-zinc-950/60 font-semibold">
                                     <th className="py-2 px-3">Couleur</th>
                                     <th className="py-2 px-3">Taille</th>
                                     <th className="py-2 px-3">SKU</th>
@@ -1705,11 +1705,11 @@ function ProductsContent() {
                                     <th className="py-2 px-3 text-right">Action</th>
                                   </tr>
                                 </thead>
-                                <tbody className="divide-y divide-zinc-800/40">
+                                <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/40">
                                   {addVariants.map((v, i) => (
-                                    <tr key={i} className="hover:bg-zinc-900/40 transition-colors">
-                                      <td className="py-2 px-3 font-medium text-zinc-200">{v.color || '—'}</td>
-                                      <td className="py-2 px-3 text-zinc-400">{v.size || '—'}</td>
+                                    <tr key={i} className="hover:bg-slate-50 dark:hover:bg-zinc-900/40 transition-colors">
+                                      <td className="py-2 px-3 font-medium text-slate-900 dark:text-zinc-200">{v.color || '—'}</td>
+                                      <td className="py-2 px-3 text-slate-600 dark:text-zinc-400">{v.size || '—'}</td>
                                       <td className="py-2 px-3">
                                         <input
                                           type="text"
@@ -1719,7 +1719,7 @@ function ProductsContent() {
                                             updated[i].sku = e.target.value;
                                             setAddVariants(updated);
                                           }}
-                                          className="w-36 bg-zinc-950 border border-zinc-800 rounded px-2 py-0.5 text-[11px] font-mono text-zinc-200"
+                                          className="w-36 bg-slate-50 dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 rounded px-2 py-0.5 text-[11px] font-mono text-slate-900 dark:text-zinc-200"
                                         />
                                       </td>
                                       <td className="py-2 px-3 text-right">
@@ -1731,14 +1731,14 @@ function ProductsContent() {
                                             updated[i].stock = Math.max(0, parseInt(e.target.value, 10) || 0);
                                             setAddVariants(updated);
                                           }}
-                                          className="w-16 bg-zinc-950 border border-zinc-800 rounded px-2 py-0.5 text-[11px] font-mono tabular-nums text-right text-zinc-100 font-semibold"
+                                          className="w-16 bg-slate-50 dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 rounded px-2 py-0.5 text-[11px] font-mono tabular-nums text-right text-slate-900 dark:text-zinc-100 font-semibold"
                                         />
                                       </td>
                                       <td className="py-2 px-3 text-right">
                                         <button
                                           type="button"
                                           onClick={() => setAddVariants(addVariants.filter((_, idx) => idx !== i))}
-                                          className="text-zinc-500 hover:text-rose-400 p-1 cursor-pointer"
+                                          className="text-slate-400 hover:text-rose-600 dark:text-zinc-500 dark:hover:text-rose-400 p-1 cursor-pointer transition-colors"
                                           title="Supprimer cette variante"
                                         >
                                           <Trash2 className="w-3 h-3" />
@@ -1759,18 +1759,18 @@ function ProductsContent() {
                 {/* TAB 4: PACKS UPSELL MAROC */}
                 {addModalTab === 'packs' && (
                   <div className="space-y-4">
-                    <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-800/40 text-emerald-300 text-xs leading-relaxed">
+                    <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-300 text-xs leading-relaxed">
                       💡 <strong>Standard E-Commerce Marocain :</strong> Plus de 40% des acheteurs COD choisissent un Pack Duo ou Trio si la livraison est offerte. La commande est expédiée dans <strong>un seul colis</strong>, ce qui amortit vos frais de transport.
                     </div>
 
                     {/* Pack Duo Card */}
-                    <div className="p-4 rounded-xl bg-[#0f0f12] border border-zinc-800 space-y-3">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0f0f12] border border-slate-200 dark:border-zinc-800 space-y-3">
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30">
                             ⭐ Pack Duo (Meilleure Vente Maroc)
                           </span>
-                          <h4 className="text-sm font-semibold text-white mt-1">Pack Duo — 2 Unités</h4>
+                          <h4 className="text-sm font-semibold text-slate-900 dark:text-white mt-1">Pack Duo — 2 Unités</h4>
                         </div>
                         <button
                           type="button"
@@ -1778,12 +1778,12 @@ function ProductsContent() {
                           aria-checked={packDuoEnabled}
                           onClick={() => setPackDuoEnabled(!packDuoEnabled)}
                           className={`w-9 h-5 flex items-center rounded-full p-0.5 transition-colors cursor-pointer border ${
-                            packDuoEnabled ? 'bg-emerald-500/20 border-emerald-500/60' : 'bg-zinc-800 border-zinc-700'
+                            packDuoEnabled ? 'bg-emerald-100 dark:bg-emerald-500/20 border-emerald-400 dark:border-emerald-500/60' : 'bg-slate-200 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700'
                           }`}
                         >
                           <span
                             className={`w-3.5 h-3.5 rounded-full transition-transform transform shadow-sm ${
-                              packDuoEnabled ? 'translate-x-4 bg-emerald-400' : 'translate-x-0 bg-zinc-400'
+                              packDuoEnabled ? 'translate-x-4 bg-emerald-600 dark:bg-emerald-400' : 'translate-x-0 bg-slate-400 dark:bg-zinc-400'
                             }`}
                           />
                         </button>
@@ -1792,28 +1792,28 @@ function ProductsContent() {
                       {packDuoEnabled && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
                           <div>
-                            <label className="block text-zinc-400 font-medium mb-1">Prix Pack Duo (MAD) :</label>
+                            <label className="block text-slate-600 dark:text-zinc-400 font-medium mb-1">Prix Pack Duo (MAD) :</label>
                             <input
                               type="number"
                               value={packDuoPrice}
                               onChange={(e) => setPackDuoPrice(Number(e.target.value))}
-                              className="w-full bg-[#121215] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 font-mono tabular-nums font-semibold text-xs"
+                              className="w-full bg-white dark:bg-[#121215] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-100 font-mono tabular-nums font-semibold text-xs"
                             />
-                            <p className="text-[11px] text-zinc-500 mt-1">
+                            <p className="text-[11px] text-slate-500 dark:text-zinc-500 mt-1">
                               Prix plein : {price * 2} MAD • Réduction : {price * 2 - packDuoPrice} MAD
                             </p>
                           </div>
                           <div className="flex flex-col justify-between">
-                            <label className="flex items-center gap-2 text-zinc-300 cursor-pointer pt-2">
+                            <label className="flex items-center gap-2 text-slate-700 dark:text-zinc-300 cursor-pointer pt-2">
                               <input
                                 type="checkbox"
                                 checked={packDuoFreeShipping}
                                 onChange={(e) => setPackDuoFreeShipping(e.target.checked)}
-                                className="rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500/20"
+                                className="rounded border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-emerald-600 focus:ring-emerald-500/20"
                               />
                               <span>Livraison Gratuite Automatique (0 DH)</span>
                             </label>
-                            <div className="p-2 rounded-lg bg-emerald-950/20 border border-emerald-800/40 text-emerald-400 text-[11px] font-mono">
+                            <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-400 text-[11px] font-mono">
                               Économie totale client : {price * 2 - packDuoPrice + (packDuoFreeShipping ? 35 : 0)} MAD
                             </div>
                           </div>
@@ -1822,13 +1822,13 @@ function ProductsContent() {
                     </div>
 
                     {/* Pack Trio Card */}
-                    <div className="p-4 rounded-xl bg-[#0f0f12] border border-zinc-800 space-y-3">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0f0f12] border border-slate-200 dark:border-zinc-800 space-y-3">
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-300 border border-purple-300 dark:border-purple-500/30">
                             🔥 Pack Trio (Panier Moyen Maximisé)
                           </span>
-                          <h4 className="text-sm font-semibold text-white mt-1">Pack Trio — 3 Unités + Cadeau</h4>
+                          <h4 className="text-sm font-semibold text-slate-900 dark:text-white mt-1">Pack Trio — 3 Unités + Cadeau</h4>
                         </div>
                         <button
                           type="button"
@@ -1836,12 +1836,12 @@ function ProductsContent() {
                           aria-checked={packTrioEnabled}
                           onClick={() => setPackTrioEnabled(!packTrioEnabled)}
                           className={`w-9 h-5 flex items-center rounded-full p-0.5 transition-colors cursor-pointer border ${
-                            packTrioEnabled ? 'bg-purple-500/20 border-purple-500/60' : 'bg-zinc-800 border-zinc-700'
+                            packTrioEnabled ? 'bg-purple-100 dark:bg-purple-500/20 border-purple-400 dark:border-purple-500/60' : 'bg-slate-200 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700'
                           }`}
                         >
                           <span
                             className={`w-3.5 h-3.5 rounded-full transition-transform transform shadow-sm ${
-                              packTrioEnabled ? 'translate-x-4 bg-purple-400' : 'translate-x-0 bg-zinc-400'
+                              packTrioEnabled ? 'translate-x-4 bg-purple-600 dark:bg-purple-400' : 'translate-x-0 bg-slate-400 dark:bg-zinc-400'
                             }`}
                           />
                         </button>
@@ -1850,26 +1850,26 @@ function ProductsContent() {
                       {packTrioEnabled && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
                           <div>
-                            <label className="block text-zinc-400 font-medium mb-1">Prix Pack Trio (MAD) :</label>
+                            <label className="block text-slate-600 dark:text-zinc-400 font-medium mb-1">Prix Pack Trio (MAD) :</label>
                             <input
                               type="number"
                               value={packTrioPrice}
                               onChange={(e) => setPackTrioPrice(Number(e.target.value))}
-                              className="w-full bg-[#121215] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 font-mono tabular-nums font-semibold text-xs"
+                              className="w-full bg-white dark:bg-[#121215] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-100 font-mono tabular-nums font-semibold text-xs"
                             />
-                            <p className="text-[11px] text-zinc-500 mt-1">
+                            <p className="text-[11px] text-slate-500 dark:text-zinc-500 mt-1">
                               Prix plein : {price * 3} MAD • Réduction : {price * 3 - packTrioPrice} MAD
                             </p>
                           </div>
                           <div>
-                            <label className="block text-zinc-400 font-medium mb-1">Cadeau Offert Inclus :</label>
+                            <label className="block text-slate-600 dark:text-zinc-400 font-medium mb-1">Cadeau Offert Inclus :</label>
                             <input
                               type="text"
                               value={packTrioGift}
                               onChange={(e) => setPackTrioGift(e.target.value)}
-                              className="w-full bg-[#121215] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 text-xs"
+                              className="w-full bg-white dark:bg-[#121215] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-100 text-xs"
                             />
-                            <p className="text-[11px] text-zinc-500 mt-1">
+                            <p className="text-[11px] text-slate-500 dark:text-zinc-500 mt-1">
                               Incite à l&apos;achat immédiat sans hésitation.
                             </p>
                           </div>
@@ -1973,13 +1973,13 @@ function ProductsContent() {
               </div>
 
               {/* Modal Footer Controls */}
-              <div className="p-4 border-t border-zinc-800/80 bg-[#0f0f12] flex items-center justify-between">
+              <div className="p-4 border-t border-slate-200 dark:border-zinc-800/80 bg-slate-50 dark:bg-[#0f0f12] flex items-center justify-between">
                 <div>
                   {(draftLoaded || title || addImages.length > 0) && (
                     <button
                       type="button"
                       onClick={handleClearDraft}
-                      className="text-zinc-500 hover:text-rose-400 text-xs font-medium transition-colors cursor-pointer"
+                      className="text-slate-500 hover:text-rose-600 dark:text-zinc-500 dark:hover:text-rose-400 text-xs font-medium transition-colors cursor-pointer"
                     >
                       Effacer le brouillon
                     </button>
@@ -2699,16 +2699,16 @@ function ProductsContent() {
       {/* Add Category Modal */}
       {showAddCategoryModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-[#121215] border border-zinc-800 rounded-xl p-6 max-w-md w-full space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
+          <div className="bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 rounded-xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-zinc-800/80">
               <div className="flex items-center gap-2">
-                <Tag className="w-4 h-4 text-zinc-300" />
-                <h3 className="text-base font-semibold text-white">Ajouter une Catégorie</h3>
+                <Tag className="w-4 h-4 text-slate-700 dark:text-zinc-300" />
+                <h3 className="text-base font-semibold text-slate-900 dark:text-white">Ajouter une Catégorie</h3>
               </div>
               <button 
                 type="button"
                 onClick={() => setShowAddCategoryModal(false)} 
-                className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors"
+                className="text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-white p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 ✕
               </button>
@@ -2716,7 +2716,7 @@ function ProductsContent() {
 
             <form onSubmit={handleCreateCategory} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-zinc-300 font-medium mb-1">Nom de la Catégorie :</label>
+                <label className="block text-slate-700 dark:text-zinc-300 font-medium mb-1">Nom de la Catégorie :</label>
                 <input
                   type="text"
                   required
@@ -2729,36 +2729,36 @@ function ProductsContent() {
                       setNewCatSlug(val.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''));
                     }
                   }}
-                  className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600"
+                  className="w-full bg-white dark:bg-[#0d0d10] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60"
                 />
               </div>
 
               <div>
-                <label className="block text-zinc-300 font-medium mb-1">Slug URL (auto-généré) :</label>
+                <label className="block text-slate-700 dark:text-zinc-300 font-medium mb-1">Slug URL (auto-généré) :</label>
                 <input
                   type="text"
                   placeholder="ex: bijouterie-artisanale"
                   value={newCatSlug}
                   onChange={(e) => setNewCatSlug(e.target.value)}
-                  className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2.5 text-zinc-300 font-mono focus:outline-none focus:border-zinc-600"
+                  className="w-full bg-white dark:bg-[#0d0d10] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-300 font-mono focus:outline-none focus:border-emerald-500/60"
                 />
-                <p className="text-[11px] text-zinc-500 mt-1">
+                <p className="text-[11px] text-slate-500 dark:text-zinc-500 mt-1">
                   Ce slug servira pour le filtrage par collection et les liens de campagne.
                 </p>
               </div>
 
               <div>
-                <label className="block text-zinc-300 font-medium mb-1">Icône & Symbole :</label>
-                <div className="flex flex-wrap gap-1.5 p-2 bg-[#0d0d10] border border-zinc-800 rounded-lg">
+                <label className="block text-slate-700 dark:text-zinc-300 font-medium mb-1">Icône & Symbole :</label>
+                <div className="flex flex-wrap gap-1.5 p-2 bg-slate-50 dark:bg-[#0d0d10] border border-slate-200 dark:border-zinc-800 rounded-lg">
                   {['🧳', '🍯', '⚡', '🌿', '👗', '👞', '💎', '🛋️', '👶', '🍵', '🏷️', '📦'].map((ico) => (
                     <button
                       key={ico}
                       type="button"
                       onClick={() => setNewCatIcon(ico)}
-                      className={`w-8 h-8 rounded-md flex items-center justify-center text-sm transition-all ${
+                      className={`w-8 h-8 rounded-md flex items-center justify-center text-sm transition-all cursor-pointer ${
                         newCatIcon === ico
-                          ? 'bg-zinc-700 border-2 border-emerald-400 scale-105 shadow-sm'
-                          : 'bg-zinc-850 hover:bg-zinc-800 border border-zinc-700/60'
+                          ? 'bg-emerald-50 border-2 border-emerald-500 text-emerald-800 dark:bg-zinc-700 dark:border-emerald-400 scale-105 shadow-sm'
+                          : 'bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:border-zinc-700/60'
                       }`}
                     >
                       {ico}
@@ -2768,13 +2768,13 @@ function ProductsContent() {
               </div>
 
               <div>
-                <label className="block text-zinc-300 font-medium mb-1">Description de la collection (optionnel) :</label>
+                <label className="block text-slate-700 dark:text-zinc-300 font-medium mb-1">Description de la collection (optionnel) :</label>
                 <textarea
                   rows={2}
                   placeholder="Brève description pour vos campagnes et votre catalogue..."
                   value={newCatDescription}
                   onChange={(e) => setNewCatDescription(e.target.value)}
-                  className="w-full bg-[#0d0d10] border border-zinc-800 rounded-lg p-2 text-zinc-200 placeholder-zinc-500 text-xs focus:outline-none focus:border-zinc-600 resize-none"
+                  className="w-full bg-white dark:bg-[#0d0d10] border border-slate-300 dark:border-zinc-800 rounded-lg p-2 text-slate-900 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 text-xs focus:outline-none focus:border-emerald-500/60 resize-none"
                 />
               </div>
 

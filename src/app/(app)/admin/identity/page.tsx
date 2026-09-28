@@ -221,11 +221,11 @@ export default function IdentityPage() {
       )}
 
       {status === 'draft' && (
-        <div className="p-4 rounded-2xl bg-[#13171c] border border-slate-800/70 bento-card text-zinc-300 text-xs font-semibold flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 text-sky-400" />
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 bento-card text-slate-700 dark:text-zinc-300 text-xs font-semibold flex items-center gap-3 shadow-xs">
+          <AlertCircle className="w-5 h-5 shrink-0 text-sky-500 dark:text-sky-400" />
           <div>
-            <p className="font-bold text-white">Dossier Non Soumis</p>
-            <p className="text-[11px] text-zinc-400 mt-0.5">
+            <p className="font-bold text-slate-900 dark:text-white">Dossier Non Soumis</p>
+            <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
               Veuillez renseigner votre statut (Auto-Entrepreneur ou SARL) et téléverser vos pièces justificatives.
             </p>
           </div>
@@ -236,8 +236,8 @@ export default function IdentityPage() {
         <div
           className={`p-3.5 rounded-2xl border text-xs font-semibold flex items-center gap-2 ${
             feedback.type === 'success'
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-              : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
+              : 'bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-400'
           }`}
         >
           {feedback.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
@@ -248,8 +248,8 @@ export default function IdentityPage() {
       {/* Main Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Step 1: Legal Entity Type */}
-        <div className="p-6 rounded-3xl bg-[#13171c] border border-slate-800/70 bento-card space-y-4">
-          <h2 className="text-sm font-black uppercase tracking-wider text-slate-400">
+        <div className="p-6 rounded-3xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 bento-card space-y-4 shadow-xs">
+          <h2 className="text-sm font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
             1. Forme Juridique de votre Activité
           </h2>
 
@@ -260,16 +260,16 @@ export default function IdentityPage() {
               onClick={() => setEntityType('auto_entrepreneur')}
               className={`p-4 rounded-2xl border text-left transition-all flex items-start gap-3.5 cursor-pointer ${
                 entityType === 'auto_entrepreneur'
-                  ? 'bg-emerald-500/10 border-emerald-500/40 text-white'
-                  : 'bg-slate-950/40 border-slate-800 text-slate-400 hover:border-slate-700'
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-950 dark:bg-emerald-500/10 dark:border-emerald-500/40 dark:text-white'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300 dark:bg-slate-950/40 dark:border-slate-800 dark:text-slate-400 dark:hover:border-slate-700'
               }`}
             >
-              <div className="p-2.5 rounded-xl bg-slate-800 text-emerald-400 shrink-0">
+              <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shrink-0">
                 <UserCheck className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-bold text-xs text-white">Auto-Entrepreneur Marocain</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="font-bold text-xs text-slate-900 dark:text-white">Auto-Entrepreneur Marocain</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                   Personne physique immatriculée au Registre National de l&apos;Auto-Entrepreneur.
                 </p>
               </div>
@@ -281,16 +281,16 @@ export default function IdentityPage() {
               onClick={() => setEntityType('sarl')}
               className={`p-4 rounded-2xl border text-left transition-all flex items-start gap-3.5 cursor-pointer ${
                 entityType === 'sarl'
-                  ? 'bg-emerald-500/10 border-emerald-500/40 text-white'
-                  : 'bg-slate-950/40 border-slate-800 text-slate-400 hover:border-slate-700'
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-950 dark:bg-emerald-500/10 dark:border-emerald-500/40 dark:text-white'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300 dark:bg-slate-950/40 dark:border-slate-800 dark:text-slate-400 dark:hover:border-slate-700'
               }`}
             >
-              <div className="p-2.5 rounded-xl bg-slate-800 text-emerald-400 shrink-0">
+              <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shrink-0">
                 <Building2 className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-bold text-xs text-white">Société Commerciale (SARL, SA)</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="font-bold text-xs text-slate-900 dark:text-white">Société Commerciale (SARL, SA)</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                   Entreprise enregistrée au Registre de Commerce (Modèle J, ICE, IF).
                 </p>
               </div>
@@ -299,8 +299,8 @@ export default function IdentityPage() {
         </div>
 
         {/* Step 2: Legal Identifiers */}
-        <div className="p-6 rounded-3xl bg-[#13171c] border border-slate-800/70 bento-card space-y-4">
-          <h2 className="text-sm font-black uppercase tracking-wider text-slate-400">
+        <div className="p-6 rounded-3xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 bento-card space-y-4 shadow-xs">
+          <h2 className="text-sm font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
             2. Identifiants Fiscaux & Réglementaires
           </h2>
 
@@ -308,7 +308,7 @@ export default function IdentityPage() {
             {entityType === 'sarl' && (
               <>
                 <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-xs font-bold text-slate-300">Raison Sociale (Nom de l&apos;entreprise)</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Raison Sociale (Nom de l&apos;entreprise)</label>
                   <input
                     type="text"
                     disabled={isLocked}
@@ -316,12 +316,12 @@ export default function IdentityPage() {
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">Numéro ICE (15 chiffres)</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Numéro ICE (15 chiffres)</label>
                   <input
                     type="text"
                     disabled={isLocked}
@@ -329,12 +329,12 @@ export default function IdentityPage() {
                     value={iceNumber}
                     onChange={(e) => setIceNumber(e.target.value)}
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">Identifiant Fiscal (IF)</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Identifiant Fiscal (IF)</label>
                   <input
                     type="text"
                     disabled={isLocked}
@@ -342,12 +342,12 @@ export default function IdentityPage() {
                     value={taxId}
                     onChange={(e) => setTaxId(e.target.value)}
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">Numéro RC (Registre du Commerce)</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Numéro RC (Registre du Commerce)</label>
                   <input
                     type="text"
                     disabled={isLocked}
@@ -355,12 +355,12 @@ export default function IdentityPage() {
                     value={rcNumber}
                     onChange={(e) => setRcNumber(e.target.value)}
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">Tribunal de Commerce</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tribunal de Commerce</label>
                   <input
                     type="text"
                     disabled={isLocked}
@@ -368,14 +368,14 @@ export default function IdentityPage() {
                     value={rcCity}
                     onChange={(e) => setRcCity(e.target.value)}
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-500"
                   />
                 </div>
               </>
             )}
 
             <div className="space-y-1.5 sm:col-span-2">
-              <label className="text-xs font-bold text-slate-300">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 {entityType === 'auto_entrepreneur'
                   ? 'Numéro CIN du Titulaire (Carte Nationale)'
                   : 'Numéro CIN du Gérant Légal'}
@@ -387,24 +387,24 @@ export default function IdentityPage() {
                 value={cinNumber}
                 onChange={(e) => setCinNumber(e.target.value.toUpperCase())}
                 required
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs outline-none focus:border-emerald-500"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs outline-none focus:border-emerald-500"
               />
             </div>
           </div>
         </div>
 
         {/* Step 3: Banking Details for COD Payouts */}
-        <div className="p-6 rounded-3xl bg-[#13171c] border border-slate-800/70 bento-card space-y-4">
+        <div className="p-6 rounded-3xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 bento-card space-y-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-black uppercase tracking-wider text-slate-400">
+            <h2 className="text-sm font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
               3. Coordonnées Bancaires Marocaines (Virements COD)
             </h2>
-            <Landmark className="w-4 h-4 text-emerald-400" />
+            <Landmark className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300">Banque Réceptrice</label>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Banque Réceptrice</label>
               <select
                 disabled={isLocked}
                 value={bankName}
@@ -419,7 +419,7 @@ export default function IdentityPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300">Relevé d&apos;Identité Bancaire (RIB - 24 chiffres)</label>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Relevé d&apos;Identité Bancaire (RIB - 24 chiffres)</label>
               <input
                 type="text"
                 disabled={isLocked}
@@ -427,29 +427,29 @@ export default function IdentityPage() {
                 value={bankRib}
                 onChange={(e) => setBankRib(e.target.value)}
                 required
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-emerald-400 font-mono text-xs outline-none focus:border-emerald-500"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-emerald-700 dark:text-emerald-400 font-mono text-xs outline-none focus:border-emerald-500"
               />
             </div>
           </div>
         </div>
 
         {/* Step 4: Documents Upload */}
-        <div className="p-6 rounded-3xl bg-[#13171c] border border-slate-800/70 bento-card space-y-4">
-          <h2 className="text-sm font-black uppercase tracking-wider text-slate-400">
+        <div className="p-6 rounded-3xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 bento-card space-y-4 shadow-xs">
+          <h2 className="text-sm font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
             4. Pièces Justificatives Obligatoires
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Doc 1: CIN Recto */}
-            <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-white">CIN (Face Avant)</span>
-                {documentUrls['cin_front'] && <Check className="w-4 h-4 text-emerald-400" />}
+                <span className="text-xs font-bold text-slate-900 dark:text-white">CIN (Face Avant)</span>
+                {documentUrls['cin_front'] && <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
               </div>
-              <p className="text-[11px] text-slate-400">Carte nationale d&apos;identité lisible.</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Carte nationale d&apos;identité lisible.</p>
               
               {!isLocked && (
-                <label className="cursor-pointer flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-bold transition-colors">
+                <label className="cursor-pointer flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-emerald-400 text-xs font-bold transition-colors">
                   <Upload className="w-3.5 h-3.5" />
                   <span>{uploadingDoc === 'cin_front' ? 'Téléversement...' : documentUrls['cin_front'] ? 'Remplacer' : 'Choisir fichier'}</span>
                   <input
@@ -463,15 +463,15 @@ export default function IdentityPage() {
             </div>
 
             {/* Doc 2: CIN Verso */}
-            <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-white">CIN (Face Arrière)</span>
-                {documentUrls['cin_back'] && <Check className="w-4 h-4 text-emerald-400" />}
+                <span className="text-xs font-bold text-slate-900 dark:text-white">CIN (Face Arrière)</span>
+                {documentUrls['cin_back'] && <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
               </div>
-              <p className="text-[11px] text-slate-400">Verso de la CIN avec adresse.</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Verso de la CIN avec adresse.</p>
               
               {!isLocked && (
-                <label className="cursor-pointer flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-bold transition-colors">
+                <label className="cursor-pointer flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-emerald-400 text-xs font-bold transition-colors">
                   <Upload className="w-3.5 h-3.5" />
                   <span>{uploadingDoc === 'cin_back' ? 'Téléversement...' : documentUrls['cin_back'] ? 'Remplacer' : 'Choisir fichier'}</span>
                   <input
@@ -485,21 +485,21 @@ export default function IdentityPage() {
             </div>
 
             {/* Doc 3: Attestation / Modèle J */}
-            <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-white">
+                <span className="text-xs font-bold text-slate-900 dark:text-white">
                   {entityType === 'auto_entrepreneur' ? 'Attestation A.E' : 'Extrait Modèle J'}
                 </span>
-                {documentUrls['legal_proof'] && <Check className="w-4 h-4 text-emerald-400" />}
+                {documentUrls['legal_proof'] && <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 {entityType === 'auto_entrepreneur'
                   ? 'Carte ou attestation délivrée par la Poste Maroc.'
                   : 'Extrait du Registre de Commerce de moins de 3 mois.'}
               </p>
               
               {!isLocked && (
-                <label className="cursor-pointer flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-bold transition-colors">
+                <label className="cursor-pointer flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-emerald-400 text-xs font-bold transition-colors">
                   <Upload className="w-3.5 h-3.5" />
                   <span>{uploadingDoc === 'legal_proof' ? 'Téléversement...' : documentUrls['legal_proof'] ? 'Remplacer' : 'Choisir fichier'}</span>
                   <input
@@ -521,7 +521,7 @@ export default function IdentityPage() {
               type="button"
               onClick={handleSaveDraft}
               disabled={submitting}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-transparent font-bold text-xs transition-colors cursor-pointer"
             >
               <Save className="w-4 h-4" /> Enregistrer le brouillon
             </button>
@@ -529,7 +529,7 @@ export default function IdentityPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-xs transition-colors shadow-lg shadow-emerald-500/10 cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors shadow-lg shadow-emerald-500/10 cursor-pointer"
             >
               {submitting ? 'Transmission...' : (
                 <>Soumettre pour vérification <ArrowRight className="w-4 h-4" /></>

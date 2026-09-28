@@ -657,33 +657,33 @@ function OrdersContent() {
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={handleBulkConfirm}
-              className="px-3 py-1.5 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/80 text-cyan-300 border border-cyan-700/50 font-medium text-xs flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 dark:bg-cyan-950/60 dark:hover:bg-cyan-900/80 dark:text-cyan-300 dark:border-cyan-700/50 font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Check className="w-3.5 h-3.5" /> Confirmer
+              <Check className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" /> Confirmer
             </button>
             <button
               onClick={handleBulkShip}
-              className="px-3 py-1.5 rounded-lg bg-sky-950/60 hover:bg-sky-900/80 text-sky-300 border border-sky-700/50 font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 dark:bg-sky-950/60 dark:hover:bg-sky-900/80 dark:text-sky-300 dark:border-sky-700/50 font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Truck className="w-3.5 h-3.5 text-sky-400" /> Expédier
+              <Truck className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" /> Expédier
             </button>
             <button
               onClick={() => handleExportCsv('selected')}
-              className="px-3 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/80 dark:text-emerald-300 dark:border-emerald-700/50 font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Exporter les commandes sélectionnées au format CSV"
             >
-              <Download className="w-3.5 h-3.5" /> Exporter CSV
+              <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Exporter CSV
             </button>
             <button
               onClick={handleBulkDelete}
-              className="px-3 py-1.5 rounded-lg bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 hover:text-white font-medium text-xs flex items-center gap-1.5 border border-rose-700/50 transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 dark:bg-rose-950/60 dark:hover:bg-rose-900/80 dark:text-rose-300 font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Supprimer définitivement les commandes sélectionnées"
             >
-              <Trash2 className="w-3.5 h-3.5" /> Supprimer
+              <Trash2 className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" /> Supprimer
             </button>
             <button
               onClick={() => setSelectedOrderIds([])}
-              className="px-2.5 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 text-xs font-medium transition-colors"
+              className="px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200 text-xs font-medium transition-colors cursor-pointer"
             >
               Désélectionner
             </button>
@@ -916,7 +916,7 @@ function OrdersContent() {
                                   href={buildWhatsAppLink(order, 'confirmation', storeSlug)}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="p-1.5 rounded-md bg-emerald-950/50 hover:bg-emerald-900 text-emerald-400 border border-emerald-800/50 text-[10px] font-bold flex items-center gap-1 transition-colors"
+                                  className="p-1.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:hover:bg-emerald-900 dark:text-emerald-400 dark:border-emerald-800/50 text-[10px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
                                   title="WhatsApp Darija"
                                 >
                                   <MessageCircle className="w-3 h-3 fill-current" />
@@ -924,7 +924,7 @@ function OrdersContent() {
 
                                 <a
                                   href={`tel:${order.phone}`}
-                                  className="p-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                                  className="p-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:hover:text-white dark:border-transparent transition-colors cursor-pointer"
                                   title="Appeler le client"
                                 >
                                   <Phone className="w-3 h-3" />
@@ -934,9 +934,9 @@ function OrdersContent() {
                                 {col.id === 'to_confirm' && (
                                   <button
                                     onClick={() => handleQuickTransition(order.id, 'confirmed')}
-                                    className="flex-1 py-1 px-2 rounded-md bg-cyan-950/60 hover:bg-cyan-900 text-cyan-300 border border-cyan-800/50 text-[10px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                                    className="flex-1 py-1 px-2 rounded-md bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 dark:bg-cyan-950/60 dark:hover:bg-cyan-900 dark:text-cyan-300 dark:border-cyan-800/50 text-[10px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                                   >
-                                    <Check className="w-3 h-3" />
+                                    <Check className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
                                     <span>Confirmer</span>
                                   </button>
                                 )}
@@ -944,9 +944,9 @@ function OrdersContent() {
                                 {col.id === 'confirmed' && (
                                   <button
                                     onClick={() => handleQuickShip(order.id)}
-                                    className="flex-1 py-1 px-2 rounded-md bg-sky-950/60 hover:bg-sky-900 text-sky-300 border border-sky-800/50 text-[10px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                                    className="flex-1 py-1 px-2 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 dark:bg-sky-950/60 dark:hover:bg-sky-900 dark:text-sky-300 dark:border-sky-800/50 text-[10px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                                   >
-                                    <Truck className="w-3 h-3 text-sky-400" />
+                                    <Truck className="w-3 h-3 text-sky-600 dark:text-sky-400" />
                                     <span>Expédier</span>
                                   </button>
                                 )}
@@ -954,9 +954,9 @@ function OrdersContent() {
                                 {col.id === 'shipped' && (
                                   <button
                                     onClick={() => handleQuickTransition(order.id, 'delivered')}
-                                    className="flex-1 py-1 px-2 rounded-md bg-emerald-950/60 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/50 text-[10px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                                    className="flex-1 py-1 px-2 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900 dark:text-emerald-300 dark:border-emerald-800/50 text-[10px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                                   >
-                                    <DollarSign className="w-3 h-3" />
+                                    <DollarSign className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                                     <span>Livrée</span>
                                   </button>
                                 )}
@@ -964,15 +964,15 @@ function OrdersContent() {
                                 {col.id === 'returned' && (
                                   <button
                                     onClick={() => handleQuickTransition(order.id, 'new')}
-                                    className="flex-1 py-1 px-2 rounded-md bg-slate-800 hover:bg-slate-700 text-zinc-300 text-[10px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                                    className="flex-1 py-1 px-2 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-zinc-300 text-[10px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                                   >
-                                    <RotateCcw className="w-3 h-3" />
+                                    <RotateCcw className="w-3 h-3 text-slate-500 dark:text-zinc-400" />
                                     <span>Réactiver</span>
                                   </button>
                                 )}
 
                                 {col.id === 'delivered' && (
-                                  <span className="text-[10px] font-mono text-emerald-400 font-bold px-2 py-0.5 bg-emerald-950/40 border border-emerald-800/30 rounded text-center flex-1">
+                                  <span className="text-[10px] font-mono text-emerald-800 dark:text-emerald-400 font-bold px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/30 rounded text-center flex-1">
                                     Encaissé ✓
                                   </span>
                                 )}
@@ -1182,16 +1182,16 @@ function OrdersContent() {
                             </a>
 
                             {/* ── Order Pipeline: Confirmed -> Shipped -> Delivered | Retournée ── */}
-                            <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 shadow-inner">
+                            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-950/80 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-inner">
                               {/* Switch 1: Confirmed Switch */}
                               <button
                                 onClick={() => handleQuickTransition(order.id, 'confirmed')}
                                 className={`px-2 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all cursor-pointer ${
                                   order.status === 'confirmed'
-                                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-sm shadow-cyan-500/20'
+                                    ? 'bg-cyan-50 text-cyan-800 border border-cyan-300 dark:bg-cyan-500/20 dark:text-cyan-300 dark:border-cyan-500/50 shadow-sm shadow-cyan-500/20'
                                     : ['shipped', 'shipping', 'delivered'].includes(order.status)
-                                    ? 'bg-cyan-950/40 text-cyan-400/60 border border-cyan-900/30'
-                                    : 'bg-[#18181b] hover:bg-cyan-950/40 text-zinc-400 hover:text-cyan-300 border border-zinc-800'
+                                    ? 'bg-cyan-50 text-cyan-700/70 border border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-400/60 dark:border-cyan-900/30'
+                                    : 'bg-white hover:bg-cyan-50 text-slate-600 hover:text-cyan-800 border border-slate-200 dark:bg-[#18181b] dark:hover:bg-cyan-950/40 dark:text-zinc-400 dark:hover:text-cyan-300 dark:border-zinc-800'
                                 }`}
                                 title={order.status === 'confirmed' ? 'Statut : Confirmée (Actuel)' : 'Basculer vers : 1. Confirmée'}
                               >
@@ -1199,49 +1199,49 @@ function OrdersContent() {
                                 <span>1. Confirmer</span>
                               </button>
 
-                              <span className="text-zinc-600 text-[10px] font-bold">→</span>
+                              <span className="text-slate-400 dark:text-zinc-600 text-[10px] font-bold">→</span>
 
                               {/* Switch 2: Shipped Switch */}
                               <button
                                 onClick={() => handleQuickShip(order.id)}
                                 className={`px-2 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all cursor-pointer ${
                                   ['shipped', 'shipping'].includes(order.status)
-                                    ? 'bg-sky-500/20 text-sky-300 border border-sky-500/50 shadow-sm shadow-sky-500/20'
+                                    ? 'bg-sky-50 text-sky-800 border border-sky-300 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/50 shadow-sm shadow-sky-500/20'
                                     : order.status === 'delivered'
-                                    ? 'bg-sky-950/40 text-sky-400/60 border border-sky-900/30'
-                                    : 'bg-[#18181b] hover:bg-sky-950/40 text-zinc-400 hover:text-sky-300 border border-zinc-800'
+                                    ? 'bg-sky-50 text-sky-700/70 border border-sky-200 dark:bg-sky-950/40 dark:text-sky-400/60 dark:border-sky-900/30'
+                                    : 'bg-white hover:bg-sky-50 text-slate-600 hover:text-sky-800 border border-slate-200 dark:bg-[#18181b] dark:hover:bg-sky-950/40 dark:text-zinc-400 dark:hover:text-sky-300 dark:border-zinc-800'
                                 }`}
                                 title={['shipped', 'shipping'].includes(order.status) ? 'Statut : Expédiée (Actuel)' : 'Basculer vers : 2. Expédier'}
                               >
-                                <Truck className="w-3 h-3 text-sky-400" />
+                                <Truck className="w-3 h-3 text-sky-600 dark:text-sky-400" />
                                 <span>2. Expédier</span>
                               </button>
 
-                              <span className="text-zinc-600 text-[10px] font-bold">→</span>
+                              <span className="text-slate-400 dark:text-zinc-600 text-[10px] font-bold">→</span>
 
                               {/* Switch 3: Delivered Switch */}
                               <button
                                 onClick={() => handleQuickTransition(order.id, 'delivered')}
                                 className={`px-2 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all cursor-pointer ${
                                   order.status === 'delivered'
-                                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-sm shadow-emerald-500/20 font-black'
-                                    : 'bg-[#18181b] hover:bg-emerald-950/40 text-zinc-400 hover:text-emerald-300 border border-zinc-800'
+                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/50 shadow-sm shadow-emerald-500/20 font-black'
+                                    : 'bg-white hover:bg-emerald-50 text-slate-600 hover:text-emerald-800 border border-slate-200 dark:bg-[#18181b] dark:hover:bg-emerald-950/40 dark:text-zinc-400 dark:hover:text-emerald-300 dark:border-zinc-800'
                                 }`}
                                 title={order.status === 'delivered' ? 'Statut : Livrée & Encaissée (Actuel)' : 'Basculer vers : 3. Livrée (Encaissée)'}
                               >
-                                <CheckCircle2 className="w-3 h-3" />
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                                 <span>3. Livrée</span>
                               </button>
 
-                              <span className="text-zinc-700 text-[10px] font-bold mx-0.5">|</span>
+                              <span className="text-slate-300 dark:text-zinc-700 text-[10px] font-bold mx-0.5">|</span>
 
                               {/* Switch 4: Retournée (Replaces both Annuler & Retour) */}
                               <button
                                 onClick={() => handleQuickTransition(order.id, order.status === 'returned' || order.status === 'canceled' ? 'new' : 'returned')}
                                 className={`px-2 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all cursor-pointer ${
                                   order.status === 'returned' || order.status === 'canceled'
-                                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/50 shadow-sm shadow-rose-500/20 font-black'
-                                    : 'bg-[#18181b] hover:bg-rose-950/40 text-zinc-400 hover:text-rose-300 border border-zinc-800'
+                                    ? 'bg-rose-50 text-rose-800 border border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/50 shadow-sm shadow-rose-500/20 font-black'
+                                    : 'bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-800 border border-slate-200 dark:bg-[#18181b] dark:hover:bg-rose-950/40 dark:text-zinc-400 dark:hover:text-rose-300 dark:border-zinc-800'
                                 }`}
                                 title={
                                   order.status === 'returned' || order.status === 'canceled'
@@ -1249,7 +1249,7 @@ function OrdersContent() {
                                     : 'Basculer vers : 4. Retournée (Refus / Annulation)'
                                 }
                               >
-                                <RotateCcw className="w-3 h-3" />
+                                <RotateCcw className="w-3 h-3 text-rose-600 dark:text-rose-400" />
                                 <span>4. Retournée</span>
                               </button>
                             </div>
