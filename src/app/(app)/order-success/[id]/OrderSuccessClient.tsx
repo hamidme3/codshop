@@ -54,7 +54,7 @@ export default function OrderSuccessClient({
   countryCode: initialCountryCode,
   currency: initialCurrency,
 }: OrderSuccessClientProps) {
-  const { formatMAD, formatPrice, countryCode: contextCountryCode } = useTheme();
+  const { formatMAD, formatPrice, countryCode: contextCountryCode, storeSlug } = useTheme();
 
   const [visitorCountry, setVisitorCountry] = useState<string>(
     initialCountryCode || contextCountryCode || 'MA'
@@ -105,7 +105,7 @@ export default function OrderSuccessClient({
     }
 
     // Initialize pixels and fire deduplicated Purchase event
-    fetchAndInitPixels().then(() => {
+    fetchAndInitPixels(storeSlug).then(() => {
       trackPurchase({
         orderId,
         total: total || 0,

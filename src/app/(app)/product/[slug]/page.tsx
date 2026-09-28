@@ -104,7 +104,7 @@ export default function ProductDetailPage() {
       });
       trackStorePageView(activeStore, `/product/${slug}`);
 
-      fetchAndInitPixels().then(() => {
+      fetchAndInitPixels(activeStore).then(() => {
         trackViewContent({
           id: product.id,
           title: product.title,

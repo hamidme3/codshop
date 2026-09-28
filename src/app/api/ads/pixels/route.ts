@@ -14,8 +14,29 @@ export async function GET(request: Request) {
     if (!storeId && db) {
       try {
         const { searchParams } = new URL(request.url);
-        const queryStore = searchParams.get('store');
+        let queryStore = searchParams.get('store');
         const queryStoreId = searchParams.get('storeId');
+
+        if (!queryStore) {
+          queryStore = request.headers.get('x-store-slug');
+        }
+
+        if (!queryStore) {
+          const referer = request.headers.get('referer');
+          if (referer) {
+            try {
+              const refUrl = new URL(referer);
+              queryStore = refUrl.searchParams.get('store');
+              if (!queryStore) {
+                const host = refUrl.hostname.toLowerCase();
+                const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
+                if (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) {
+                  queryStore = host.replace(`.${rootDomain}`, '');
+                }
+              }
+            } catch {}
+          }
+        }
 
         if (queryStoreId) {
           storeId = queryStoreId;
@@ -24,10 +45,17 @@ export async function GET(request: Request) {
             where: eq(schema.stores.slug, queryStore),
           });
           if (storeRecord) storeId = storeRecord.id;
-        } else {
-          // Fallback to default active store
-          const defaultStore = await db.query.stores.findFirst();
-          if (defaultStore) storeId = defaultStore.id;
+        }
+
+        if (!storeId) {
+          // If still no store resolved, check for any configured ad integration
+          const activeIntegration = await db.query.adIntegrations.findFirst();
+          if (activeIntegration) {
+            storeId = activeIntegration.storeId;
+          } else {
+            const defaultStore = await db.query.stores.findFirst();
+            if (defaultStore) storeId = defaultStore.id;
+          }
         }
       } catch {
         // Fall through

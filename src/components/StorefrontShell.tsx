@@ -9,11 +9,15 @@ import { CartDrawer } from '@/components/CartDrawer';
 import { MobileBottomNav } from '@/components/MobileBottomNav';
 import { SearchModal } from '@/components/SearchModal';
 
+import { useTheme } from '@/context/ThemeContext';
+import { fetchAndInitPixels } from '@/lib/pixel-tracker';
+
 function ShellContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '';
   const searchParams = useSearchParams();
   const storeParam = searchParams.get('store');
   const [isSubdomain, setIsSubdomain] = useState(false);
+  const { storeSlug } = useTheme();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -32,6 +36,13 @@ function ShellContent({ children }: { children: React.ReactNode }) {
     pathname.startsWith('/cms');
   // Root domain homepage without a store parameter is the Universal SaaS Landing Page (which has its own header & footer)
   const isPlatformHome = pathname === '/' && !storeParam && !isSubdomain;
+
+  // Initialize ad pixels and fire PageView for the active store across the storefront
+  useEffect(() => {
+    if (!isBackoffice && !isPlatformHome && storeSlug) {
+      fetchAndInitPixels(storeSlug);
+    }
+  }, [isBackoffice, isPlatformHome, storeSlug]);
 
   if (isBackoffice || isPlatformHome) {
     return <>{children}</>;
