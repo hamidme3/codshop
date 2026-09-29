@@ -2031,12 +2031,35 @@ export async function closeSupportTicket(ticketId: string, accountId: string) {
 }
 
 // ── Store Analytics & Events Repository (Multi-Tenant SaaS) ────
+interface ActiveVisitorSession {
+  storeSlug: string;
+  distinctId: string;
+  lastSeenAt: number;
+  inCheckout?: boolean;
+}
+
+const memoryVisitorSessions = new Map<string, ActiveVisitorSession>();
+
 export async function recordAnalyticsEvent(data: {
   storeSlug: string;
   eventName: string;
   distinctId: string;
   properties?: Record<string, any>;
 }) {
+  const cleanStore = (data.storeSlug || '').toLowerCase().trim();
+  const distinctId = data.distinctId || 'anonymous';
+  const isInCheckout = ['initiated_checkout', 'checkout_step_2', 'cod_step_1_started', 'cod_step_2_started'].includes(data.eventName);
+  const isOrderCompleted = data.eventName === 'order_completed';
+
+  const sessionKey = `${cleanStore}:${distinctId}`;
+  const existingSession = memoryVisitorSessions.get(sessionKey);
+  memoryVisitorSessions.set(sessionKey, {
+    storeSlug: cleanStore,
+    distinctId,
+    lastSeenAt: Date.now(),
+    inCheckout: isOrderCompleted ? false : (isInCheckout || (existingSession?.inCheckout ?? false)),
+  });
+
   const db = getDb();
   if (!db) return null;
 
@@ -2073,6 +2096,83 @@ export async function recordAnalyticsEvent(data: {
     console.warn('[DbRepo] Error recording analytics event:', err);
     return null;
   }
+}
+
+export async function getLiveVisitorsFromDb(storeSlug: string): Promise<{ liveVisitors: number; inCheckout: number }> {
+  const cleanStore = (storeSlug || '').toLowerCase().trim();
+  const db = getDb();
+
+  if (db) {
+    try {
+      const store = await getStoreBySlug(cleanStore);
+      if (store && 'id' in store) {
+        const now = new Date();
+        const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+        const fifteenMinutesAgo = new Date(now.getTime() - 15 * 60 * 1000);
+
+        // Fetch lightweight distinct events from the last 15 minutes
+        const events = await db.query.analyticsEvents.findMany({
+          where: and(
+            eq(schema.analyticsEvents.storeId, store.id),
+            gte(schema.analyticsEvents.createdAt, fifteenMinutesAgo)
+          ),
+          columns: {
+            distinctId: true,
+            eventName: true,
+            createdAt: true,
+          },
+        });
+
+        // 1. Live visitors in last 5 minutes
+        const recentEvents = events.filter((e) => e.createdAt >= fiveMinutesAgo);
+        const liveDistinctIds = new Set(recentEvents.map((e) => e.distinctId));
+        const liveVisitors = liveDistinctIds.size;
+
+        // 2. Shoppers actively in checkout (last 15m, without completed order)
+        const checkoutEvents = events.filter((e) =>
+          ['initiated_checkout', 'checkout_step_2', 'cod_step_1_started', 'cod_step_2_started'].includes(e.eventName)
+        );
+        const completedOrderDistinctIds = new Set(
+          events.filter((e) => e.eventName === 'order_completed').map((e) => e.distinctId)
+        );
+        const inCheckoutDistinctIds = new Set(
+          checkoutEvents.filter((e) => !completedOrderDistinctIds.has(e.distinctId)).map((e) => e.distinctId)
+        );
+
+        return {
+          liveVisitors,
+          inCheckout: inCheckoutDistinctIds.size,
+        };
+      }
+    } catch (err) {
+      console.warn('[DbRepo] Error querying live visitors from DB, checking memory fallback:', err);
+    }
+  }
+
+  // Fallback to in-memory sliding window
+  const now = Date.now();
+  const fiveMinAgo = now - 5 * 60 * 1000;
+
+  let liveCount = 0;
+  let checkoutCount = 0;
+
+  for (const [key, session] of memoryVisitorSessions.entries()) {
+    if (session.storeSlug === cleanStore) {
+      if (session.lastSeenAt >= fiveMinAgo) {
+        liveCount++;
+        if (session.inCheckout) {
+          checkoutCount++;
+        }
+      } else if (session.lastSeenAt < now - 30 * 60 * 1000) {
+        memoryVisitorSessions.delete(key);
+      }
+    }
+  }
+
+  return {
+    liveVisitors: liveCount,
+    inCheckout: checkoutCount,
+  };
 }
 
 export async function getStorefrontAnalyticsFromDb(storeSlug: string) {

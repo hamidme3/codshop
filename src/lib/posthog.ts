@@ -70,12 +70,39 @@ function dispatchServerEvent(storeSlug: string, eventName: string, properties: R
   }
 }
 
+let activeHeartbeatInterval: ReturnType<typeof setInterval> | null = null;
+let currentHeartbeatStore: string | null = null;
+
+/**
+ * Periodically dispatches heartbeat events while the tab is active
+ * so the store's live visitor telemetry stays accurate.
+ */
+export function startVisitorHeartbeat(storeSlug: string) {
+  if (typeof window === 'undefined' || !storeSlug) return;
+  if (activeHeartbeatInterval && currentHeartbeatStore === storeSlug) return;
+
+  if (activeHeartbeatInterval) {
+    clearInterval(activeHeartbeatInterval);
+  }
+
+  currentHeartbeatStore = storeSlug;
+  activeHeartbeatInterval = setInterval(() => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+      dispatchServerEvent(storeSlug, 'heartbeat', {
+        path: window.location.pathname,
+        timestamp: Date.now(),
+      });
+    }
+  }, 45000);
+}
+
 /**
  * Capture a pageview explicitly tagged with the tenant store_slug
  */
 export function trackStorePageView(storeSlug: string, path: string, properties?: Record<string, any>) {
   if (typeof window === 'undefined') return;
   initPostHog();
+  startVisitorHeartbeat(storeSlug);
   dispatchServerEvent(storeSlug, 'pageview', { path, ...properties });
   posthog.capture('$pageview', {
     store_slug: storeSlug,

@@ -63,6 +63,21 @@ function AdminNav({ children }: { children: React.ReactNode }) {
     returned: 0,
   });
   const [ordersOpen, setOrdersOpen] = useState(true);
+  const [liveVisitors, setLiveVisitors] = useState<number>(0);
+
+  const fetchLiveVisitors = React.useCallback(async () => {
+    try {
+      const res = await fetch(`/api/admin/live-visitors?store=${encodeURIComponent(storeSlug)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && typeof data.liveVisitors === 'number') {
+          setLiveVisitors(data.liveVisitors);
+        }
+      }
+    } catch (err) {
+      console.warn('[Admin Layout] Could not fetch live visitors:', err);
+    }
+  }, [storeSlug]);
 
   const fetchOrderCounts = React.useCallback(async () => {
     try {
@@ -80,14 +95,20 @@ function AdminNav({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetchOrderCounts();
-    const handleOrdersUpdated = () => fetchOrderCounts();
+    fetchLiveVisitors();
+    const handleOrdersUpdated = () => {
+      fetchOrderCounts();
+      fetchLiveVisitors();
+    };
     window.addEventListener('orders-updated', handleOrdersUpdated);
-    const interval = setInterval(fetchOrderCounts, 30000);
+    const orderInterval = setInterval(fetchOrderCounts, 30000);
+    const visitorInterval = setInterval(fetchLiveVisitors, 15000);
     return () => {
       window.removeEventListener('orders-updated', handleOrdersUpdated);
-      clearInterval(interval);
+      clearInterval(orderInterval);
+      clearInterval(visitorInterval);
     };
-  }, [fetchOrderCounts]);
+  }, [fetchOrderCounts, fetchLiveVisitors]);
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -496,12 +517,27 @@ function AdminNav({ children }: { children: React.ReactNode }) {
             <LanguageToggle />
 
             {/* Live Visitors Pill */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 text-xs font-semibold">
+            <div
+              title={`${liveVisitors} ${liveVisitors > 1 ? 'visiteurs actifs' : 'visiteur actif'} ces 5 dernières minutes`}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all duration-300 ${
+                liveVisitors > 0
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
+                  : 'bg-slate-100 text-slate-500 border border-slate-200 dark:bg-slate-800/60 dark:text-slate-400 dark:border-slate-700/60'
+              }`}
+            >
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                {liveVisitors > 0 ? (
+                  <>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </>
+                ) : (
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-slate-400 dark:bg-slate-500"></span>
+                )}
               </span>
-              <span>8 en direct</span>
+              <span className="tabular-nums font-mono">
+                {language === 'ar' ? `${liveVisitors} مباشر` : language === 'en' ? `${liveVisitors} live` : `${liveVisitors} en direct`}
+              </span>
             </div>
 
             {/* Store Status Pill */}
@@ -529,9 +565,18 @@ function AdminNav({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-1 sm:gap-1.5">
             {/* Live Visitors Pill Mobile */}
-            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>8</span>
+            <div
+              title={`${liveVisitors} ${liveVisitors > 1 ? 'visiteurs actifs' : 'visiteur actif'}`}
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold transition-all duration-300 ${
+                liveVisitors > 0
+                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                  : 'bg-slate-100 text-slate-500 border border-slate-200 dark:bg-slate-800/60 dark:text-slate-400 dark:border-slate-700/60'
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                liveVisitors > 0 ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400 dark:bg-slate-500'
+              }`} />
+              <span className="tabular-nums font-mono">{liveVisitors}</span>
             </div>
 
             {/* Quick ⌘K Search trigger on mobile */}

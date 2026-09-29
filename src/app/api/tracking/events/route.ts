@@ -18,10 +18,24 @@ export async function POST(request: Request) {
 
     // 2. Persist event into PostgreSQL analytics_events if storeSlug and eventName provided
     if (targetStoreSlug && isValidStoreSlug(targetStoreSlug) && eventName) {
+      let resolvedDistinctId = distinctId;
+      if (!resolvedDistinctId || resolvedDistinctId === 'anonymous') {
+        const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                         request.headers.get('x-real-ip') || 
+                         '';
+        const userAgent = request.headers.get('user-agent') || '';
+        if (clientIp || userAgent) {
+          const hash = Buffer.from(`${clientIp}:${userAgent}`).toString('base64').replace(/[^a-zA-Z0-9]/g, '').slice(0, 16);
+          resolvedDistinctId = `ip_${hash}`;
+        } else {
+          resolvedDistinctId = `anon_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+        }
+      }
+
       await recordAnalyticsEvent({
         storeSlug: targetStoreSlug,
         eventName: String(eventName),
-        distinctId: String(distinctId || 'anonymous'),
+        distinctId: String(resolvedDistinctId),
         properties: properties || {
           value,
           currency,
