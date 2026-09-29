@@ -22,7 +22,7 @@ import {
 } from '../src/lib/db-repository';
 import { getCategories, addCategory, deleteCategory } from '../src/lib/mocks';
 import { getDb, schema } from '../src/db';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 async function runTests() {
   console.log('--- TEST SUITE: Similar Bugs Audit & Remediation ---');
@@ -84,7 +84,7 @@ async function runTests() {
     if (store) {
       // Find or create test product
       let testProd = await db.query.products.findFirst({
-        where: eq(schema.products.sku, 'SKU-5567'),
+        where: and(eq(schema.products.storeId, store.id), eq(schema.products.sku, 'SKU-5567')),
       });
       if (!testProd) {
         testProd = await createProduct({
@@ -126,7 +126,7 @@ async function runTests() {
       });
 
       const updatedProd = await db.query.products.findFirst({
-        where: eq(schema.products.sku, 'SKU-5567'),
+        where: and(eq(schema.products.storeId, store.id), eq(schema.products.sku, 'SKU-5567')),
       });
       if (!updatedProd || updatedProd.stock !== initialStock - 2) {
         throw new Error(`FAILED: Stock was not properly decremented. Expected ${initialStock - 2}, got ${updatedProd?.stock}`);
@@ -140,7 +140,7 @@ async function runTests() {
       ]);
 
       const restoredProd = await db.query.products.findFirst({
-        where: eq(schema.products.sku, 'SKU-5567'),
+        where: and(eq(schema.products.storeId, store.id), eq(schema.products.sku, 'SKU-5567')),
       });
       if (!restoredProd || restoredProd.stock !== initialStock) {
         throw new Error(`FAILED: Stock was not properly restored. Expected ${initialStock}, got ${restoredProd?.stock}`);

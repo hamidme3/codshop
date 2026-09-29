@@ -69,8 +69,11 @@ interface OperationsAnalyticsData {
   confirmationRate: number;
   deliveryRate: number;
   returnRate: number;
+  totalCostOfGoods?: number;
+  totalShippingPaid?: number;
   netProfit: number;
-  cityDistribution: { city: string; orders: number; rate: number; revenue: number }[];
+  cityDistribution: { city: string; orders: number; rate: number; revenue: number; deliveryRate?: number }[];
+  dailyCashflow?: { date: string; deliveredCash: number; inTransitCash: number; returnedLoss: number }[];
   pipelineStages?: PipelineStageMetric[];
   topProducts?: ProductPerformanceMetric[];
   source?: string;
@@ -648,17 +651,41 @@ function AnalyticsContent() {
           </div>
 
           {/* COD Conversion-to-Cash Realization Funnel */}
-          <CodFunnelChart 
-            stages={[
-              { id: 'visits', name: 'Visiteurs Ads', count: storefrontData?.funnel?.visitors ?? 12450, rate: 100, stepRate: 100, color: '#64748b', iconName: 'Users' },
-              { id: 'checkout', name: 'Formulaire Rempli', count: storefrontData?.funnel?.initiatedCheckout ?? 560, rate: 4.5, stepRate: storefrontData?.funnel?.visitors ? Number(((storefrontData.funnel.initiatedCheckout / storefrontData.funnel.visitors) * 100).toFixed(1)) : 4.5, color: '#3b82f6', iconName: 'Filter' },
-              { id: 'confirmed', name: 'Confirmées Tél.', count: operationsData?.totalOrders ? Math.round(operationsData.totalOrders * (operationsData.confirmationRate / 100)) : 485, rate: 3.9, stepRate: operationsData?.confirmationRate ?? 86.6, color: '#06b6d4', iconName: 'PhoneCall' },
-              { id: 'shipped', name: 'Expédiées Transporteur', count: operationsData?.totalOrders ? Math.round(operationsData.totalOrders * 0.95) : 470, rate: 3.8, stepRate: 96.9, color: '#f59e0b', iconName: 'Truck' },
-              { id: 'delivered', name: 'Livrées & Encaissées', count: operationsData?.totalOrders ? Math.round(operationsData.totalOrders * (operationsData.deliveryRate / 100)) : 395, rate: 3.2, stepRate: operationsData?.deliveryRate ?? 84.0, color: '#10b981', iconName: 'CheckCircle2' },
-            ]}
-            currency="MAD"
-            totalDeliveredRevenue={analytics.totalRevenueDelivered}
-          />
+          {(() => {
+            const visitors = storefrontData?.funnel?.visitors ?? 0;
+            const checkout = storefrontData?.funnel?.initiatedCheckout ?? 0;
+            const confirmed = operationsData?.pipelineStages?.find((s) => s.key === 'confirmed')?.count 
+              ?? (operationsData?.totalOrders ? Math.round(operationsData.totalOrders * (operationsData.confirmationRate / 100)) : 0);
+            const shipped = operationsData?.pipelineStages?.find((s) => s.key === 'shipped')?.count 
+              ?? (operationsData?.totalOrders ? Math.round(operationsData.totalOrders * ((operationsData.deliveryRate + operationsData.returnRate) / 100)) : 0);
+            const delivered = operationsData?.pipelineStages?.find((s) => s.key === 'delivered')?.count 
+              ?? (operationsData?.totalOrders ? Math.round(operationsData.totalOrders * (operationsData.deliveryRate / 100)) : 0);
+
+            const visitRate = 100;
+            const checkoutRate = visitors > 0 ? Number(((checkout / visitors) * 100).toFixed(1)) : 0;
+            const confirmedRate = visitors > 0 ? Number(((confirmed / visitors) * 100).toFixed(1)) : 0;
+            const shippedRate = visitors > 0 ? Number(((shipped / visitors) * 100).toFixed(1)) : 0;
+            const deliveredRate = visitors > 0 ? Number(((delivered / visitors) * 100).toFixed(1)) : 0;
+
+            const stepCheckout = visitors > 0 ? Number(((checkout / visitors) * 100).toFixed(1)) : 0;
+            const stepConfirmed = checkout > 0 ? Number(((confirmed / checkout) * 100).toFixed(1)) : (operationsData?.confirmationRate ?? 0);
+            const stepShipped = confirmed > 0 ? Number(((shipped / confirmed) * 100).toFixed(1)) : 0;
+            const stepDelivered = shipped > 0 ? Number(((delivered / shipped) * 100).toFixed(1)) : (operationsData?.deliveryRate ?? 0);
+
+            return (
+              <CodFunnelChart 
+                stages={[
+                  { id: 'visits', name: 'Visiteurs Ads', count: visitors, rate: visitRate, stepRate: 100, color: '#64748b', iconName: 'Users' },
+                  { id: 'checkout', name: 'Formulaire Rempli', count: checkout, rate: checkoutRate, stepRate: stepCheckout, color: '#3b82f6', iconName: 'Filter' },
+                  { id: 'confirmed', name: 'Confirmées Tél.', count: confirmed, rate: confirmedRate, stepRate: stepConfirmed, color: '#06b6d4', iconName: 'PhoneCall' },
+                  { id: 'shipped', name: 'Expédiées Transporteur', count: shipped, rate: shippedRate, stepRate: stepShipped, color: '#f59e0b', iconName: 'Truck' },
+                  { id: 'delivered', name: 'Livrées & Encaissées', count: delivered, rate: deliveredRate, stepRate: stepDelivered, color: '#10b981', iconName: 'CheckCircle2' },
+                ]}
+                currency="MAD"
+                totalDeliveredRevenue={analytics.totalRevenueDelivered}
+              />
+            );
+          })()}
 
           {/* Product Visitor & Conversion Breakdown Table */}
           <div className="p-6 sm:p-8 rounded-3xl admin-surface bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/80 space-y-5 shadow-sm">
@@ -885,7 +912,7 @@ function AnalyticsContent() {
           </div>
 
           {/* Interactive Recharts COD Cashflow Stream */}
-          <CodCashflowChart currency="MAD" />
+          <CodCashflowChart data={operationsData?.dailyCashflow} currency="MAD" />
 
           {/* 2-Column Grid: Order Pipeline Velocity & Regional Distribution */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -895,13 +922,13 @@ function AnalyticsContent() {
             />
             <RegionalDistributionChart 
               currency="MAD"
-              data={analytics.cityDistribution.length > 0 ? analytics.cityDistribution.map((cd, idx) => ({
+              data={analytics.cityDistribution.map((cd, idx) => ({
                 name: cd.city,
                 value: cd.rate,
                 revenue: cd.revenue,
-                deliveryRate: 80 + (idx % 3) * 3,
+                deliveryRate: cd.deliveryRate ?? 0,
                 color: ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'][idx % 6]
-              })) : undefined}
+              }))}
             />
           </div>
 
@@ -924,13 +951,13 @@ function AnalyticsContent() {
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                 <div className="text-slate-500 dark:text-slate-400">Coût Marchandise & Packaging :</div>
                 <div className="text-lg font-black text-rose-600 dark:text-rose-400 mt-1">
-                  -{(analytics.totalRevenueDelivered * 0.32).toFixed(0)} DH
+                  -{(operationsData?.totalCostOfGoods ?? Math.round(analytics.totalRevenueDelivered * 0.35)).toLocaleString()} DH
                 </div>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                 <div className="text-slate-500 dark:text-slate-400">Frais de Livraison & Retours :</div>
                 <div className="text-lg font-black text-rose-600 dark:text-rose-400 mt-1">
-                  -{(analytics.totalOrders * 22).toFixed(0)} DH
+                  -{(operationsData?.totalShippingPaid ?? Math.round(analytics.totalOrders * 22)).toLocaleString()} DH
                 </div>
               </div>
             </div>
@@ -982,10 +1009,10 @@ function AnalyticsContent() {
                             <div className="w-24 bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                               <div
                                 className="bg-emerald-500 dark:bg-emerald-400 h-full rounded-full"
-                                style={{ width: `${item.rate}%` }}
+                                style={{ width: `${item.deliveryRate ?? item.rate}%` }}
                               />
                             </div>
-                            <span className="font-bold text-emerald-600 dark:text-emerald-400">{item.rate}%</span>
+                            <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">{item.deliveryRate ?? item.rate}%</span>
                           </div>
                         </td>
                         <td className="py-3.5 px-4 text-right">

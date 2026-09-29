@@ -326,16 +326,32 @@ export default function ProductDetailPage() {
         {/* Right: Product Purchase Area */}
         <div className="space-y-6">
           <div>
-            {/* Reviews */}
-            <div className="flex items-center gap-2 text-amber-500 text-xs">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                ))}
+            {/* Reviews or Authentic New Product Badge */}
+            {product.reviewCount && product.reviewCount > 0 ? (
+              <div className="flex items-center gap-2 text-amber-500 text-xs">
+                <div className="flex items-center">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-4 h-4 ${
+                        i < Math.round(product.rating || 5)
+                          ? 'fill-amber-400 text-amber-400'
+                          : 'text-zinc-200 dark:text-zinc-700'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="font-bold text-zinc-800 dark:text-zinc-200">{product.rating} / 5</span>
+                <span className="text-zinc-400">({product.reviewCount} avis certifiés)</span>
               </div>
-              <span className="font-bold text-zinc-800">{product.rating} / 5</span>
-              <span className="text-zinc-400">({product.reviewCount} avis certifiés)</span>
-            </div>
+            ) : (
+              <div className="flex items-center gap-2 text-xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-semibold text-[11px]">
+                  ✨ Nouveau Produit
+                </span>
+                <span className="text-zinc-400 text-[11px]">Paiement à la livraison après inspection</span>
+              </div>
+            )}
 
             <h1
               className={`${theme.typography.scale.h1} ${theme.typography.headingClass} mt-2`}

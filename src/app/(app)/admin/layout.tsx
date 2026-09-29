@@ -8,7 +8,7 @@ import {
   TrendingUp, Truck, CreditCard, ExternalLink, 
   Clock, Menu, X, Users, Filter, Wallet, LogOut, Shield, 
   UserCheck, Zap, LifeBuoy, UserCog, Layers, Search, ChevronRight, ChevronDown,
-  Command, Sparkles, CheckCircle2, ArrowRight
+  Command, Sparkles, CheckCircle2, ArrowRight, ShieldCheck, AlertCircle
 } from 'lucide-react';
 import LanguageToggle from '@/components/LanguageToggle';
 import StoreSwitcher from '@/components/admin/StoreSwitcher';
@@ -64,6 +64,32 @@ function AdminNav({ children }: { children: React.ReactNode }) {
   });
   const [ordersOpen, setOrdersOpen] = useState(true);
   const [liveVisitors, setLiveVisitors] = useState<number>(0);
+  const [storeMeta, setStoreMeta] = useState<{
+    planTier: string;
+    isPaid: boolean;
+    daysRemainingInTrial: number;
+    isTrialActive: boolean;
+    country: string;
+    currency: string;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/stores/${encodeURIComponent(storeSlug)}/meta`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.store) {
+          setStoreMeta({
+            planTier: data.store.planTier || 'starter',
+            isPaid: Boolean(data.store.isPaid),
+            daysRemainingInTrial: typeof data.store.daysRemainingInTrial === 'number' ? data.store.daysRemainingInTrial : 14,
+            isTrialActive: Boolean(data.store.isTrialActive),
+            country: data.store.country || 'MA',
+            currency: data.store.currency || 'MAD',
+          });
+        }
+      })
+      .catch((err) => console.warn('[Admin Layout] Store meta notice:', err));
+  }, [storeSlug]);
 
   const fetchLiveVisitors = React.useCallback(async () => {
     try {
@@ -308,8 +334,14 @@ function AdminNav({ children }: { children: React.ReactNode }) {
               <span className="text-[10px] text-slate-400 font-medium mt-0.5">Suite E-Commerce</span>
             </div>
           </Link>
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
-            <span>PRO</span>
+          <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+            (storeMeta?.planTier || 'pro').toLowerCase() === 'scale'
+              ? 'bg-purple-500/15 text-purple-400 border border-purple-500/30'
+              : (storeMeta?.planTier || 'pro').toLowerCase() === 'starter'
+              ? 'bg-slate-500/15 text-slate-300 border border-slate-500/30'
+              : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+          }`}>
+            <span>{storeMeta?.planTier ? storeMeta.planTier.toUpperCase() : 'PRO'}</span>
           </div>
         </div>
 
@@ -332,12 +364,38 @@ function AdminNav({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center justify-between pt-0.5 text-[11px] text-slate-400 font-medium">
             <div className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-sky-400" />
-              <span>14 j restants (Essai)</span>
+              {storeMeta?.isPaid ? (
+                <>
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-emerald-400 font-semibold">
+                    {language === 'ar' ? 'اشتراك نشط' : language === 'en' ? 'Active Plan' : 'Abonnement Actif'}
+                  </span>
+                </>
+              ) : storeMeta && !storeMeta.isTrialActive ? (
+                <>
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-amber-400 font-semibold">
+                    {language === 'ar' ? 'انتهت الفترة التجريبية' : language === 'en' ? 'Trial Expired' : 'Essai expiré'}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Clock className="w-3.5 h-3.5 text-sky-400" />
+                  <span className="tabular-nums font-mono">
+                    {language === 'ar'
+                      ? `${storeMeta?.daysRemainingInTrial ?? 14} يوماً متبقية (تجريبي)`
+                      : language === 'en'
+                      ? `${storeMeta?.daysRemainingInTrial ?? 14}d left (Trial)`
+                      : `${storeMeta?.daysRemainingInTrial ?? 14} j restants (Essai)`}
+                  </span>
+                </>
+              )}
             </div>
-            <span className="text-slate-300 flex items-center gap-1.5">
+            <span className="text-slate-300 flex items-center gap-1.5 font-mono text-[11px]">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>Maroc (MAD)</span>
+              <span>
+                {storeMeta?.country === 'MA' ? 'Maroc' : storeMeta?.country || 'Maroc'} ({storeMeta?.currency || 'MAD'})
+              </span>
             </span>
           </div>
         </div>

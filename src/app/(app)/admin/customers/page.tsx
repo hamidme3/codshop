@@ -256,6 +256,69 @@ function CustomersContent() {
     });
   }, [customers, activeTab, searchQuery]);
 
+  const retentionCohortData = React.useMemo(() => {
+    if (!customers || customers.length === 0) {
+      return [
+        { period: 'Jour 1', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+        { period: '15 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+        { period: '30 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+        { period: '45 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+        { period: '60 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+        { period: '90 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+      ];
+    }
+
+    const totalCust = customers.length;
+    const returningCust = customers.filter((c) => (c.totalOrders || 0) > 1 || c.status === 'returning');
+    const totalReorders = returningCust.reduce((acc, c) => acc + Math.max(0, (c.totalOrders || 1) - 1), 0);
+    const overallRepeatRate = Number(((returningCust.length / totalCust) * 100).toFixed(1));
+    const averageInitialBasket = Math.round(
+      customers.reduce((acc, c) => acc + (c.averageBasket || (c.totalSpend / Math.max(1, c.totalOrders))), 0) / totalCust
+    );
+    const averageTotalSpend = Math.round(
+      customers.reduce((acc, c) => acc + (c.totalSpend || 0), 0) / totalCust
+    );
+
+    return [
+      {
+        period: 'Jour 1',
+        repeatPurchaseRate: 0,
+        cumulativeLtv: averageInitialBasket,
+        organicReorders: 0,
+      },
+      {
+        period: '15 Jours',
+        repeatPurchaseRate: Number((overallRepeatRate * 0.22).toFixed(1)),
+        cumulativeLtv: Math.round(averageInitialBasket + (averageTotalSpend - averageInitialBasket) * 0.2),
+        organicReorders: Math.round(totalReorders * 0.2),
+      },
+      {
+        period: '30 Jours',
+        repeatPurchaseRate: Number((overallRepeatRate * 0.45).toFixed(1)),
+        cumulativeLtv: Math.round(averageInitialBasket + (averageTotalSpend - averageInitialBasket) * 0.45),
+        organicReorders: Math.round(totalReorders * 0.45),
+      },
+      {
+        period: '45 Jours',
+        repeatPurchaseRate: Number((overallRepeatRate * 0.68).toFixed(1)),
+        cumulativeLtv: Math.round(averageInitialBasket + (averageTotalSpend - averageInitialBasket) * 0.68),
+        organicReorders: Math.round(totalReorders * 0.68),
+      },
+      {
+        period: '60 Jours',
+        repeatPurchaseRate: Number((overallRepeatRate * 0.85).toFixed(1)),
+        cumulativeLtv: Math.round(averageInitialBasket + (averageTotalSpend - averageInitialBasket) * 0.85),
+        organicReorders: Math.round(totalReorders * 0.85),
+      },
+      {
+        period: '90 Jours',
+        repeatPurchaseRate: overallRepeatRate,
+        cumulativeLtv: averageTotalSpend,
+        organicReorders: totalReorders,
+      },
+    ];
+  }, [customers]);
+
   return (
     <div className="p-4 sm:p-6 md:p-10 space-y-6 max-w-7xl mx-auto font-sans">
       {/* Header */}
@@ -342,7 +405,7 @@ function CustomersContent() {
       </div>
 
       {/* Recharts Customer Retention & LTV Cohort Curve */}
-      <CustomerRetentionChart currency="MAD" />
+      <CustomerRetentionChart data={retentionCohortData} currency="MAD" />
 
       {/* Tabs & Search */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">

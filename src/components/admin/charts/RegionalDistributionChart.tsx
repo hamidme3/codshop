@@ -29,7 +29,7 @@ const DEFAULT_REGIONS: RegionalData[] = [
 ];
 
 export default function RegionalDistributionChart({ 
-  data = DEFAULT_REGIONS, 
+  data, 
   currency = 'MAD' 
 }: RegionalDistributionChartProps) {
   const [mounted, setMounted] = useState(false);
@@ -37,6 +37,9 @@ export default function RegionalDistributionChart({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const hasData = Boolean(data && data.length > 0 && data.some((d) => d.value > 0 || d.revenue > 0));
+  const chartData = hasData ? data! : [];
 
   if (!mounted) {
     return (
@@ -56,7 +59,7 @@ export default function RegionalDistributionChart({
               Répartition Régionale Maroc & Taux de Livraison
             </h3>
             <span className="text-[10px] font-medium bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-950/60 dark:border-blue-800/60 dark:text-blue-300 px-2 py-0.5 rounded">
-              12 Régions
+              {hasData ? `${chartData.length} Villes / Régions` : 'En attente'}
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
@@ -65,7 +68,16 @@ export default function RegionalDistributionChart({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+      {!hasData ? (
+        <div className="h-[230px] flex flex-col items-center justify-center text-center p-6 bg-slate-50/50 dark:bg-zinc-900/30 rounded-xl border border-dashed border-slate-200 dark:border-zinc-800">
+          <MapPin className="w-8 h-8 text-slate-300 dark:text-zinc-600 mb-2" />
+          <p className="text-xs font-semibold text-slate-700 dark:text-zinc-300">Aucune commande enregistrée pour le moment</p>
+          <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-1 max-w-sm">
+            La répartition géographique et les taux de livraison par ville apparaîtront dès la confirmation de vos premières ventes.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
         {/* Donut Chart */}
         <div className="w-full h-[230px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -90,7 +102,7 @@ export default function RegionalDistributionChart({
                 }}
               />
               <Pie
-                data={data}
+                data={chartData}
                 cx="50%"
                 cy="50%"
                 innerRadius={55}
@@ -98,7 +110,7 @@ export default function RegionalDistributionChart({
                 paddingAngle={3}
                 dataKey="value"
               >
-                {data.map((entry, index) => (
+                {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -108,7 +120,7 @@ export default function RegionalDistributionChart({
 
         {/* Legend & Breakdown List */}
         <div className="space-y-2">
-          {data.map((region) => (
+          {chartData.map((region) => (
             <div 
               key={region.name} 
               className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-zinc-900/40 border border-slate-200/80 dark:border-zinc-800/60 text-xs"
@@ -130,6 +142,7 @@ export default function RegionalDistributionChart({
           ))}
         </div>
       </div>
+      )}
     </div>
   );
 }

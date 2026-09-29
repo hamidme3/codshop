@@ -65,7 +65,8 @@ import { getOrders } from './mocks';
 // ── Analytics helper (derived from mock orders) ─────────────────
 export function getAnalytics(storeSlug: string) {
   if (!storeSlug) throw new Error('storeSlug is required');
-  const storeOrders = getOrders(storeSlug);
+  const allOrders = getOrders(storeSlug);
+  const storeOrders = allOrders.filter((o) => o.status !== 'abandoned');
   const totalOrders = storeOrders.length;
   const deliveredOrders = storeOrders.filter((o) => o.status === 'delivered');
   const returnedOrders = storeOrders.filter((o) => o.status === 'returned');
@@ -94,25 +95,36 @@ export function getAnalytics(storeSlug: string) {
     netProfit: Math.round(netProfit),
     // ── Dynamic city distribution scoped to storeSlug ──────────────────────
     cityDistribution: (() => {
-      const cityMap = new Map<string, { orders: number; revenue: number }>();
+      const cityMap = new Map<string, { orders: number; revenue: number; delivered: number; returned: number }>();
       storeOrders.forEach((o) => {
         const c = o.city ?? 'Autre';
-        const existing = cityMap.get(c) ?? { orders: 0, revenue: 0 };
+        const existing = cityMap.get(c) ?? { orders: 0, revenue: 0, delivered: 0, returned: 0 };
+        const isDelivered = o.status === 'delivered';
+        const isReturned = ['returned', 'canceled'].includes(o.status);
         cityMap.set(c, {
           orders: existing.orders + 1,
           revenue: existing.revenue + (Number(o.total) || 0),
+          delivered: existing.delivered + (isDelivered ? 1 : 0),
+          returned: existing.returned + (isReturned ? 1 : 0),
         });
       });
       const total = storeOrders.length || 1;
       return Array.from(cityMap.entries())
         .sort((a, b) => b[1].revenue - a[1].revenue)
         .slice(0, 6)
-        .map(([city, data]) => ({
-          city,
-          orders: data.orders,
-          rate: Number(((data.orders / total) * 100).toFixed(1)),
-          revenue: Math.round(data.revenue),
-        }));
+        .map(([city, data]) => {
+          const dispatched = data.delivered + data.returned;
+          const cityDeliveryRate = dispatched > 0
+            ? Math.round((data.delivered / dispatched) * 100)
+            : (data.orders > 0 ? Math.round((data.delivered / data.orders) * 100) : 0);
+          return {
+            city,
+            orders: data.orders,
+            rate: Number(((data.orders / total) * 100).toFixed(1)),
+            revenue: Math.round(data.revenue),
+            deliveryRate: cityDeliveryRate,
+          };
+        });
     })(),
 
     // ── Dynamic Order Pipeline Velocity ───────────────────────────

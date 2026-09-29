@@ -565,13 +565,15 @@ export function ReviewsSection({
             {[...Array(5)].map((_, s) => (
               <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
             ))}
-            <span className="text-xs font-bold text-white ml-2">4.9 / 5 sur 1 420+ avis clients</span>
+            <span className="text-xs font-bold text-white ml-2">
+              {settings.reviewsSummary || 'Avis vérifiés après réception'}
+            </span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-white">
             {settings.title || 'Ce Que Disent Nos Clients Partout au Maroc'}
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Avis vérifiés après livraison par nos livreurs partenaires au Maroc.
+            {settings.subtitle || 'Avis vérifiés après inspection et paiement à la livraison.'}
           </p>
         </div>
 

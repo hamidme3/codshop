@@ -19,17 +19,19 @@ interface CustomerRetentionChartProps {
   currency?: string;
 }
 
-const DEFAULT_RETENTION: RetentionCohortPoint[] = [
-  { period: 'Jour 1', repeatPurchaseRate: 0, cumulativeLtv: 380, organicReorders: 0 },
-  { period: '15 Jours', repeatPurchaseRate: 8.4, cumulativeLtv: 440, organicReorders: 38 },
-  { period: '30 Jours', repeatPurchaseRate: 16.2, cumulativeLtv: 560, organicReorders: 92 },
-  { period: '45 Jours', repeatPurchaseRate: 23.5, cumulativeLtv: 690, organicReorders: 145 },
-  { period: '60 Jours', repeatPurchaseRate: 31.8, cumulativeLtv: 850, organicReorders: 210 },
-  { period: '90 Jours', repeatPurchaseRate: 39.4, cumulativeLtv: 1040, organicReorders: 285 },
-];
+function generateZeroRetention(): RetentionCohortPoint[] {
+  return [
+    { period: 'Jour 1', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+    { period: '15 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+    { period: '30 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+    { period: '45 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+    { period: '60 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+    { period: '90 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+  ];
+}
 
 export default function CustomerRetentionChart({ 
-  data = DEFAULT_RETENTION, 
+  data, 
   currency = 'MAD' 
 }: CustomerRetentionChartProps) {
   const [mounted, setMounted] = useState(false);
@@ -38,6 +40,14 @@ export default function CustomerRetentionChart({
     setMounted(true);
   }, []);
 
+  const points = data && data.length > 0 ? data : generateZeroRetention();
+  const latest = points[points.length - 1] ?? {
+    period: '90 Jours',
+    repeatPurchaseRate: 0,
+    cumulativeLtv: 0,
+    organicReorders: 0,
+  };
+
   if (!mounted) {
     return (
       <div className="rounded-xl border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 p-5 h-[340px] flex items-center justify-center text-slate-400 dark:text-zinc-500 text-xs font-mono">
@@ -45,8 +55,6 @@ export default function CustomerRetentionChart({
       </div>
     );
   }
-
-  const latest = data[data.length - 1];
 
   return (
     <div className="rounded-xl border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 p-5 transition-all shadow-xs">
@@ -80,7 +88,7 @@ export default function CustomerRetentionChart({
 
       <div className="w-full h-[220px]">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 10, right: 20, left: -20, bottom: 0 }}>
+          <LineChart data={points} margin={{ top: 10, right: 20, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" vertical={false} />
             <XAxis dataKey="period" stroke="#64748b" fontSize={11} tickLine={false} axisLine={{ stroke: '#cbd5e1' }} />
             <YAxis yAxisId="rate" orientation="left" stroke="#a855f7" fontSize={11} tickLine={false} axisLine={false} unit="%" />

@@ -242,82 +242,83 @@ export async function getProducts(storeSlug: string): Promise<Product[]> {
 }
 
 export async function createProduct(data: Omit<Product, 'id'>): Promise<Product> {
-  // Try Payload CMS first (single source of truth for products)
+  const db = getDb();
+  let drizzleCreated: Product | null = null;
+
+  if (db) {
+    try {
+      const store = await getStoreBySlug(data.storeSlug);
+      if (store && 'id' in store) {
+        const [newProd] = await db.insert(schema.products).values({
+          storeId: store.id,
+          title: data.title,
+          sku: data.sku,
+          category: data.category,
+          price: data.price,
+          comparePrice: data.comparePrice,
+          costPrice: data.costPrice,
+          stock: data.stock,
+          images: data.images,
+          variants: data.variants || [],
+          status: data.status || 'active',
+        }).returning();
+
+        if (newProd) {
+          drizzleCreated = {
+            id: newProd.id,
+            storeSlug: data.storeSlug,
+            title: newProd.title,
+            sku: newProd.sku,
+            category: newProd.category,
+            price: Number(newProd.price),
+            comparePrice: newProd.comparePrice ? Number(newProd.comparePrice) : undefined,
+            costPrice: Number(newProd.costPrice) || 0,
+            stock: Number(newProd.stock),
+            images: Array.isArray(newProd.images) ? newProd.images : [],
+            variants: (newProd.variants as any) || [],
+            status: newProd.status as any,
+          };
+        }
+      }
+    } catch (drizzleErr) {
+      console.warn('[DbRepo] Drizzle product insert warning:', drizzleErr);
+    }
+  }
+
+  // Also sync to Payload CMS
   try {
     const { createProductInPayload } = await import('./payload-products');
     const created = await createProductInPayload(data);
     if (created) {
-      // Also sync to mock for instant UI cache
       addMockProduct(data);
-      return created;
+      return drizzleCreated || created;
     }
   } catch (err) {
-    console.warn('[DbRepo] Payload product create unavailable, trying Drizzle fallback:', err);
+    console.warn('[DbRepo] Payload product create warning:', err);
   }
 
-  // Fallback to Drizzle DB
-  const db = getDb();
-  if (!db) {
-    return addMockProduct(data);
-  }
-
-  try {
-    const store = await getStoreBySlug(data.storeSlug);
-    if (!store || !('id' in store)) {
-      return addMockProduct(data);
-    }
-
-    const [newProd] = await db.insert(schema.products).values({
-      storeId: store.id,
-      title: data.title,
-      sku: data.sku,
-      category: data.category,
-      price: data.price,
-      comparePrice: data.comparePrice,
-      costPrice: data.costPrice,
-      stock: data.stock,
-      images: data.images,
-      variants: data.variants,
-      status: data.status,
-    }).returning();
-
-    return {
-      id: newProd.id,
-      storeSlug: data.storeSlug,
-      title: newProd.title,
-      sku: newProd.sku,
-      category: newProd.category,
-      price: newProd.price,
-      comparePrice: newProd.comparePrice || undefined,
-      costPrice: newProd.costPrice,
-      stock: newProd.stock,
-      images: newProd.images,
-      variants: newProd.variants,
-      status: newProd.status as 'active' | 'draft',
-    };
-  } catch (err) {
-    console.warn('[DbRepo] Error creating product in DB, fallback to mock:', err);
-    return addMockProduct(data);
-  }
+  addMockProduct(data);
+  return drizzleCreated || {
+    id: `prod_${Date.now()}`,
+    ...data,
+  };
 }
 
 export async function updateProduct(productId: string, updates: Partial<Product>): Promise<Product | null> {
-  // Try Payload CMS first (single source of truth for products)
+  // 1. Update in Payload CMS
+  let payloadUpdated: Product | null = null;
   try {
     const { updateProductInPayload } = await import('./payload-products');
-    const updated = await updateProductInPayload(productId, updates);
-    if (updated) {
-      updateMockProduct(productId, updates);
-      return updated;
-    }
+    payloadUpdated = await updateProductInPayload(productId, updates);
   } catch (err) {
-    console.warn('[DbRepo] Payload product update unavailable, trying Drizzle fallback:', err);
+    console.warn('[DbRepo] Payload product update warning:', err);
   }
 
-  // Fallback to Drizzle DB
+  // 2. Also update in Drizzle DB for dual-engine consistency
   const db = getDb();
   if (!db) {
-    return updateMockProduct(productId, updates);
+    updateMockProduct(productId, updates);
+    return payloadUpdated || updateMockProduct(productId, updates);
   }
 
   try {
@@ -373,39 +374,36 @@ export async function updateProduct(productId: string, updates: Partial<Product>
           title: updated.title,
           sku: updated.sku,
           category: updated.category,
-          price: updated.price,
-          comparePrice: updated.comparePrice || undefined,
-          costPrice: updated.costPrice,
-          stock: updated.stock,
-          images: updated.images,
-          variants: updated.variants,
-          status: updated.status as 'active' | 'draft',
+          price: Number(updated.price),
+          comparePrice: updated.comparePrice ? Number(updated.comparePrice) : undefined,
+          costPrice: Number(updated.costPrice) || 0,
+          stock: Number(updated.stock),
+          images: Array.isArray(updated.images) ? updated.images : [],
+          variants: (updated.variants as any) || [],
+          status: updated.status as any,
         };
       }
     }
-    return updateMockProduct(productId, updates);
   } catch (err) {
     console.warn('[DbRepo] Error updating product in DB:', err);
-    return updateMockProduct(productId, updates);
   }
+
+  updateMockProduct(productId, updates);
+  return payloadUpdated;
 }
 
 export async function deleteProduct(productId: string): Promise<boolean> {
-  // Try Payload CMS first (single source of truth for products)
+  // 1. Delete from Payload CMS
   try {
     const { deleteProductInPayload } = await import('./payload-products');
-    const deleted = await deleteProductInPayload(productId);
-    if (deleted) {
-      deleteMockProduct(productId);
-      return true;
-    }
+    await deleteProductInPayload(productId);
   } catch (err) {
-    console.warn('[DbRepo] Payload product delete unavailable, trying Drizzle fallback:', err);
+    console.warn('[DbRepo] Payload product delete warning:', err);
   }
 
-  // Fallback to Drizzle DB
-  const db = getDb();
+  // 2. Also delete from Drizzle DB
   deleteMockProduct(productId);
+  const db = getDb();
   if (!db) return true;
 
   try {
@@ -515,8 +513,8 @@ export function convertDbProductToStorefrontProduct(p: any): any {
     tagline: p.category || 'Collection Exclusive',
     price: price,
     originalPrice: originalPrice,
-    rating: 4.9,
-    reviewCount: 38,
+    rating: p.rating ?? 0,
+    reviewCount: p.reviewCount ?? 0,
     stockLeft: p.stock ?? 20,
     images: Array.isArray(p.images) && p.images.length > 0 ? p.images : ['https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800&auto=format&fit=crop'],
     description: p.description || `${p.title}. Qualité supérieure confectionnée avec soin. Paiement à la livraison après vérification du colis partout au Maroc.`,
@@ -2174,6 +2172,8 @@ export async function getLiveVisitorsFromDb(storeSlug: string): Promise<{ liveVi
     inCheckout: checkoutCount,
   };
 }
+
+export const getLiveVisitors = getLiveVisitorsFromDb;
 
 export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
   const db = getDb();

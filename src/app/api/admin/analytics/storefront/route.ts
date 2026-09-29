@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getStoreBySlug, getProducts, getStorefrontAnalyticsFromDb } from '@/lib/db-repository';
+import { getStoreBySlug, getProducts, getStorefrontAnalyticsFromDb, getLiveVisitors } from '@/lib/db-repository';
 import { isValidStoreSlug } from '@/lib/sanitizer';
 
 interface ProductStats {
@@ -94,8 +94,9 @@ export async function GET(req: Request) {
         { query: 'coffret cadeau artisanal', count: 17, resultsCount: 0, isZeroResult: true },
       ];
 
-      const liveVisitors = Math.max(3, Math.floor((totalVisitors % 19) + 4));
-      const inCheckoutNow = Math.max(1, Math.floor(liveVisitors * 0.25));
+      const livePresence = await getLiveVisitors(storeSlug);
+      const liveVisitors = livePresence.liveVisitors;
+      const inCheckoutNow = livePresence.inCheckout;
 
       return NextResponse.json({
         success: true,
@@ -106,7 +107,7 @@ export async function GET(req: Request) {
           inCheckout: inCheckoutNow,
           activeProducts: defaultProductStats.slice(0, 3).map((p) => ({
             title: p.title,
-            activeViewers: Math.max(1, Math.floor(liveVisitors / 2)),
+            activeViewers: liveVisitors > 0 ? Math.max(1, Math.floor(liveVisitors / 2)) : 0,
           })),
         },
         funnel: {

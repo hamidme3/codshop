@@ -15,10 +15,35 @@ function BillingContent() {
   const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro' | 'growth' | 'scale'>('growth');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'virement'>('card');
   const [confirmed, setConfirmed] = useState(false);
+  const [storeMeta, setStoreMeta] = useState<{
+    planTier: string;
+    isPaid: boolean;
+    daysRemainingInTrial: number;
+    isTrialActive: boolean;
+  } | null>(null);
+
+  React.useEffect(() => {
+    fetch(`/api/stores/${encodeURIComponent(storeSlug)}/meta`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.store) {
+          setStoreMeta({
+            planTier: data.store.planTier || 'starter',
+            isPaid: Boolean(data.store.isPaid),
+            daysRemainingInTrial: typeof data.store.daysRemainingInTrial === 'number' ? data.store.daysRemainingInTrial : 14,
+            isTrialActive: Boolean(data.store.isTrialActive),
+          });
+        }
+      })
+      .catch((err) => console.warn('[Billing] Meta load notice:', err));
+  }, [storeSlug]);
 
   const handleSubscribe = () => {
     setConfirmed(true);
   };
+
+  const daysLeft = storeMeta?.daysRemainingInTrial ?? 14;
+  const isPaid = storeMeta?.isPaid ?? false;
 
   return (
     <div className="min-h-screen bg-[var(--admin-bg-base)] text-[var(--admin-text-primary)] font-sans py-12 px-4 sm:px-6 lg:px-8">
@@ -40,19 +65,46 @@ function BillingContent() {
         <div className="bg-white dark:bg-slate-900 border border-emerald-500/30 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xs">
           <div className="space-y-2 text-center sm:text-left">
             <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-bold uppercase">
-              <Clock className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" /> Essai Gratuit Actif
+              {isPaid ? (
+                <>
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+                  <span>Abonnement {storeMeta?.planTier.toUpperCase()} Actif</span>
+                </>
+              ) : daysLeft > 0 ? (
+                <>
+                  <Clock className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+                  <span>Essai Gratuit Actif</span>
+                </>
+              ) : (
+                <>
+                  <Clock className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Essai Expiré</span>
+                </>
+              )}
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-              Il vous reste <span className="text-emerald-600 dark:text-emerald-400">14 jours</span> d&apos;essai gratuit
+              {isPaid ? (
+                <span>Formule <span className="text-emerald-600 dark:text-emerald-400 uppercase">{storeMeta?.planTier}</span> en cours</span>
+              ) : daysLeft > 0 ? (
+                <span>Il vous reste <span className="text-emerald-600 dark:text-emerald-400">{daysLeft} jours</span> d&apos;essai gratuit</span>
+              ) : (
+                <span>Période d&apos;essai <span className="text-amber-500">terminée</span></span>
+              )}
             </h1>
             <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm max-w-lg">
-              Toutes les fonctionnalités Pro sont débloquées. Choisissez votre forfait dès maintenant pour assurer la continuité de vos ventes sans interruption.
+              {isPaid
+                ? 'Toutes les fonctionnalités de votre forfait sont actives. Vous pouvez faire évoluer votre formule à tout moment.'
+                : 'Toutes les fonctionnalités Pro sont débloquées. Choisissez votre forfait dès maintenant pour assurer la continuité de vos ventes sans interruption.'}
             </p>
           </div>
           <div className="text-center sm:text-right shrink-0">
             <div className="text-xs text-slate-500 dark:text-slate-400">Prochaine facturation :</div>
-            <div className="text-lg font-bold text-slate-900 dark:text-white">Dans 14 jours</div>
-            <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">0 DH prélevé aujourd&apos;hui</div>
+            <div className="text-lg font-bold text-slate-900 dark:text-white">
+              {isPaid ? 'Renouvellement mensuel' : daysLeft > 0 ? `Dans ${daysLeft} jours` : 'Immédiate'}
+            </div>
+            <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+              {isPaid ? 'Facturation sécurisée' : '0 DH prélevé aujourd\'hui'}
+            </div>
           </div>
         </div>
 
