@@ -601,7 +601,7 @@ export function addProduct(product: Omit<Product, 'id'>): Product {
   if (!product.title?.trim() || (product.price ?? 0) < 0 || (product.stock ?? 0) < 0) throw new Error('Invalid product input');
   const newProd: Product = {
     ...product,
-    id: `prod_${Date.now()}`,
+    id: `prod_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
   };
   PRODUCTS.push(newProd); // append instead of unshift — avoids unbounded growth pattern
   if (PRODUCTS.length > 200) PRODUCTS.shift(); // cap total in-memory records
@@ -717,6 +717,7 @@ export function getCategories(storeSlug: string = 'ottavio', customProducts?: Pr
 
   return existingCategories.map((cat) => {
     const count = storeProducts.filter((p) => {
+      if (p.status === 'draft') return false;
       const pCat = (p.category || '').toLowerCase().trim();
       const cName = cat.name.toLowerCase().trim();
       const cSlug = cat.slug.toLowerCase().trim();

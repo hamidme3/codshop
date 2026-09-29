@@ -18,6 +18,7 @@ export interface CatalogProductResolution {
   id: string;
   title: string;
   price: number;
+  status?: 'active' | 'draft';
   quantityTiers?: QuantityTier[];
 }
 
@@ -52,6 +53,7 @@ export async function resolveCatalogProduct(
         id: payloadProd.id,
         title: payloadProd.title,
         price: payloadProd.price,
+        status: (payloadProd as any).status || 'active',
         quantityTiers: tiers,
       };
     }
@@ -92,6 +94,7 @@ export async function resolveCatalogProduct(
             id: matched.id,
             title: matched.title,
             price: Number(matched.price),
+            status: (matched as any).status || 'active',
             quantityTiers: tiers,
           };
         }
@@ -119,6 +122,7 @@ export async function resolveCatalogProduct(
       id: mockProduct.id,
       title: mockProduct.title,
       price: mockProduct.price,
+      status: (mockProduct as any).status || 'active',
       quantityTiers: mockProduct.quantityTiers,
     };
   }
@@ -147,6 +151,7 @@ export async function resolveCatalogProduct(
       id: repoProduct.id,
       title: repoProduct.title,
       price: repoProduct.price,
+      status: repoProduct.status || 'active',
       quantityTiers: tiers,
     };
   }
@@ -400,6 +405,24 @@ export async function verifyAndRecalculateOrder(
         success: false,
         countryCode: orderCountryCode,
         error: `Produit introuvable dans le catalogue: ${rawIt.title || rawIt.id || rawIt.slug || 'inconnu'}`,
+        items: [],
+        subtotal: 0,
+        shippingFee: 0,
+        total: 0,
+        city,
+        address,
+        customerName,
+        deliveryType,
+        agencyName,
+        tamperingDetected: false,
+      };
+    }
+
+    if ((catalogProd as any).status === 'draft') {
+      return {
+        success: false,
+        countryCode: orderCountryCode,
+        error: `Le produit "${catalogProd.title}" est en cours de préparation et ne peut pas être commandé actuellement.`,
         items: [],
         subtotal: 0,
         shippingFee: 0,

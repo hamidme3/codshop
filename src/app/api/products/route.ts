@@ -37,10 +37,27 @@ export async function GET(req: Request) {
       .filter((p) => p.status !== 'draft')
       .map((p) => convertDbProductToStorefrontProduct(p));
 
+    const isPreview = searchParams.get('preview') === 'true';
+
     // If querying a single product by slug or sku
     if (slugQuery) {
-      // 1. Check current store products
-      let match = storefrontProducts.find(
+      // Check if product exists in this store in draft mode
+      const draftMatch = combined.find(
+        (p) =>
+          p.sku?.toLowerCase() === slugQuery ||
+          p.id?.toLowerCase() === slugQuery ||
+          p.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slugQuery
+      );
+
+      if (draftMatch && draftMatch.status === 'draft' && !isPreview) {
+        return NextResponse.json(
+          { success: false, message: 'Ce produit est actuellement en cours de préparation', isDraft: true },
+          { status: 404 }
+        );
+      }
+
+      // 1. Check current store published products (or draft if preview)
+      let match = (isPreview ? combined.map((p) => convertDbProductToStorefrontProduct(p)) : storefrontProducts).find(
         (p) =>
           p.slug.toLowerCase() === slugQuery ||
           p.sku.toLowerCase() === slugQuery ||
@@ -53,6 +70,12 @@ export async function GET(req: Request) {
         try {
           const dbProd = await getProductBySlugOrSku(slugQuery);
           if (dbProd) {
+            if (dbProd.status === 'draft' && !isPreview) {
+              return NextResponse.json(
+                { success: false, message: 'Ce produit est actuellement en cours de préparation', isDraft: true },
+                { status: 404 }
+              );
+            }
             match = convertDbProductToStorefrontProduct(dbProd);
           }
         } catch {}
@@ -64,7 +87,7 @@ export async function GET(req: Request) {
       }
 
       if (match) {
-        return NextResponse.json({ success: true, product: match });
+        return NextResponse.json({ success: true, product: match, isPreview: isPreview && draftMatch?.status === 'draft' });
       }
 
       return NextResponse.json({ success: false, message: 'Produit introuvable' }, { status: 404 });

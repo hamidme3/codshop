@@ -7,7 +7,7 @@ import {
   Layers, Check, Trash2, Edit3, ArrowUpRight,
   Sparkles, Wand2, Copy, CheckCheck, ShieldCheck, Flame,
   Star, Image as ImageIcon, SlidersHorizontal, ArrowLeft, ArrowRight,
-  Smartphone, Calculator, Clock, Gift, ShoppingBag, X, CheckCircle2, ChevronRight, Eye,
+  Smartphone, Calculator, Clock, Gift, ShoppingBag, X, CheckCircle2, ChevronRight, Eye, EyeOff,
   UploadCloud, Loader2
 } from 'lucide-react';
 import { 
@@ -48,6 +48,7 @@ function ProductsContent() {
 
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'products' | 'categories'>('products');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'draft'>('all');
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || '');
 
   const handleSearchChange = (val: string) => {
@@ -75,6 +76,7 @@ function ProductsContent() {
   const [editImages, setEditImages] = useState<string[]>([]);
   const [newImageInput, setNewImageInput] = useState('');
   const [editVariants, setEditVariants] = useState<Array<{ color?: string; size?: string; stock: number; sku?: string }>>([]);
+  const [editStatus, setEditStatus] = useState<'active' | 'draft'>('active');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   // Matrix Generator & Batch Fill State
@@ -208,7 +210,28 @@ function ProductsContent() {
         }))
       : [{ size: 'Standard', stock: prod.stock || 0 }];
     setEditVariants(vars);
+    setEditStatus(prod.status === 'draft' ? 'draft' : 'active');
     setShowEditModal(true);
+  };
+
+  const handleToggleProductStatus = async (productId: string, currentStatus?: string) => {
+    const newStatus: 'active' | 'draft' = currentStatus === 'draft' ? 'active' : 'draft';
+    setProducts((prev) =>
+      prev.map((p) => (p.id === productId ? { ...p, status: newStatus } : p))
+    );
+    updateProduct(productId, { status: newStatus });
+    setCategories(getCategories(storeSlug));
+    showToast(newStatus === 'active' ? 'Produit publié et visible en boutique !' : 'Produit passé en mode brouillon (masqué).');
+
+    try {
+      await fetch('/api/admin/products', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, status: newStatus }),
+      });
+    } catch (err) {
+      console.error('[Admin Products] Status toggle error:', err);
+    }
   };
 
   const handleSaveEditProduct = async (e: React.FormEvent) => {
@@ -240,6 +263,7 @@ function ProductsContent() {
         stock: Number(v.stock) || 0,
         sku: v.sku || undefined,
       })),
+      status: editStatus,
       storeSlug,
     };
 
@@ -631,7 +655,18 @@ function ProductsContent() {
     setAddModalTab('general');
   };
 
+  const activeProductsCount = products.filter((p) => p.status !== 'draft').length;
+  const draftProductsCount = products.filter((p) => p.status === 'draft').length;
+
   const filteredProducts = products.filter((p) => {
+    const matchesStatus =
+      statusFilter === 'all'
+        ? true
+        : statusFilter === 'active'
+        ? p.status !== 'draft'
+        : p.status === 'draft';
+    if (!matchesStatus) return false;
+
     return (
       (p.title ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.category ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -800,8 +835,57 @@ function ProductsContent() {
 
       {activeTab === 'products' ? (
         <>
-          {/* Search Bar */}
-          <div className="flex items-center justify-between gap-4 bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 rounded-xl p-3 shadow-xs">
+          {/* Controls: Segmented Status Filter + Search Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 rounded-xl p-3 shadow-xs">
+            {/* Segmented Status Filter Tabs */}
+            <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-xs font-medium self-start sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setStatusFilter('all')}
+                className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                  statusFilter === 'all'
+                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
+                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
+                }`}
+              >
+                <span>Tous</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-zinc-700/60 tabular-nums">
+                  {products.length}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatusFilter('active')}
+                className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                  statusFilter === 'active'
+                    ? 'bg-white dark:bg-zinc-800 text-emerald-600 dark:text-emerald-400 shadow-xs font-semibold'
+                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span>Actifs</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 tabular-nums">
+                  {activeProductsCount}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatusFilter('draft')}
+                className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                  statusFilter === 'draft'
+                    ? 'bg-white dark:bg-zinc-800 text-amber-600 dark:text-amber-400 shadow-xs font-semibold'
+                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                <span>Brouillons</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 tabular-nums">
+                  {draftProductsCount}
+                </span>
+              </button>
+            </div>
+
+            {/* Search Input */}
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" />
               <input
@@ -822,8 +906,8 @@ function ProductsContent() {
                 </button>
               )}
             </div>
-            <div className="text-xs text-slate-500 dark:text-zinc-400 font-mono tabular-nums">
-              <strong className="text-slate-900 dark:text-zinc-200">{filteredProducts.length}</strong> article(s) trouvé(s)
+            <div className="text-xs text-slate-500 dark:text-zinc-400 font-mono tabular-nums whitespace-nowrap">
+              <strong className="text-slate-900 dark:text-zinc-200">{filteredProducts.length}</strong> article(s)
             </div>
           </div>
 
@@ -853,9 +937,17 @@ function ProductsContent() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-1">
                             <h4 className="font-bold text-slate-900 dark:text-white text-xs truncate">{p.title}</h4>
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0">
-                              Actif
-                            </span>
+                            {p.status === 'draft' ? (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 shrink-0 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                Brouillon
+                              </span>
+                            ) : (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                Actif
+                              </span>
+                            )}
                           </div>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700/60 text-[10px] font-medium truncate">
@@ -923,6 +1015,24 @@ function ProductsContent() {
                         </div>
 
                         <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleProductStatus(p.id, p.status)}
+                            className="touch-target px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 dark:border-zinc-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                            title={p.status === 'draft' ? "Publier l'article" : "Mettre en brouillon"}
+                          >
+                            {p.status === 'draft' ? (
+                              <>
+                                <Eye className="w-3.5 h-3.5 text-amber-500" />
+                                <span>Publier</span>
+                              </>
+                            ) : (
+                              <>
+                                <EyeOff className="w-3.5 h-3.5 text-slate-400" />
+                                <span>Brouillon</span>
+                              </>
+                            )}
+                          </button>
                           <button
                             type="button"
                             onClick={() => handleOpenEditModal(p)}
@@ -1032,13 +1142,33 @@ function ProductsContent() {
                         </td>
 
                         <td className="py-2.5 px-3 text-center">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                            Actif
-                          </span>
+                          {p.status === 'draft' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                              Brouillon
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                              Actif
+                            </span>
+                          )}
                         </td>
 
                         <td className="py-2.5 px-3 text-right">
                           <div className="flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleProductStatus(p.id, p.status)}
+                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-300 dark:border-zinc-700 transition-colors cursor-pointer"
+                              title={p.status === 'draft' ? "Publier l'article (Rendre visible)" : "Mettre en brouillon (Masquer)"}
+                            >
+                              {p.status === 'draft' ? (
+                                <Eye className="w-3.5 h-3.5 text-amber-500 hover:text-emerald-500" />
+                              ) : (
+                                <EyeOff className="w-3.5 h-3.5 text-slate-400 hover:text-amber-500" />
+                              )}
+                            </button>
                             <button
                               type="button"
                               onClick={() => handleOpenEditModal(p)}
@@ -1051,7 +1181,7 @@ function ProductsContent() {
                               type="button"
                               onClick={() => handleDeleteProduct(p)}
                               className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 dark:text-zinc-400 dark:hover:text-rose-400 dark:hover:bg-rose-950/40 dark:hover:border-rose-800/40 transition-colors cursor-pointer"
-                              title="Supprimer"
+                              title="Supprimer définitivement"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -2064,6 +2194,36 @@ function ProductsContent() {
                   onChange={(e) => setEditTitle(e.target.value)}
                   className="w-full bg-slate-50 dark:bg-[#0d0d10] border border-slate-300 dark:border-zinc-800 rounded-lg p-2.5 text-slate-900 dark:text-zinc-100 focus:outline-none focus:border-emerald-500 font-medium"
                 />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 dark:text-zinc-300 font-medium mb-1.5">Statut de visibilité :</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditStatus('active')}
+                    className={`py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                      editStatus === 'active'
+                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-bold'
+                        : 'bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400'
+                    }`}
+                  >
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span>Actif (Visible en boutique)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditStatus('draft')}
+                    className={`py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                      editStatus === 'draft'
+                        ? 'bg-amber-500/10 border-amber-500/40 text-amber-600 dark:text-amber-400 font-bold'
+                        : 'bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400'
+                    }`}
+                  >
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                    <span>Brouillon (Masqué aux clients)</span>
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
