@@ -2047,7 +2047,7 @@ export async function recordAnalyticsEvent(data: {
   const cleanStore = (data.storeSlug || '').toLowerCase().trim();
   const distinctId = data.distinctId || 'anonymous';
   const isInCheckout = ['initiated_checkout', 'checkout_step_2', 'cod_step_1_started', 'cod_step_2_started'].includes(data.eventName);
-  const isOrderCompleted = data.eventName === 'order_completed';
+  const isCheckoutExit = data.eventName === 'order_completed' || data.eventName === 'cod_checkout_abandoned';
 
   const sessionKey = `${cleanStore}:${distinctId}`;
   const existingSession = memoryVisitorSessions.get(sessionKey);
@@ -2055,7 +2055,7 @@ export async function recordAnalyticsEvent(data: {
     storeSlug: cleanStore,
     distinctId,
     lastSeenAt: Date.now(),
-    inCheckout: isOrderCompleted ? false : (isInCheckout || (existingSession?.inCheckout ?? false)),
+    inCheckout: isCheckoutExit ? false : (isInCheckout || (existingSession?.inCheckout ?? false)),
   });
 
   const db = getDb();
@@ -2126,16 +2126,27 @@ export async function getLiveVisitorsFromDb(storeSlug: string): Promise<{ liveVi
         const liveDistinctIds = new Set(recentEvents.map((e) => e.distinctId));
         const liveVisitors = liveDistinctIds.size;
 
-        // 2. Shoppers actively in checkout (last 15m, without completed order)
+        // 2. Shoppers actively in checkout (last 15m, without exit after checkout)
         const checkoutEvents = events.filter((e) =>
           ['initiated_checkout', 'checkout_step_2', 'cod_step_1_started', 'cod_step_2_started'].includes(e.eventName)
         );
-        const completedOrderDistinctIds = new Set(
-          events.filter((e) => e.eventName === 'order_completed').map((e) => e.distinctId)
+        const exitEvents = events.filter((e) =>
+          ['order_completed', 'cod_checkout_abandoned'].includes(e.eventName)
         );
-        const inCheckoutDistinctIds = new Set(
-          checkoutEvents.filter((e) => !completedOrderDistinctIds.has(e.distinctId)).map((e) => e.distinctId)
-        );
+        const latestExitTimes = new Map<string, number>();
+        exitEvents.forEach((e) => {
+          const t = e.createdAt.getTime();
+          const curr = latestExitTimes.get(e.distinctId) || 0;
+          if (t > curr) latestExitTimes.set(e.distinctId, t);
+        });
+
+        const inCheckoutDistinctIds = new Set<string>();
+        for (const ce of checkoutEvents) {
+          const exitTime = latestExitTimes.get(ce.distinctId);
+          if (!exitTime || ce.createdAt.getTime() > exitTime) {
+            inCheckoutDistinctIds.add(ce.distinctId);
+          }
+        }
 
         return {
           liveVisitors,
@@ -2177,7 +2188,37 @@ export const getLiveVisitors = getLiveVisitorsFromDb;
 
 export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
   const db = getDb();
-  if (!db) return null;
+  if (!db) {
+    const livePresence = await getLiveVisitorsFromDb(storeSlug);
+    return {
+      hasData: true,
+      live: {
+        activeNow: livePresence.liveVisitors,
+        inCheckout: livePresence.inCheckout,
+        activeProducts: [],
+      },
+      funnel: {
+        visitors: livePresence.liveVisitors,
+        catalogViews: 0,
+        productViews: 0,
+        initiatedCheckout: livePresence.inCheckout,
+        checkoutStep2: livePresence.inCheckout,
+        ordersCompleted: 0,
+        overallConversionRate: 0,
+      },
+      abandonment: {
+        totalAbandoned: 0,
+        step1Abandoned: 0,
+        step2Abandoned: 0,
+        recoverableLeads: 0,
+        recoveryRate: 0,
+      },
+      searches: [],
+      products: [],
+      channels: { webOrders: 0, webPercentage: 100, whatsappRescues: 0, whatsappPercentage: 0 },
+      source: 'memory_fallback',
+    };
+  }
 
   try {
     const store = await getStoreBySlug(storeSlug);
@@ -2243,22 +2284,29 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
       return null;
     }
 
-    // 3. Compute real live metrics
-    const recentEvents = events.filter((e) => e.createdAt >= fiveMinutesAgo);
-    const liveDistinctIds = new Set(recentEvents.map((e) => e.distinctId));
-    const activeNow = liveDistinctIds.size;
+    // 3. Compute real live metrics using the unified live presence engine
+    const livePresence = await getLiveVisitorsFromDb(storeSlug);
+    const activeNow = livePresence.liveVisitors;
+    const inCheckoutNow = livePresence.inCheckout;
 
-    const checkoutEvents = events.filter(
-      (e) =>
-        e.createdAt >= fifteenMinutesAgo &&
-        ['initiated_checkout', 'checkout_step_2', 'cod_step_1_started', 'cod_step_2_started'].includes(e.eventName)
+    // Real active products viewed in the last 15 minutes
+    const recentProductViews = events.filter(
+      (e) => e.createdAt >= fifteenMinutesAgo && e.eventName === 'product_viewed'
     );
-    const completedOrderDistinctIds = new Set(
-      events.filter((e) => e.eventName === 'order_completed').map((e) => e.distinctId)
-    );
-    const inCheckoutNow = new Set(
-      checkoutEvents.filter((e) => !completedOrderDistinctIds.has(e.distinctId)).map((e) => e.distinctId)
-    ).size;
+    const activeProductsMap = new Map<string, { title: string; viewers: Set<string> }>();
+    for (const pv of recentProductViews) {
+      const props = (pv.properties || {}) as any;
+      const title = props.title || props.productTitle || props.product_title;
+      if (title) {
+        if (!activeProductsMap.has(title)) {
+          activeProductsMap.set(title, { title, viewers: new Set() });
+        }
+        activeProductsMap.get(title)!.viewers.add(pv.distinctId);
+      }
+    }
+    const liveActiveProducts = Array.from(activeProductsMap.values())
+      .map((ap) => ({ title: ap.title, activeViewers: ap.viewers.size }))
+      .slice(0, 3);
 
     // 4. Compute funnel (strictly counting completed, non-abandoned orders)
     const allVisitors = new Set(events.map((e) => e.distinctId)).size || (activeOrders.length > 0 ? activeOrders.length : 0);
@@ -2411,7 +2459,7 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
       live: {
         activeNow,
         inCheckout: inCheckoutNow,
-        activeProducts: [],
+        activeProducts: liveActiveProducts,
       },
       funnel: {
         visitors: allVisitors,
