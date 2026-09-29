@@ -680,45 +680,63 @@ function AnalyticsContent() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60">
-                  {storefrontData?.products?.map((prod) => (
-                    <tr key={prod.id} className="hover:bg-slate-100/60 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white text-sm">
-                        <div className="max-w-[280px] truncate flex items-center gap-2">
-                          <Package className="w-4 h-4 text-slate-400 shrink-0" />
-                          <span>{prod.title}</span>
+                  {storefrontData?.products && storefrontData.products.length > 0 ? (
+                    storefrontData.products.map((prod) => (
+                      <tr key={prod.id} className="hover:bg-slate-100/60 dark:hover:bg-slate-800/40 transition-colors">
+                        <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white text-sm">
+                          <div className="max-w-[280px] truncate flex items-center gap-2">
+                            <Package className="w-4 h-4 text-slate-400 shrink-0" />
+                            <span>{prod.title}</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-mono font-bold text-sky-600 dark:text-sky-400">
+                          {prod.uniqueVisitors}
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-mono text-slate-600 dark:text-slate-300">
+                          {prod.totalViews}
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-mono font-black text-emerald-600 dark:text-emerald-400">
+                          {prod.ordersCount}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <div className="inline-flex items-center gap-1.5 font-bold font-mono text-slate-900 dark:text-white">
+                            <span>{prod.conversionRate}%</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          {prod.conversionRate >= 5.0 ? (
+                            <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                              🔥 Top Vendeur
+                            </span>
+                          ) : prod.uniqueVisitors > 200 ? (
+                            <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                              ⚠️ À Optimiser
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                              ⭐ Standard
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center">
+                        <div className="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                          <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center text-slate-400">
+                            <Package className="w-5 h-5" />
+                          </div>
+                          <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                            Aucune donnée produit pour le moment
+                          </p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                            Les visites et conversions de vos fiches produits s'afficheront ici dès les premiers clics de vos visiteurs.
+                          </p>
                         </div>
-                      </td>
-                      <td className="py-3.5 px-4 text-center font-mono font-bold text-sky-600 dark:text-sky-400">
-                        {prod.uniqueVisitors}
-                      </td>
-                      <td className="py-3.5 px-4 text-center font-mono text-slate-600 dark:text-slate-300">
-                        {prod.totalViews}
-                      </td>
-                      <td className="py-3.5 px-4 text-center font-mono font-black text-emerald-600 dark:text-emerald-400">
-                        {prod.ordersCount}
-                      </td>
-                      <td className="py-3.5 px-4 text-center">
-                        <div className="inline-flex items-center gap-1.5 font-bold font-mono text-slate-900 dark:text-white">
-                          <span>{prod.conversionRate}%</span>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        {prod.conversionRate >= 5.0 ? (
-                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                            🔥 Top Vendeur
-                          </span>
-                        ) : prod.uniqueVisitors > 200 ? (
-                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
-                            ⚠️ À Optimiser
-                          </span>
-                        ) : (
-                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                            ⭐ Standard
-                          </span>
-                        )}
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>

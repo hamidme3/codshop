@@ -13,6 +13,7 @@ import {
   ShoppingBag,
   MessageCircle,
 } from 'lucide-react';
+import { trackWhatsAppRescue } from '@/lib/posthog';
 
 export function MobileBottomNav() {
   const pathname = usePathname() || '';
@@ -147,6 +148,10 @@ export function MobileBottomNav() {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => {
+            const storeSlug = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('store') || 'ottavio' : 'ottavio';
+            trackWhatsAppRescue(storeSlug, { reason: 'mobile_bottom_nav_click' });
+          }}
           className="flex flex-col items-center justify-center h-full min-h-[48px] py-1 text-emerald-600 hover:text-emerald-700 transition-colors"
           aria-label="Assistance WhatsApp"
         >

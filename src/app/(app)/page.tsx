@@ -8,6 +8,7 @@ import { getProductsByTheme, MOCK_PRODUCTS } from '@/lib/mockProducts';
 import { ProductCard } from '@/components/ProductCard';
 import { Award, Sparkles, Zap, ArrowRight, Star, ShieldCheck, Truck } from 'lucide-react';
 import { UniversalLandingPage } from '@/components/landing/UniversalLandingPage';
+import { trackStorePageView } from '@/lib/posthog';
 
 function StorefrontHome({ storeSlug }: { storeSlug?: string }) {
   const { theme, lang, countryCode } = useTheme();
@@ -17,6 +18,7 @@ function StorefrontHome({ storeSlug }: { storeSlug?: string }) {
 
   useEffect(() => {
     const slug = storeSlug || 'storet1';
+    trackStorePageView(slug, '/');
     fetch(`/api/products?store=${encodeURIComponent(slug)}`)
       .then((res) => res.json())
       .then((data) => {

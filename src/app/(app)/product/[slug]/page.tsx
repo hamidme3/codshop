@@ -28,7 +28,7 @@ import { CodCheckoutModal } from '@/components/CodCheckoutModal';
 import { CartWidget } from '@/components/CartWidget';
 import { useCart } from '@/context/CartContext';
 import { fetchAndInitPixels, trackViewContent } from '@/lib/pixel-tracker';
-import { trackProductView, trackStorePageView } from '@/lib/posthog';
+import { trackProductView, trackStorePageView, trackWhatsAppRescue } from '@/lib/posthog';
 import { THEMES } from '@/lib/themes';
 
 export default function ProductDetailPage() {
@@ -755,6 +755,15 @@ export default function ProductDetailPage() {
               )}`}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => {
+                if (product) {
+                  trackWhatsAppRescue(currentStoreSlug, {
+                    productId: product.id,
+                    total: activeTier?.totalPrice ?? product?.price ?? 0,
+                    reason: 'direct_pdp_click',
+                  });
+                }
+              }}
               className="w-full py-4 px-6 bg-white hover:bg-zinc-50 text-zinc-800 border-2 border-zinc-200 font-black text-sm rounded-2xl transition flex items-center justify-center gap-2 shadow-sm min-h-[48px]"
               aria-label="Commander via WhatsApp"
             >

@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useTheme } from '@/context/ThemeContext';
+import { trackOrderCompleted } from '@/lib/posthog';
 import {
   X,
   Plus,
@@ -185,6 +186,15 @@ export function CartDrawer() {
       }
 
       const orderRef = data.order?.orderNumber || data.orderId || `CMD-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      // Track order completion in PostHog analytics
+      trackOrderCompleted(effectiveStoreSlug, {
+        orderId: orderRef,
+        total: grandTotal,
+        city: customerCity,
+        deliveryType: 'home',
+        productId: items[0]?.productId,
+      });
 
       // Clear cart on successful order
       clearCart();
