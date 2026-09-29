@@ -1,5 +1,5 @@
 import { getDb, schema } from '@/db';
-import { eq, desc, asc, and, ne, gte } from 'drizzle-orm';
+import { eq, desc, asc, and, ne, gte, sql } from 'drizzle-orm';
 import type { Order, Product, Customer, CourierName, OrderStatus } from './types';
 import {
   ORDERS,
@@ -741,60 +741,7 @@ export async function createOrder(data: {
 
   try {
     if (!isAbandoned) {
-      // 1. Decrement product stock in Payload CMS (single source of truth)
-      try {
-        const { decrementPayloadStock } = await import('./payload-products');
-        for (const it of cleanItems) {
-          await decrementPayloadStock(it.id, it.quantity, { size: it.size, color: it.color });
-        }
-      } catch (payloadStockErr) {
-        console.warn('[DbRepo] Non-fatal Payload stock decrement warning:', payloadStockErr);
-      }
-
-      // 2. Also decrement in Drizzle Postgres for backward-compatibility during migration
-      try {
-        const allStoreProds = await db.query.products.findMany({
-          where: eq(schema.products.storeId, store.id),
-        });
-        for (const it of cleanItems) {
-          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(it.id);
-          const targetSku = (it.sku || it.id || '').trim().toLowerCase();
-          const targetSkuClean = targetSku.replace(/^prod_/, '');
-          const prod = allStoreProds.find(
-            (p) =>
-              (isUuid && p.id === it.id) ||
-              p.sku.toLowerCase() === targetSku ||
-              p.sku.toLowerCase() === targetSkuClean ||
-              targetSku.startsWith(p.sku.toLowerCase()) ||
-              p.sku.toLowerCase().startsWith(targetSku) ||
-              p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSku ||
-              p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSkuClean
-          );
-          if (prod) {
-            let updatedVariants = prod.variants;
-            if (Array.isArray(updatedVariants)) {
-              updatedVariants = updatedVariants.map((v) => {
-                const matchColor = it.color ? v.color?.toLowerCase() === it.color.toLowerCase() : true;
-                const matchSize = it.size ? v.size?.toLowerCase() === it.size.toLowerCase() : true;
-                if (matchColor && matchSize) {
-                  return { ...v, stock: Math.max(0, (v.stock || 0) - it.quantity) };
-                }
-                return v;
-              });
-            }
-            await db
-              .update(schema.products)
-              .set({
-                stock: Math.max(0, prod.stock - it.quantity),
-                variants: updatedVariants,
-                updatedAt: new Date(),
-              })
-              .where(eq(schema.products.id, prod.id));
-          }
-        }
-      } catch (invDbErr) {
-        console.warn('[DbRepo] Non-fatal DB stock decrement warning:', invDbErr);
-      }
+      await decrementDbProductStock(store.id, cleanItems);
     }
 
     const [newOrder] = await db.insert(schema.orders).values({
@@ -819,8 +766,10 @@ export async function createOrder(data: {
       currency: cleanCurrency,
     }).returning();
 
-    // Auto-update or create Customer in CRM
-    await syncCustomerFromOrder(store.id, cleanCustomerName, data.phone, cleanCity, cleanTotal, cleanEmail);
+    // Auto-update or create Customer in CRM (strictly for completed orders, not abandoned checkout captures)
+    if (!isAbandoned) {
+      await syncCustomerFromOrder(store.id, cleanCustomerName, data.phone, cleanCity, cleanTotal, cleanEmail);
+    }
 
     // Sync to in-memory ORDERS cache for real-time backoffice parity
     try {
@@ -857,6 +806,71 @@ export async function createOrder(data: {
   } catch (err) {
     console.error('[DbRepo] Error creating order in DB:', err);
     throw err;
+  }
+}
+
+export async function decrementDbProductStock(
+  storeId: string,
+  items: Array<{ id: string; sku?: string; quantity: number; size?: string; color?: string }>
+) {
+  if (!items || items.length === 0) return;
+
+  // 1. Decrement in Payload CMS (single source of truth)
+  try {
+    const { decrementPayloadStock } = await import('./payload-products');
+    for (const it of items) {
+      await decrementPayloadStock(it.id, it.quantity, { size: it.size, color: it.color });
+    }
+  } catch (payloadStockErr) {
+    console.warn('[DbRepo] Non-fatal Payload stock decrement warning:', payloadStockErr);
+  }
+
+  // 2. Decrement in Drizzle Postgres
+  const db = getDb();
+  if (!db) return;
+
+  try {
+    const allStoreProds = await db.query.products.findMany({
+      where: eq(schema.products.storeId, storeId),
+    });
+    for (const it of items) {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(it.id);
+      const targetSku = (it.sku || it.id || '').trim().toLowerCase();
+      const targetSkuClean = targetSku.replace(/^prod_/, '');
+      const prod = allStoreProds.find(
+        (p) =>
+          (isUuid && p.id === it.id) ||
+          p.sku.toLowerCase() === targetSku ||
+          p.sku.toLowerCase() === targetSkuClean ||
+          targetSku.startsWith(p.sku.toLowerCase()) ||
+          p.sku.toLowerCase().startsWith(targetSku) ||
+          p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSku ||
+          p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSkuClean
+      );
+      if (prod) {
+        let updatedVariants = prod.variants;
+        if (Array.isArray(updatedVariants)) {
+          updatedVariants = updatedVariants.map((v) => {
+            const matchColor = it.color ? v.color?.toLowerCase() === it.color.toLowerCase() : true;
+            const matchSize = it.size ? v.size?.toLowerCase() === it.size.toLowerCase() : true;
+            if (matchColor && matchSize) {
+              return { ...v, stock: Math.max(0, (v.stock || 0) - it.quantity) };
+            }
+            return v;
+          });
+        }
+        await db
+          .update(schema.products)
+          .set({
+            stock: Math.max(0, prod.stock - it.quantity),
+            variants: updatedVariants,
+            updatedAt: new Date(),
+          })
+          .where(eq(schema.products.id, prod.id));
+      }
+    }
+  } catch (invDbErr) {
+    console.warn('[DbRepo] Non-fatal DB stock decrement warning:', invDbErr);
   }
 }
 
@@ -1045,7 +1059,7 @@ export async function addUpsellToOrder(
   return updatedOrder;
 }
 
-async function syncCustomerFromOrder(
+export async function syncCustomerFromOrder(
   storeId: string,
   name: string,
   phone: string,
@@ -1128,12 +1142,14 @@ export async function getCustomers(storeSlug: string): Promise<Customer[]> {
 
     return dbCusts.map((c) => {
       const custOrders = storeOrders.filter((o) => o.phone === c.phone);
+      const validCustOrders = custOrders.filter((o) => o.status !== 'abandoned');
       const lastOrd = custOrders[0];
-      const delivered = custOrders.filter((o) => o.status === 'delivered').length;
-      const returned = custOrders.filter((o) => o.status === 'returned').length;
+      const delivered = validCustOrders.filter((o) => o.status === 'delivered').length;
+      const returned = validCustOrders.filter((o) => o.status === 'returned').length;
+      const abandoned = custOrders.filter((o) => o.status === 'abandoned').length;
       const totalResolved = delivered + returned;
       const deliverySuccessRate = totalResolved > 0 ? Math.round((delivered / totalResolved) * 100) : (delivered > 0 ? 100 : undefined);
-      const deliveredSpend = custOrders.filter((o) => o.status === 'delivered').reduce((sum, o) => sum + Number(o.total), 0);
+      const deliveredSpend = validCustOrders.filter((o) => o.status === 'delivered').reduce((sum, o) => sum + Number(o.total), 0);
 
       return {
         id: c.id,
@@ -1142,21 +1158,22 @@ export async function getCustomers(storeSlug: string): Promise<Customer[]> {
         phone: c.phone,
         email: c.email || '',
         city: c.city,
-        totalOrders: Math.max(c.totalOrders, custOrders.length),
+        totalOrders: validCustOrders.length > 0 ? validCustOrders.length : (abandoned > 0 ? 0 : c.totalOrders),
         totalSpend: deliveredSpend > 0 ? deliveredSpend : (delivered > 0 ? (c.totalSpend || 0) : 0),
         averageBasket: Math.round((deliveredSpend > 0 ? deliveredSpend : (c.totalSpend || 0)) / Math.max(1, delivered)),
-        status: (c.status as any) || (returned > 0 ? 'risk' : (delivered >= 2 || (custOrders.length >= 2 && delivered >= 1)) ? 'returning' : custOrders.length > 0 ? 'active' : 'new'),
+        status: (c.status as any) || (returned > 0 ? 'risk' : (delivered >= 2 || (validCustOrders.length >= 2 && delivered >= 1)) ? 'returning' : validCustOrders.length > 0 ? 'active' : 'new'),
         riskScore: (returned > 0 ? 'high' : 'low') as any,
         lastOrderDate: (c.lastOrderAt || lastOrd?.createdAt || c.createdAt)?.toISOString() || new Date().toISOString(),
         lastOrderNumber: lastOrd?.orderNumber,
         lastOrderStatus: (lastOrd?.status as any) || 'new',
         lastTrackingNumber: lastOrd?.trackingNumber || undefined,
         deliverySuccessRate,
-        confirmedOrders: custOrders.filter((o) => o.status === 'confirmed').length,
-        shippedOrders: custOrders.filter((o) => ['shipped', 'shipping'].includes(o.status)).length,
+        confirmedOrders: validCustOrders.filter((o) => o.status === 'confirmed').length,
+        shippedOrders: validCustOrders.filter((o) => ['shipped', 'shipping'].includes(o.status)).length,
         deliveredOrders: delivered,
         returnedOrders: returned,
-        canceledOrders: custOrders.filter((o) => o.status === 'canceled').length,
+        canceledOrders: validCustOrders.filter((o) => o.status === 'canceled').length,
+        abandonedOrders: abandoned,
         recentOrders: custOrders.slice(0, 50).map((o) => ({
           id: o.id,
           orderNumber: o.orderNumber,
@@ -2027,6 +2044,20 @@ export async function recordAnalyticsEvent(data: {
     const store = await getStoreBySlug(data.storeSlug);
     if (!store || !('id' in store)) return null;
 
+    // Deduplicate order_completed events for the same orderId to maintain pure idempotency
+    if (data.eventName === 'order_completed' && data.properties?.orderId) {
+      const existing = await db.query.analyticsEvents.findFirst({
+        where: and(
+          eq(schema.analyticsEvents.storeId, store.id),
+          eq(schema.analyticsEvents.eventName, 'order_completed'),
+          sql`${schema.analyticsEvents.properties}->>'orderId' = ${String(data.properties.orderId)}`
+        ),
+      });
+      if (existing) {
+        return existing;
+      }
+    }
+
     const [event] = await db
       .insert(schema.analyticsEvents)
       .values({
@@ -2075,6 +2106,9 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
       ),
       orderBy: [desc(schema.orders.createdAt)],
     });
+
+    const activeOrders = storeOrders.filter((o) => o.status !== 'abandoned');
+    const abandonedOrdersList = storeOrders.filter((o) => o.status === 'abandoned');
 
     // If no events and not ottavio, return authentic zero metrics for fresh stores
     if (events.length === 0 && storeOrders.length === 0 && storeSlug !== 'ottavio') {
@@ -2126,8 +2160,8 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
       checkoutEvents.filter((e) => !completedOrderDistinctIds.has(e.distinctId)).map((e) => e.distinctId)
     ).size;
 
-    // 4. Compute funnel
-    const allVisitors = new Set(events.map((e) => e.distinctId)).size || (storeOrders.length > 0 ? storeOrders.length : 0);
+    // 4. Compute funnel (strictly counting completed, non-abandoned orders)
+    const allVisitors = new Set(events.map((e) => e.distinctId)).size || (activeOrders.length > 0 ? activeOrders.length : 0);
     const catalogViews = events.filter((e) => e.eventName === 'catalog_viewed').length;
     const productViews = events.filter((e) => e.eventName === 'product_viewed').length;
     const initiatedCheckout = events.filter(
@@ -2136,15 +2170,15 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
     const checkoutStep2 = events.filter(
       (e) => e.eventName === 'checkout_step_2' || e.eventName === 'cod_step_2_started'
     ).length;
-    const ordersCompleted = storeOrders.length || events.filter((e) => e.eventName === 'order_completed').length;
+    const ordersCompleted = activeOrders.length || events.filter((e) => e.eventName === 'order_completed').length;
     const overallConversionRate = allVisitors > 0 ? Number(((ordersCompleted / allVisitors) * 100).toFixed(1)) : 0;
 
     // 5. Abandonment
     const abandonedEvents = events.filter((e) => e.eventName === 'cod_checkout_abandoned');
     const step1Abandoned = abandonedEvents.filter((e) => (e.properties as any)?.abandoned_at_step === 1 || (e.properties as any)?.step === 1).length;
     const step2Abandoned = abandonedEvents.filter((e) => (e.properties as any)?.abandoned_at_step === 2 || (e.properties as any)?.step === 2).length;
-    const totalAbandoned = abandonedEvents.length || Math.max(0, initiatedCheckout - ordersCompleted);
-    const recoverableLeads = abandonedEvents.filter((e) => (e.properties as any)?.has_phone === true || (e.properties as any)?.hasPhone === true).length;
+    const totalAbandoned = Math.max(abandonedOrdersList.length, abandonedEvents.length || Math.max(0, initiatedCheckout - ordersCompleted));
+    const recoverableLeads = Math.max(abandonedOrdersList.length, abandonedEvents.filter((e) => (e.properties as any)?.has_phone === true || (e.properties as any)?.hasPhone === true).length);
     const recoveryRate = totalAbandoned > 0 ? Number(((recoverableLeads / totalAbandoned) * 100).toFixed(1)) : 0;
 
     // 6. Searches
@@ -2185,7 +2219,7 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
 
     // 7. Channels
     const whatsappRescues = events.filter((e) => e.eventName === 'whatsapp_rescue_clicked').length;
-    const webOrders = storeOrders.filter((o) => (o as any).source !== 'whatsapp').length || ordersCompleted;
+    const webOrders = activeOrders.filter((o) => (o as any).source !== 'whatsapp').length || ordersCompleted;
     const totalChannelOrders = Math.max(1, webOrders + whatsappRescues);
 
     // 8. Products Breakdown (Performance de l'Offre)
@@ -2240,8 +2274,8 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
       const uniqueVisitors = new Set(matchingEvents.map((e) => e.distinctId)).size;
       const totalViews = matchingEvents.filter((e) => e.eventName === 'product_viewed').length || matchingEvents.length;
 
-      // Match orders containing this product
-      const matchingOrders = storeOrders.filter((ord) => {
+      // Match orders containing this product (strictly active, non-abandoned orders)
+      const matchingOrders = activeOrders.filter((ord) => {
         const items = (ord.items || []) as any[];
         return items.some((it) => {
           const itId = String(it.id || it.productId || '').toLowerCase();

@@ -141,10 +141,47 @@ export async function PATCH(req: Request) {
           updatePayload.trackingNumber = trackingNumber;
         }
 
-        // Restore DB stock if transitioning to canceled or returned from active state
-        if (status && existingOrder && (status === 'canceled' || status === 'returned') && existingOrder.status !== 'canceled' && existingOrder.status !== 'returned') {
+        // Accurate Inventory & CRM State Transitions:
+        const prevStatus = existingOrder?.status;
+        const isPrevActive = prevStatus && prevStatus !== 'canceled' && prevStatus !== 'returned' && prevStatus !== 'abandoned';
+        const isNextActive = status && status !== 'canceled' && status !== 'returned' && status !== 'abandoned';
+
+        // 1. Restore DB stock if transitioning to canceled or returned from an active state
+        if (existingOrder && (status === 'canceled' || status === 'returned') && isPrevActive) {
           const { restoreDbProductStock } = await import('@/lib/db-repository');
           await restoreDbProductStock(existingOrder.storeId, existingOrder.items as any);
+        } else if (existingOrder && !isPrevActive && isNextActive) {
+          // 2. Decrement DB stock when transitioning back to active (e.g. converting an abandoned lead or re-opening)
+          const { decrementDbProductStock } = await import('@/lib/db-repository');
+          await decrementDbProductStock(existingOrder.storeId, existingOrder.items as any);
+
+          // If converting an abandoned lead, sync customer CRM spend and track order_completed conversion event
+          if (prevStatus === 'abandoned') {
+            try {
+              const { syncCustomerFromOrder, recordAnalyticsEvent } = await import('@/lib/db-repository');
+              await syncCustomerFromOrder(
+                existingOrder.storeId,
+                existingOrder.customerName,
+                existingOrder.phone,
+                existingOrder.city,
+                Number(existingOrder.total),
+                existingOrder.email || undefined
+              );
+              await recordAnalyticsEvent({
+                storeSlug,
+                eventName: 'order_completed',
+                distinctId: existingOrder.phone || 'anonymous',
+                properties: {
+                  orderId: existingOrder.orderNumber,
+                  orderNumber: existingOrder.orderNumber,
+                  value: Number(existingOrder.total),
+                  source: 'lead_recovery',
+                },
+              });
+            } catch (crmErr) {
+              console.warn('[API Admin Orders] Warning syncing CRM on lead conversion:', crmErr);
+            }
+          }
         }
 
         await db
@@ -195,8 +232,8 @@ export async function DELETE(req: Request) {
           where: whereClause,
         });
 
-        // Restore DB stock if deleting an active order
-        if (existingOrder && existingOrder.status !== 'canceled' && existingOrder.status !== 'returned') {
+        // Restore DB stock ONLY if deleting a previously active order (never for abandoned, canceled, or returned orders)
+        if (existingOrder && existingOrder.status !== 'canceled' && existingOrder.status !== 'returned' && existingOrder.status !== 'abandoned') {
           const { restoreDbProductStock } = await import('@/lib/db-repository');
           await restoreDbProductStock(existingOrder.storeId, existingOrder.items as any);
         }

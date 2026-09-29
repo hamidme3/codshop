@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   MessageSquare, Plus, Clock, CheckCircle, AlertCircle, 
   MessageCircle, ExternalLink, ShieldCheck, ChevronRight,
@@ -42,11 +43,36 @@ const PRIORITY_LABELS: Record<string, { label: string; color: string }> = {
   urgent: { label: 'Urgente 🔥', color: 'text-rose-400 font-semibold' },
 };
 
-export default function SupportDeskPage() {
+function SupportDeskContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>(() => searchParams.get('status') || 'all');
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || '');
+  
+  // Sync URL when filter or search changes
+  const handleFilterChange = (status: string) => {
+    setFilterStatus(status);
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (status === 'all') {
+      newParams.delete('status');
+    } else {
+      newParams.set('status', status);
+    }
+    router.replace(`/admin/support?${newParams.toString()}`, { scroll: false });
+  };
+
+  const handleSearchChange = (q: string) => {
+    setSearchQuery(q);
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (q.trim()) {
+      newParams.set('q', q.trim());
+    } else {
+      newParams.delete('q');
+    }
+    router.replace(`/admin/support?${newParams.toString()}`, { scroll: false });
+  };
   
   // New ticket modal
   const [showModal, setShowModal] = useState(false);
@@ -231,7 +257,7 @@ export default function SupportDeskPage() {
             {['all', 'open', 'in_progress', 'waiting_merchant', 'closed'].map((status) => (
               <button
                 key={status}
-                onClick={() => setFilterStatus(status)}
+                onClick={() => handleFilterChange(status)}
                 className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition whitespace-nowrap cursor-pointer ${
                   filterStatus === status
                     ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-bold'
@@ -250,7 +276,7 @@ export default function SupportDeskPage() {
               type="text"
               placeholder="Rechercher par numéro ou sujet..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500"
             />
           </div>
@@ -447,5 +473,20 @@ export default function SupportDeskPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function SupportDeskPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent mb-3" />
+          <p>Chargement du support...</p>
+        </div>
+      }
+    >
+      <SupportDeskContent />
+    </Suspense>
   );
 }

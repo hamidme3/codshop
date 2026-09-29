@@ -125,6 +125,7 @@ export interface Customer {
   deliveredOrders?: number;
   returnedOrders?: number;
   canceledOrders?: number;
+  abandonedOrders?: number;
   totalSpend: number;
   averageBasket: number;
   lastOrderDate: string;

@@ -472,6 +472,8 @@ export function syncCustomersFromOrders(storeSlug: string): Customer[] {
       cust.deliveredOrders = (cust.deliveredOrders || 0) + 1;
     } else if (order.status === 'returned' || order.status === 'canceled') {
       cust.returnedOrders = (cust.returnedOrders || 0) + 1;
+    } else if (order.status === 'abandoned') {
+      cust.abandonedOrders = (cust.abandonedOrders || 0) + 1;
     }
   }
 
@@ -480,7 +482,8 @@ export function syncCustomersFromOrders(storeSlug: string): Customer[] {
 
   for (const cust of Array.from(customerMap.values())) {
     const ordersList = cust.recentOrders || [];
-    cust.totalOrders = Math.max(cust.totalOrders || 0, ordersList.length);
+    const validOrders = ordersList.filter((o) => o.status !== 'abandoned');
+    cust.totalOrders = validOrders.length;
 
     // Latest order is the first item (since sorted desc)
     const latestOrder = ordersList[0];
@@ -818,8 +821,8 @@ export function deleteOrder(orderId: string, storeSlug: string = 'ottavio'): boo
   if (index === -1) return false;
   const order = ORDERS[index];
 
-  // Restore inventory if order was active (not canceled or returned)
-  if (order.status !== 'canceled' && order.status !== 'returned') {
+  // Restore inventory if order was active (not canceled, returned, or abandoned)
+  if (order.status !== 'canceled' && order.status !== 'returned' && order.status !== 'abandoned') {
     for (const item of order.items) {
       const prod = PRODUCTS.find((p) => p.id === item.id);
       if (prod) {

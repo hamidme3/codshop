@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
   Palette, Check, ExternalLink, Sliders, 
@@ -115,17 +115,43 @@ function MiniThemeMockup({ theme }: { theme: ThemeConfig }) {
 }
 
 function ThemeGalleryContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
   const storefrontUrl = getStorefrontUrl(storeSlug);
   const { language } = useLanguage();
 
+  const urlCategory = (searchParams.get('category') || 'all') as ThemeCategory | 'all';
+  const urlQuery = searchParams.get('q') || '';
+
   const [activeThemeId, setActiveThemeId] = useState<ThemeId>('luxury');
-  const [selectedCategory, setSelectedCategory] = useState<ThemeCategory | 'all'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<ThemeCategory | 'all'>(() => urlCategory);
+  const [searchQuery, setSearchQuery] = useState(() => urlQuery);
   const [loadingTheme, setLoadingTheme] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleCategoryChange = (cat: ThemeCategory | 'all') => {
+    setSelectedCategory(cat);
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (cat === 'all') {
+      newParams.delete('category');
+    } else {
+      newParams.set('category', cat);
+    }
+    router.replace(`/admin/themes?${newParams.toString()}`, { scroll: false });
+  };
+
+  const handleSearchChange = (q: string) => {
+    setSearchQuery(q);
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (q.trim()) {
+      newParams.set('q', q.trim());
+    } else {
+      newParams.delete('q');
+    }
+    router.replace(`/admin/themes?${newParams.toString()}`, { scroll: false });
+  };
 
   // Fetch active store theme on mount and store change
   useEffect(() => {
@@ -365,7 +391,7 @@ function ThemeGalleryContent() {
                   : 'Rechercher par nom, benchmark (Shopify/WooCommerce)...'
               }
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 transition"
             />
           </div>
@@ -383,7 +409,7 @@ function ThemeGalleryContent() {
             return (
               <button
                 key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
+                onClick={() => handleCategoryChange(cat.id)}
                 className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer ${
                   isSelected
                     ? 'bg-emerald-600 text-white font-bold shadow-xs'

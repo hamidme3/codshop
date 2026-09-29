@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Suspense, useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   TrendingUp, Truck, Phone, AlertOctagon, 
   MapPin, DollarSign, Wallet, ShieldCheck, ArrowUpRight,
@@ -77,10 +77,23 @@ interface OperationsAnalyticsData {
 }
 
 function AnalyticsContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const storeSlug = searchParams.get('store') || 'ottavio';
+  const urlTab = searchParams.get('tab') === 'operations' ? 'operations' : 'storefront';
 
-  const [activeTab, setActiveTab] = useState<'storefront' | 'operations'>('storefront');
+  const [activeTab, setActiveTab] = useState<'storefront' | 'operations'>(() => urlTab);
+
+  const handleTabChange = (tab: 'storefront' | 'operations') => {
+    setActiveTab(tab);
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (tab === 'storefront') {
+      newParams.delete('tab');
+    } else {
+      newParams.set('tab', tab);
+    }
+    router.replace(`/admin/analytics?${newParams.toString()}`, { scroll: false });
+  };
   const [storefrontData, setStorefrontData] = useState<StorefrontAnalyticsData | null>(null);
   const [operationsData, setOperationsData] = useState<OperationsAnalyticsData | null>(null);
   const [loadingStorefront, setLoadingStorefront] = useState(true);
@@ -197,7 +210,7 @@ function AnalyticsContent() {
         {/* Tab Switcher */}
         <div className="flex items-center p-1.5 rounded-2xl bg-slate-200/80 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 shadow-inner self-start sm:self-auto backdrop-blur-md">
           <button
-            onClick={() => setActiveTab('storefront')}
+            onClick={() => handleTabChange('storefront')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'storefront'
                 ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 scale-[1.02]'
@@ -208,7 +221,7 @@ function AnalyticsContent() {
             <span>Trafic & Entonnoir (Live)</span>
           </button>
           <button
-            onClick={() => setActiveTab('operations')}
+            onClick={() => handleTabChange('operations')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'operations'
                 ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 scale-[1.02]'

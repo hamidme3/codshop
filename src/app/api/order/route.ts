@@ -176,6 +176,21 @@ export async function POST(req: Request) {
     // 6. Persist order with authentic server-recalculated pricing, variant SKUs, and inventory reservation
     const customerEmail = body.customer?.email || body.email || undefined;
     let savedOrder;
+    const resolvedItems = (pricingResult.items && pricingResult.items.length > 0)
+      ? pricingResult.items
+      : (Array.isArray(body.items) && body.items.length > 0 ? body.items : (body.product ? [body.product] : []));
+
+    const finalItems = resolvedItems.map((it: any) => ({
+      id: it.id || it.productId || 'item_default',
+      title: it.title || body.productTitle || 'Produit',
+      quantity: Number(it.quantity) || 1,
+      price: Number(it.price) || Number(body.total) || 0,
+      variant: it.variant,
+      sku: it.sku,
+      color: it.color,
+      size: it.size,
+    }));
+
     try {
       savedOrder = await createOrder({
         storeSlug,
@@ -184,16 +199,7 @@ export async function POST(req: Request) {
         phone,
         city: pricingResult.city || body.city || 'Casablanca',
         address: pricingResult.address || body.address || 'Coordonnées incomplètes',
-        items: (pricingResult.items || []).map((it) => ({
-          id: it.id,
-          title: it.title,
-          quantity: it.quantity,
-          price: it.price,
-          variant: it.variant,
-          sku: it.sku,
-          color: it.color,
-          size: it.size,
-        })),
+        items: finalItems,
         subtotal: pricingResult.subtotal || body.subtotal || 0,
         shippingFee: pricingResult.shippingFee || body.shippingFee || 0,
         total: pricingResult.total || body.total || 0,
@@ -218,6 +224,36 @@ export async function POST(req: Request) {
     }
 
     const orderId = savedOrder.orderNumber;
+
+    // Server-Side Conversion Logging (Guarantees 100% analytics parity even if mobile user closes tab before client beacon)
+    if (!isAbandoned) {
+      try {
+        const { recordAnalyticsEvent } = await import('@/lib/db-repository');
+        await recordAnalyticsEvent({
+          storeSlug,
+          eventName: 'order_completed',
+          distinctId: body.distinctId || phone || 'anonymous',
+          properties: {
+            orderId,
+            orderNumber: orderId,
+            value: pricingResult.total || body.total || 0,
+            currency: countryConfig.currency.code,
+            items: finalItems.map((i: any) => ({
+              id: i.id,
+              productId: i.id,
+              title: i.title,
+              sku: i.sku,
+              quantity: i.quantity,
+              price: i.price,
+            })),
+            source,
+            countryCode: orderCountryCode,
+          },
+        });
+      } catch (evtErr) {
+        console.warn('[CODShop Order] Server-side order_completed event record warning:', evtErr);
+      }
+    }
 
     console.log(`[CODShop Order Created] ID: ${orderId}`, {
       storeSlug,
