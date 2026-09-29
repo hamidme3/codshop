@@ -80,10 +80,10 @@ export function SearchModal() {
   // Combine store products with base catalog
   const catalog = useMemo(() => {
     if (storeProducts.length === 0) return MOCK_PRODUCTS;
-    const existingSlugs = new Set(storeProducts.map((p) => p.slug.toLowerCase()));
-    const existingSkus = new Set(storeProducts.map((p) => (p.sku || p.id).toLowerCase()));
+    const existingSlugs = new Set(storeProducts.map((p) => String(p.slug || '').toLowerCase()));
+    const existingSkus = new Set(storeProducts.map((p) => String(p.sku || p.id).toLowerCase()));
     const remainder = MOCK_PRODUCTS.filter(
-      (p) => !existingSlugs.has(p.slug.toLowerCase()) && !existingSkus.has((p.sku || p.id).toLowerCase())
+      (p) => !existingSlugs.has(String(p.slug || '').toLowerCase()) && !existingSkus.has(String(p.sku || p.id).toLowerCase())
     );
     return [...storeProducts, ...remainder];
   }, [storeProducts]);

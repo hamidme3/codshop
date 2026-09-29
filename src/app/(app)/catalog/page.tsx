@@ -79,10 +79,10 @@ export default function CatalogPage() {
   // Merge store products at the top with base catalog
   const allProducts = useMemo(() => {
     if (storeProducts.length === 0) return MOCK_PRODUCTS;
-    const existingSkus = new Set(storeProducts.map((p) => (p.sku || p.id).toLowerCase()));
-    const existingSlugs = new Set(storeProducts.map((p) => p.slug.toLowerCase()));
+    const existingSkus = new Set(storeProducts.map((p) => String(p.sku || p.id).toLowerCase()));
+    const existingSlugs = new Set(storeProducts.map((p) => String(p.slug || '').toLowerCase()));
     const remainder = MOCK_PRODUCTS.filter(
-      (p) => !existingSkus.has((p.sku || p.id).toLowerCase()) && !existingSlugs.has(p.slug.toLowerCase())
+      (p) => !existingSkus.has(String(p.sku || p.id).toLowerCase()) && !existingSlugs.has(String(p.slug || '').toLowerCase())
     );
     return [...storeProducts, ...remainder];
   }, [storeProducts]);

@@ -134,14 +134,19 @@ export function CodCheckoutModal({
     return (product as any)?.storeSlug || 'ottavio';
   }, [storeSlug, product]);
 
+  const productPrefix = useMemo(() => {
+    const raw = product?.id != null ? String(product.id) : (product?.sku != null ? String(product.sku) : 'PROD');
+    return raw.slice(0, 4).toUpperCase();
+  }, [product?.id, product?.sku]);
+
   // Stable waybill serial number (initialized deterministically to prevent hydration mismatch)
   const [waybillNumber, setWaybillNumber] = useState(
-    `${effectiveCountryCode}-${product.id.slice(0, 4).toUpperCase()}-1088`
+    `${effectiveCountryCode}-${productPrefix}-1088`
   );
   useEffect(() => {
     const rand = Math.floor(1000 + Math.random() * 9000);
-    setWaybillNumber(`${effectiveCountryCode}-${product.id.slice(0, 4).toUpperCase()}-${rand}`);
-  }, [product.id, effectiveCountryCode]);
+    setWaybillNumber(`${effectiveCountryCode}-${productPrefix}-${rand}`);
+  }, [productPrefix, effectiveCountryCode]);
 
   // A/B: detect waybill variant from cookie (set by middleware). Default: standard modal.
   const [isWaybill, setIsWaybill] = useState(false);

@@ -20,12 +20,63 @@ import {
   getCustomers,
   updateCustomerNotes
 } from '../src/lib/db-repository';
-import { getCategories, addCategory, deleteCategory } from '../src/lib/mocks';
+import { getCategories, addCategory, deleteCategory, addProduct, PRODUCTS } from '../src/lib/mocks';
+import { getStoreBySlug, createStore as createMockStore } from '../src/lib/stores';
 import { getDb, schema } from '../src/db';
 import { eq, and } from 'drizzle-orm';
 
 async function runTests() {
   console.log('--- TEST SUITE: Similar Bugs Audit & Remediation ---');
+
+  // Ensure storet1 exists in memory store map
+  if (!getStoreBySlug('storet1')) {
+    createMockStore({
+      name: 'Store T1',
+      slug: 'storet1',
+      whatsapp: '0612345678',
+    });
+  }
+
+  // Ensure test product exists in memory fallback
+  if (!PRODUCTS.some((p: any) => p.sku === 'SKU-5567')) {
+    addProduct({
+      storeSlug: 'storet1',
+      title: 'Test Product SKU 5567',
+      sku: 'SKU-5567',
+      category: 'Accessoires',
+      price: 299,
+      costPrice: 100,
+      stock: 30,
+      images: [],
+      variants: [],
+      status: 'active',
+    });
+  }
+
+  // Ensure test product exists
+  const dbInit = getDb();
+  if (dbInit) {
+    const store = await dbInit.query.stores.findFirst({ where: eq(schema.stores.slug, 'storet1') });
+    if (store) {
+      const existing = await dbInit.query.products.findFirst({
+        where: and(eq(schema.products.storeId, store.id), eq(schema.products.sku, 'SKU-5567')),
+      });
+      if (!existing) {
+        await createProduct({
+          storeSlug: 'storet1',
+          title: 'Test Product SKU 5567',
+          sku: 'SKU-5567',
+          category: 'Accessoires',
+          price: 299,
+          costPrice: 100,
+          stock: 30,
+          images: [],
+          variants: [],
+          status: 'active',
+        });
+      }
+    }
+  }
 
   // Test 1: Pricing engine resolution & Pack Duo tier calculation for custom product
   console.log('\n1. Testing catalog product resolution & tier pricing for custom product...');
@@ -221,7 +272,29 @@ async function runTests() {
 
   // Test 7: CRM Customer synchronization
   console.log('\n7. Testing CRM Customer synchronization...');
-  const customers = await getCustomers('storet1');
+  let customers = await getCustomers('storet1');
+  if (!Array.isArray(customers) || customers.length === 0) {
+    await createOrder({
+      storeSlug: 'storet1',
+      customerName: 'Karim Bennani',
+      phone: '0612345678',
+      city: 'Casablanca',
+      address: '12 Boulevard d Anfa',
+      items: [
+        {
+          id: 'prod_1',
+          sku: 'SKU-5567',
+          title: 'Test Product SKU 5567',
+          quantity: 1,
+          price: 299,
+        },
+      ],
+      subtotal: 299,
+      shippingFee: 0,
+      total: 299,
+    });
+    customers = await getCustomers('storet1');
+  }
   if (!Array.isArray(customers) || customers.length === 0) {
     throw new Error('FAILED: getCustomers returned empty list');
   }

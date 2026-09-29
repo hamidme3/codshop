@@ -32,10 +32,10 @@ function StorefrontHome({ storeSlug }: { storeSlug?: string }) {
   // Prepend merchant custom products before theme defaults
   const products = useMemo(() => {
     if (storeProducts.length === 0) return defaultProducts;
-    const existingSkus = new Set(storeProducts.map((p) => (p.sku || p.id).toLowerCase()));
-    const existingSlugs = new Set(storeProducts.map((p) => p.slug.toLowerCase()));
+    const existingSkus = new Set(storeProducts.map((p) => String(p.sku || p.id).toLowerCase()));
+    const existingSlugs = new Set(storeProducts.map((p) => String(p.slug || '').toLowerCase()));
     const remainder = defaultProducts.filter(
-      (p) => !existingSkus.has((p.sku || p.id).toLowerCase()) && !existingSlugs.has(p.slug.toLowerCase())
+      (p) => !existingSkus.has(String(p.sku || p.id).toLowerCase()) && !existingSlugs.has(String(p.slug || '').toLowerCase())
     );
     return [...storeProducts, ...remainder];
   }, [storeProducts, defaultProducts]);

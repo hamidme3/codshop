@@ -73,9 +73,9 @@ export async function resolveCatalogProduct(
           where: eq(schema.products.storeId, storeRow.id),
         });
         const matched = dbProducts.find((p) => {
-          const pId = p.id.toLowerCase();
-          const pSku = p.sku.toLowerCase();
-          const pTitle = p.title.toLowerCase();
+          const pId = String(p.id ?? '').toLowerCase();
+          const pSku = String(p.sku ?? '').toLowerCase();
+          const pTitle = String(p.title ?? '').toLowerCase();
           const titleSlug = pTitle.replace(/[^a-z0-9]+/g, '-');
           if (targetId && (pId === targetId || pSku === targetId)) return true;
           if (targetSku && (pSku === targetSku || targetSku.startsWith(pSku) || pSku.startsWith(targetSku))) return true;
@@ -84,7 +84,8 @@ export async function resolveCatalogProduct(
           return false;
         });
         if (matched) {
-          const mockMatch = MOCK_PRODUCTS.find((p) => p.id === matched.id || p.sku.toLowerCase() === matched.sku.toLowerCase() || p.slug.toLowerCase() === matched.sku.toLowerCase());
+          const matchedSku = String(matched.sku ?? '').toLowerCase();
+          const mockMatch = MOCK_PRODUCTS.find((p) => String(p.id) === String(matched.id) || p.sku.toLowerCase() === matchedSku || p.slug.toLowerCase() === matchedSku);
           let tiers = mockMatch?.quantityTiers;
           if (!tiers || tiers.length === 0) {
             const sfProd = convertDbProductToStorefrontProduct(matched);
@@ -137,18 +138,23 @@ export async function resolveCatalogProduct(
   const resolvedId = idAliases[targetId] || targetId;
 
   const repoProduct = PRODUCTS.find((p) => {
-    const pId = p.id.toLowerCase();
-    const pSku = p.sku.toLowerCase();
-    const pTitle = p.title.toLowerCase();
+    const pId = String(p.id ?? '').toLowerCase();
+    const pSku = String(p.sku ?? '').toLowerCase();
+    const pTitle = String(p.title ?? '').toLowerCase();
     if (resolvedId && (pId === resolvedId || pSku === resolvedId)) return true;
+    if (targetSku && (pSku === targetSku || targetSku.startsWith(pSku) || pSku.startsWith(targetSku))) return true;
     if (targetTitle && (pTitle === targetTitle || pTitle.includes(targetTitle) || targetTitle.includes(pTitle))) return true;
     return false;
   });
   if (repoProduct) {
-    const mockMatch = MOCK_PRODUCTS.find((p) => p.id === repoProduct.id || p.sku === repoProduct.sku || p.slug === repoProduct.sku);
-    const tiers = mockMatch?.quantityTiers;
+    const mockMatch = MOCK_PRODUCTS.find((p) => String(p.id) === String(repoProduct.id) || p.sku === repoProduct.sku || p.slug === repoProduct.sku);
+    let tiers = mockMatch?.quantityTiers;
+    if (!tiers || tiers.length === 0) {
+      const sfProd = convertDbProductToStorefrontProduct(repoProduct);
+      tiers = sfProd.quantityTiers;
+    }
     return {
-      id: repoProduct.id,
+      id: String(repoProduct.id),
       title: repoProduct.title,
       price: repoProduct.price,
       status: repoProduct.status || 'active',

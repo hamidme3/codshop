@@ -331,9 +331,9 @@ export async function updateProduct(productId: string, updates: Partial<Product>
       const cleanSkuPart = cleanTarget.replace(/^prod_/, '');
       const all = await db.query.products.findMany({ limit: 500 });
       const matched = all.find((p) => {
-        const pSku = p.sku.toLowerCase();
-        const pId = p.id.toLowerCase();
-        const titleSlug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const pSku = String(p.sku || '').toLowerCase();
+        const pId = String(p.id ?? '').toLowerCase();
+        const titleSlug = String(p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
         return (
           pId === cleanTarget ||
           pSku === cleanTarget ||
@@ -416,9 +416,9 @@ export async function deleteProduct(productId: string): Promise<boolean> {
       const cleanSkuPart = cleanTarget.replace(/^prod_/, '');
       const all = await db.query.products.findMany({ limit: 500 });
       const matched = all.find((p) => {
-        const pSku = p.sku.toLowerCase();
-        const pId = p.id.toLowerCase();
-        const titleSlug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const pSku = String(p.sku || '').toLowerCase();
+        const pId = String(p.id ?? '').toLowerCase();
+        const titleSlug = String(p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
         return (
           pId === cleanTarget ||
           pSku === cleanTarget ||
@@ -449,9 +449,9 @@ export async function getProductBySlugOrSku(slugOrSku: string): Promise<Product 
   if (!db) {
     const memMatch = PRODUCTS.find(
       (p: any) =>
-        p.sku?.toLowerCase() === clean ||
-        p.id?.toLowerCase() === clean ||
-        p.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') === clean
+        String(p.sku || '').toLowerCase() === clean ||
+        String(p.id ?? '').toLowerCase() === clean ||
+        String(p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') === clean
     );
     return memMatch || null;
   }
@@ -462,9 +462,9 @@ export async function getProductBySlugOrSku(slugOrSku: string): Promise<Product 
     });
     const found = all.find(
       (r: any) =>
-        r.sku?.toLowerCase() === clean ||
-        r.id?.toLowerCase() === clean ||
-        r.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') === clean
+        String(r.sku || '').toLowerCase() === clean ||
+        String(r.id ?? '').toLowerCase() === clean ||
+        String(r.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') === clean
     );
     if (found) {
       return {
@@ -493,7 +493,7 @@ export async function getProductBySlugOrSku(slugOrSku: string): Promise<Product 
  * compatible with ProductCard, CodCheckoutModal, and ProductDetailPage.
  */
 export function convertDbProductToStorefrontProduct(p: any): any {
-  const baseSlug = (p.sku || p.id || 'product')
+  const baseSlug = String(p.sku || p.id || 'product')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
@@ -504,10 +504,10 @@ export function convertDbProductToStorefrontProduct(p: any): any {
   const trioPrice = p.packTrioPrice ? Number(p.packTrioPrice) : Math.max(price, Math.round(price * 3 - 200));
 
   return {
-    id: p.id,
+    id: String(p.id),
     storeSlug: p.storeSlug || p.store_slug || p.store?.slug || undefined,
     slug: p.slug || baseSlug,
-    sku: p.sku || `SKU-${p.id?.slice?.(0, 4) || '0000'}`,
+    sku: p.sku || `SKU-${String(p.id ?? '0000').slice(0, 4)}`,
     theme: p.theme || 'luxury',
     title: p.title,
     tagline: p.category || 'Collection Exclusive',
