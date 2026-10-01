@@ -3,7 +3,7 @@
  * Verifies: Safe execution, adblocker resilience, event payloads, and purchase deduplication.
  */
 
-import { initPixels, trackViewContent, trackInitiateCheckout, trackPurchase, PixelConfig } from '../src/lib/pixel-tracker';
+import { initPixels, trackViewContent, trackInitiateCheckout, trackPurchase, PixelConfig, isValidPixelId } from '../src/lib/pixel-tracker';
 
 async function runPixelTests() {
   console.log('🧪 Starting Ad Pixels & Conversion Tracking Tests...\n');
@@ -47,6 +47,18 @@ async function runPixelTests() {
   };
 
   (global as any).window = mockWindow;
+
+  // Test 0: isValidPixelId validation logic
+  console.log('Test 0: Pixel ID sanity validation...');
+  if (isValidPixelId('C9K1234567890')) throw new Error('Dummy TikTok ID should be rejected');
+  if (isValidPixelId('123456789')) throw new Error('Dummy placeholder number should be rejected');
+  if (isValidPixelId('Ex: 1386256236443220')) throw new Error('Ex: prefix should be rejected');
+  if (isValidPixelId('placeholder_key')) throw new Error('Placeholder key should be rejected');
+  if (isValidPixelId('')) throw new Error('Empty ID should be rejected');
+  if (isValidPixelId(null)) throw new Error('Null ID should be rejected');
+  if (!isValidPixelId('1386256236443220')) throw new Error('Valid Meta ID should be accepted');
+  if (!isValidPixelId('TT-998877')) throw new Error('Valid TikTok ID should be accepted');
+  console.log('  ✓ Dummy test IDs safely rejected; valid production IDs accepted.');
 
   // Test 1: initPixels idempotency
   console.log('Test 1: Pixel initialization...');

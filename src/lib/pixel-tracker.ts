@@ -66,6 +66,27 @@ declare global {
 let currentConfig: PixelConfig | null = null;
 
 /**
+ * Validates that a pixel identifier is not empty, null, or a dummy test placeholder.
+ */
+export function isValidPixelId(id?: string | null): boolean {
+  if (!id) return false;
+  const trimmed = id.trim();
+  if (!trimmed || trimmed === 'null' || trimmed === 'undefined') return false;
+  const lower = trimmed.toLowerCase();
+  if (
+    lower.startsWith('ex:') ||
+    lower.startsWith('c8k92l81938') ||
+    lower === 'c9k1234567890' ||
+    lower === '123456789' ||
+    lower.includes('placeholder') ||
+    lower.includes('dummy')
+  ) {
+    return false;
+  }
+  return true;
+}
+
+/**
  * Initializes ad pixel SDK scripts into the DOM safely.
  */
 export function initPixels(config: PixelConfig): void {
@@ -77,13 +98,15 @@ export function initPixels(config: PixelConfig): void {
 
     try {
       window.addEventListener('error', (event) => {
+        const src = event.filename || (event.target as any)?.src || '';
         if (
-          event.filename &&
-          (event.filename.includes('tiktok') ||
-           event.filename.includes('facebook') ||
-           event.filename.includes('sc-static') ||
-           event.filename.includes('googletagmanager') ||
-           event.filename.includes('pinimg'))
+          typeof src === 'string' &&
+          (src.includes('tiktok') ||
+           src.includes('facebook') ||
+           src.includes('sc-static') ||
+           src.includes('googletagmanager') ||
+           src.includes('google-analytics') ||
+           src.includes('pinimg'))
         ) {
           event.preventDefault();
           event.stopPropagation();
@@ -93,7 +116,7 @@ export function initPixels(config: PixelConfig): void {
   }
 
   // 1. Meta (Facebook) Pixel
-  if (config.metaPixelId && !window.__cod_loaded_pixels.has(`meta_${config.metaPixelId}`)) {
+  if (isValidPixelId(config.metaPixelId) && !window.__cod_loaded_pixels.has(`meta_${config.metaPixelId}`)) {
     try {
       if (!window.fbq) {
         const n: any = (window.fbq = function () {
@@ -107,6 +130,7 @@ export function initPixels(config: PixelConfig): void {
         const t = document.createElement('script');
         t.async = true;
         t.src = 'https://connect.facebook.net/en_US/fbevents.js';
+        t.onerror = () => { /* Suppress adblocker / network errors */ };
         const s = document.getElementsByTagName('script')[0];
         s?.parentNode?.insertBefore(t, s);
       }
@@ -114,12 +138,12 @@ export function initPixels(config: PixelConfig): void {
       window.fbq('track', 'PageView');
       window.__cod_loaded_pixels.add(`meta_${config.metaPixelId}`);
     } catch (e) {
-      console.warn('[Pixel Tracker] Meta init suppressed by client/adblocker');
+      // Suppress adblocker / client error
     }
   }
 
   // 2. TikTok Pixel
-  if (config.tiktokPixelId && !window.__cod_loaded_pixels.has(`tt_${config.tiktokPixelId}`)) {
+  if (isValidPixelId(config.tiktokPixelId) && !window.__cod_loaded_pixels.has(`tt_${config.tiktokPixelId}`)) {
     try {
       if (!window.ttq) {
         (window as any).TiktokAnalyticsObject = 'ttq';
@@ -167,6 +191,7 @@ export function initPixels(config: PixelConfig): void {
           o.type = 'text/javascript';
           o.async = true;
           o.src = i + '?sdkid=' + e + '&lib=ttq';
+          o.onerror = () => { /* Suppress adblocker / network errors */ };
           const a = document.getElementsByTagName('script')[0];
           a?.parentNode?.insertBefore(o, a);
         };
@@ -175,12 +200,12 @@ export function initPixels(config: PixelConfig): void {
       window.ttq.page();
       window.__cod_loaded_pixels.add(`tt_${config.tiktokPixelId}`);
     } catch (e) {
-      console.warn('[Pixel Tracker] TikTok init suppressed by client/adblocker');
+      // Suppress adblocker / client error
     }
   }
 
   // 3. Snapchat Pixel
-  if (config.snapchatPixelId && !window.__cod_loaded_pixels.has(`snap_${config.snapchatPixelId}`)) {
+  if (isValidPixelId(config.snapchatPixelId) && !window.__cod_loaded_pixels.has(`snap_${config.snapchatPixelId}`)) {
     try {
       if (!window.snaptr) {
         const tr: any = (window.snaptr = function () {
@@ -190,6 +215,7 @@ export function initPixels(config: PixelConfig): void {
         const s = document.createElement('script');
         s.async = true;
         s.src = 'https://sc-static.net/scevent.min.js';
+        s.onerror = () => { /* Suppress adblocker / network errors */ };
         const head = document.getElementsByTagName('script')[0];
         head?.parentNode?.insertBefore(s, head);
       }
@@ -197,12 +223,12 @@ export function initPixels(config: PixelConfig): void {
       window.snaptr('track', 'PAGE_VIEW');
       window.__cod_loaded_pixels.add(`snap_${config.snapchatPixelId}`);
     } catch (e) {
-      console.warn('[Pixel Tracker] Snapchat init suppressed by client/adblocker');
+      // Suppress adblocker / client error
     }
   }
 
   // 4. Google Analytics / Tag
-  if (config.googleAnalyticsId && !window.__cod_loaded_pixels.has(`gtag_${config.googleAnalyticsId}`)) {
+  if (isValidPixelId(config.googleAnalyticsId) && !window.__cod_loaded_pixels.has(`gtag_${config.googleAnalyticsId}`)) {
     try {
       if (!window.gtag) {
         window.dataLayer = window.dataLayer || [];
@@ -211,7 +237,8 @@ export function initPixels(config: PixelConfig): void {
         };
         const s = document.createElement('script');
         s.async = true;
-        s.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(config.googleAnalyticsId)}`;
+        s.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(config.googleAnalyticsId!)}`;
+        s.onerror = () => { /* Suppress adblocker / network errors */ };
         const head = document.getElementsByTagName('script')[0];
         head?.parentNode?.insertBefore(s, head);
         window.gtag('js', new Date());
@@ -219,12 +246,12 @@ export function initPixels(config: PixelConfig): void {
       window.gtag('config', config.googleAnalyticsId);
       window.__cod_loaded_pixels.add(`gtag_${config.googleAnalyticsId}`);
     } catch (e) {
-      console.warn('[Pixel Tracker] Google Tag init suppressed by client/adblocker');
+      // Suppress adblocker / client error
     }
   }
 
   // 5. Pinterest Tag
-  if (config.pinterestPartnerId && !window.__cod_loaded_pixels.has(`pin_${config.pinterestPartnerId}`)) {
+  if (isValidPixelId(config.pinterestPartnerId) && !window.__cod_loaded_pixels.has(`pin_${config.pinterestPartnerId}`)) {
     try {
       if (!window.pintrk) {
         window.pintrk = function () {
@@ -235,6 +262,7 @@ export function initPixels(config: PixelConfig): void {
         const s = document.createElement('script');
         s.async = true;
         s.src = 'https://s.pinimg.com/ct/core.js';
+        s.onerror = () => { /* Suppress adblocker / network errors */ };
         const head = document.getElementsByTagName('script')[0];
         head?.parentNode?.insertBefore(s, head);
       }
@@ -242,7 +270,7 @@ export function initPixels(config: PixelConfig): void {
       window.pintrk('page');
       window.__cod_loaded_pixels.add(`pin_${config.pinterestPartnerId}`);
     } catch (e) {
-      console.warn('[Pixel Tracker] Pinterest init suppressed by client/adblocker');
+      // Suppress adblocker / client error
     }
   }
 
