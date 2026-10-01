@@ -79,6 +79,7 @@ async function runTelemetryTests() {
   console.log('  ✓ Native /api/tracking/events received pageview beacon without third-party network noise.\n');
 
   console.log('🎉 ALL TELEMETRY & POSTHOG SAFETY TESTS PASSED (100% SUCCESS)!\n');
+  process.exit(0);
 }
 
 runTelemetryTests().catch((err) => {
