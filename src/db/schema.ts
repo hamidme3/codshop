@@ -1,5 +1,6 @@
 import { pgTable, uuid, text, integer, timestamp, boolean, jsonb, index, uniqueIndex } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import type { MenuItem } from '@/lib/types';
 
 // ── Stores (Tenants) ───────────────────────────────────────────
 export const stores = pgTable(
@@ -364,6 +365,51 @@ export const analyticsEvents = pgTable(
   ]
 );
 
+// ── Store Navigation Menus ─────────────────────────────────────
+export const menus = pgTable(
+  'menus',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    storeId: uuid('store_id')
+      .references(() => stores.id, { onDelete: 'cascade' })
+      .notNull(),
+    placement: text('placement').notNull(), // 'header' | 'mobile_drawer' | 'footer_col_1' | 'footer_col_2'
+    title: text('title').notNull(),
+    items: jsonb('items').$type<MenuItem[]>().default([]).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('menu_store_placement_idx').on(table.storeId, table.placement),
+    index('menu_store_idx').on(table.storeId),
+  ]
+);
+
+// ── Custom Pages & Legal Policies ──────────────────────────────
+export const pages = pgTable(
+  'pages',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    storeId: uuid('store_id')
+      .references(() => stores.id, { onDelete: 'cascade' })
+      .notNull(),
+    title: text('title').notNull(),
+    slug: text('slug').notNull(),
+    content: text('content').notNull(),
+    policyType: text('policy_type').default('custom').notNull(), // 'terms' | 'privacy' | 'shipping' | 'returns' | 'about' | 'custom'
+    isSystemPolicy: boolean('is_system_policy').default(false).notNull(),
+    isPublished: boolean('is_published').default(true).notNull(),
+    seoTitle: text('seo_title'),
+    seoDescription: text('seo_description'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('page_store_slug_idx').on(table.storeId, table.slug),
+    index('page_store_idx').on(table.storeId),
+  ]
+);
+
 // ── Relations ──────────────────────────────────────────────────
 export const storesRelations = relations(stores, ({ many, one }) => ({
   users: many(users),
@@ -371,6 +417,8 @@ export const storesRelations = relations(stores, ({ many, one }) => ({
   products: many(products),
   orders: many(orders),
   customers: many(customers),
+  menus: many(menus),
+  pages: many(pages),
   layout: one(pageLayouts, {
     fields: [stores.id],
     references: [pageLayouts.storeId],
@@ -380,6 +428,21 @@ export const storesRelations = relations(stores, ({ many, one }) => ({
     references: [adIntegrations.storeId],
   }),
 }));
+
+export const menusRelations = relations(menus, ({ one }) => ({
+  store: one(stores, {
+    fields: [menus.storeId],
+    references: [stores.id],
+  }),
+}));
+
+export const pagesRelations = relations(pages, ({ one }) => ({
+  store: one(stores, {
+    fields: [pages.storeId],
+    references: [stores.id],
+  }),
+}));
+
 
 export const accountsRelations = relations(accounts, ({ many }) => ({
   memberships: many(storeMemberships),

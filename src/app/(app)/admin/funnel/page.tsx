@@ -53,10 +53,10 @@ function FunnelContent() {
           const overallRate = f.overallConversionRate || (totalVisitors > 0 ? Number(((completed / totalVisitors) * 100).toFixed(1)) : 0);
 
           const step1Pct = totalVisitors > 0 ? 100 : 0;
-          const step2Pct = totalVisitors > 0 ? Number(((productViews / totalVisitors) * 100).toFixed(1)) : (productViews > 0 ? 100 : 0);
-          const step3Pct = totalVisitors > 0 ? Number(((initiated / totalVisitors) * 100).toFixed(1)) : (initiated > 0 ? 100 : 0);
-          const step4Pct = totalVisitors > 0 ? Number(((step2 / totalVisitors) * 100).toFixed(1)) : (step2 > 0 ? 100 : 0);
-          const step5Pct = totalVisitors > 0 ? Number(((completed / totalVisitors) * 100).toFixed(1)) : (completed > 0 ? 100 : 0);
+          const step2Pct = totalVisitors > 0 ? Math.min(100, Number(((productViews / totalVisitors) * 100).toFixed(1))) : (productViews > 0 ? 100 : 0);
+          const step3Pct = totalVisitors > 0 ? Math.min(100, Number(((initiated / totalVisitors) * 100).toFixed(1))) : (initiated > 0 ? 100 : 0);
+          const step4Pct = totalVisitors > 0 ? Math.min(100, Number(((step2 / totalVisitors) * 100).toFixed(1))) : (step2 > 0 ? 100 : 0);
+          const step5Pct = totalVisitors > 0 ? Math.min(100, Number(((completed / totalVisitors) * 100).toFixed(1))) : (completed > 0 ? 100 : 0);
 
           const steps: FunnelStep[] = [
             {

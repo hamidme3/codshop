@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product, QuantityTier, getProductQuantityTiers } from '@/lib/mockProducts';
 import {
@@ -225,31 +225,38 @@ export function CodCheckoutModal({
     return formatCountryPrice(amount, effectiveCountryCode, lang);
   };
 
-  // Track InitiateCheckout on pixel channels and PostHog when modal is opened
+  // Track InitiateCheckout on pixel channels and PostHog when modal is opened (strictly once per modal session)
+  const hasTrackedOpenRef = useRef(false);
   useEffect(() => {
     if (isOpen) {
-      trackPostHogProductView(effectiveStoreSlug, {
-        id: product.id,
-        title: product.title,
-        price: selectedTier?.unitPrice || product.price,
-        slug: product.slug,
-      });
+      if (!hasTrackedOpenRef.current) {
+        hasTrackedOpenRef.current = true;
+        const currentTier = selectedTier || tiers.find((t) => t.quantity === initialQuantity) || tiers[0];
+        trackPostHogProductView(effectiveStoreSlug, {
+          id: product.id,
+          title: product.title,
+          price: currentTier?.unitPrice || product.price,
+          slug: product.slug,
+        });
 
-      trackPostHogInitiateCheckout(effectiveStoreSlug, {
-        id: product.id,
-        title: product.title,
-        price: selectedTier?.unitPrice || product.price,
-        quantity: selectedTier?.quantity || 1,
-      });
+        trackPostHogInitiateCheckout(effectiveStoreSlug, {
+          id: product.id,
+          title: product.title,
+          price: currentTier?.unitPrice || product.price,
+          quantity: currentTier?.quantity || 1,
+        });
 
-      trackInitiateCheckout({
-        id: product.id,
-        title: product.title,
-        price: selectedTier?.unitPrice || product.price,
-        quantity: selectedTier?.quantity || 1,
-      });
+        trackInitiateCheckout({
+          id: product.id,
+          title: product.title,
+          price: currentTier?.unitPrice || product.price,
+          quantity: currentTier?.quantity || 1,
+        });
+      }
+    } else {
+      hasTrackedOpenRef.current = false;
     }
-  }, [isOpen, product.id, product.title, product.price, product.slug, selectedTier, effectiveStoreSlug]);
+  }, [isOpen, product.id, product.title, product.price, product.slug, effectiveStoreSlug, initialQuantity, tiers]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -489,6 +496,7 @@ export function CodCheckoutModal({
           address: address.trim(),
         },
         theme: theme.id,
+        distinctId: typeof window !== 'undefined' ? ((window as any).posthog?.get_distinct_id?.() || localStorage.getItem('cod_anon_id') || undefined) : undefined,
         createdAt: new Date().toISOString(),
       };
 

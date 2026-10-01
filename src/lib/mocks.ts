@@ -1,5 +1,6 @@
-import type { Order, Product, Category, Customer, PaymentGateway, OrderStatus, CustomerOrderSummary } from './types';
+import type { Order, Product, Category, Customer, PaymentGateway, OrderStatus, CustomerOrderSummary, MenuItem, MenuPlacement, StoreMenu, StorePage, PolicyType } from './types';
 import { restoreMockProductStock, decrementMockProductStock } from './mockProducts';
+import { generateStandardPolicies } from './policy-generator';
 
 // ── Seed Moroccan Orders ────────────────────────────────────────
 export let ORDERS: Order[] = [
@@ -350,7 +351,7 @@ export function getOrders(storeSlug: string): Order[] {
 /**
  * Normalizes Moroccan phone number for CRM customer identification
  */
-function normalizeCustomerPhone(phone?: string): string {
+export function normalizeCustomerPhone(phone?: string): string {
   if (!phone) return '';
   let digits = phone.replace(/[^0-9]/g, '');
   if (digits.startsWith('212') && digits.length === 12) {
@@ -998,3 +999,385 @@ export function resetMocks(): void {
   // No-op placeholder — re-importing module resets via HMR in dev;
   // kept for test convenience.
 }
+
+// ── Store Navigation Menus Mock Storage & Helpers ──────────────
+
+export function validateMenuNesting(items: MenuItem[], currentDepth: number = 0): boolean {
+  if (currentDepth > 2) return false;
+  for (const item of items) {
+    if (item.children && item.children.length > 0) {
+      if (currentDepth >= 2) return false;
+      if (!validateMenuNesting(item.children, currentDepth + 1)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+export function getDefaultStoreMenus(storeSlug: string = 'ottavio'): StoreMenu[] {
+  return [
+    {
+      id: `menu_header_${storeSlug}`,
+      storeSlug,
+      placement: 'header',
+      title: 'Menu Principal (Header)',
+      updatedAt: new Date().toISOString(),
+      items: [
+        {
+          id: 'item_h1',
+          label: 'Accueil',
+          type: 'home',
+          url: '/',
+          order: 0,
+        },
+        {
+          id: 'item_h2',
+          label: 'Catalogue & Collections',
+          type: 'catalog',
+          url: '/catalog',
+          badgeText: 'Boutique',
+          badgeColor: 'primary',
+          order: 1,
+          children: [
+            {
+              id: 'item_h2_1',
+              label: 'Catégories Populaires',
+              type: 'catalog',
+              url: '/catalog',
+              order: 0,
+              children: [
+                {
+                  id: 'item_h2_1_1',
+                  label: 'Maroquinerie & Cuir',
+                  type: 'category',
+                  url: '/catalog?category=maroquinerie',
+                  targetId: 'maroquinerie',
+                  order: 0,
+                },
+                {
+                  id: 'item_h2_1_2',
+                  label: 'Accessoires & Bijoux',
+                  type: 'category',
+                  url: '/catalog?category=accessoires',
+                  targetId: 'accessoires',
+                  order: 1,
+                },
+              ],
+            },
+            {
+              id: 'item_h2_2',
+              label: 'Offres Spéciales',
+              type: 'catalog',
+              url: '/catalog?sort=discount',
+              badgeText: 'HOT',
+              badgeColor: 'rose',
+              order: 1,
+            },
+          ],
+        },
+        {
+          id: 'item_h3',
+          label: 'Promotions',
+          type: 'catalog',
+          url: '/catalog?sort=discount',
+          badgeText: '-30%',
+          badgeColor: 'rose',
+          order: 2,
+        },
+        {
+          id: 'item_h4',
+          label: 'Assistance WhatsApp',
+          type: 'whatsapp',
+          url: 'https://wa.me/212661000000?text=Salam,%20j%27ai%20une%20question%20sur%20vos%20produits',
+          order: 3,
+        },
+      ],
+    },
+    {
+      id: `menu_mobile_${storeSlug}`,
+      storeSlug,
+      placement: 'mobile_drawer',
+      title: 'Menu Mobile (Tiroir)',
+      updatedAt: new Date().toISOString(),
+      items: [
+        {
+          id: 'item_m1',
+          label: 'Accueil',
+          type: 'home',
+          url: '/',
+          order: 0,
+        },
+        {
+          id: 'item_m2',
+          label: 'Catalogue Complet',
+          type: 'catalog',
+          url: '/catalog',
+          order: 1,
+          children: [
+            {
+              id: 'item_m2_1',
+              label: 'Maroquinerie & Chaussures',
+              type: 'category',
+              url: '/catalog?category=maroquinerie',
+              targetId: 'maroquinerie',
+              order: 0,
+            },
+            {
+              id: 'item_m2_2',
+              label: 'Accessoires de Mode',
+              type: 'category',
+              url: '/catalog?category=accessoires',
+              targetId: 'accessoires',
+              order: 1,
+            },
+          ],
+        },
+        {
+          id: 'item_m3',
+          label: 'Nos Meilleures Ventes',
+          type: 'catalog',
+          url: '/catalog?sort=rating',
+          badgeText: 'HOT',
+          badgeColor: 'rose',
+          order: 2,
+        },
+      ],
+    },
+    {
+      id: `menu_footer1_${storeSlug}`,
+      storeSlug,
+      placement: 'footer_col_1',
+      title: 'Navigation Rapide',
+      updatedAt: new Date().toISOString(),
+      items: [
+        { id: 'item_f1_1', label: 'Accueil', type: 'home', url: '/', order: 0 },
+        { id: 'item_f1_2', label: 'Catalogue Général', type: 'catalog', url: '/catalog', order: 1 },
+        { id: 'item_f1_3', label: 'Maroquinerie', type: 'category', url: '/catalog?category=maroquinerie', targetId: 'maroquinerie', order: 2 },
+        { id: 'item_f1_4', label: 'Promotions du Moment', type: 'catalog', url: '/catalog?sort=discount', order: 3 },
+      ],
+    },
+    {
+      id: `menu_footer2_${storeSlug}`,
+      storeSlug,
+      placement: 'footer_col_2',
+      title: 'Service & Confiance COD',
+      updatedAt: new Date().toISOString(),
+      items: [
+        { id: 'item_f2_1', label: 'Paiement à la Livraison', type: 'home', url: '/', order: 0 },
+        { id: 'item_f2_2', label: 'Livraison Partout au Maroc', type: 'home', url: '/', order: 1 },
+        { id: 'item_f2_3', label: 'Garantie Échange 7 Jours', type: 'home', url: '/', order: 2 },
+        { id: 'item_f2_4', label: 'Contact WhatsApp 7j/7', type: 'whatsapp', url: 'https://wa.me/212661000000', order: 3 },
+      ],
+    },
+  ];
+}
+
+export let STORE_MENUS: Record<string, StoreMenu[]> = {};
+
+export function getStoreMenusMock(storeSlug: string = 'ottavio'): StoreMenu[] {
+  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  if (!STORE_MENUS[cleanSlug] || STORE_MENUS[cleanSlug].length === 0) {
+    STORE_MENUS[cleanSlug] = getDefaultStoreMenus(cleanSlug);
+  }
+  return STORE_MENUS[cleanSlug];
+}
+
+export function getStoreMenuByPlacementMock(storeSlug: string = 'ottavio', placement: MenuPlacement = 'header'): StoreMenu {
+  const menus = getStoreMenusMock(storeSlug);
+  const found = menus.find((m) => m.placement === placement);
+  if (found) return found;
+
+  const defaultMenu = getDefaultStoreMenus(storeSlug).find((m) => m.placement === placement)!;
+  menus.push(defaultMenu);
+  return defaultMenu;
+}
+
+export function updateStoreMenuMock(
+  storeSlug: string = 'ottavio',
+  placement: MenuPlacement,
+  items: MenuItem[],
+  title?: string
+): StoreMenu {
+  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const menus = getStoreMenusMock(cleanSlug);
+  let menu = menus.find((m) => m.placement === placement);
+
+  if (!menu) {
+    menu = {
+      id: `menu_${placement}_${cleanSlug}`,
+      storeSlug: cleanSlug,
+      placement,
+      title: title || `${placement} Menu`,
+      items,
+      updatedAt: new Date().toISOString(),
+    };
+    menus.push(menu);
+  } else {
+    menu.items = items;
+    if (title) menu.title = title;
+    menu.updatedAt = new Date().toISOString();
+  }
+
+  return menu;
+}
+
+export function resetStoreMenuMock(storeSlug: string = 'ottavio', placement: MenuPlacement): StoreMenu {
+  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const defaults = getDefaultStoreMenus(cleanSlug);
+  const defaultMenu = defaults.find((m) => m.placement === placement)!;
+  return updateStoreMenuMock(cleanSlug, placement, defaultMenu.items, defaultMenu.title);
+}
+
+// ── Store Custom Pages & Policies Mock Store ───────────────────
+export const MOCK_PAGES_STORE: Record<string, StorePage[]> = {};
+
+export function initDefaultStorePages(storeSlug: string = 'ottavio'): StorePage[] {
+  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const generated = generateStandardPolicies({
+    storeName: cleanSlug === 'ottavio' ? 'Ottavio Leather' : cleanSlug.toUpperCase(),
+    storeSlug: cleanSlug,
+    phone: '+212 6 61 00 00 00',
+    email: `contact@${cleanSlug}.ma`,
+    city: 'Casablanca',
+    currency: 'MAD',
+  });
+
+  const pages: StorePage[] = generated.map((gen, idx) => ({
+    id: `page_${cleanSlug}_${gen.slug}`,
+    storeSlug: cleanSlug,
+    title: gen.title,
+    slug: gen.slug,
+    content: gen.content,
+    policyType: gen.policyType,
+    isSystemPolicy: true,
+    isPublished: true,
+    seoTitle: gen.seoTitle,
+    seoDescription: gen.seoDescription,
+    createdAt: new Date(Date.now() - (5 - idx) * 3600000).toISOString(),
+    updatedAt: new Date().toISOString(),
+  }));
+
+  MOCK_PAGES_STORE[cleanSlug] = pages;
+  return pages;
+}
+
+export function getStorePagesMock(storeSlug: string = 'ottavio'): StorePage[] {
+  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  if (!MOCK_PAGES_STORE[cleanSlug]) {
+    initDefaultStorePages(cleanSlug);
+  }
+  return MOCK_PAGES_STORE[cleanSlug];
+}
+
+export function getStorePageBySlugMock(storeSlug: string = 'ottavio', slug: string): StorePage | null {
+  const pages = getStorePagesMock(storeSlug);
+  const cleanSlug = (slug || '').toLowerCase().trim();
+  return pages.find((p) => p.slug.toLowerCase() === cleanSlug) || null;
+}
+
+export function createOrUpdateStorePageMock(
+  storeSlug: string = 'ottavio',
+  data: Partial<StorePage> & { title: string; slug: string; content: string }
+): StorePage {
+  const cleanStoreSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const pages = getStorePagesMock(cleanStoreSlug);
+  const normalizedSlug = data.slug.toLowerCase().trim().replace(/[^a-z0-9_-]/g, '-');
+
+  const existingIdx = pages.findIndex((p) => p.slug.toLowerCase() === normalizedSlug || (data.id && p.id === data.id));
+
+  if (existingIdx >= 0) {
+    const existing = pages[existingIdx];
+    const updated: StorePage = {
+      ...existing,
+      title: data.title.trim(),
+      slug: normalizedSlug,
+      content: data.content,
+      policyType: data.policyType || existing.policyType || 'custom',
+      isPublished: data.isPublished !== undefined ? data.isPublished : existing.isPublished,
+      seoTitle: data.seoTitle !== undefined ? data.seoTitle : existing.seoTitle,
+      seoDescription: data.seoDescription !== undefined ? data.seoDescription : existing.seoDescription,
+      updatedAt: new Date().toISOString(),
+    };
+    pages[existingIdx] = updated;
+    return updated;
+  }
+
+  const newPage: StorePage = {
+    id: data.id || `page_${cleanStoreSlug}_${Date.now()}`,
+    storeSlug: cleanStoreSlug,
+    title: data.title.trim(),
+    slug: normalizedSlug,
+    content: data.content,
+    policyType: data.policyType || 'custom',
+    isSystemPolicy: Boolean(data.isSystemPolicy),
+    isPublished: data.isPublished !== undefined ? data.isPublished : true,
+    seoTitle: data.seoTitle || `${data.title.trim()} | ${cleanStoreSlug.toUpperCase()}`,
+    seoDescription: data.seoDescription || data.content.slice(0, 150).replace(/[#*`\n]/g, ' ').trim(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  pages.push(newPage);
+  return newPage;
+}
+
+export function deleteStorePageMock(storeSlug: string = 'ottavio', idOrSlug: string): boolean {
+  const cleanStoreSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const pages = getStorePagesMock(cleanStoreSlug);
+  const target = (idOrSlug || '').toLowerCase().trim();
+
+  const idx = pages.findIndex((p) => p.id === idOrSlug || p.slug.toLowerCase() === target);
+  if (idx === -1) return false;
+
+  pages.splice(idx, 1);
+  return true;
+}
+
+export function generateStandardStorePoliciesMock(storeSlug: string = 'ottavio'): StorePage[] {
+  const cleanStoreSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const generated = generateStandardPolicies({
+    storeName: cleanStoreSlug === 'ottavio' ? 'Ottavio Leather' : cleanStoreSlug.toUpperCase(),
+    storeSlug: cleanStoreSlug,
+    phone: '+212 6 61 00 00 00',
+    email: `contact@${cleanStoreSlug}.ma`,
+    city: 'Casablanca',
+    currency: 'MAD',
+  });
+
+  const existingPages = getStorePagesMock(cleanStoreSlug);
+
+  for (const gen of generated) {
+    const existingIdx = existingPages.findIndex((p) => p.slug === gen.slug);
+    if (existingIdx >= 0) {
+      existingPages[existingIdx] = {
+        ...existingPages[existingIdx],
+        title: gen.title,
+        content: gen.content,
+        policyType: gen.policyType,
+        isSystemPolicy: true,
+        seoTitle: gen.seoTitle,
+        seoDescription: gen.seoDescription,
+        updatedAt: new Date().toISOString(),
+      };
+    } else {
+      existingPages.push({
+        id: `page_${cleanStoreSlug}_${gen.slug}`,
+        storeSlug: cleanStoreSlug,
+        title: gen.title,
+        slug: gen.slug,
+        content: gen.content,
+        policyType: gen.policyType,
+        isSystemPolicy: true,
+        isPublished: true,
+        seoTitle: gen.seoTitle,
+        seoDescription: gen.seoDescription,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    }
+  }
+
+  return existingPages;
+}
+

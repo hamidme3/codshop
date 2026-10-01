@@ -8,7 +8,7 @@ import {
   TrendingUp, Truck, CreditCard, ExternalLink, 
   Clock, Menu, X, Users, Filter, Wallet, LogOut, Shield, 
   UserCheck, Zap, LifeBuoy, UserCog, Layers, Search, ChevronRight, ChevronDown,
-  Command, Sparkles, CheckCircle2, ArrowRight, ShieldCheck, AlertCircle
+  Command, Sparkles, CheckCircle2, ArrowRight, ShieldCheck, AlertCircle, FileText
 } from 'lucide-react';
 import LanguageToggle from '@/components/LanguageToggle';
 import StoreSwitcher from '@/components/admin/StoreSwitcher';
@@ -235,10 +235,13 @@ function AdminNav({ children }: { children: React.ReactNode }) {
       title: 'CATALOGUE & BOUTIQUE',
       items: [
         { label: t.nav.products, href: `/admin/products?store=${storeSlug}`, icon: Package },
+        { label: t.nav.pages, href: `/admin/pages?store=${storeSlug}`, icon: FileText },
+        { label: t.nav.menus, href: `/admin/menus?store=${storeSlug}`, icon: Menu },
         { label: t.nav.builder, href: `/admin/builder?store=${storeSlug}`, icon: Layers },
         { label: t.nav.themes, href: `/admin/themes?store=${storeSlug}`, icon: Palette },
       ],
     },
+
     {
       title: 'FINANCES & PERFORMANCE',
       items: [

@@ -101,7 +101,7 @@ function setAbVariantCookie(response: NextResponse, variant: 'control' | 'waybil
     response.cookies.set({
       name: 'cod_anon_id',
       value: anonId,
-      httpOnly: true,
+      httpOnly: false, // Accessible to client-side JS so edge session matches browser event telemetry
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',

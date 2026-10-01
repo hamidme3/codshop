@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createOrder, getOrderByNumber, getStoreBySlug } from '@/lib/db-repository';
+import { createOrder, getOrderByNumber, getStoreBySlug, recordAnalyticsEvent } from '@/lib/db-repository';
 import { validateAndNormalizeMoroccanPhone } from '@/lib/moroccan-phone';
 import { validateCountryPhone, getCountryConfig } from '@/lib/geo';
 import { checkOrderRateLimit } from '@/lib/rate-limiter';
@@ -228,11 +228,12 @@ export async function POST(req: Request) {
     // Server-Side Conversion Logging (Guarantees 100% analytics parity even if mobile user closes tab before client beacon)
     if (!isAbandoned) {
       try {
-        const { recordAnalyticsEvent } = await import('@/lib/db-repository');
+        const cookieAnonId = req.headers.get('cookie')?.match(/(?:^|;\s*)cod_anon_id=([^;]+)/)?.[1];
+        const resolvedDistinctId = body.distinctId || (cookieAnonId ? decodeURIComponent(cookieAnonId) : null) || phone || 'anonymous';
         await recordAnalyticsEvent({
           storeSlug,
           eventName: 'order_completed',
-          distinctId: body.distinctId || phone || 'anonymous',
+          distinctId: resolvedDistinctId,
           properties: {
             orderId,
             orderNumber: orderId,

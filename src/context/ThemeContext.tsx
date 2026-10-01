@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useTransition } from 'react';
 import { ThemeId, THEMES, ThemeConfig } from '@/lib/themes';
 import { detectClientVisitorCountry, formatCountryPrice } from '@/lib/geo';
+import { getDefaultStoreMenus } from '@/lib/mocks';
+import type { StoreMenu, MenuPlacement } from '@/lib/types';
 
 export interface StoreShippingSettings {
   freeShippingThreshold: number;
@@ -26,7 +28,13 @@ interface ThemeContextType {
   formatPrice: (amount: number, overrideCountry?: string) => string;
   formatMAD: (amount: number) => string;
   storeSlug: string;
+  menus: StoreMenu[];
+  getMenu: (placement: MenuPlacement) => StoreMenu | undefined;
+  isMobileMenuOpen: boolean;
+  openMobileMenu: () => void;
+  closeMobileMenu: () => void;
 }
+
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
@@ -43,7 +51,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     deliveryTimeframe: '24h à 48h',
     checkoutEmailMode: 'hidden',
   });
+  const [menus, setMenus] = useState<StoreMenu[]>(() => getDefaultStoreMenus('ottavio'));
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const openMobileMenu = () => setIsMobileMenuOpen(true);
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
+  const getMenu = React.useCallback(
+    (placement: MenuPlacement): StoreMenu | undefined => {
+      const found = menus.find((m) => m.placement === placement);
+      if (found) return found;
+      return getDefaultStoreMenus(storeSlug).find((m) => m.placement === placement);
+    },
+    [menus, storeSlug]
+  );
+
   const [mounted, setMounted] = useState(false);
+
   const [, startTransition] = useTransition();
 
   // Safely hydrate theme and lang from URL or localStorage on mount
@@ -154,13 +177,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         })
         .catch(() => {});
 
+      fetch(`/api/stores/${encodeURIComponent(resolvedSlug)}/menus`, { signal: ctrl.signal })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.menus)) {
+            setMenus(data.menus);
+          }
+        })
+        .catch(() => {});
+
       return () => ctrl.abort();
     } catch {
       // ignore
     }
   }, []); // run once
 
-  // Listen to live updates from admin logistics page
+  // Listen to live updates from admin logistics and menus pages
   useEffect(() => {
     const handleSettingsUpdated = () => {
       if (!storeSlug) return;
@@ -181,9 +213,26 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         .catch(() => {});
     };
 
+    const handleMenusUpdated = () => {
+      if (!storeSlug) return;
+      fetch(`/api/stores/${encodeURIComponent(storeSlug)}/menus`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.menus)) {
+            setMenus(data.menus);
+          }
+        })
+        .catch(() => {});
+    };
+
     window.addEventListener('shipping-settings-updated', handleSettingsUpdated);
-    return () => window.removeEventListener('shipping-settings-updated', handleSettingsUpdated);
+    window.addEventListener('store-menus-updated', handleMenusUpdated);
+    return () => {
+      window.removeEventListener('shipping-settings-updated', handleSettingsUpdated);
+      window.removeEventListener('store-menus-updated', handleMenusUpdated);
+    };
   }, [storeSlug]);
+
 
   const setThemeId = (id: ThemeId) => {
     // View transition progressive
@@ -268,7 +317,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   return (
-    <ThemeContext.Provider value={{ themeId, theme, setThemeId, lang, setLang, countryCode, setCountryCode, shippingSettings, setShippingSettings, formatPrice, formatMAD, storeSlug }}>
+    <ThemeContext.Provider value={{ themeId, theme, setThemeId, lang, setLang, countryCode, setCountryCode, shippingSettings, setShippingSettings, formatPrice, formatMAD, storeSlug, menus, getMenu, isMobileMenuOpen, openMobileMenu, closeMobileMenu }}>
       <div
         data-theme={themeId}
         suppressHydrationWarning

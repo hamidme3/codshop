@@ -3,15 +3,19 @@
 import React, { useMemo } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { getCountryConfig } from '@/lib/geo';
-import { MessageCircle, ShieldCheck, ShoppingBag, Compass, Search } from 'lucide-react';
+import { MessageCircle, ShieldCheck, ShoppingBag, Compass, Search, Menu, ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useSearch } from '@/context/SearchContext';
 
 export function Navbar() {
-  const { theme, countryCode, shippingSettings } = useTheme();
+  const { theme, countryCode, shippingSettings, getMenu, openMobileMenu } = useTheme();
   const { totalCount, openCart } = useCart();
   const { openSearch } = useSearch();
   const countryConfig = useMemo(() => getCountryConfig(countryCode || 'MA'), [countryCode]);
+
+  const headerMenu = useMemo(() => getMenu('header'), [getMenu]);
+  const navItems = useMemo(() => headerMenu?.items || [], [headerMenu]);
+
 
   const announcement = useMemo(() => {
     let text = theme.announcementText || '';
@@ -77,32 +81,169 @@ export function Navbar() {
           </div>
         </a>
 
-        {/* Central Storefront Navigation Links */}
-        <nav className="hidden md:flex items-center gap-1.5 font-bold text-xs" aria-label="Navigation principale">
-          <a
-            href="/"
-            className="px-3 py-1.5 rounded-lg transition hover:bg-black/5"
-            style={{ color: 'var(--theme-text-primary)' }}
-          >
-            Accueil
-          </a>
-          <a
-            href="/catalog"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition hover:bg-black/5"
-            style={{ color: 'var(--theme-text-primary)' }}
-          >
-            <Compass className="w-3.5 h-3.5" style={{ color: theme.colors.accent }} />
-            <span>Catalogue & Collections</span>
-            <span
-              className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded"
-              style={{
-                backgroundColor: theme.colors.badgeBg,
-                color: theme.colors.badgeText,
-              }}
-            >
-              Boutique
-            </span>
-          </a>
+        {/* Central Storefront Navigation Links (Dynamic Header Menu) */}
+        <nav className="hidden md:flex items-center gap-1 font-bold text-xs" aria-label="Navigation principale">
+          {navItems.map((item) => {
+            const hasChildren = Boolean(item.children && item.children.length > 0);
+
+            if (hasChildren) {
+              return (
+                <div key={item.id} className="relative group">
+                  <a
+                    href={item.url}
+                    target={item.isOpenNewTab ? '_blank' : undefined}
+                    rel={item.isOpenNewTab ? 'noopener noreferrer' : undefined}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition hover:bg-black/5 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-primary)]"
+                    style={{ color: 'var(--theme-text-primary)' }}
+                  >
+                    <span>{item.label}</span>
+                    {item.badgeText && (
+                      <span
+                        className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded"
+                        style={{
+                          backgroundColor:
+                            item.badgeColor === 'rose'
+                              ? '#f43f5e'
+                              : item.badgeColor === 'amber'
+                              ? '#f59e0b'
+                              : item.badgeColor === 'accent'
+                              ? theme.colors.accent
+                              : theme.colors.badgeBg || theme.colors.primary,
+                          color: theme.colors.badgeText || '#ffffff',
+                        }}
+                      >
+                        {item.badgeText}
+                      </span>
+                    )}
+                    <ChevronDown className="w-3 h-3 opacity-60 group-hover:rotate-180 transition-transform duration-150" />
+                  </a>
+
+                  {/* Level 2 Dropdown Panel */}
+                  <div
+                    className="absolute top-full left-0 mt-1 min-w-[210px] rounded-xl border p-1.5 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-150 z-50 pointer-events-none group-hover:pointer-events-auto"
+                    style={{
+                      backgroundColor: 'var(--theme-card-bg)',
+                      borderColor: 'var(--theme-border)',
+                      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                    }}
+                  >
+                    {item.children!.map((sub) => {
+                      const hasSubChildren = Boolean(sub.children && sub.children.length > 0);
+
+                      if (hasSubChildren) {
+                        return (
+                          <div key={sub.id} className="relative group/sub">
+                            <a
+                              href={sub.url}
+                              target={sub.isOpenNewTab ? '_blank' : undefined}
+                              rel={sub.isOpenNewTab ? 'noopener noreferrer' : undefined}
+                              className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition hover:bg-black/5 dark:hover:bg-white/5"
+                              style={{ color: 'var(--theme-text-primary)' }}
+                            >
+                              <div className="flex items-center gap-1.5 truncate">
+                                <span>{sub.label}</span>
+                                {sub.badgeText && (
+                                  <span
+                                    className="text-[8px] font-black uppercase px-1 py-0.2 rounded"
+                                    style={{
+                                      backgroundColor: theme.colors.badgeBg || theme.colors.primary,
+                                      color: theme.colors.badgeText || '#ffffff',
+                                    }}
+                                  >
+                                    {sub.badgeText}
+                                  </span>
+                                )}
+                              </div>
+                              <ChevronRight className="w-3 h-3 opacity-60" />
+                            </a>
+
+                            {/* Level 3 Flyout Panel */}
+                            <div
+                              className="absolute left-full top-0 ml-1 min-w-[190px] rounded-xl border p-1.5 shadow-xl opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible group-focus-within/sub:opacity-100 group-focus-within/sub:visible transition-all duration-150 z-50 pointer-events-none group-hover/sub:pointer-events-auto"
+                              style={{
+                                backgroundColor: 'var(--theme-card-bg)',
+                                borderColor: 'var(--theme-border)',
+                                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2)',
+                              }}
+                            >
+                              {sub.children!.map((nested) => (
+                                <a
+                                  key={nested.id}
+                                  href={nested.url}
+                                  target={nested.isOpenNewTab ? '_blank' : undefined}
+                                  rel={nested.isOpenNewTab ? 'noopener noreferrer' : undefined}
+                                  className="block px-3 py-1.5 rounded-lg text-xs font-medium transition hover:bg-black/5 dark:hover:bg-white/5 truncate"
+                                  style={{ color: 'var(--theme-text-secondary)' }}
+                                >
+                                  {nested.label}
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <a
+                          key={sub.id}
+                          href={sub.url}
+                          target={sub.isOpenNewTab ? '_blank' : undefined}
+                          rel={sub.isOpenNewTab ? 'noopener noreferrer' : undefined}
+                          className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition hover:bg-black/5 dark:hover:bg-white/5"
+                          style={{ color: 'var(--theme-text-primary)' }}
+                        >
+                          <span className="truncate">{sub.label}</span>
+                          {sub.badgeText && (
+                            <span
+                              className="text-[8px] font-black uppercase px-1 py-0.2 rounded"
+                              style={{
+                                backgroundColor: theme.colors.badgeBg || theme.colors.primary,
+                                color: theme.colors.badgeText || '#ffffff',
+                              }}
+                            >
+                              {sub.badgeText}
+                            </span>
+                          )}
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <a
+                key={item.id}
+                href={item.url}
+                target={item.isOpenNewTab ? '_blank' : undefined}
+                rel={item.isOpenNewTab ? 'noopener noreferrer' : undefined}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition hover:bg-black/5 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-primary)]"
+                style={{ color: 'var(--theme-text-primary)' }}
+              >
+                <span>{item.label}</span>
+                {item.badgeText && (
+                  <span
+                    className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded shadow-2xs"
+                    style={{
+                      backgroundColor:
+                        item.badgeColor === 'rose'
+                          ? '#f43f5e'
+                          : item.badgeColor === 'amber'
+                          ? '#f59e0b'
+                          : item.badgeColor === 'accent'
+                          ? theme.colors.accent
+                          : theme.colors.badgeBg || theme.colors.primary,
+                      color: theme.colors.badgeText || '#ffffff',
+                    }}
+                  >
+                    {item.badgeText}
+                  </span>
+                )}
+                {item.isOpenNewTab && <ExternalLink className="w-3 h-3 opacity-50 shrink-0" />}
+              </a>
+            );
+          })}
         </nav>
 
         {/* Header Right Actions */}
@@ -153,19 +294,22 @@ export function Navbar() {
             <span>Assistance WhatsApp</span>
           </a>
 
-          {/* Quick Mobile Catalog Icon Link */}
-          <a
-            href="/catalog"
-            className="md:hidden p-2 rounded-xl border flex items-center justify-center transition shadow-xs"
+          {/* Mobile Hamburger Menu Drawer Toggle */}
+          <button
+            type="button"
+            onClick={openMobileMenu}
+            className="md:hidden p-2 rounded-xl border flex items-center justify-center transition shadow-xs cursor-pointer hover:opacity-90"
             style={{
               backgroundColor: 'var(--theme-card-bg)',
               borderColor: 'var(--theme-border)',
               color: 'var(--theme-text-primary)',
             }}
-            aria-label="Voir le catalogue"
+            aria-label="Ouvrir le menu de navigation"
+            title="Menu de navigation"
           >
-            <Compass className="w-4 h-4" />
-          </a>
+            <Menu className="w-4 h-4" />
+          </button>
+
 
           {/* Global Reactive Cart Drawer Button */}
           <button

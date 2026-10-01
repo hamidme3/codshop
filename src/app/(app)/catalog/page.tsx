@@ -64,6 +64,10 @@ export default function CatalogPage() {
       if (qParam) {
         setSearchQuery(qParam);
       }
+      const sortParam = urlParams.get('sort') as SortOption | null;
+      if (sortParam && ['featured', 'price-asc', 'price-desc', 'rating'].includes(sortParam)) {
+        setSortBy(sortParam);
+      }
 
       fetch(`/api/products?store=${encodeURIComponent(fetchSlug)}`)
         .then((r) => r.json())

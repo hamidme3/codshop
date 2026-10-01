@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 import { MOCK_PRODUCTS } from '../src/lib/mockProducts';
+import { PRODUCTS } from '../src/lib/mocks';
 import { THEMES } from '../src/lib/themes';
 
 console.log('🧪 Starting Storefront Navigation Verification Tests...\n');
@@ -15,14 +16,18 @@ async function runTests() {
     { query: 'luxury', minExpected: 1 },
   ];
 
+  const searchCatalog = [...PRODUCTS.map((p) => ({ ...p, theme: 'leather_craft' as const })), ...MOCK_PRODUCTS];
+
   for (const { query, minExpected } of testQueries) {
     const q = query.trim().toLowerCase();
-    const results = MOCK_PRODUCTS.filter((p) => {
+    const results = searchCatalog.filter((p: any) => {
       const title = p.title?.toLowerCase() || '';
       const titleAr = p.titleAr || '';
-      const tagline = p.tagline?.toLowerCase() || '';
+      const themeObj = (THEMES as Record<string, any>)[p.theme];
+      const tagline = p.tagline?.toLowerCase() || themeObj?.tagline?.toLowerCase() || '';
       const sku = p.sku?.toLowerCase() || '';
-      const categoryName = THEMES[p.theme]?.name?.toLowerCase() || '';
+      const categoryName = themeObj?.name?.toLowerCase() || '';
+
       const categoryId = p.theme?.toLowerCase() || '';
       const desc = p.description?.toLowerCase() || '';
 

@@ -15,6 +15,8 @@ export interface Translations {
     logistics: string;
     shipping: string;
     billing: string;
+    menus: string;
+    pages: string;
   };
   common: {
     activeStore: string;
@@ -191,6 +193,8 @@ export const DICTIONARY: Record<Language, Translations> = {
       logistics: 'Delivery & Shipping',
       shipping: 'Shipping & Delivery',
       billing: 'Subscription (14d)',
+      menus: 'Navigation & Menus',
+      pages: 'Pages & Legal Policies',
     },
     common: {
       activeStore: 'Active Store:',
@@ -365,6 +369,8 @@ export const DICTIONARY: Record<Language, Translations> = {
       logistics: 'Frais de Livraison',
       shipping: 'Frais de Livraison',
       billing: 'Abonnement (14j)',
+      menus: 'Menus & Navigation',
+      pages: 'Pages & Politiques',
     },
     common: {
       activeStore: 'Boutique active :',
@@ -539,6 +545,8 @@ export const DICTIONARY: Record<Language, Translations> = {
       logistics: 'إعدادات ومناطق التوصيل',
       shipping: 'إعدادات التوصيل',
       billing: 'الاشتراك والفوترة',
+      menus: 'القوائم والتنقل',
+      pages: 'الصفحات والسياسات',
     },
     common: {
       activeStore: 'المتجر النشط :',

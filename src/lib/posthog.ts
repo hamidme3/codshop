@@ -40,6 +40,11 @@ function getDistinctId(): string {
       stored = `anon_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
       localStorage.setItem('cod_anon_id', stored);
     }
+    try {
+      document.cookie = `cod_anon_id=${encodeURIComponent(stored)}; path=/; max-age=31536000; SameSite=Lax`;
+    } catch {
+      // non-blocking cookie write
+    }
     return stored;
   } catch {
     return 'anon';

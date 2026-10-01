@@ -8,6 +8,8 @@ import { Footer } from '@/components/Footer';
 import { CartDrawer } from '@/components/CartDrawer';
 import { MobileBottomNav } from '@/components/MobileBottomNav';
 import { SearchModal } from '@/components/SearchModal';
+import { MobileMenuDrawer } from '@/components/MobileMenuDrawer';
+
 
 import { useTheme } from '@/context/ThemeContext';
 import { fetchAndInitPixels } from '@/lib/pixel-tracker';
@@ -61,8 +63,10 @@ function ShellContent({ children }: { children: React.ReactNode }) {
       <Footer />
       <CartDrawer />
       <MobileBottomNav />
+      <MobileMenuDrawer />
       <SearchModal />
     </>
+
   );
 }
 

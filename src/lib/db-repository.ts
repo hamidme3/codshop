@@ -1,6 +1,6 @@
 import { getDb, schema } from '@/db';
 import { eq, desc, asc, and, ne, gte, sql } from 'drizzle-orm';
-import type { Order, Product, Customer, CourierName, OrderStatus } from './types';
+import type { Order, Product, Customer, CourierName, OrderStatus, MenuItem, MenuPlacement, StoreMenu, StorePage, PolicyType } from './types';
 import {
   ORDERS,
   PRODUCTS,
@@ -16,7 +16,19 @@ import {
   updateOrderStatus as updateMockOrderStatus,
   checkInventory,
   decrementInventory,
+  normalizeCustomerPhone,
+  getStoreMenusMock,
+  getStoreMenuByPlacementMock,
+  updateStoreMenuMock,
+  resetStoreMenuMock,
+  validateMenuNesting,
+  getStorePagesMock,
+  getStorePageBySlugMock,
+  createOrUpdateStorePageMock,
+  deleteStorePageMock,
+  generateStandardStorePoliciesMock,
 } from './mocks';
+
 import { MOCK_PRODUCTS, checkMockProductStock, decrementMockProductStock } from './mockProducts';
 import { 
   getStoreBySlug as getMockStoreBySlug, 
@@ -1069,12 +1081,13 @@ export async function syncCustomerFromOrder(
   if (!db) return;
 
   try {
-    const existing = await db.query.customers.findFirst({
-      where: and(
-        eq(schema.customers.storeId, storeId),
-        eq(schema.customers.phone, phone)
-      ),
+    const normPhone = normalizeCustomerPhone(phone) || phone;
+    const storeCustomers = await db.query.customers.findMany({
+      where: eq(schema.customers.storeId, storeId),
     });
+    const existing = storeCustomers.find(
+      (c) => c.phone === phone || normalizeCustomerPhone(c.phone) === normPhone
+    );
 
     if (existing) {
       const updatedTotalOrders = existing.totalOrders + 1;
@@ -1097,7 +1110,7 @@ export async function syncCustomerFromOrder(
         storeId,
         name,
         email: email || null,
-        phone,
+        phone: normPhone,
         city,
         totalOrders: 1,
         totalSpend: orderTotal,
@@ -1139,7 +1152,12 @@ export async function getCustomers(storeSlug: string): Promise<Customer[]> {
     });
 
     return dbCusts.map((c) => {
-      const custOrders = storeOrders.filter((o) => o.phone === c.phone);
+      const cNorm = normalizeCustomerPhone(c.phone);
+      const custOrders = storeOrders.filter((o) => {
+        if (o.phone === c.phone) return true;
+        const oNorm = normalizeCustomerPhone(o.phone);
+        return oNorm && cNorm && oNorm === cNorm;
+      });
       const validCustOrders = custOrders.filter((o) => o.status !== 'abandoned');
       const lastOrd = custOrders[0];
       const delivered = validCustOrders.filter((o) => o.status === 'delivered').length;
@@ -1159,7 +1177,7 @@ export async function getCustomers(storeSlug: string): Promise<Customer[]> {
         totalOrders: validCustOrders.length > 0 ? validCustOrders.length : (abandoned > 0 ? 0 : c.totalOrders),
         totalSpend: deliveredSpend > 0 ? deliveredSpend : (delivered > 0 ? (c.totalSpend || 0) : 0),
         averageBasket: Math.round((deliveredSpend > 0 ? deliveredSpend : (c.totalSpend || 0)) / Math.max(1, delivered)),
-        status: (c.status as any) || (returned > 0 ? 'risk' : (delivered >= 2 || (validCustOrders.length >= 2 && delivered >= 1)) ? 'returning' : validCustOrders.length > 0 ? 'active' : 'new'),
+        status: (c.status === 'vip' ? 'vip' : null) || (returned > 0 ? 'risk' : (delivered >= 2 || (validCustOrders.length >= 2 && delivered >= 1)) ? 'returning' : validCustOrders.length > 0 ? 'active' : (c.status as any) || 'new'),
         riskScore: (returned > 0 ? 'high' : 'low') as any,
         lastOrderDate: (c.lastOrderAt || lastOrd?.createdAt || c.createdAt)?.toISOString() || new Date().toISOString(),
         lastOrderNumber: lastOrd?.orderNumber,
@@ -2309,7 +2327,9 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
       .slice(0, 3);
 
     // 4. Compute funnel (strictly counting completed, non-abandoned orders)
-    const allVisitors = new Set(events.map((e) => e.distinctId)).size || (activeOrders.length > 0 ? activeOrders.length : 0);
+    const rawDistinctVisitors = new Set(events.map((e) => e.distinctId)).size;
+    const ordersCompleted = activeOrders.length || events.filter((e) => e.eventName === 'order_completed').length;
+    const allVisitors = Math.max(rawDistinctVisitors, ordersCompleted);
     const catalogViews = events.filter((e) => e.eventName === 'catalog_viewed').length;
     const productViews = events.filter((e) => e.eventName === 'product_viewed').length;
     const initiatedCheckout = events.filter(
@@ -2318,16 +2338,38 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
     const checkoutStep2 = events.filter(
       (e) => e.eventName === 'checkout_step_2' || e.eventName === 'cod_step_2_started'
     ).length;
-    const ordersCompleted = activeOrders.length || events.filter((e) => e.eventName === 'order_completed').length;
-    const overallConversionRate = allVisitors > 0 ? Number(((ordersCompleted / allVisitors) * 100).toFixed(1)) : 0;
+    const overallConversionRate = allVisitors > 0 ? Math.min(100, Number(((ordersCompleted / allVisitors) * 100).toFixed(1))) : 0;
 
-    // 5. Abandonment
+    // 5. Abandonment & Recoverable Leads
+    const completedPhones = new Set(
+      activeOrders.map((o) => normalizeCustomerPhone(o.phone)).filter(Boolean)
+    );
+    const completedDistinctIds = new Set(
+      events.filter((e) => e.eventName === 'order_completed').map((e) => e.distinctId).filter(Boolean)
+    );
+
     const abandonedEvents = events.filter((e) => e.eventName === 'cod_checkout_abandoned');
     const step1Abandoned = abandonedEvents.filter((e) => (e.properties as any)?.abandoned_at_step === 1 || (e.properties as any)?.step === 1).length;
     const step2Abandoned = abandonedEvents.filter((e) => (e.properties as any)?.abandoned_at_step === 2 || (e.properties as any)?.step === 2).length;
-    const totalAbandoned = Math.max(abandonedOrdersList.length, abandonedEvents.length || Math.max(0, initiatedCheckout - ordersCompleted));
-    const recoverableLeads = Math.max(abandonedOrdersList.length, abandonedEvents.filter((e) => (e.properties as any)?.has_phone === true || (e.properties as any)?.hasPhone === true).length);
-    const recoveryRate = totalAbandoned > 0 ? Number(((recoverableLeads / totalAbandoned) * 100).toFixed(1)) : 0;
+
+    // Filter out abandoned events for visitors who subsequently completed an order
+    const unconvertedAbandonedEvents = abandonedEvents.filter((e) => {
+      if (completedDistinctIds.has(e.distinctId)) return false;
+      const rawPhone = (e.properties as any)?.phone;
+      if (rawPhone && completedPhones.has(normalizeCustomerPhone(rawPhone))) return false;
+      return true;
+    });
+
+    const eventRecoverableLeads = unconvertedAbandonedEvents.filter(
+      (e) => (e.properties as any)?.has_phone === true || (e.properties as any)?.hasPhone === true
+    ).length;
+
+    const totalAbandoned = Math.max(
+      abandonedOrdersList.length,
+      unconvertedAbandonedEvents.length || Math.max(0, initiatedCheckout - ordersCompleted)
+    );
+    const recoverableLeads = abandonedOrdersList.length > 0 ? abandonedOrdersList.length : eventRecoverableLeads;
+    const recoveryRate = totalAbandoned > 0 ? Math.min(100, Number(((recoverableLeads / totalAbandoned) * 100).toFixed(1))) : 0;
 
     // 6. Searches
     const searchEvents = events.filter((e) => e.eventName === 'search_performed');
@@ -2492,5 +2534,398 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
     return null;
   }
 }
+
+// ── Store Navigation Menus Repository ─────────────────────────
+
+export async function getStoreMenus(storeSlug: string): Promise<StoreMenu[]> {
+  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const db = getDb();
+  if (db) {
+    try {
+      const store = await getStoreBySlug(cleanSlug);
+      if (store && store.id) {
+        const rows = await db.query.menus.findMany({
+          where: eq(schema.menus.storeId, store.id),
+        });
+        if (rows && rows.length > 0) {
+          return rows.map((r) => ({
+            id: r.id,
+            storeSlug: cleanSlug,
+            placement: r.placement as MenuPlacement,
+            title: r.title,
+            items: (r.items as MenuItem[]) || [],
+            updatedAt: r.updatedAt ? r.updatedAt.toISOString() : new Date().toISOString(),
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn('[DbRepo] DB menus fetch failed, fallback to mock:', err);
+    }
+  }
+  return getStoreMenusMock(cleanSlug);
+}
+
+export async function getStoreMenuByPlacement(
+  storeSlug: string,
+  placement: MenuPlacement
+): Promise<StoreMenu> {
+  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const db = getDb();
+  if (db) {
+    try {
+      const store = await getStoreBySlug(cleanSlug);
+      if (store && store.id) {
+        const row = await db.query.menus.findFirst({
+          where: and(eq(schema.menus.storeId, store.id), eq(schema.menus.placement, placement)),
+        });
+        if (row) {
+          return {
+            id: row.id,
+            storeSlug: cleanSlug,
+            placement: row.placement as MenuPlacement,
+            title: row.title,
+            items: (row.items as MenuItem[]) || [],
+            updatedAt: row.updatedAt ? row.updatedAt.toISOString() : new Date().toISOString(),
+          };
+        }
+      }
+    } catch (err) {
+      console.warn('[DbRepo] DB menu fetch failed, fallback to mock:', err);
+    }
+  }
+  return getStoreMenuByPlacementMock(cleanSlug, placement);
+}
+
+export async function updateStoreMenu(
+  storeSlug: string,
+  placement: MenuPlacement,
+  items: MenuItem[],
+  title?: string
+): Promise<StoreMenu> {
+  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const db = getDb();
+  if (db) {
+    try {
+      const store = await getStoreBySlug(cleanSlug);
+      if (store && store.id) {
+        const existing = await db.query.menus.findFirst({
+          where: and(eq(schema.menus.storeId, store.id), eq(schema.menus.placement, placement)),
+        });
+        if (existing) {
+          await db
+            .update(schema.menus)
+            .set({
+              items,
+              title: title || existing.title,
+              updatedAt: new Date(),
+            })
+            .where(eq(schema.menus.id, existing.id));
+        } else {
+          await db.insert(schema.menus).values({
+            storeId: store.id,
+            placement,
+            title: title || `${placement} Menu`,
+            items,
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[DbRepo] DB menu update failed, fallback to mock:', err);
+    }
+  }
+  return updateStoreMenuMock(cleanSlug, placement, items, title);
+}
+
+export async function resetStoreMenu(
+  storeSlug: string,
+  placement: MenuPlacement
+): Promise<StoreMenu> {
+  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const defaultMenu = resetStoreMenuMock(cleanSlug, placement);
+  const db = getDb();
+  if (db) {
+    try {
+      const store = await getStoreBySlug(cleanSlug);
+      if (store && store.id) {
+        const existing = await db.query.menus.findFirst({
+          where: and(eq(schema.menus.storeId, store.id), eq(schema.menus.placement, placement)),
+        });
+        if (existing) {
+          await db
+            .update(schema.menus)
+            .set({
+              items: defaultMenu.items,
+              title: defaultMenu.title,
+              updatedAt: new Date(),
+            })
+            .where(eq(schema.menus.id, existing.id));
+        } else {
+          await db.insert(schema.menus).values({
+            storeId: store.id,
+            placement,
+            title: defaultMenu.title,
+            items: defaultMenu.items,
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[DbRepo] DB menu reset failed, fallback to mock:', err);
+    }
+  }
+  return defaultMenu;
+}
+
+// ── Store Custom Pages & Policies Repository ───────────────────
+export async function getStorePages(storeSlug: string, onlyPublished: boolean = false): Promise<StorePage[]> {
+  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const db = getDb();
+  if (db) {
+    try {
+      const store = await db.query.stores.findFirst({
+        where: eq(schema.stores.slug, cleanSlug),
+      });
+      if (store) {
+        const rows = await db.query.pages.findMany({
+          where: onlyPublished
+            ? and(eq(schema.pages.storeId, store.id), eq(schema.pages.isPublished, true))
+            : eq(schema.pages.storeId, store.id),
+          orderBy: [desc(schema.pages.createdAt)],
+        });
+
+        if (rows.length > 0) {
+          return rows.map((r) => ({
+            id: r.id,
+            storeSlug: cleanSlug,
+            title: r.title,
+            slug: r.slug,
+            content: r.content,
+            policyType: (r.policyType as PolicyType) || 'custom',
+            isSystemPolicy: r.isSystemPolicy,
+            isPublished: r.isPublished,
+            seoTitle: r.seoTitle || undefined,
+            seoDescription: r.seoDescription || undefined,
+            createdAt: r.createdAt.toISOString(),
+            updatedAt: r.updatedAt.toISOString(),
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn('[DbRepo] DB getStorePages failed, falling back to mock:', err);
+    }
+  }
+
+  const mockPages = getStorePagesMock(cleanSlug);
+  return onlyPublished ? mockPages.filter((p) => p.isPublished) : mockPages;
+}
+
+export async function getStorePageBySlug(storeSlug: string, slug: string): Promise<StorePage | null> {
+  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const cleanPageSlug = (slug || '').toLowerCase().trim();
+
+  const db = getDb();
+  if (db) {
+    try {
+      const store = await db.query.stores.findFirst({
+        where: eq(schema.stores.slug, cleanSlug),
+      });
+      if (store) {
+        const row = await db.query.pages.findFirst({
+          where: and(eq(schema.pages.storeId, store.id), eq(schema.pages.slug, cleanPageSlug)),
+        });
+        if (row) {
+          return {
+            id: row.id,
+            storeSlug: cleanSlug,
+            title: row.title,
+            slug: row.slug,
+            content: row.content,
+            policyType: (row.policyType as PolicyType) || 'custom',
+            isSystemPolicy: row.isSystemPolicy,
+            isPublished: row.isPublished,
+            seoTitle: row.seoTitle || undefined,
+            seoDescription: row.seoDescription || undefined,
+            createdAt: row.createdAt.toISOString(),
+            updatedAt: row.updatedAt.toISOString(),
+          };
+        }
+      }
+    } catch (err) {
+      console.warn('[DbRepo] DB getStorePageBySlug failed, falling back to mock:', err);
+    }
+  }
+
+  return getStorePageBySlugMock(cleanSlug, cleanPageSlug);
+}
+
+export async function createOrUpdateStorePage(
+  storeSlug: string,
+  pageData: Partial<StorePage> & { title: string; slug: string; content: string }
+): Promise<StorePage> {
+  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const normalizedSlug = pageData.slug.toLowerCase().trim().replace(/[^a-z0-9_-]/g, '-');
+
+  const db = getDb();
+  if (db) {
+    try {
+      const store = await db.query.stores.findFirst({
+        where: eq(schema.stores.slug, cleanSlug),
+      });
+      if (store) {
+        const existing = await db.query.pages.findFirst({
+          where: and(eq(schema.pages.storeId, store.id), eq(schema.pages.slug, normalizedSlug)),
+        });
+
+        if (existing) {
+          const [updated] = await db
+            .update(schema.pages)
+            .set({
+              title: pageData.title.trim(),
+              content: pageData.content,
+              policyType: pageData.policyType || existing.policyType,
+              isPublished: pageData.isPublished !== undefined ? pageData.isPublished : existing.isPublished,
+              seoTitle: pageData.seoTitle,
+              seoDescription: pageData.seoDescription,
+              updatedAt: new Date(),
+            })
+            .where(eq(schema.pages.id, existing.id))
+            .returning();
+
+          if (updated) {
+            createOrUpdateStorePageMock(cleanSlug, pageData);
+            return {
+              id: updated.id,
+              storeSlug: cleanSlug,
+              title: updated.title,
+              slug: updated.slug,
+              content: updated.content,
+              policyType: (updated.policyType as PolicyType) || 'custom',
+              isSystemPolicy: updated.isSystemPolicy,
+              isPublished: updated.isPublished,
+              seoTitle: updated.seoTitle || undefined,
+              seoDescription: updated.seoDescription || undefined,
+              createdAt: updated.createdAt.toISOString(),
+              updatedAt: updated.updatedAt.toISOString(),
+            };
+          }
+        } else {
+          const [inserted] = await db
+            .insert(schema.pages)
+            .values({
+              storeId: store.id,
+              title: pageData.title.trim(),
+              slug: normalizedSlug,
+              content: pageData.content,
+              policyType: pageData.policyType || 'custom',
+              isSystemPolicy: Boolean(pageData.isSystemPolicy),
+              isPublished: pageData.isPublished !== undefined ? pageData.isPublished : true,
+              seoTitle: pageData.seoTitle,
+              seoDescription: pageData.seoDescription,
+            })
+            .returning();
+
+          if (inserted) {
+            createOrUpdateStorePageMock(cleanSlug, pageData);
+            return {
+              id: inserted.id,
+              storeSlug: cleanSlug,
+              title: inserted.title,
+              slug: inserted.slug,
+              content: inserted.content,
+              policyType: (inserted.policyType as PolicyType) || 'custom',
+              isSystemPolicy: inserted.isSystemPolicy,
+              isPublished: inserted.isPublished,
+              seoTitle: inserted.seoTitle || undefined,
+              seoDescription: inserted.seoDescription || undefined,
+              createdAt: inserted.createdAt.toISOString(),
+              updatedAt: inserted.updatedAt.toISOString(),
+            };
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[DbRepo] DB createOrUpdateStorePage failed, fallback to mock:', err);
+    }
+  }
+
+  return createOrUpdateStorePageMock(cleanSlug, pageData);
+}
+
+export async function deleteStorePage(storeSlug: string, idOrSlug: string): Promise<boolean> {
+  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const db = getDb();
+  if (db) {
+    try {
+      const store = await db.query.stores.findFirst({
+        where: eq(schema.stores.slug, cleanSlug),
+      });
+      if (store) {
+        await db
+          .delete(schema.pages)
+          .where(
+            and(
+              eq(schema.pages.storeId, store.id),
+              sql`(${schema.pages.id}::text = ${idOrSlug} OR ${schema.pages.slug} = ${idOrSlug.toLowerCase().trim()})`
+            )
+          );
+      }
+    } catch (err) {
+      console.warn('[DbRepo] DB deleteStorePage failed, fallback to mock:', err);
+    }
+  }
+
+  return deleteStorePageMock(cleanSlug, idOrSlug);
+}
+
+export async function generateStandardStorePolicies(storeSlug: string): Promise<StorePage[]> {
+  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const mockResult = generateStandardStorePoliciesMock(cleanSlug);
+
+  const db = getDb();
+  if (db) {
+    try {
+      const store = await db.query.stores.findFirst({
+        where: eq(schema.stores.slug, cleanSlug),
+      });
+      if (store) {
+        for (const page of mockResult) {
+          const existing = await db.query.pages.findFirst({
+            where: and(eq(schema.pages.storeId, store.id), eq(schema.pages.slug, page.slug)),
+          });
+          if (existing) {
+            await db
+              .update(schema.pages)
+              .set({
+                title: page.title,
+                content: page.content,
+                policyType: page.policyType,
+                isSystemPolicy: true,
+                seoTitle: page.seoTitle,
+                seoDescription: page.seoDescription,
+                updatedAt: new Date(),
+              })
+              .where(eq(schema.pages.id, existing.id));
+          } else {
+            await db.insert(schema.pages).values({
+              storeId: store.id,
+              title: page.title,
+              slug: page.slug,
+              content: page.content,
+              policyType: page.policyType,
+              isSystemPolicy: true,
+              isPublished: true,
+              seoTitle: page.seoTitle,
+              seoDescription: page.seoDescription,
+            });
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[DbRepo] DB generateStandardStorePolicies failed, fallback to mock:', err);
+    }
+  }
+
+  return mockResult;
+}
+
 
 

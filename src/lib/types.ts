@@ -152,3 +152,49 @@ export interface PaymentGateway {
   description: string;
   feeInfo: string;
 }
+
+// ── Navigation & Menus ──────────────────────────────────────────
+export type MenuPlacement = 'header' | 'mobile_drawer' | 'footer_col_1' | 'footer_col_2';
+
+export type MenuLinkType = 'home' | 'catalog' | 'category' | 'product' | 'page' | 'whatsapp' | 'url';
+
+export interface MenuItem {
+  id: string;
+  label: string;
+  type: MenuLinkType;
+  url: string;
+  targetId?: string; // Optional category slug, product SKU/ID, or page slug
+  badgeText?: string; // e.g. "HOT", "NEW", "PROMO"
+  badgeColor?: 'primary' | 'accent' | 'rose' | 'amber' | 'emerald';
+  isOpenNewTab?: boolean;
+  order: number;
+  children?: MenuItem[]; // Up to 2 levels of nesting
+}
+
+export interface StoreMenu {
+  id: string;
+  storeSlug: string;
+  placement: MenuPlacement;
+  title: string;
+  items: MenuItem[];
+  updatedAt: string;
+}
+
+// ── Custom Pages & Legal Policies ──────────────────────────────
+export type PolicyType = 'terms' | 'privacy' | 'shipping' | 'returns' | 'about' | 'custom';
+
+export interface StorePage {
+  id: string;
+  storeSlug: string;
+  title: string;
+  slug: string;
+  content: string;
+  policyType: PolicyType;
+  isSystemPolicy: boolean;
+  isPublished: boolean;
+  seoTitle?: string;
+  seoDescription?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+

@@ -5,7 +5,9 @@ import { useTheme } from '@/context/ThemeContext';
 import { ShieldCheck, Truck, RotateCcw, Headphones } from 'lucide-react';
 
 export function Footer() {
-  const { theme } = useTheme();
+  const { theme, getMenu } = useTheme();
+  const footerCol1 = React.useMemo(() => getMenu('footer_col_1'), [getMenu]);
+  const footerCol2 = React.useMemo(() => getMenu('footer_col_2'), [getMenu]);
 
   return (
     <footer
@@ -82,36 +84,46 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Footer Navigation Links */}
+      {/* Dynamic Footer Navigation Links */}
       <div className="border-b py-6" style={{ borderColor: 'var(--theme-border)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-4 text-xs">
-          <div className="flex flex-wrap items-center gap-4 font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-            <a href="/" className="hover:underline">
-              Accueil
-            </a>
-            <span>•</span>
-            <a href="/catalog" className="hover:underline flex items-center gap-1 font-bold" style={{ color: theme.colors.primary }}>
-              Catalogue Complet
-            </a>
-            <span>•</span>
-            <a href="/catalog" className="hover:underline" style={{ color: 'var(--theme-text-secondary)' }}>
-              Maroquinerie & Chaussures
-            </a>
-            <span>•</span>
-            <a href="/catalog" className="hover:underline" style={{ color: 'var(--theme-text-secondary)' }}>
-              Terroir & Miels d'Atlas
-            </a>
-            <span>•</span>
-            <a href="/catalog" className="hover:underline" style={{ color: 'var(--theme-text-secondary)' }}>
-              High-Tech & Son
-            </a>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 text-xs">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+            {(footerCol1?.items || []).map((item, idx) => (
+              <React.Fragment key={item.id}>
+                {idx > 0 && <span className="opacity-30">•</span>}
+                <a
+                  href={item.url}
+                  target={item.isOpenNewTab ? '_blank' : undefined}
+                  rel={item.isOpenNewTab ? 'noopener noreferrer' : undefined}
+                  className="hover:underline transition truncate"
+                  style={{
+                    color: idx === 0 ? theme.colors.primary : 'inherit',
+                  }}
+                >
+                  {item.label}
+                </a>
+              </React.Fragment>
+            ))}
           </div>
 
-          <div className="text-[11px] font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
-            Paiement Cash • Vérification avant de payer
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
+            {(footerCol2?.items || []).map((item, idx) => (
+              <React.Fragment key={item.id}>
+                {idx > 0 && <span className="opacity-30">•</span>}
+                <a
+                  href={item.url}
+                  target={item.isOpenNewTab ? '_blank' : undefined}
+                  rel={item.isOpenNewTab ? 'noopener noreferrer' : undefined}
+                  className="hover:underline transition"
+                >
+                  {item.label}
+                </a>
+              </React.Fragment>
+            ))}
           </div>
         </div>
       </div>
+
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
         <div className="flex items-center gap-2" style={{ color: 'var(--theme-text-secondary)' }}>
