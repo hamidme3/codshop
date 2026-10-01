@@ -186,11 +186,11 @@ export default function IdentityPage() {
           <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             <ShieldCheck className="w-5 h-5" />
           </span>
-          <h1 className="text-2xl font-black text-white tracking-tight">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
             Conformité & Identité Marchande (KYC Maroc)
           </h1>
         </div>
-        <p className="text-xs sm:text-sm text-zinc-400">
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
           Vérification légale conforme aux directives Bank Al-Maghrib pour les virements bancaires COD.
         </p>
       </div>

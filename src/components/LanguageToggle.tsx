@@ -22,17 +22,17 @@ export default function LanguageToggle({ currentLang, onLanguageChange }: Langua
   ];
 
   return (
-    <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-[11px] font-bold">
-      <Globe className="w-3.5 h-3.5 text-slate-400 ml-1.5 mr-0.5 shrink-0" />
+    <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-950/80 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-[11px] font-bold transition-colors">
+      <Globe className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 ml-1.5 mr-0.5 shrink-0" />
       {languages.map((item) => (
         <button
           key={item.code}
           type="button"
           onClick={() => setLang(item.code)}
-          className={`px-2 py-1 rounded-lg transition-colors ${
+          className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${
             lang === item.code
-              ? 'bg-amber-500 text-slate-950 font-black shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'
           }`}
         >
           {item.label}

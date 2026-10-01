@@ -329,18 +329,18 @@ function CustomersContent() {
             <span className="text-zinc-600">•</span>
             <span className="text-[11px] text-zinc-400 font-mono tabular-nums">{totalCustomersCount} profils acheteurs</span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-            <Users className="w-6 h-6 text-zinc-200" /> CRM & Profils Acheteurs
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
+            <Users className="w-6 h-6 text-slate-700 dark:text-zinc-200" /> CRM & Profils Acheteurs
           </h1>
-          <p className="text-zinc-400 text-xs mt-1">
-            Synchronisé avec vos 4 étapes : <span className="text-cyan-300 font-mono text-[11px]">1. Confirmée</span>, <span className="text-sky-300 font-mono text-[11px]">2. Expédiée</span>, <span className="text-emerald-300 font-mono text-[11px]">3. Livrée</span>, <span className="text-rose-300 font-mono text-[11px]">4. Retournée</span>.
+          <p className="text-slate-500 dark:text-zinc-400 text-xs mt-1">
+            Synchronisé avec vos 4 étapes : <span className="text-cyan-600 dark:text-cyan-300 font-mono text-[11px]">1. Confirmée</span>, <span className="text-sky-600 dark:text-sky-300 font-mono text-[11px]">2. Expédiée</span>, <span className="text-emerald-600 dark:text-emerald-300 font-mono text-[11px]">3. Livrée</span>, <span className="text-rose-600 dark:text-rose-300 font-mono text-[11px]">4. Retournée</span>.
           </p>
         </div>
 
         <div className="flex items-center gap-2.5">
           <button
             onClick={refreshCustomers}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-xs font-medium text-zinc-300 hover:text-white transition-colors shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 dark:bg-zinc-900 dark:border-zinc-800 dark:hover:border-zinc-700 dark:text-zinc-300 dark:hover:text-white text-xs font-medium transition-colors shadow-2xs cursor-pointer"
             title="Rafraîchir les données CRM"
           >
             <RefreshCw className="w-3.5 h-3.5" />
@@ -1180,7 +1180,7 @@ function CustomersContent() {
 
 export default function CustomersPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-white">Chargement du CRM...</div>}>
+    <Suspense fallback={<div className="p-8 text-slate-700 dark:text-white text-xs font-medium">Chargement du CRM...</div>}>
       <CustomersContent />
     </Suspense>
   );

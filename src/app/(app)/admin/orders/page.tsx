@@ -917,29 +917,29 @@ function OrdersContent() {
                             <div
                               key={`kanban-card-${order.id}`}
                               onClick={() => setSelectedOrder(order)}
-                              className={`p-3 rounded-lg border transition-all cursor-pointer hover:border-slate-600 space-y-2 group ${
+                              className={`p-3 rounded-lg border transition-all cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 space-y-2 group shadow-2xs ${
                                 isSelected
                                   ? 'bg-emerald-500/10 border-emerald-500/40'
-                                  : 'bg-[#13171c] border-slate-800/80 hover:bg-[#161b22]'
+                                  : 'bg-white hover:bg-slate-50 dark:bg-[#13171c] dark:hover:bg-[#161b22] border-slate-200 dark:border-slate-800/80'
                               }`}
                             >
                               {/* Order Number + Time + Total MAD */}
                               <div className="flex items-center justify-between gap-1">
-                                <span className="font-mono font-bold text-emerald-400 text-xs tabular-nums group-hover:underline">
+                                <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-xs tabular-nums group-hover:underline">
                                   {order.orderNumber}
                                 </span>
-                                <span className="text-[11px] font-mono font-black text-white tabular-nums">
-                                  {order.total} <span className="text-[9px] font-sans text-zinc-400">DH</span>
+                                <span className="text-[11px] font-mono font-black text-slate-900 dark:text-white tabular-nums">
+                                  {order.total} <span className="text-[9px] font-sans text-slate-500 dark:text-zinc-400">DH</span>
                                 </span>
                               </div>
 
                               {/* Customer Name & City */}
                               <div>
-                                <div className="font-bold text-white text-xs truncate">{order.customerName}</div>
-                                <div className="flex items-center gap-1 text-[11px] text-zinc-400 mt-0.5">
+                                <div className="font-bold text-slate-900 dark:text-white text-xs truncate">{order.customerName}</div>
+                                <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
                                   <span className="truncate">{order.city}</span>
                                   {order.deliveryType === 'stopdesk' && (
-                                    <span className="px-1 py-0.2 rounded text-[9px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30 shrink-0">
+                                    <span className="px-1 py-0.2 rounded text-[9px] font-bold bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 shrink-0">
                                       Stopdesk
                                     </span>
                                   )}
@@ -1160,7 +1160,7 @@ function OrdersContent() {
                               </a>
                               <button
                                 onClick={() => setActiveWaOrderId(isWaOpen ? null : order.id)}
-                                className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-[9px] border border-slate-700"
+                                className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 flex items-center justify-center text-[9px] border border-slate-300 dark:border-slate-700 cursor-pointer"
                                 title="Modèles Darija WhatsApp"
                               >
                                 ▾
@@ -1217,7 +1217,7 @@ function OrdersContent() {
                             {/* Direct Call */}
                             <a
                               href={`tel:${order.phone}`}
-                              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                              className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:hover:text-white border border-slate-200 dark:border-transparent transition-colors cursor-pointer"
                               title="Appeler le client"
                             >
                               <Phone className="w-4 h-4" />
@@ -1599,7 +1599,7 @@ function OrdersContent() {
 
 export default function OrdersPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-white">Chargement des commandes...</div>}>
+    <Suspense fallback={<div className="p-8 text-slate-700 dark:text-white text-xs font-medium">Chargement des commandes...</div>}>
       <OrdersContent />
     </Suspense>
   );

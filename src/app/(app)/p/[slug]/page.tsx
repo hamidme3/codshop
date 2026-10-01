@@ -226,23 +226,25 @@ export default function StorefrontCustomPage() {
   if (error || !page) {
     return (
       <div className="min-h-[60vh] max-w-lg mx-auto flex flex-col items-center justify-center py-20 px-4 text-center">
-        <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mb-4">
+        <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center mb-4">
           <AlertCircle className="w-6 h-6" />
         </div>
-        <h1 className="text-xl font-bold text-white mb-2">Page Non Trouvée</h1>
-        <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
+        <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Page Non Trouvée</h1>
+        <p className="text-xs mb-6 leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
           {error || 'La page que vous recherchez n’existe pas ou a été déplacée par la boutique.'}
         </p>
         <div className="flex items-center gap-3">
           <Link
             href="/"
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-white text-zinc-900 hover:bg-zinc-200 transition"
+            className="px-4 py-2 rounded-xl text-xs font-bold text-white transition shadow-xs hover:opacity-90"
+            style={{ backgroundColor: 'var(--theme-primary)' }}
           >
             Retour à l’Accueil
           </Link>
           <Link
             href="/catalog"
-            className="px-4 py-2 rounded-xl text-xs font-bold border border-zinc-800 text-zinc-300 hover:bg-zinc-800 transition"
+            className="px-4 py-2 rounded-xl text-xs font-bold border transition hover:opacity-80"
+            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)', backgroundColor: 'var(--theme-card-bg)' }}
           >
             Voir le Catalogue
           </Link>

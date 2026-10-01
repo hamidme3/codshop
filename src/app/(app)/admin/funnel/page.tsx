@@ -304,7 +304,7 @@ function FunnelContent() {
 
 export default function FunnelPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-white">Chargement de l&apos;entonnoir...</div>}>
+    <Suspense fallback={<div className="p-8 text-slate-700 dark:text-white text-xs font-medium">Chargement de l&apos;entonnoir...</div>}>
       <FunnelContent />
     </Suspense>
   );

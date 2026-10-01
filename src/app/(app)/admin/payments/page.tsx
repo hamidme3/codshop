@@ -205,7 +205,7 @@ function PaymentsContent() {
 
 export default function PaymentsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-white">Chargement des passerelles...</div>}>
+    <Suspense fallback={<div className="p-8 text-slate-700 dark:text-white text-xs font-medium">Chargement des passerelles...</div>}>
       <PaymentsContent />
     </Suspense>
   );

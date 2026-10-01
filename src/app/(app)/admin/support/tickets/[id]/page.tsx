@@ -135,12 +135,12 @@ export default function TicketConversationPage({
   if (error || !ticket) {
     return (
       <div className="max-w-2xl mx-auto py-16 text-center space-y-4">
-        <ShieldAlert className="w-12 h-12 text-rose-400 mx-auto" />
-        <h2 className="text-lg font-bold text-white">Ticket introuvable</h2>
-        <p className="text-sm text-slate-400">{error || 'Ce ticket n existe pas ou a été supprimé.'}</p>
+        <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto" />
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white">Ticket introuvable</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400">{error || 'Ce ticket n existe pas ou a été supprimé.'}</p>
         <Link
           href="/admin/support"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white rounded-lg text-xs font-semibold transition"
         >
           <ArrowLeft className="w-4 h-4" />
           Retour au support
@@ -149,7 +149,7 @@ export default function TicketConversationPage({
     );
   }
 
-  const stat = STATUS_LABELS[ticket.status] || { label: ticket.status, badge: 'bg-slate-700 text-slate-300' };
+  const stat = STATUS_LABELS[ticket.status] || { label: ticket.status, badge: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300' };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-20">
@@ -157,7 +157,7 @@ export default function TicketConversationPage({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Link
           href="/admin/support"
-          className="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-white transition"
+          className="inline-flex items-center gap-2 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition"
         >
           <ArrowLeft className="w-4 h-4" />
           Retour à tous les tickets
@@ -167,7 +167,7 @@ export default function TicketConversationPage({
           <button
             onClick={handleCloseTicket}
             disabled={closing}
-            className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-500/30 rounded-lg text-xs font-medium transition"
+            className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-300 dark:bg-slate-800 dark:hover:bg-rose-500/20 dark:text-slate-300 dark:hover:text-rose-300 dark:border-slate-700 dark:hover:border-rose-500/30 rounded-lg text-xs font-medium transition cursor-pointer"
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
             {closing ? 'Clôture en cours...' : 'Marquer comme Résolu'}
@@ -176,23 +176,23 @@ export default function TicketConversationPage({
       </div>
 
       {/* Ticket Header Card */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-5 space-y-3">
+      <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-3 shadow-xs">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-xs font-bold text-emerald-400 px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/20">
+          <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
             {ticket.ticketNumber}
           </span>
-          <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+          <span className="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
             {DEPARTMENT_LABELS[ticket.department] || ticket.department}
           </span>
           <span className={`text-xs px-2.5 py-1 rounded-full border ${stat.badge}`}>
             {stat.label}
           </span>
-          <span className="text-xs text-slate-400 ml-auto">
+          <span className="text-xs text-slate-500 dark:text-slate-400 ml-auto">
             Créé le {new Date(ticket.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
           </span>
         </div>
 
-        <h1 className="text-xl font-bold text-white tracking-tight">{ticket.subject}</h1>
+        <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">{ticket.subject}</h1>
       </div>
 
       {/* Messages Thread */}
@@ -206,23 +206,23 @@ export default function TicketConversationPage({
               className={`flex gap-3.5 ${isMerchant ? 'justify-end' : 'justify-start'}`}
             >
               {!isMerchant && (
-                <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 flex-shrink-0 mt-1">
+                <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1">
                   <Headset className="w-4 h-4" />
                 </div>
               )}
 
               <div
-                className={`max-w-2xl rounded-2xl p-4 space-y-2 text-sm ${
+                className={`max-w-2xl rounded-2xl p-4 space-y-2 text-sm shadow-2xs ${
                   isMerchant
-                    ? 'bg-emerald-950/40 border border-emerald-800/40 text-emerald-100 rounded-tr-none'
-                    : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-none'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-emerald-950 dark:text-emerald-100 rounded-tr-none'
+                    : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none'
                 }`}
               >
                 <div className="flex items-center justify-between gap-4 text-xs">
-                  <span className={`font-semibold ${isMerchant ? 'text-emerald-400' : 'text-blue-400'}`}>
+                  <span className={`font-semibold ${isMerchant ? 'text-emerald-700 dark:text-emerald-400' : 'text-blue-700 dark:text-blue-400'}`}>
                     {isMerchant ? 'Vous (Marchand)' : 'Support CODShop Maroc'}
                   </span>
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] text-slate-400 dark:text-slate-500">
                     {new Date(msg.createdAt).toLocaleTimeString('fr-FR', {
                       hour: '2-digit',
                       minute: '2-digit',
@@ -236,7 +236,7 @@ export default function TicketConversationPage({
               </div>
 
               {isMerchant && (
-                <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0 mt-1">
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-1">
                   <User className="w-4 h-4" />
                 </div>
               )}
@@ -247,13 +247,13 @@ export default function TicketConversationPage({
 
       {/* Reply Box */}
       {ticket.status === 'closed' ? (
-        <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-800 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-          <Lock className="w-4 h-4 text-slate-500" />
+        <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400 flex items-center justify-center gap-2">
+          <Lock className="w-4 h-4 text-slate-400" />
           Ce ticket est clôturé. Pour toute nouvelle demande, veuillez ouvrir un nouveau ticket.
         </div>
       ) : (
-        <form onSubmit={handleSendReply} className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
-          <label className="block text-xs font-semibold text-slate-300">
+        <form onSubmit={handleSendReply} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3 shadow-xs">
+          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
             Votre Réponse
           </label>
           <textarea
@@ -261,17 +261,17 @@ export default function TicketConversationPage({
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
             placeholder="Écrivez votre message ou précisions supplémentaires..."
-            className="w-full px-3 py-2.5 bg-slate-800/80 border border-slate-700/80 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+            className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500"
           />
 
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
               Réponse moyenne par nos agents : &lt; 15 min.
             </span>
             <button
               type="submit"
               disabled={sending || !replyText.trim()}
-              className="flex items-center gap-2 px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-lg text-xs font-semibold transition shadow-sm"
+              className="flex items-center gap-2 px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-lg text-xs font-semibold transition shadow-sm cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
               {sending ? 'Envoi...' : 'Envoyer la réponse'}
