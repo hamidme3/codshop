@@ -96,25 +96,49 @@ describe('Custom Pages, Standard Legal Policies & Menu Integration Test Suite', 
       );
     });
 
-    test('Moroccan Law 09-08 (CNDP) personal data protection compliance', () => {
+    test('Universal personal data protection and COD privacy compliance', () => {
       const policies = generateStandardPolicies({
-        storeName: 'Rabat Tech',
-        storeSlug: 'rabat-tech',
+        storeName: 'Global Tech Store',
+        storeSlug: 'global-tech',
       });
 
       const privacy = policies.find((p) => p.slug === 'privacy')!;
       assert.ok(
-        privacy.content.includes('09-08'),
-        'Privacy policy must explicitly reference Moroccan Law n° 09-08'
-      );
-      assert.ok(
-        privacy.content.includes('CNDP'),
-        'Privacy policy must reference CNDP'
+        privacy.content.includes('Protection des Données Personnelles'),
+        'Privacy policy must specify personal data protection'
       );
       assert.ok(
         privacy.content.includes('aucune coordonnée bancaire'),
         'Must assure buyers that no banking cards are processed since it is COD'
       );
+      assert.ok(
+        privacy.content.includes("d'accès") && privacy.content.includes('rectification'),
+        'Must guarantee right to access and rectify personal data'
+      );
+    });
+
+    test('Universal multi-country policy generation adapts country and currency dynamically', () => {
+      const saudiPolicies = generateStandardPolicies({
+        storeName: 'Riyadh Perfumes',
+        storeSlug: 'riyadh-perfumes',
+        country: 'SA',
+        city: 'Riyadh',
+      });
+
+      const saudiTerms = saudiPolicies.find((p) => p.slug === 'terms')!;
+      assert.ok(saudiTerms.content.includes('SAR'), 'Must adapt currency to SAR for Saudi Arabia');
+      assert.ok(saudiTerms.content.includes('Arabie Saoudite'), 'Must include country name');
+
+      const uaePolicies = generateStandardPolicies({
+        storeName: 'Dubai Gadgets',
+        storeSlug: 'dubai-gadgets',
+        country: 'AE',
+        city: 'Dubai',
+      });
+
+      const uaeShipping = uaePolicies.find((p) => p.slug === 'shipping-policy')!;
+      assert.ok(uaeShipping.content.includes('AED'), 'Must adapt currency to AED for UAE');
+      assert.ok(uaeShipping.content.includes('Émirats Arabes Unis'), 'Must include country name');
     });
   });
 

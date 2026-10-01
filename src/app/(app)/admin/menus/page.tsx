@@ -539,14 +539,14 @@ function MenusContent() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-800 pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
               <Compass className="w-5 h-5" />
             </span>
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white">
               Gestion des Menus & Navigation
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
             Organisez la structure de vos liens, collections, et sous-menus (jusqu'à 2 niveaux d'imbrication) pour chaque emplacement.
           </p>
         </div>
@@ -556,10 +556,10 @@ function MenusContent() {
             type="button"
             onClick={handleReset}
             disabled={saving || loading}
-            className="px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-300 hover:text-white hover:bg-zinc-800 text-xs font-semibold flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer shadow-xs"
+            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-900 dark:hover:text-white text-xs font-semibold flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer shadow-2xs"
             title="Restaurer la configuration par défaut"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-zinc-400" />
+            <RotateCcw className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-400" />
             <span>Réinitialiser</span>
           </button>
 
@@ -580,14 +580,14 @@ function MenusContent() {
         <div
           className={`p-3.5 rounded-xl border text-xs flex items-center gap-2.5 transition animate-in fade-in duration-200 ${
             statusMessage.type === 'success'
-              ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
-              : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
+              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-500/40 text-emerald-800 dark:text-emerald-300'
+              : 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-500/40 text-rose-800 dark:text-rose-300'
           }`}
         >
           {statusMessage.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
           ) : (
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
           )}
           <span className="font-medium">{statusMessage.text}</span>
         </div>
@@ -605,23 +605,23 @@ function MenusContent() {
               onClick={() => handlePlacementChange(p.id)}
               className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
                 isActive
-                  ? 'bg-zinc-800/90 border-emerald-500/50 text-white shadow-sm ring-1 ring-emerald-500/30'
-                  : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500 text-emerald-950 dark:text-white shadow-xs ring-1 ring-emerald-500/30'
+                  : 'bg-white dark:bg-[#13171c] border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-zinc-200 shadow-2xs'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className={`p-1.5 rounded-lg ${isActive ? 'bg-emerald-500/20 text-emerald-400' : 'bg-zinc-800 text-zinc-400'}`}>
+                <span className={`p-1.5 rounded-lg ${isActive ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 'bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400'}`}>
                   <Icon className="w-4 h-4" />
                 </span>
                 {isActive && (
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/30">
                     Actif
                   </span>
                 )}
               </div>
               <div>
-                <div className="font-bold text-xs text-zinc-100">{p.label}</div>
-                <div className="text-[11px] text-zinc-500 line-clamp-1 mt-0.5">{p.description}</div>
+                <div className={`font-bold text-xs ${isActive ? 'text-emerald-950 dark:text-white' : 'text-slate-900 dark:text-zinc-100'}`}>{p.label}</div>
+                <div className="text-[11px] text-slate-500 dark:text-zinc-400 line-clamp-1 mt-0.5">{p.description}</div>
               </div>
             </button>
           );
@@ -631,16 +631,16 @@ function MenusContent() {
       {/* Main Workspace Grid (Tree Editor & Simulator Preview) */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Left Column: Hierarchical Tree Editor */}
-        <div className="xl:col-span-8 bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+        <div className="xl:col-span-8 bg-white dark:bg-[#13171c] border border-slate-200 dark:border-zinc-800 rounded-2xl p-5 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800/80 pb-3">
             <div>
-              <h2 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-zinc-100 flex items-center gap-2">
                 <span>Structure des Liens</span>
-                <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700">
+                <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700">
                   {flattenedItems.length} élément{flattenedItems.length > 1 ? 's' : ''}
                 </span>
               </h2>
-              <p className="text-[11px] text-zinc-500 mt-0.5">
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
                 Utilisez les flèches pour réordonner et indenter les sous-menus (Niveau 1 → Sous-menu → Sous-élément).
               </p>
             </div>
@@ -650,10 +650,10 @@ function MenusContent() {
                 <button
                   type="button"
                   onClick={handleAddLegalPoliciesToFooter}
-                  className="px-2.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 text-xs font-semibold flex items-center gap-1.5 transition border border-sky-500/30 cursor-pointer shadow-xs"
+                  className="px-2.5 py-1.5 rounded-lg bg-sky-50 dark:bg-sky-500/10 hover:bg-sky-100 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 text-xs font-semibold flex items-center gap-1.5 transition border border-sky-200 dark:border-sky-500/30 cursor-pointer shadow-2xs"
                   title="Ajouter en 1 clic les 4 politiques légales au pied de page"
                 >
-                  <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
                   <span>+ Politiques Légales</span>
                 </button>
               )}
@@ -661,9 +661,9 @@ function MenusContent() {
               <button
                 type="button"
                 onClick={handleAddRoot}
-                className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold flex items-center gap-1.5 transition border border-zinc-700 cursor-pointer shadow-xs"
+                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 text-xs font-semibold flex items-center gap-1.5 transition border border-slate-200 dark:border-zinc-700 cursor-pointer shadow-2xs"
               >
-                <Plus className="w-3.5 h-3.5 text-emerald-400" />
+                <Plus className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>Ajouter un lien principal</span>
               </button>
             </div>
@@ -671,17 +671,17 @@ function MenusContent() {
 
           {/* Tree Rows List */}
           {loading ? (
-            <div className="py-12 text-center text-xs text-zinc-500 animate-pulse">
+            <div className="py-12 text-center text-xs text-slate-400 dark:text-zinc-500 animate-pulse">
               Chargement de la navigation...
             </div>
           ) : flattenedItems.length === 0 ? (
-            <div className="py-12 text-center space-y-3 border border-dashed border-zinc-800 rounded-xl bg-zinc-950/40">
-              <Compass className="w-8 h-8 mx-auto text-zinc-600" />
-              <div className="text-xs text-zinc-400 font-medium">Ce menu ne contient aucun lien pour le moment.</div>
+            <div className="py-12 text-center space-y-3 border border-dashed border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50/50 dark:bg-zinc-950/40">
+              <Compass className="w-8 h-8 mx-auto text-slate-400 dark:text-zinc-600" />
+              <div className="text-xs text-slate-500 dark:text-zinc-400 font-medium">Ce menu ne contient aucun lien pour le moment.</div>
               <button
                 type="button"
                 onClick={handleAddRoot}
-                className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 hover:bg-emerald-500 transition cursor-pointer"
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 hover:bg-emerald-500 transition cursor-pointer shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Créer le premier lien</span>
@@ -716,10 +716,10 @@ function MenusContent() {
                     key={item.id}
                     className={`group rounded-xl border transition-all flex items-center justify-between p-2.5 sm:p-3 ${
                       isRoot
-                        ? 'bg-zinc-950/70 border-zinc-800 hover:border-zinc-700'
+                        ? 'bg-white dark:bg-[#0c0f12] border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 shadow-2xs'
                         : isSub
-                        ? 'bg-zinc-900/90 border-zinc-800/80 ml-6 sm:ml-8 border-l-2 border-l-sky-500/50'
-                        : 'bg-zinc-900/60 border-zinc-800/60 ml-12 sm:ml-16 border-l-2 border-l-purple-500/50'
+                        ? 'bg-slate-50/90 dark:bg-[#0c0f12]/90 border-slate-200 dark:border-zinc-800/80 ml-6 sm:ml-8 border-l-2 border-l-sky-500'
+                        : 'bg-slate-50/60 dark:bg-[#0c0f12]/60 border-slate-200 dark:border-zinc-800/60 ml-12 sm:ml-16 border-l-2 border-l-purple-500'
                     }`}
                   >
                     {/* Item Information */}
@@ -732,7 +732,7 @@ function MenusContent() {
 
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-xs text-zinc-100 truncate">
+                          <span className="font-bold text-xs text-slate-900 dark:text-zinc-100 truncate">
                             {item.label}
                           </span>
 
@@ -741,24 +741,24 @@ function MenusContent() {
                             <span
                               className={`text-[9px] font-black uppercase px-1.5 py-0.2 rounded border ${
                                 item.badgeColor === 'rose'
-                                  ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                                  ? 'bg-rose-500/10 text-rose-500 dark:text-rose-400 border-rose-500/20'
                                   : item.badgeColor === 'amber'
-                                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
                                   : item.badgeColor === 'accent'
-                                  ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                                  : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                  ? 'bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 border-indigo-500/20'
+                                  : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                               }`}
                             >
                               {item.badgeText}
                             </span>
                           )}
 
-                          <span className="text-[10px] font-mono text-zinc-500 bg-zinc-800/50 px-1.5 py-0.5 rounded border border-zinc-800">
+                          <span className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 bg-slate-100 dark:bg-zinc-800/50 px-1.5 py-0.5 rounded border border-slate-200 dark:border-zinc-800">
                             {item.type}
                           </span>
                         </div>
 
-                        <div className="text-[11px] font-mono text-zinc-500 truncate max-w-xs sm:max-w-md mt-0.5">
+                        <div className="text-[11px] font-mono text-slate-500 dark:text-zinc-400 truncate max-w-xs sm:max-w-md mt-0.5">
                           {item.url}
                         </div>
                       </div>
@@ -771,7 +771,7 @@ function MenusContent() {
                         type="button"
                         onClick={() => handleMove(item.path, 'up')}
                         disabled={!canMoveUp}
-                        className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition disabled:opacity-20 cursor-pointer"
+                        className="p-1.5 rounded-lg text-slate-400 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition disabled:opacity-20 cursor-pointer"
                         title="Monter"
                       >
                         <ArrowUp className="w-3.5 h-3.5" />
@@ -782,7 +782,7 @@ function MenusContent() {
                         type="button"
                         onClick={() => handleMove(item.path, 'down')}
                         disabled={!canMoveDown}
-                        className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition disabled:opacity-20 cursor-pointer"
+                        className="p-1.5 rounded-lg text-slate-400 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition disabled:opacity-20 cursor-pointer"
                         title="Descendre"
                       >
                         <ArrowDown className="w-3.5 h-3.5" />
@@ -793,7 +793,7 @@ function MenusContent() {
                         type="button"
                         onClick={() => handleIndent(flatIdx)}
                         disabled={!canIndent}
-                        className="p-1.5 rounded-lg text-zinc-400 hover:text-sky-400 hover:bg-zinc-800 transition disabled:opacity-20 cursor-pointer"
+                        className="p-1.5 rounded-lg text-slate-400 dark:text-zinc-400 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-sky-50 dark:hover:bg-zinc-800 transition disabled:opacity-20 cursor-pointer"
                         title="Indenter (transformer en sous-élément)"
                       >
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -804,7 +804,7 @@ function MenusContent() {
                         type="button"
                         onClick={() => handleOutdent(item)}
                         disabled={!canOutdent}
-                        className="p-1.5 rounded-lg text-zinc-400 hover:text-purple-400 hover:bg-zinc-800 transition disabled:opacity-20 cursor-pointer"
+                        className="p-1.5 rounded-lg text-slate-400 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-zinc-800 transition disabled:opacity-20 cursor-pointer"
                         title="Désindenter (remonter d'un niveau)"
                       >
                         <ArrowLeft className="w-3.5 h-3.5" />
@@ -815,7 +815,7 @@ function MenusContent() {
                         <button
                           type="button"
                           onClick={() => handleAddChild(item.path)}
-                          className="p-1.5 rounded-lg text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition cursor-pointer"
+                          className="p-1.5 rounded-lg text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition cursor-pointer"
                           title="Ajouter un sous-élément"
                         >
                           <Plus className="w-3.5 h-3.5" />
@@ -826,7 +826,7 @@ function MenusContent() {
                       <button
                         type="button"
                         onClick={() => handleEdit(item)}
-                        className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
+                        className="p-1.5 rounded-lg text-slate-400 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition cursor-pointer"
                         title="Modifier"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
@@ -836,7 +836,7 @@ function MenusContent() {
                       <button
                         type="button"
                         onClick={() => handleDelete(item.path, item.label)}
-                        className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer"
+                        className="p-1.5 rounded-lg text-slate-400 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition cursor-pointer"
                         title="Supprimer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -851,19 +851,19 @@ function MenusContent() {
 
         {/* Right Column: Live Storefront Simulator */}
         <div className="xl:col-span-4 space-y-4">
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 shadow-sm space-y-3">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <h3 className="text-xs font-bold text-zinc-200 flex items-center gap-1.5">
-                <Eye className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="bg-white dark:bg-[#13171c] border border-slate-200 dark:border-zinc-800 rounded-2xl p-4 shadow-xs space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800 pb-3">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-200 flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>Simulateur Visuel (Thème Actif)</span>
               </h3>
 
-              <div className="flex items-center gap-1 bg-zinc-950 p-0.5 rounded-lg border border-zinc-800">
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-zinc-950 p-0.5 rounded-lg border border-slate-200 dark:border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setPreviewMode('desktop')}
                   className={`p-1 rounded text-xs transition cursor-pointer ${
-                    previewMode === 'desktop' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'
+                    previewMode === 'desktop' ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-2xs font-semibold' : 'text-slate-500 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-zinc-300'
                   }`}
                   title="Aperçu Desktop"
                 >
@@ -873,7 +873,7 @@ function MenusContent() {
                   type="button"
                   onClick={() => setPreviewMode('mobile')}
                   className={`p-1 rounded text-xs transition cursor-pointer ${
-                    previewMode === 'mobile' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'
+                    previewMode === 'mobile' ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-2xs font-semibold' : 'text-slate-500 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-zinc-300'
                   }`}
                   title="Aperçu Mobile"
                 >
@@ -885,7 +885,7 @@ function MenusContent() {
             {/* Desktop Simulator View */}
             {previewMode === 'desktop' ? (
               <div className="space-y-3">
-                <div className="text-[11px] text-zinc-400">
+                <div className="text-[11px] text-slate-500 dark:text-zinc-400">
                   Aperçu de la barre de navigation sur écran large :
                 </div>
 
@@ -944,7 +944,7 @@ function MenusContent() {
             ) : (
               /* Mobile Simulator View */
               <div className="space-y-3">
-                <div className="text-[11px] text-zinc-400">
+                <div className="text-[11px] text-slate-500 dark:text-zinc-400">
                   Aperçu du tiroir coulissant sur smartphone :
                 </div>
 
@@ -1009,13 +1009,13 @@ function MenusContent() {
           </div>
 
           {/* Quick Help Card */}
-          <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-2xl p-4 text-xs text-zinc-400 space-y-2">
-            <div className="font-bold text-zinc-200 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <div className="bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-2xl p-4 text-xs text-amber-900 dark:text-amber-200 space-y-2">
+            <div className="font-bold text-amber-950 dark:text-amber-200 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
               <span>Bonnes Pratiques E-commerce COD</span>
             </div>
-            <p className="text-[11px] leading-relaxed">
-              Pour maximiser votre taux de conversion, limitez le menu principal à <strong>4 à 6 éléments</strong> et mettez en avant vos collections phares ou promotions via un badge accrocheur (ex: <code className="text-rose-400">-30%</code> ou <code className="text-emerald-400">HOT</code>).
+            <p className="text-[11px] leading-relaxed text-amber-800 dark:text-amber-300/80">
+              Pour maximiser votre taux de conversion, limitez le menu principal à <strong>4 à 6 éléments</strong> et mettez en avant vos collections phares ou promotions via un badge accrocheur (ex: <code className="text-rose-600 dark:text-rose-400 font-bold bg-white/60 dark:bg-zinc-900/60 px-1 py-0.5 rounded border border-amber-200/60 dark:border-amber-900/40">-30%</code> ou <code className="text-emerald-600 dark:text-emerald-400 font-bold bg-white/60 dark:bg-zinc-900/60 px-1 py-0.5 rounded border border-amber-200/60 dark:border-amber-900/40">HOT</code>).
             </p>
           </div>
         </div>
@@ -1023,10 +1023,10 @@ function MenusContent() {
 
       {/* Item Modal (Add / Edit) */}
       {isModalOpen && editingItem && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-xl animate-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <h3 className="font-bold text-sm text-white">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-xl animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800 pb-3">
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white">
                 {editingItem.id
                   ? 'Modifier l\'élément de menu'
                   : editingItem.parentItemPath
@@ -1039,7 +1039,7 @@ function MenusContent() {
                   setIsModalOpen(false);
                   setEditingItem(null);
                 }}
-                className="text-zinc-400 hover:text-white text-xs font-semibold p-1"
+                className="text-slate-400 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-white text-xs font-semibold p-1 cursor-pointer"
               >
                 ✕
               </button>
@@ -1048,8 +1048,8 @@ function MenusContent() {
             <form onSubmit={handleModalSave} className="space-y-4">
               {/* Item Title / Label */}
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
-                  Titre / Libellé affiché <span className="text-rose-400">*</span>
+                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
+                  Titre / Libellé affiché <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -1057,13 +1057,13 @@ function MenusContent() {
                   value={editingItem.label}
                   onChange={(e) => setEditingItem({ ...editingItem, label: e.target.value })}
                   placeholder="Ex: Maroquinerie, Nouveautés, Promos..."
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
               {/* Link Destination Type */}
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
                   Type de destination
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
@@ -1082,8 +1082,8 @@ function MenusContent() {
                       onClick={() => handleLinkTypeChange(dest.id as MenuLinkType)}
                       className={`px-2 py-1.5 rounded-lg border text-center font-medium transition cursor-pointer ${
                         editingItem.type === dest.id
-                          ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
-                          : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:bg-zinc-800'
+                          ? 'bg-emerald-50 dark:bg-emerald-500/20 border-emerald-500 text-emerald-800 dark:text-emerald-300 font-bold'
+                          : 'bg-slate-50 dark:bg-zinc-950 border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800'
                       }`}
                     >
                       {dest.label}
@@ -1095,7 +1095,7 @@ function MenusContent() {
               {/* Dynamic Pickers based on Type */}
               {editingItem.type === 'category' && (
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
                     Choisir la catégorie
                   </label>
                   <select
@@ -1108,7 +1108,7 @@ function MenusContent() {
                         url: `/catalog?category=${selCat}`,
                       });
                     }}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
                   >
                     {categories.map((cat) => (
                       <option key={cat.id || cat.slug} value={cat.slug}>
@@ -1121,7 +1121,7 @@ function MenusContent() {
 
               {editingItem.type === 'product' && (
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
                     Choisir le produit
                   </label>
                   <select
@@ -1134,7 +1134,7 @@ function MenusContent() {
                         url: `/product/${selProd}`,
                       });
                     }}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
                   >
                     {products.map((prod) => (
                       <option key={prod.id} value={prod.sku || prod.id}>
@@ -1148,21 +1148,21 @@ function MenusContent() {
               {editingItem.type === 'page' && (
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-medium text-zinc-300">
+                    <label className="text-xs font-medium text-slate-700 dark:text-zinc-300">
                       Choisir la page ou politique
                     </label>
                     <Link
                       href={`/admin/pages?store=${storeSlug}`}
                       target="_blank"
-                      className="text-[11px] text-emerald-400 hover:underline flex items-center gap-1"
+                      className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 font-medium"
                     >
                       <span>Gérer les pages</span>
                       <ExternalLink className="w-2.5 h-2.5" />
                     </Link>
                   </div>
                   {storePages.length === 0 ? (
-                    <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-zinc-400">
-                      Aucune page enregistrée. Rendez-vous dans <Link href={`/admin/pages?store=${storeSlug}`} className="text-emerald-400 underline">Pages & Politiques</Link> pour en créer.
+                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs text-slate-500 dark:text-zinc-400">
+                      Aucune page enregistrée. Rendez-vous dans <Link href={`/admin/pages?store=${storeSlug}`} className="text-emerald-600 dark:text-emerald-400 underline font-medium">Pages & Politiques</Link> pour en créer.
                     </div>
                   ) : (
                     <select
@@ -1177,7 +1177,7 @@ function MenusContent() {
                           label: editingItem.label || found?.title || 'Page',
                         });
                       }}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
                     >
                       {storePages.map((pg) => (
                         <option key={pg.id || pg.slug} value={pg.slug}>
@@ -1191,7 +1191,7 @@ function MenusContent() {
 
               {/* Direct URL input */}
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
                   URL cible
                 </label>
                 <input
@@ -1200,14 +1200,14 @@ function MenusContent() {
                   value={editingItem.url}
                   onChange={(e) => setEditingItem({ ...editingItem, url: e.target.value })}
                   placeholder="/catalog ou https://..."
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white font-mono placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-mono placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
               {/* Micro Promo Badge */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
                     Badge promo (Optionnel)
                   </label>
                   <input
@@ -1215,18 +1215,18 @@ function MenusContent() {
                     value={editingItem.badgeText || ''}
                     onChange={(e) => setEditingItem({ ...editingItem, badgeText: e.target.value })}
                     placeholder="HOT, PROMO, -30%..."
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
                     Couleur du badge
                   </label>
                   <select
                     value={editingItem.badgeColor || 'primary'}
                     onChange={(e) => setEditingItem({ ...editingItem, badgeColor: e.target.value as any })}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
                   >
                     <option value="primary">Émeraude (Défaut)</option>
                     <option value="rose">Rose / Rouge (Urgence / Réduction)</option>
@@ -1243,22 +1243,22 @@ function MenusContent() {
                   id="isOpenNewTab"
                   checked={Boolean(editingItem.isOpenNewTab)}
                   onChange={(e) => setEditingItem({ ...editingItem, isOpenNewTab: e.target.checked })}
-                  className="rounded bg-zinc-950 border-zinc-800 text-emerald-500 focus:ring-emerald-500 h-4 w-4"
+                  className="rounded bg-slate-50 dark:bg-zinc-950 border-slate-300 dark:border-zinc-800 text-emerald-600 focus:ring-emerald-500 h-4 w-4"
                 />
-                <label htmlFor="isOpenNewTab" className="text-xs text-zinc-300 cursor-pointer">
+                <label htmlFor="isOpenNewTab" className="text-xs text-slate-700 dark:text-zinc-300 cursor-pointer">
                   Ouvrir le lien dans un nouvel onglet
                 </label>
               </div>
 
               {/* Modal Buttons */}
-              <div className="flex items-center justify-end gap-2 border-t border-zinc-800 pt-3">
+              <div className="flex items-center justify-end gap-2 border-t border-slate-200 dark:border-zinc-800 pt-3">
                 <button
                   type="button"
                   onClick={() => {
                     setIsModalOpen(false);
                     setEditingItem(null);
                   }}
-                  className="px-3 py-1.5 rounded-lg border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white text-xs font-semibold transition cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white text-xs font-semibold transition cursor-pointer"
                 >
                   Annuler
                 </button>

@@ -330,7 +330,7 @@ export default function StorefrontCustomPage() {
           </div>
         </div>
 
-        {/* Moroccan Parcel Inspection Guarantee Banner (Special Callout on Shipping/Return/CGV) */}
+        {/* Universal Cash-on-Delivery Parcel Inspection Guarantee Banner */}
         {['shipping', 'returns', 'terms'].includes(page.policyType) && (
           <div
             className="rounded-2xl border p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs"
@@ -340,15 +340,15 @@ export default function StorefrontCustomPage() {
             }}
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-                  <span>Garantie Sérénité Maroc : Ouvrez et vérifiez votre colis</span>
-                  <span className="text-[11px] font-normal text-emerald-400 font-arabic">عاين سلعتك قبل ما تخلص</span>
+                <h3 className="text-xs sm:text-sm font-bold flex items-center gap-2 flex-wrap" style={{ color: 'var(--theme-text-primary)' }}>
+                  <span>Garantie Sérénité COD : Ouvrez et vérifiez votre colis avant de payer</span>
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 font-arabic">عاين سلعتك وتأكد من الجودة قبل الدفع</span>
                 </h3>
-                <p className="text-[11px] text-zinc-300 mt-0.5">
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>
                   Paiement 100% à la livraison (Cash on Delivery). Vous ne réglez le livreur qu’après avoir vérifié la conformité de vos articles.
                 </p>
               </div>
@@ -367,7 +367,7 @@ export default function StorefrontCustomPage() {
             borderColor: 'var(--theme-border)',
           }}
         >
-          <div className="prose prose-invert max-w-none">
+          <div className="space-y-1 max-w-none">
             {renderFormattedContent(page.content)}
           </div>
         </div>
