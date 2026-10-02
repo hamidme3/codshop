@@ -33,6 +33,7 @@ import { MOCK_PRODUCTS, checkMockProductStock, decrementMockProductStock } from 
 import { 
   getStoreBySlug as getMockStoreBySlug, 
   updateStoreSections as updateMockStoreSections, 
+  createStore as createMockStore,
   SectionInstance 
 } from './stores';
 import { getThemeById } from './themes';
@@ -168,8 +169,15 @@ export async function createStore(data: {
   trialDate.setDate(trialDate.getDate() + 14);
 
   if (!db) {
+    const mockStore = createMockStore({
+      name: data.name,
+      slug: data.slug,
+      whatsapp: data.phone,
+      city: 'Casablanca',
+      niche: 'general',
+    });
     return {
-      id: `store_${Date.now()}`,
+      id: mockStore.id,
       slug: data.slug,
       name: data.name,
       email: data.email,
@@ -2054,7 +2062,17 @@ interface ActiveVisitorSession {
   inCheckout?: boolean;
 }
 
+interface MemoryAnalyticsEvent {
+  id: string;
+  storeSlug: string;
+  eventName: string;
+  distinctId: string;
+  properties: Record<string, any>;
+  createdAt: Date;
+}
+
 const memoryVisitorSessions = new Map<string, ActiveVisitorSession>();
+const memoryAnalyticsEvents: MemoryAnalyticsEvent[] = [];
 
 export async function recordAnalyticsEvent(data: {
   storeSlug: string;
@@ -2077,7 +2095,24 @@ export async function recordAnalyticsEvent(data: {
   });
 
   const db = getDb();
-  if (!db) return null;
+  if (!db) {
+    if (data.eventName === 'order_completed' && data.properties?.orderId) {
+      const existing = memoryAnalyticsEvents.find(
+        (e) => e.storeSlug === cleanStore && e.eventName === 'order_completed' && e.properties?.orderId === data.properties?.orderId
+      );
+      if (existing) return existing;
+    }
+    const memoryEvent: MemoryAnalyticsEvent = {
+      id: `evt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      storeSlug: cleanStore,
+      eventName: data.eventName,
+      distinctId,
+      properties: data.properties || {},
+      createdAt: new Date(),
+    };
+    memoryAnalyticsEvents.push(memoryEvent);
+    return memoryEvent;
+  }
 
   try {
     const store = await getStoreBySlug(data.storeSlug);
@@ -2205,69 +2240,51 @@ export async function getLiveVisitorsFromDb(storeSlug: string): Promise<{ liveVi
 export const getLiveVisitors = getLiveVisitorsFromDb;
 
 export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
-  const db = getDb();
+  try {
+    const cleanStore = (storeSlug || '').toLowerCase().trim();
+    const db = getDb();
+
+    let events: { eventName: string; distinctId: string; properties: any; createdAt: Date }[] = [];
+    let storeOrders: any[] = [];
+
+  const now = new Date();
+  const fifteenMinutesAgo = new Date(now.getTime() - 15 * 60 * 1000);
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
   if (!db) {
-    const livePresence = await getLiveVisitorsFromDb(storeSlug);
-    return {
-      hasData: true,
-      live: {
-        activeNow: livePresence.liveVisitors,
-        inCheckout: livePresence.inCheckout,
-        activeProducts: [],
-      },
-      funnel: {
-        visitors: livePresence.liveVisitors,
-        catalogViews: 0,
-        productViews: 0,
-        initiatedCheckout: livePresence.inCheckout,
-        checkoutStep2: livePresence.inCheckout,
-        ordersCompleted: 0,
-        overallConversionRate: 0,
-      },
-      abandonment: {
-        totalAbandoned: 0,
-        step1Abandoned: 0,
-        step2Abandoned: 0,
-        recoverableLeads: 0,
-        recoveryRate: 0,
-      },
-      searches: [],
-      products: [],
-      channels: { webOrders: 0, webPercentage: 100, whatsappRescues: 0, whatsappPercentage: 0 },
-      source: 'memory_fallback',
-    };
+    events = memoryAnalyticsEvents.filter((e) => e.storeSlug === cleanStore && e.createdAt >= thirtyDaysAgo);
+    storeOrders = (await getOrders(cleanStore)) || [];
+  } else {
+    try {
+      const store = await getStoreBySlug(cleanStore);
+      if (!store || !('id' in store)) return null;
+
+      // 1. Fetch events from last 30 days
+      events = (await db.query.analyticsEvents.findMany({
+        where: and(
+          eq(schema.analyticsEvents.storeId, store.id),
+          gte(schema.analyticsEvents.createdAt, thirtyDaysAgo)
+        ),
+        orderBy: [desc(schema.analyticsEvents.createdAt)],
+        limit: 10000,
+      })) as any[];
+
+      // 2. Fetch real orders from last 30 days
+      storeOrders = await db.query.orders.findMany({
+        where: and(
+          eq(schema.orders.storeId, store.id),
+          gte(schema.orders.createdAt, thirtyDaysAgo)
+        ),
+        orderBy: [desc(schema.orders.createdAt)],
+      });
+    } catch (err) {
+      console.warn('[DbRepo] Error fetching analytics from DB:', err);
+      return null;
+    }
   }
 
-  try {
-    const store = await getStoreBySlug(storeSlug);
-    if (!store || !('id' in store)) return null;
-
-    const now = new Date();
-    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
-    const fifteenMinutesAgo = new Date(now.getTime() - 15 * 60 * 1000);
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-    // 1. Fetch events from last 30 days
-    const events = await db.query.analyticsEvents.findMany({
-      where: and(
-        eq(schema.analyticsEvents.storeId, store.id),
-        gte(schema.analyticsEvents.createdAt, thirtyDaysAgo)
-      ),
-      orderBy: [desc(schema.analyticsEvents.createdAt)],
-      limit: 10000,
-    });
-
-    // 2. Fetch real orders from last 30 days
-    const storeOrders = await db.query.orders.findMany({
-      where: and(
-        eq(schema.orders.storeId, store.id),
-        gte(schema.orders.createdAt, thirtyDaysAgo)
-      ),
-      orderBy: [desc(schema.orders.createdAt)],
-    });
-
-    const activeOrders = storeOrders.filter((o) => o.status !== 'abandoned');
-    const abandonedOrdersList = storeOrders.filter((o) => o.status === 'abandoned');
+  const activeOrders = storeOrders.filter((o) => o.status !== 'abandoned');
+  const abandonedOrdersList = storeOrders.filter((o) => o.status === 'abandoned');
 
     // If no events and not ottavio, return authentic zero metrics for fresh stores
     if (events.length === 0 && storeOrders.length === 0 && storeSlug !== 'ottavio') {
@@ -2414,12 +2431,14 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
 
     // 8. Products Breakdown (Performance de l'Offre)
     let dbStoreProducts: any[] = [];
-    try {
-      dbStoreProducts = await db.query.products.findMany({
-        where: eq(schema.products.storeId, store.id),
-      });
-    } catch (prodErr) {
-      console.warn('[DbRepo] Non-fatal product fetch warning:', prodErr);
+    if (db && store) {
+      try {
+        dbStoreProducts = await db.query.products.findMany({
+          where: eq(schema.products.storeId, store.id),
+        });
+      } catch (prodErr) {
+        console.warn('[DbRepo] Non-fatal product fetch warning:', prodErr);
+      }
     }
     const memStoreProducts = getMockProducts(storeSlug);
     const combinedProductsMap = new Map<string, any>();
