@@ -2431,14 +2431,16 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
 
     // 8. Products Breakdown (Performance de l'Offre)
     let dbStoreProducts: any[] = [];
-    if (db && store) {
-      try {
+    // Re-fetch store (if db available) for product mapping, or skip if not
+    try {
+      const productStore = await getStoreBySlug(storeSlug);
+      if (db && productStore && 'id' in productStore) {
         dbStoreProducts = await db.query.products.findMany({
-          where: eq(schema.products.storeId, store.id),
+          where: eq(schema.products.storeId, (productStore as any).id),
         });
-      } catch (prodErr) {
-        console.warn('[DbRepo] Non-fatal product fetch warning:', prodErr);
       }
+    } catch (prodErr) {
+      console.warn('[DbRepo] Non-fatal product fetch warning:', prodErr);
     }
     const memStoreProducts = getMockProducts(storeSlug);
     const combinedProductsMap = new Map<string, any>();
