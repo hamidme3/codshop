@@ -63,6 +63,8 @@ interface CodCheckoutModalProps {
   initialCity?: string;
   isWaybill?: boolean; // override from parent (optional)
   emailMode?: 'hidden' | 'optional_collapsed' | 'optional_visible' | 'required';
+  cartItems?: any[];
+  cartSubtotal?: number;
 }
 
 function getAbVariant(): boolean {
@@ -85,6 +87,8 @@ export function CodCheckoutModal({
   initialCity,
   isWaybill: waybillOverride,
   emailMode: initialEmailMode,
+  cartItems,
+  cartSubtotal,
 }: CodCheckoutModalProps) {
   const router = useRouter();
   const { theme, formatMAD, lang, shippingSettings } = useTheme();
@@ -152,7 +156,7 @@ export function CodCheckoutModal({
   const [isWaybill, setIsWaybill] = useState(false);
 
   // Multi-step state: Step 1 (Offre & Options) -> Step 2 (Coordonnées & Livraison)
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2>(cartItems && cartItems.length > 0 ? 2 : 1);
 
   // Reset scroll to top of form when step changes
   useEffect(() => {
@@ -321,7 +325,36 @@ export function CodCheckoutModal({
   // COD Upsell Economics: Pack Duo (2+ units) gets Free Shipping!
   const isFreeShipping = selectedTier.quantity >= 2 || selectedTier.freeDelivery || deliveryEstimate.isFree;
   const effectiveShippingFee = isFreeShipping ? 0 : deliveryEstimate.shippingFee;
-  const finalTotal = selectedTier.totalPrice + effectiveShippingFee;
+  const effectiveSubtotal = cartItems && cartSubtotal !== undefined ? cartSubtotal : selectedTier.totalPrice;
+  const finalTotal = effectiveSubtotal + effectiveShippingFee;
+
+  const resolvedItems = cartItems && cartItems.length > 0
+    ? cartItems.map(it => ({
+        id: it.productId || it.id,
+        productId: it.productId,
+        slug: it.slug,
+        title: it.title,
+        quantity: it.quantity,
+        price: it.price,
+        variant: it.variant,
+        sku: it.sku,
+        color: it.color,
+        size: it.size,
+        freeDelivery: Boolean(it.freeDelivery || isFreeShipping),
+      }))
+    : [
+        {
+          id: product?.id || 'cart',
+          title: product?.title || 'Panier',
+          quantity: selectedTier.quantity,
+          price: selectedTier.unitPrice,
+          variant: selectedVariant || undefined,
+          sku: selectedSku || undefined,
+          color: selectedColor || undefined,
+          size: selectedSize || undefined,
+          freeDelivery: Boolean(selectedTier.freeDelivery || isFreeShipping),
+        },
+      ];
 
   const handleClose = () => {
     if (!isOrderSubmitted) {
@@ -352,16 +385,9 @@ export function CodCheckoutModal({
               address: address.trim() || 'Coordonnées incomplètes',
               countryCode: effectiveCountryCode,
               total: finalTotal,
-              subtotal: selectedTier.totalPrice,
+              subtotal: effectiveSubtotal,
               shippingFee: effectiveShippingFee,
-              items: [{
-                id: product.id,
-                title: product.title,
-                quantity: selectedTier.quantity,
-                price: selectedTier.unitPrice,
-                variant: selectedVariant || undefined,
-                sku: selectedSku || undefined,
-              }],
+              items: resolvedItems,
               source: 'web',
             }),
           }).catch(() => {});
@@ -462,24 +488,12 @@ export function CodCheckoutModal({
           size: selectedSize,
           freeDelivery: Boolean(selectedTier.freeDelivery || isFreeShipping),
         },
-        items: [
-          {
-            id: product.id,
-            title: product.title,
-            quantity: selectedTier.quantity,
-            price: selectedTier.unitPrice,
-            variant: selectedVariant,
-            sku: selectedSku,
-            color: selectedColor,
-            size: selectedSize,
-            freeDelivery: Boolean(selectedTier.freeDelivery || isFreeShipping),
-          },
-        ],
+        items: resolvedItems,
         storeSlug: effectiveStoreSlug,
         store: effectiveStoreSlug,
         quantity: selectedTier.quantity,
         unitPrice: selectedTier.unitPrice,
-        subtotal: selectedTier.totalPrice,
+        subtotal: effectiveSubtotal,
         shippingFee: effectiveShippingFee,
         total: finalTotal,
         freeDelivery: Boolean(selectedTier.freeDelivery || isFreeShipping),
@@ -568,21 +582,10 @@ export function CodCheckoutModal({
             color: selectedColor,
             size: selectedSize,
           },
-          items: [
-            {
-              id: product.id,
-              title: product.title,
-              quantity: selectedTier.quantity,
-              price: selectedTier.unitPrice,
-              variant: selectedVariant,
-              sku: selectedSku,
-              color: selectedColor,
-              size: selectedSize,
-            },
-          ],
+          items: resolvedItems,
           quantity: selectedTier.quantity,
           unitPrice: selectedTier.unitPrice,
-          subtotal: selectedTier.totalPrice,
+          subtotal: effectiveSubtotal,
           shippingFee: effectiveShippingFee,
           total: finalTotal,
           abVariant: isWaybill ? 'waybill' : 'control',

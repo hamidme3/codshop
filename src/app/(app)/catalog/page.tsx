@@ -35,8 +35,10 @@ export default function CatalogPage() {
   const [isSubdomain, setIsSubdomain] = useState(false);
   const [currentStoreSlug, setCurrentStoreSlug] = useState<string>('ottavio');
   const [storeProducts, setStoreProducts] = useState<any[]>([]);
+  const [mounted, setMounted] = useState(false);
 
   React.useEffect(() => {
+    setMounted(true);
     if (typeof window !== 'undefined') {
       const host = window.location.hostname.toLowerCase();
       const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
@@ -226,7 +228,7 @@ export default function CatalogPage() {
       >
         <div className="max-w-7xl mx-auto space-y-3">
           {/* SaaS Platform Demo Catalog Banner (when visited on root domain) */}
-          {!isSubdomain && (
+          {mounted && !isSubdomain && (
             <div className="p-3.5 sm:p-4 rounded-2xl bg-zinc-900/90 border border-emerald-500/30 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs mb-3">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold shrink-0">

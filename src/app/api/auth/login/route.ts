@@ -90,8 +90,10 @@ export async function POST(request: Request) {
     });
 
     // Record session audit log
-    const forwardedFor = request.headers.get('x-forwarded-for') || '196.200.150.12';
-    const ipAddress = forwardedFor.split(',')[0].trim();
+    const ipAddress = request.headers.get('cf-connecting-ip') || 
+                      request.headers.get('x-real-ip') || 
+                      request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
+                      '196.200.150.12';
     const userAgent = request.headers.get('user-agent') || 'Mozilla/5.0';
 
     await recordUserSession({

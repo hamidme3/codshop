@@ -136,8 +136,10 @@ export async function POST(req: Request) {
 
     // 4. CGNAT-Safe Composite Rate Limiting (Skip for abandoned background captures)
     if (!isAbandoned) {
-      const forwarded = req.headers.get('x-forwarded-for') || '';
-      const clientIp = forwarded.split(',')[0].trim() || '127.0.0.1';
+      const clientIp = req.headers.get('cf-connecting-ip') || 
+                       req.headers.get('x-real-ip') || 
+                       req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
+                       '127.0.0.1';
       const rateCheck = checkOrderRateLimit(clientIp, phone);
       if (!rateCheck.allowed) {
         return NextResponse.json(

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CODShop Architecture Map</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #09090b; /* Obsidian background */
+            color: #fff;
+        }
+        #mynetwork {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        #header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(24, 24, 27, 0.9);
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 1px solid #27272a;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+        h1 { margin: 0 0 5px 0; font-size: 1.2rem; color: #f4f4f5; }
+        p { margin: 0; font-size: 0.85rem; color: #a1a1aa; }
+    </style>
+</head>
+<body>
+
+<div id="header">
+    <h1>CODShop Project Relations</h1>
+    <p>Interactive Map • Scroll to zoom • Drag to move</p>
+</div>
+
+<div id="mynetwork"></div>
+
+<script type="text/javascript">
+    // Define the nodes representing project components
+    var nodes = new vis.DataSet([
+        // Frontend Layer
+        { id: 1, label: 'Storefront UI\n(src/app/(app)/catalog)', group: 'frontend', shape: 'box' },
+        { id: 2, label: 'Admin Dashboard UI\n(src/app/(app)/admin)', group: 'frontend', shape: 'box' },
+        
+        // Edge / Routing
+        { id: 3, label: 'Next.js Middleware\n(src/middleware.ts)\nAuth & Tenant Routing', group: 'edge', shape: 'ellipse' },
+        
+        // Backend API
+        { id: 4, label: 'Backend API Routes\n(src/app/api)', group: 'backend', shape: 'box' },
+        
+        // CMS Layer
+        { id: 5, label: 'Payload CMS Core\n(src/payload.config.ts)', group: 'cms', shape: 'box' },
+        { id: 6, label: 'Payload Admin UI\n(src/app/(payload))', group: 'cms', shape: 'box' },
+        
+        // Data Access Layer
+        { id: 7, label: 'Data Repository\n(src/lib/db-repository.ts)', group: 'data', shape: 'database' },
+        { id: 11, label: 'Payload Products Adapter\n(src/lib/payload-products.ts)', group: 'data', shape: 'box' },
+        { id: 12, label: 'PostgreSQL Pool (Drizzle)\n(src/db/index.ts)', group: 'data', shape: 'database' },
+
+        // Database
+        { id: 8, label: 'PostgreSQL Database', group: 'db', shape: 'database' },
+        
+        // Mock System
+        { id: 9, label: 'Mock Fallback Engine\n(src/lib/mocks.ts)', group: 'mocks', shape: 'box' },
+        
+        // External
+        { id: 10, label: 'External Integrations\n(WhatsApp, Pixel, PostHog)', group: 'external', shape: 'ellipse' }
+    ]);
+
+    // Define the edges (relationships/dependencies)
+    var edges = new vis.DataSet([
+        // UI talks to Middleware & API
+        { from: 1, to: 3, label: 'routes via', arrows: 'to', dashes: true },
+        { from: 2, to: 3, label: 'routes via', arrows: 'to', dashes: true },
+        { from: 1, to: 4, label: 'fetches data', arrows: 'to' },
+        { from: 2, to: 4, label: 'mutates/fetches', arrows: 'to' },
+        
+        // Middleware guards API
+        { from: 3, to: 4, label: 'protects/enriches', arrows: 'to' },
+        
+        // API talks to Repositories
+        { from: 4, to: 7, label: 'reads/writes', arrows: 'to' },
+        
+        // Repositories talk to DB and CMS
+        { from: 7, to: 12, label: 'SQL queries', arrows: 'to' },
+        { from: 7, to: 11, label: 'delegates products to', arrows: 'to' },
+        { from: 7, to: 9, label: 'fallbacks to (Dev/Test)', arrows: 'to', dashes: true },
+        
+        // CMS Connections
+        { from: 11, to: 5, label: 'local API calls', arrows: 'to' },
+        { from: 6, to: 5, label: 'manages', arrows: 'to' },
+        { from: 5, to: 8, label: 'stores data', arrows: 'to' },
+        
+        // Drizzle Connection
+        { from: 12, to: 8, label: 'stores data', arrows: 'to' },
+        
+        // UI to External
+        { from: 1, to: 10, label: 'dispatches events', arrows: 'to', dashes: true }
+    ]);
+
+    var container = document.getElementById('mynetwork');
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+    
+    var options = {
+        nodes: {
+            font: { color: '#ffffff', size: 14, face: 'Inter' },
+            borderWidth: 2,
+            shadow: true
+        },
+        edges: {
+            color: { color: '#71717a', highlight: '#3b82f6', hover: '#3b82f6' },
+            font: { color: '#a1a1aa', size: 11, align: 'middle' },
+            smooth: { type: 'cubicBezier', forceDirection: 'vertical', roundness: 0.4 }
+        },
+        groups: {
+            frontend: { color: { background: '#2563eb', border: '#1d4ed8' } },
+            backend: { color: { background: '#059669', border: '#047857' } },
+            edge: { color: { background: '#9333ea', border: '#7e22ce' } },
+            data: { color: { background: '#ea580c', border: '#c2410c' } },
+            cms: { color: { background: '#db2777', border: '#be185d' } },
+            db: { color: { background: '#0284c7', border: '#0369a1' } },
+            mocks: { color: { background: '#52525b', border: '#3f3f46' } },
+            external: { color: { background: '#14b8a6', border: '#0f766e' } }
+        },
+        layout: {
+            hierarchical: {
+                direction: 'UD',
+                sortMethod: 'directed',
+                nodeSpacing: 250,
+                levelSeparation: 150
+            }
+        },
+        physics: {
+            hierarchicalRepulsion: { nodeDistance: 200 }
+        }
+    };
+
+    var network = new vis.Network(container, data, options);
+</script>
+
+</body>
+</html>

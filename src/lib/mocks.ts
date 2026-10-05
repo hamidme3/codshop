@@ -581,7 +581,7 @@ export function updateOrderStatus(orderId: string, status: Order['status'], trac
   syncCustomersFromOrders(order.storeSlug);
 
   // Broadcast real-time update event to CRM and active browser tabs
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
     window.dispatchEvent(new CustomEvent('cod_orders_updated', { detail: { orderId, status } }));
     try {
       const bc = new BroadcastChannel('cod_pipeline_sync');
@@ -837,7 +837,7 @@ export function deleteOrder(orderId: string, storeSlug: string = 'ottavio'): boo
   ORDERS.splice(index, 1);
   syncCustomersFromOrders(order.storeSlug || storeSlug);
 
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
     window.dispatchEvent(new CustomEvent('cod_orders_updated', { detail: { orderId, action: 'deleted' } }));
   }
 

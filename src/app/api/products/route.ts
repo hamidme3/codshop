@@ -44,9 +44,9 @@ export async function GET(req: Request) {
       // Check if product exists in this store in draft mode
       const draftMatch = combined.find(
         (p) =>
-          p.sku?.toLowerCase() === slugQuery ||
-          p.id?.toLowerCase() === slugQuery ||
-          p.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slugQuery
+          String(p.sku || '').toLowerCase() === slugQuery ||
+          String(p.id || '').toLowerCase() === slugQuery ||
+          String(p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') === slugQuery
       );
 
       if (draftMatch && draftMatch.status === 'draft' && !isPreview) {
@@ -59,10 +59,10 @@ export async function GET(req: Request) {
       // 1. Check current store published products (or draft if preview)
       let match = (isPreview ? combined.map((p) => convertDbProductToStorefrontProduct(p)) : storefrontProducts).find(
         (p) =>
-          p.slug.toLowerCase() === slugQuery ||
-          p.sku.toLowerCase() === slugQuery ||
-          p.id.toLowerCase() === slugQuery ||
-          p.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slugQuery
+          String(p.slug || '').toLowerCase() === slugQuery ||
+          String(p.sku || '').toLowerCase() === slugQuery ||
+          String(p.id || '').toLowerCase() === slugQuery ||
+          String(p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') === slugQuery
       );
 
       // 2. If not found in current store, check DB directly by slug/sku across all stores

@@ -29,6 +29,7 @@ import {
   getCityShipping,
 } from '@/lib/moroccanCities';
 import { getCountryConfig, validateCountryPhone, getCountryCityShipping } from '@/lib/geo';
+import { CodCheckoutModal } from './CodCheckoutModal';
 
 export function CartDrawer() {
   const router = useRouter();
@@ -44,22 +45,13 @@ export function CartDrawer() {
   } = useCart();
   const { theme, formatPrice, countryCode, shippingSettings } = useTheme();
 
-  const [mode, setMode] = useState<'cart' | 'checkout'>('cart');
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [customerCity, setCustomerCity] = useState(POPULAR_CITIES[0]);
-  const [customerAddress, setCustomerAddress] = useState('');
-  const deliveryType = 'home' as const;
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const countryConfig = useMemo(() => getCountryConfig(countryCode || 'MA'), [countryCode]);
 
-  // Reset to cart view when drawer closes
+  // Reset modal when drawer closes
   useEffect(() => {
     if (!isDrawerOpen) {
-      setMode('cart');
-      setFormError(null);
+      setIsCheckoutModalOpen(false);
     }
   }, [isDrawerOpen]);
 
@@ -94,120 +86,13 @@ export function CartDrawer() {
   const shippingFee = useMemo(() => {
     if (isFreeShipping) return 0;
     if (countryCode && countryCode !== 'MA') {
-      return getCountryCityShipping(countryCode, customerCity, subtotal).fee;
+      return getCountryCityShipping(countryCode, POPULAR_CITIES[0], subtotal).fee;
     }
-    return getCityShipping(customerCity, subtotal, shippingSettings).fee;
-  }, [isFreeShipping, countryCode, customerCity, subtotal, shippingSettings]);
+    return getCityShipping(POPULAR_CITIES[0], subtotal, shippingSettings).fee;
+  }, [isFreeShipping, countryCode, subtotal, shippingSettings]);
 
   const grandTotal = subtotal + shippingFee;
   const progressToFree = Math.min(100, Math.round((subtotal / freeThreshold) * 100));
-
-  const handleCheckoutSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
-
-    // 1. Validation
-    if (!customerName.trim() || customerName.trim().length < 2) {
-      setFormError('Veuillez entrer votre nom complet.');
-      return;
-    }
-
-    const phoneCheck =
-      countryCode === 'MA'
-        ? validateMoroccanPhone(customerPhone)
-        : validateCountryPhone(customerPhone, countryCode);
-
-    if (!phoneCheck.isValid) {
-      setFormError(
-        (phoneCheck as any).error ||
-          `Numéro de téléphone invalide (${countryCode}). Ex: 0612345678`
-      );
-      return;
-    }
-
-    if (!customerAddress.trim() || customerAddress.trim().length < 5) {
-      setFormError('Veuillez préciser votre adresse de livraison.');
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    let effectiveStoreSlug = 'ottavio';
-    if (typeof window !== 'undefined') {
-      const sp = new URLSearchParams(window.location.search);
-      const urlStore = sp.get('store');
-      if (urlStore) {
-        effectiveStoreSlug = urlStore;
-      } else {
-        const host = window.location.hostname.toLowerCase();
-        const root = 'codshop.vipone.site';
-        if (host.endsWith(root) && host !== root && host !== `www.${root}`) {
-          effectiveStoreSlug = host.replace(`.${root}`, '');
-        }
-      }
-    }
-
-    try {
-      const response = await fetch('/api/order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          storeSlug: effectiveStoreSlug,
-          customerName: customerName.trim(),
-          customerPhone: (phoneCheck as any).cleanPhone || customerPhone.trim(),
-          customerCity,
-          customerAddress: customerAddress.trim(),
-          deliveryType: 'home',
-          countryCode: countryCode || 'MA',
-          subtotal,
-          shippingFee,
-          total: grandTotal,
-          freeDelivery: isFreeShipping,
-          items: items.map((it) => ({
-            id: it.productId,
-            productId: it.productId,
-            slug: it.slug,
-            title: it.title,
-            quantity: it.quantity,
-            price: it.price,
-            variant: it.variant,
-            color: it.color,
-            size: it.size,
-            sku: it.sku,
-            freeDelivery: Boolean(it.freeDelivery || isFreeShipping),
-          })),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Échec de validation de la commande.');
-      }
-
-      const orderRef = data.order?.orderNumber || data.orderId || `CMD-${Math.floor(1000 + Math.random() * 9000)}`;
-
-      // Track order completion in PostHog analytics
-      trackOrderCompleted(effectiveStoreSlug, {
-        orderId: orderRef,
-        total: grandTotal,
-        city: customerCity,
-        deliveryType: 'home',
-        productId: items[0]?.productId,
-      });
-
-      // Clear cart on successful order
-      clearCart();
-      closeCart();
-
-      // Navigate to order confirmation
-      router.push(`/order-success/${orderRef}?total=${grandTotal}&city=${encodeURIComponent(customerCity)}`);
-    } catch (err: any) {
-      setFormError(err.message || 'Une erreur est survenue lors de la commande.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   if (!isDrawerOpen) return null;
 
@@ -233,22 +118,12 @@ export function CartDrawer() {
           style={{ borderColor: 'var(--theme-border)' }}
         >
           <div className="flex items-center gap-2.5">
-            {mode === 'checkout' && (
-              <button
-                type="button"
-                onClick={() => setMode('cart')}
-                className="p-1.5 rounded-lg hover:bg-zinc-100 transition mr-1"
-                aria-label="Retour au panier"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-            )}
             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold" style={{ backgroundColor: theme.colors.primary }}>
               <ShoppingBag className="w-4 h-4" />
             </div>
             <div>
               <h2 className="font-black text-sm tracking-tight">
-                {mode === 'cart' ? 'Mon Panier' : 'Paiement à la Livraison'}
+                Mon Panier
               </h2>
               <p className="text-[11px] text-zinc-500 font-medium">
                 {totalCount} {totalCount > 1 ? 'articles' : 'article'} • {countryConfig.inspectionBadge.fr}
@@ -314,7 +189,7 @@ export function CartDrawer() {
                 <ArrowRight className="w-3.5 h-3.5" />
               </a>
             </div>
-          ) : mode === 'cart' ? (
+          ) : (
             /* Mode 1: Cart Items List */
             <div className="space-y-3">
               {items.map((item) => (
@@ -401,133 +276,11 @@ export function CartDrawer() {
                 </div>
               </div>
             </div>
-          ) : (
-            /* Mode 2: In-Drawer Multi-Item COD Checkout Form */
-            <form onSubmit={handleCheckoutSubmit} className="space-y-4">
-              {formError && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span>{formError}</span>
-                </div>
-              )}
-
-              {/* Name */}
-              <div className="space-y-1">
-                <label className="block text-xs font-bold text-zinc-800">Nom & Prénom *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: Yasmine Berrada"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full px-3 py-2.5 text-xs border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:outline-none bg-white text-zinc-900"
-                />
-              </div>
-
-              {/* Phone */}
-              <div className="space-y-1">
-                <label className="block text-xs font-bold text-zinc-800">
-                  Numéro de Téléphone (WhatsApp / Appel) *
-                </label>
-                <div className="relative">
-                  <input
-                    type="tel"
-                    required
-                    placeholder={countryCode === 'MA' ? '06 12 34 56 78' : countryConfig.phone.placeholder}
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="w-full px-3 py-2.5 text-xs border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:outline-none bg-white text-zinc-900"
-                  />
-                  <span className="absolute right-3 top-2.5 text-[11px] font-bold text-zinc-400">
-                    {countryConfig.phone.flag}
-                  </span>
-                </div>
-                <p className="text-[10px] text-zinc-500">
-                  Notre livreur vous appellera pour confirmer l'heure de passage.
-                </p>
-              </div>
-
-              {/* City Selection */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-zinc-800">Ville de Réception *</label>
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  {(countryCode === 'MA' ? POPULAR_CITIES : countryConfig.popularCities.slice(0, 6)).map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => setCustomerCity(c)}
-                      className={`px-2.5 py-1 text-[11px] font-bold rounded-lg border transition ${
-                        customerCity.toLowerCase() === c.toLowerCase()
-                          ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
-                          : 'bg-white text-zinc-700 border-zinc-200 hover:border-zinc-400'
-                      }`}
-                    >
-                      {c}
-                    </button>
-                  ))}
-                </div>
-                <select
-                  value={customerCity}
-                  onChange={(e) => setCustomerCity(e.target.value)}
-                  className="w-full px-3 py-2.5 text-xs border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:outline-none bg-white text-zinc-900"
-                >
-                  {countryCode === 'MA'
-                    ? MOROCCAN_CITIES.map((c) => (
-                        <option key={c.id} value={c.name}>
-                          {c.name} ({c.nameAr}) • {c.deliverySla}
-                        </option>
-                      ))
-                    : countryConfig.popularCities.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                </select>
-              </div>
-
-              {/* Address */}
-              <div className="space-y-1">
-                <label className="block text-xs font-bold text-zinc-800">Adresse de Livraison *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Quartier, Rue, N° d'immeuble ou maison"
-                  value={customerAddress}
-                  onChange={(e) => setCustomerAddress(e.target.value)}
-                  className="w-full px-3 py-2.5 text-xs border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:outline-none bg-white text-zinc-900"
-                />
-              </div>
-
-              {/* Hidden anti-bot honeypot */}
-              <input type="text" name="_hp" className="hidden" tabIndex={-1} autoComplete="off" />
-
-              {/* Confirmation CTA button */}
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full py-3.5 px-4 rounded-xl text-white font-black text-sm shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                  style={{ backgroundColor: theme.colors.primary }}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Validation en cours...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Confirmer la Commande ({formatPrice(grandTotal)})</span>
-                      <CheckCircle2 className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
           )}
         </div>
 
         {/* Bottom Drawer Footer: Subtotal & Action Bar */}
-        {items.length > 0 && mode === 'cart' && (
+        {items.length > 0 && (
           <div
             className="p-5 border-t bg-zinc-50/90 shrink-0 space-y-3"
             style={{ borderColor: 'var(--theme-border)' }}
@@ -560,7 +313,7 @@ export function CartDrawer() {
 
             <button
               type="button"
-              onClick={() => setMode('checkout')}
+              onClick={() => setIsCheckoutModalOpen(true)}
               className="w-full py-3.5 px-4 rounded-xl text-white font-black text-sm shadow-lg hover:shadow-xl active:scale-[0.99] transition flex items-center justify-center gap-2 cursor-pointer"
               style={{ backgroundColor: theme.colors.primary }}
             >
@@ -582,6 +335,25 @@ export function CartDrawer() {
           </div>
         )}
       </div>
+
+      {isCheckoutModalOpen && (
+        <CodCheckoutModal
+          isOpen={isCheckoutModalOpen}
+          onClose={() => setIsCheckoutModalOpen(false)}
+          product={{ 
+            id: 'cart', 
+            title: 'Panier', 
+            price: subtotal,
+            originalPrice: subtotal,
+            images: [items[0]?.image || ''],
+            stockLeft: 99,
+            slug: 'cart',
+            whatsAppDirectNumber: '212600000000'
+          } as any}
+          cartItems={items}
+          cartSubtotal={subtotal}
+        />
+      )}
     </div>
   );
 }

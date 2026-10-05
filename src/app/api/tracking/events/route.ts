@@ -24,8 +24,9 @@ export async function POST(request: Request) {
         if (cookieAnonId) {
           resolvedDistinctId = decodeURIComponent(cookieAnonId);
         } else {
-          const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+          const clientIp = request.headers.get('cf-connecting-ip') || 
                            request.headers.get('x-real-ip') || 
+                           request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
                            '';
           const userAgent = request.headers.get('user-agent') || '';
           if (clientIp || userAgent) {

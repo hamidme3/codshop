@@ -151,7 +151,10 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set('x-ab-variant', abVariant);
 
   // Admin Route Protection
-  if (url.pathname.startsWith('/admin')) {
+  const isAdminPage = url.pathname.startsWith('/admin');
+  const isAdminApi = url.pathname.startsWith('/api/admin');
+
+  if (isAdminPage || isAdminApi) {
     const sessionCookie = request.cookies.get('codshop_session')?.value;
     let isValidSession = false;
     let sessionUser: any = null;
@@ -179,13 +182,17 @@ export async function middleware(request: NextRequest) {
         return redirectRes;
       }
     } else {
-      // Protected admin routes: redirect unauthenticated users to login
+      // Protected admin routes: reject unauthenticated users
       if (!isValidSession) {
-        const returnUrl = encodeURIComponent(url.pathname + url.search);
-        const loginUrl = new URL(`/admin/login?returnUrl=${returnUrl}`, request.url);
-        const redirectRes = NextResponse.redirect(loginUrl);
-        redirectRes.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
-        return redirectRes;
+        if (isAdminApi) {
+          return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+        } else {
+          const returnUrl = encodeURIComponent(url.pathname + url.search);
+          const loginUrl = new URL(`/admin/login?returnUrl=${returnUrl}`, request.url);
+          const redirectRes = NextResponse.redirect(loginUrl);
+          redirectRes.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+          return redirectRes;
+        }
       }
 
       // Valid session: attach authenticated user context to headers

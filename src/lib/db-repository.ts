@@ -53,7 +53,7 @@ export async function getStoreBySlug(slug: string) {
       });
       if (store) return store;
     } catch (err) {
-      console.warn('[DbRepo] Failed to fetch store from DB, checking mock catalog:', err);
+      console.warn('[DbRepo] Failed to fetch store from DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     }
   }
 
@@ -223,13 +223,13 @@ export async function getProducts(storeSlug: string): Promise<Product[]> {
   // Fallback to Drizzle DB (legacy data during migration)
   const db = getDb();
   if (!db) {
-    return getMockProducts(storeSlug);
+    return [];
   }
 
   try {
     const store = await getStoreBySlug(storeSlug);
     if (!store || !('id' in store)) {
-      return getMockProducts(storeSlug);
+      return [];
     }
 
     const rows = await db.query.products.findMany({
@@ -238,7 +238,7 @@ export async function getProducts(storeSlug: string): Promise<Product[]> {
     });
 
     if (rows.length === 0) {
-      return getMockProducts(storeSlug);
+      return [];
     }
 
     return rows.map((r) => ({
@@ -256,8 +256,8 @@ export async function getProducts(storeSlug: string): Promise<Product[]> {
       status: r.status as 'active' | 'draft',
     }));
   } catch (err) {
-    console.warn('[DbRepo] Error querying products from DB, fallback to mock:', err);
-    return getMockProducts(storeSlug);
+    console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
+    return [];
   }
 }
 
@@ -629,7 +629,7 @@ export async function getOrders(storeSlug: string): Promise<Order[]> {
       currency: (r as any).currency || 'MAD',
     }));
   } catch (err) {
-    console.warn('[DbRepo] Error querying orders from DB, fallback to mock:', err);
+    console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     return getMockOrders(storeSlug);
   }
 }
@@ -762,27 +762,36 @@ export async function createOrder(data: {
       await decrementDbProductStock(store.id, cleanItems);
     }
 
-    const [newOrder] = await db.insert(schema.orders).values({
-      storeId: store.id,
-      orderNumber,
-      customerName: cleanCustomerName,
-      email: cleanEmail || null,
-      phone: data.phone,
-      city: cleanCity,
-      address: cleanAddress,
-      status: (data.status || 'new') as any,
-      items: cleanItems,
-      subtotal: cleanSubtotal,
-      shippingFee: cleanShippingFee,
-      total: cleanTotal,
-      courier: data.courier || 'manual',
-      abVariant: data.abVariant || 'control',
-      deliveryType: data.deliveryType || 'home',
-      agencyName: cleanAgencyName,
-      source: data.source || 'web',
-      countryCode: cleanCountryCode,
-      currency: cleanCurrency,
-    }).returning();
+    let newOrder;
+    try {
+      [newOrder] = await db.insert(schema.orders).values({
+        storeId: store.id,
+        orderNumber,
+        customerName: cleanCustomerName,
+        email: cleanEmail || null,
+        phone: data.phone,
+        city: cleanCity,
+        address: cleanAddress,
+        status: (data.status || 'new') as any,
+        items: cleanItems,
+        subtotal: cleanSubtotal,
+        shippingFee: cleanShippingFee,
+        total: cleanTotal,
+        courier: data.courier || 'manual',
+        abVariant: data.abVariant || 'control',
+        deliveryType: data.deliveryType || 'home',
+        agencyName: cleanAgencyName,
+        source: data.source || 'web',
+        countryCode: cleanCountryCode,
+        currency: cleanCurrency,
+      }).returning();
+    } catch (insertErr) {
+      if (!isAbandoned) {
+        await restoreDbProductStock(store.id, cleanItems);
+      }
+      console.error('[DbRepo] Error creating order in DB, stock rolled back:', insertErr);
+      throw insertErr;
+    }
 
     // Auto-update or create Customer in CRM (strictly for completed orders, not abandoned checkout captures)
     if (!isAbandoned) {
@@ -1214,7 +1223,7 @@ export async function getCustomers(storeSlug: string): Promise<Customer[]> {
       };
     });
   } catch (err) {
-    console.warn('[DbRepo] Error querying customers from DB, fallback to mock:', err);
+    console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     return getMockCustomers(storeSlug);
   }
 }
@@ -2580,7 +2589,7 @@ export async function getStoreMenus(storeSlug: string): Promise<StoreMenu[]> {
         }
       }
     } catch (err) {
-      console.warn('[DbRepo] DB menus fetch failed, fallback to mock:', err);
+      console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     }
   }
   return getStoreMenusMock(cleanSlug);
@@ -2611,7 +2620,7 @@ export async function getStoreMenuByPlacement(
         }
       }
     } catch (err) {
-      console.warn('[DbRepo] DB menu fetch failed, fallback to mock:', err);
+      console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     }
   }
   return getStoreMenuByPlacementMock(cleanSlug, placement);
@@ -2651,7 +2660,7 @@ export async function updateStoreMenu(
         }
       }
     } catch (err) {
-      console.warn('[DbRepo] DB menu update failed, fallback to mock:', err);
+      console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     }
   }
   return updateStoreMenuMock(cleanSlug, placement, items, title);
@@ -2690,7 +2699,7 @@ export async function resetStoreMenu(
         }
       }
     } catch (err) {
-      console.warn('[DbRepo] DB menu reset failed, fallback to mock:', err);
+      console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     }
   }
   return defaultMenu;
@@ -2731,7 +2740,7 @@ export async function getStorePages(storeSlug: string, onlyPublished: boolean = 
         }
       }
     } catch (err) {
-      console.warn('[DbRepo] DB getStorePages failed, falling back to mock:', err);
+      console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     }
   }
 
@@ -2771,7 +2780,7 @@ export async function getStorePageBySlug(storeSlug: string, slug: string): Promi
         }
       }
     } catch (err) {
-      console.warn('[DbRepo] DB getStorePageBySlug failed, falling back to mock:', err);
+      console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     }
   }
 
@@ -2864,7 +2873,7 @@ export async function createOrUpdateStorePage(
         }
       }
     } catch (err) {
-      console.warn('[DbRepo] DB createOrUpdateStorePage failed, fallback to mock:', err);
+      console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     }
   }
 
@@ -2890,7 +2899,7 @@ export async function deleteStorePage(storeSlug: string, idOrSlug: string): Prom
           );
       }
     } catch (err) {
-      console.warn('[DbRepo] DB deleteStorePage failed, fallback to mock:', err);
+      console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     }
   }
 
@@ -2941,7 +2950,7 @@ export async function generateStandardStorePolicies(storeSlug: string): Promise<
         }
       }
     } catch (err) {
-      console.warn('[DbRepo] DB generateStandardStorePolicies failed, fallback to mock:', err);
+      console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     }
   }
 

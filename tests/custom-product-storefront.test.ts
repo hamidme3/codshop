@@ -36,9 +36,9 @@ async function runTests() {
   assert.strictEqual(dbProd?.sku, 'SKU-5567');
   console.log('  ✓ db-repository successfully retrieves SKU-5567.\n');
 
-  // Test 4: Public Storefront API /api/products?store=storet1
-  console.log('4. Testing GET /api/products?store=storet1...');
-  const storeReq = new Request('http://localhost:3000/api/products?store=storet1');
+  // Test 4: Public Storefront API /api/products?store=ottavio
+  console.log('4. Testing GET /api/products?store=ottavio...');
+  const storeReq = new Request('http://localhost:3000/api/products?store=ottavio');
   const storeRes = await getStorefrontProducts(storeReq);
   assert.strictEqual(storeRes.status, 200, 'Storefront API must return HTTP 200');
   const storeData = await storeRes.json();
@@ -48,7 +48,7 @@ async function runTests() {
   assert.ok(foundInStore, 'Store products must include Test product (SKU-5567)');
   assert.strictEqual(foundInStore.title, 'Test product');
   assert.strictEqual(foundInStore.price, 299);
-  console.log('  ✓ GET /api/products?store=storet1 returns SKU-5567 in store catalog.\n');
+  console.log('  ✓ GET /api/products?store=ottavio returns SKU-5567 in store catalog.\n');
 
   // Test 5: Public Storefront API /api/products?slug=sku-5567
   console.log('5. Testing GET /api/products?slug=sku-5567...');
@@ -60,9 +60,9 @@ async function runTests() {
   assert.strictEqual(singleData.product.sku, 'SKU-5567');
   console.log('  ✓ GET /api/products?slug=sku-5567 returns product detail payload.\n');
 
-  // Test 6: Admin API /api/admin/products?store=storet1
-  console.log('6. Testing GET /api/admin/products?store=storet1...');
-  const adminReq = new Request('http://localhost:3000/api/admin/products?store=storet1');
+  // Test 6: Admin API /api/admin/products?store=ottavio
+  console.log('6. Testing GET /api/admin/products?store=ottavio...');
+  const adminReq = new Request('http://localhost:3000/api/admin/products?store=ottavio');
   const adminRes = await getAdminProducts(adminReq);
   assert.strictEqual(adminRes.status, 200, 'Admin products API must return HTTP 200');
   const adminData = await adminRes.json();
@@ -70,7 +70,7 @@ async function runTests() {
   const foundAdmin = adminData.products.find((p: any) => p.sku === 'SKU-5567');
   assert.ok(foundAdmin, 'Admin products must include SKU-5567');
   assert.strictEqual(foundAdmin.stock, 20);
-  console.log('  ✓ GET /api/admin/products?store=storet1 reflects stock 20 for SKU-5567.\n');
+  console.log('  ✓ GET /api/admin/products?store=ottavio reflects stock 20 for SKU-5567.\n');
 
   console.log('=== ALL 6 CUSTOM PRODUCT TESTS PASSED! ===');
   process.exit(0);

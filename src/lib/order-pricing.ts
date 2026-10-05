@@ -169,7 +169,11 @@ export async function resolveCatalogProduct(
     const secTitle = (codSection.settings.productTitle || '').toLowerCase();
     const secPrice = Number(codSection.settings.price) || 349;
     if (
-      (targetTitle && (targetTitle.includes('boutique') || targetTitle.includes('produit') || secTitle.includes(targetTitle) || targetTitle.includes(secTitle))) ||
+      (targetTitle && (
+        targetTitle.includes('boutique') || 
+        targetTitle.includes('produit') || 
+        (secTitle && (secTitle.includes(targetTitle) || targetTitle.includes(secTitle)))
+      )) ||
       targetId === 'sec_cod_prod' ||
       targetId === '1'
     ) {
@@ -191,6 +195,15 @@ export async function resolveCatalogProduct(
         price: storeProducts[0].price,
       };
     }
+  }
+
+  // 6. Generic Sandbox Fallback for Visual Builder temporary products
+  if (targetId.startsWith('temp-') || targetId.startsWith('temp_')) {
+    return {
+      id: identifier.id || identifier.productId || 'sandbox_prod',
+      title: identifier.title || 'Produit de Test',
+      price: (identifier as any).price !== undefined ? Number((identifier as any).price) : 215,
+    };
   }
 
   return null;
@@ -368,6 +381,7 @@ export async function verifyAndRecalculateOrder(
           color: body.product?.color || body.color,
           size: body.product?.size || body.size,
           freeDelivery: Boolean(body.freeDelivery || body.product?.freeDelivery),
+          price: body.product?.price || body.price,
         },
       ];
 
