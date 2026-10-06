@@ -21,10 +21,10 @@ export async function GET(req: Request) {
     // 2. Fetch in-memory products
     const memProducts = PRODUCTS.filter((p) => p.storeSlug === storeSlug);
     const existingIds = new Set(dbProducts.map((p) => p.id));
-    const existingSkus = new Set(dbProducts.map((p) => p.sku?.toLowerCase()).filter(Boolean));
+    const existingSkus = new Set(dbProducts.map((p) => String(p.sku || '').toLowerCase()).filter(Boolean));
     const combined = [...dbProducts];
     for (const mp of memProducts) {
-      const skuLower = mp.sku?.toLowerCase();
+      const skuLower = String(mp.sku || '').toLowerCase();
       if (!existingIds.has(mp.id) && (!skuLower || !existingSkus.has(skuLower))) {
         combined.push(mp);
         existingIds.add(mp.id);

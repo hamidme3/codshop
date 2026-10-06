@@ -643,8 +643,8 @@ export function getProductBySlug(slug: string): Product | undefined {
   const cleanSlug = slug.toLowerCase().trim();
   return MOCK_PRODUCTS.find((p) => 
     p.slug.toLowerCase() === cleanSlug || 
-    p.sku.toLowerCase() === cleanSlug || 
-    p.id.toLowerCase() === cleanSlug ||
+    String(p.sku || "").toLowerCase() === cleanSlug || 
+    String(p.id).toLowerCase() === cleanSlug ||
     p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === cleanSlug
   );
 }

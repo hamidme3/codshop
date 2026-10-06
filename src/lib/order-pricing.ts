@@ -44,7 +44,7 @@ export async function resolveCatalogProduct(
         const mockMatch = MOCK_PRODUCTS.find(
           (p) =>
             p.id === payloadProd.id ||
-            p.sku.toLowerCase() === (identifier.sku || '').toLowerCase() ||
+            String(p.sku || "").toLowerCase() === (identifier.sku || '').toLowerCase() ||
             p.slug.toLowerCase() === targetSlug
         );
         tiers = mockMatch?.quantityTiers;
@@ -85,7 +85,7 @@ export async function resolveCatalogProduct(
         });
         if (matched) {
           const matchedSku = String(matched.sku ?? '').toLowerCase();
-          const mockMatch = MOCK_PRODUCTS.find((p) => String(p.id) === String(matched.id) || p.sku.toLowerCase() === matchedSku || p.slug.toLowerCase() === matchedSku);
+          const mockMatch = MOCK_PRODUCTS.find((p) => String(p.id) === String(matched.id) || String(p.sku || "").toLowerCase() === matchedSku || p.slug.toLowerCase() === matchedSku);
           let tiers = mockMatch?.quantityTiers;
           if (!tiers || tiers.length === 0) {
             const sfProd = convertDbProductToStorefrontProduct(matched);
@@ -107,9 +107,9 @@ export async function resolveCatalogProduct(
 
   // 2. Try MOCK_PRODUCTS (Theme-specific catalog with explicit quantityTiers)
   const mockProduct = MOCK_PRODUCTS.find((p) => {
-    const pId = p.id.toLowerCase();
+    const pId = String(p.id).toLowerCase();
     const pSlug = p.slug.toLowerCase();
-    const pSku = p.sku.toLowerCase();
+    const pSku = String(p.sku || "").toLowerCase();
     const pTitle = p.title.toLowerCase();
     const titleSlug = pTitle.replace(/[^a-z0-9]+/g, '-');
     if (targetId && (pId === targetId || pSlug === targetId || pSku === targetId)) return true;
