@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getProducts, getProductBySlugOrSku, convertDbProductToStorefrontProduct } from '@/lib/db-repository';
-import { getProducts as getMockProducts, PRODUCTS } from '@/lib/mocks';
-import { MOCK_PRODUCTS, getProductBySlug as getMockProductBySlug } from '@/lib/mockProducts';
 
 export async function GET(req: Request) {
   try {
@@ -14,26 +12,12 @@ export async function GET(req: Request) {
     let dbProducts: any[] = [];
     try {
       dbProducts = await getProducts(storeSlug);
-    } catch {
-      dbProducts = getMockProducts(storeSlug);
-    }
-
-    // 2. Fetch in-memory products
-    const memProducts = PRODUCTS.filter((p) => p.storeSlug === storeSlug);
-    const existingIds = new Set(dbProducts.map((p) => p.id));
-    const existingSkus = new Set(dbProducts.map((p) => String(p.sku || '').toLowerCase()).filter(Boolean));
-    const combined = [...dbProducts];
-    for (const mp of memProducts) {
-      const skuLower = String(mp.sku || '').toLowerCase();
-      if (!existingIds.has(mp.id) && (!skuLower || !existingSkus.has(skuLower))) {
-        combined.push(mp);
-        existingIds.add(mp.id);
-        if (skuLower) existingSkus.add(skuLower);
-      }
+    } catch (err) {
+      console.error('[API Storefront Products] DB error:', err);
     }
 
     // Convert to storefront format
-    const storefrontProducts = combined
+    const storefrontProducts = dbProducts
       .filter((p) => p.status !== 'draft')
       .map((p) => convertDbProductToStorefrontProduct(p));
 
@@ -42,7 +26,7 @@ export async function GET(req: Request) {
     // If querying a single product by slug or sku
     if (slugQuery) {
       // Check if product exists in this store in draft mode
-      const draftMatch = combined.find(
+      const draftMatch = dbProducts.find(
         (p) =>
           String(p.sku || '').toLowerCase() === slugQuery ||
           String(p.id || '').toLowerCase() === slugQuery ||
@@ -57,7 +41,7 @@ export async function GET(req: Request) {
       }
 
       // 1. Check current store published products (or draft if preview)
-      let match = (isPreview ? combined.map((p) => convertDbProductToStorefrontProduct(p)) : storefrontProducts).find(
+      let match = (isPreview ? dbProducts.map((p) => convertDbProductToStorefrontProduct(p)) : storefrontProducts).find(
         (p) =>
           String(p.slug || '').toLowerCase() === slugQuery ||
           String(p.sku || '').toLowerCase() === slugQuery ||
@@ -79,11 +63,6 @@ export async function GET(req: Request) {
             match = convertDbProductToStorefrontProduct(dbProd);
           }
         } catch {}
-      }
-
-      // 3. Fallback to mockProducts
-      if (!match) {
-        match = getMockProductBySlug(slugQuery);
       }
 
       if (match) {

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getProducts, createProduct, updateProduct, deleteProduct } from '@/lib/db-repository';
-import { getProducts as getMockProducts, PRODUCTS } from '@/lib/mocks';
 import { isValidStoreSlug } from '@/lib/sanitizer';
 
 export async function GET(req: Request) {
@@ -17,31 +16,13 @@ export async function GET(req: Request) {
     try {
       dbProducts = await getProducts(storeSlug);
     } catch (err) {
-      console.warn('[API Admin Products] Fallback to mock products:', err);
-      dbProducts = getMockProducts(storeSlug);
-    }
-
-    // 2. Fetch in-memory products for this store
-    const memProducts = PRODUCTS.filter((p) => p.storeSlug === storeSlug);
-
-    // 3. Merge without duplicate SKUs/IDs (DB takes precedence)
-    const existingIds = new Set(dbProducts.map((p) => p.id));
-    const existingSkus = new Set(dbProducts.map((p) => String(p.sku || '').toLowerCase()).filter(Boolean));
-    const combined = [...dbProducts];
-
-    for (const mp of memProducts) {
-      const skuLower = String(mp.sku || '').toLowerCase();
-      if (!existingIds.has(mp.id) && (!skuLower || !existingSkus.has(skuLower))) {
-        combined.push(mp);
-        existingIds.add(mp.id);
-        if (skuLower) existingSkus.add(skuLower);
-      }
+      console.error('[API Admin Products] DB fetch error:', err);
     }
 
     return NextResponse.json({
       success: true,
-      products: combined,
-      count: combined.length,
+      products: dbProducts,
+      count: dbProducts.length,
       store: storeSlug,
     });
   } catch (error: any) {
