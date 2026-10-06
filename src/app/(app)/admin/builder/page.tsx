@@ -57,7 +57,7 @@ const THEME_PRESETS: Record<string, {
 
 function BuilderContent() {
   const searchParams = useSearchParams();
-  const storeSlug = searchParams.get('store') || 'ottavio';
+  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || 'ottavio';
   const storefrontUrl = getStorefrontUrl(storeSlug);
 
   const [storeData, setStoreData] = useState<any>(null);

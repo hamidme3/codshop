@@ -46,7 +46,22 @@ function AdminNav({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const storeSlug = searchParams.get('store') || 'ottavio';
+  
+  // Try to use the query parameter first. If missing, we'll try to read from localStorage below.
+  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || 'ottavio';
+
+  useEffect(() => {
+    const queryStore = searchParams.get('store');
+    if (queryStore) {
+      localStorage.setItem('codshop_active_store', queryStore);
+    } else if (pathname && storeSlug !== 'ottavio' || (!queryStore && storeSlug)) {
+      // If no query parameter exists, but we know the storeSlug (from localStorage or default), redirect to include it.
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('store', storeSlug);
+      router.replace(`${pathname}?${params.toString()}`);
+    }
+  }, [searchParams, pathname, router, storeSlug]);
+
   const storefrontUrl = useMemo(() => getStorefrontUrl(storeSlug), [storeSlug]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ name: string; email: string } | null>(null);

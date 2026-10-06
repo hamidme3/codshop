@@ -10,7 +10,7 @@ import {
 
 function BillingContent() {
   const searchParams = useSearchParams();
-  const storeSlug = searchParams.get('store') || 'ottavio';
+  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || 'ottavio';
 
   const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro' | 'growth' | 'scale'>('growth');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'virement'>('card');

@@ -30,7 +30,7 @@ const STATUS_OPTIONS: { value: OrderStatus; label: string; dotColor: string }[] 
 function OrdersContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const storeSlug = searchParams.get('store') || 'ottavio';
+  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || 'ottavio';
   const urlFilter = searchParams.get('filter') || searchParams.get('status') || 'all';
   const { t } = useLanguage();
 
