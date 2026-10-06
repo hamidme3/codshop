@@ -403,6 +403,44 @@ export async function updateProduct(productId: string, updates: Partial<Product>
           status: updated.status as any,
         };
       }
+    } else {
+      // Mock product being updated for the first time -> convert to real DB product
+      const store = await getStoreBySlug(updates.storeSlug || 'storet1');
+      if (store && 'id' in store) {
+        const existingMock = PRODUCTS.find(p => p.id === productId) || getMockProducts(updates.storeSlug || 'storet1').find(p => p.id === productId) || MOCK_PRODUCTS.find(p => p.id === productId || p.sku === productId);
+        
+        const [newProd] = await db.insert(schema.products).values({
+          storeId: store.id,
+          title: updates.title || existingMock?.title || 'Produit',
+          sku: updates.sku || existingMock?.sku || `SKU-${Date.now()}`,
+          category: updates.category || (existingMock as any)?.category || 'Général',
+          price: updates.price !== undefined ? Number(updates.price) : Number(existingMock?.price || 0),
+          comparePrice: updates.comparePrice ? Number(updates.comparePrice) : undefined,
+          costPrice: updates.costPrice !== undefined ? Number(updates.costPrice) : Number((existingMock as any)?.costPrice || 0),
+          stock: updates.stock !== undefined ? Number(updates.stock) : Number((existingMock as any)?.stock || (existingMock as any)?.stockLeft || 0),
+          images: updates.images || existingMock?.images || [],
+          variants: updates.variants || (existingMock as any)?.variants || [],
+          status: updates.status || 'active',
+        }).returning();
+
+        if (newProd) {
+          updateMockProduct(productId, updates);
+          return {
+            id: newProd.id,
+            storeSlug: updates.storeSlug || 'storet1',
+            title: newProd.title,
+            sku: newProd.sku,
+            category: newProd.category,
+            price: Number(newProd.price),
+            comparePrice: newProd.comparePrice ? Number(newProd.comparePrice) : undefined,
+            costPrice: Number(newProd.costPrice) || 0,
+            stock: Number(newProd.stock),
+            images: Array.isArray(newProd.images) ? newProd.images : [],
+            variants: (newProd.variants as any) || [],
+            status: newProd.status as any,
+          };
+        }
+      }
     }
   } catch (err) {
     console.warn('[DbRepo] Error updating product in DB:', err);

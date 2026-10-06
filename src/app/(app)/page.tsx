@@ -4,16 +4,14 @@ import React, { useMemo, useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 import { getCountryConfig } from '@/lib/geo';
-import { getProductsByTheme, MOCK_PRODUCTS } from '@/lib/mockProducts';
 import { ProductCard } from '@/components/ProductCard';
-import { Award, Sparkles, Zap, ArrowRight, Star, ShieldCheck, Truck } from 'lucide-react';
+import { Award, Sparkles, Zap, ArrowRight, Star, ShieldCheck, Truck, PackageCheck } from 'lucide-react';
 import { UniversalLandingPage } from '@/components/landing/UniversalLandingPage';
 import { trackStorePageView } from '@/lib/posthog';
 
 function StorefrontHome({ storeSlug }: { storeSlug?: string }) {
   const { theme, lang, countryCode } = useTheme();
   const countryConfig = useMemo(() => getCountryConfig(countryCode), [countryCode]);
-  const defaultProducts = useMemo(() => getProductsByTheme(theme.id), [theme.id]);
   const [storeProducts, setStoreProducts] = useState<any[]>([]);
 
   useEffect(() => {
@@ -22,23 +20,15 @@ function StorefrontHome({ storeSlug }: { storeSlug?: string }) {
     fetch(`/api/products?store=${encodeURIComponent(slug)}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+        if (data.success && Array.isArray(data.products)) {
           setStoreProducts(data.products);
         }
       })
       .catch(() => {});
   }, [storeSlug]);
 
-  // Prepend merchant custom products before theme defaults
-  const products = useMemo(() => {
-    if (storeProducts.length === 0) return defaultProducts;
-    const existingSkus = new Set(storeProducts.map((p) => String(p.sku || p.id).toLowerCase()));
-    const existingSlugs = new Set(storeProducts.map((p) => String(p.slug || '').toLowerCase()));
-    const remainder = defaultProducts.filter(
-      (p) => !existingSkus.has(String(p.sku || p.id).toLowerCase()) && !existingSlugs.has(String(p.slug || '').toLowerCase())
-    );
-    return [...storeProducts, ...remainder];
-  }, [storeProducts, defaultProducts]);
+  // Use only real store products (no placeholders)
+  const products = storeProducts;
 
   return (
     <div className="space-y-12 pb-16">
@@ -199,11 +189,32 @@ function StorefrontHome({ storeSlug }: { storeSlug?: string }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {products.length === 0 ? (
+          <div
+            className="py-16 text-center rounded-2xl border space-y-3"
+            style={{
+              backgroundColor: 'var(--theme-card-bg)',
+              borderColor: 'var(--theme-border)',
+            }}
+          >
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
+                 style={{ backgroundColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+              <PackageCheck className="w-6 h-6 stroke-[1.5]" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm" style={{ color: 'var(--theme-text-primary)' }}>Aucun produit pour le moment</h3>
+              <p className="text-[11px] max-w-xs mx-auto mt-1" style={{ color: 'var(--theme-text-secondary)' }}>
+                La boutique prépare actuellement ses collections. Revenez bientôt !
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
 
         {/* View Full Catalog Callout */}
         <div

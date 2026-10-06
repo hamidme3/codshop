@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useTheme } from '@/context/ThemeContext';
-import { MOCK_PRODUCTS, Product } from '@/lib/mockProducts';
+import { Product } from '@/lib/mockProducts';
 import { ProductCard } from '@/components/ProductCard';
 import { getCountryConfig } from '@/lib/geo';
 import {
@@ -74,7 +74,7 @@ export default function CatalogPage() {
       fetch(`/api/products?store=${encodeURIComponent(fetchSlug)}`)
         .then((r) => r.json())
         .then((data) => {
-          if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+          if (data.success && Array.isArray(data.products)) {
             setStoreProducts(data.products);
           }
         })
@@ -82,16 +82,8 @@ export default function CatalogPage() {
     }
   }, []);
 
-  // Merge store products at the top with base catalog
-  const allProducts = useMemo(() => {
-    if (storeProducts.length === 0) return MOCK_PRODUCTS;
-    const existingSkus = new Set(storeProducts.map((p) => String(p.sku || p.id).toLowerCase()));
-    const existingSlugs = new Set(storeProducts.map((p) => String(p.slug || '').toLowerCase()));
-    const remainder = MOCK_PRODUCTS.filter(
-      (p) => !existingSkus.has(String(p.sku || p.id).toLowerCase()) && !existingSlugs.has(String(p.slug || '').toLowerCase())
-    );
-    return [...storeProducts, ...remainder];
-  }, [storeProducts]);
+  // Use only real store products (no placeholders)
+  const allProducts = storeProducts;
 
   // Dynamic Category Definitions based on catalog
   const categories = useMemo(
