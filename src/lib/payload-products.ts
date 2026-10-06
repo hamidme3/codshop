@@ -139,12 +139,46 @@ export async function createProductInPayload(data: Omit<Product, 'id'>): Promise
 
   const storeId = storeResult.docs.length > 0 ? storeResult.docs[0].id : undefined;
 
+  const mediaIds: (string | number)[] = [];
+  if (data.images && Array.isArray(data.images)) {
+    try {
+      for (const img of data.images) {
+        if (typeof img === 'number') {
+          mediaIds.push(img);
+        } else if (typeof img === 'string') {
+          const filenameMatch = img.match(/\/api\/uploads\/media\/([^/?#]+)/) || img.match(/\/uploads\/media\/([^/?#]+)/);
+          const filename = filenameMatch ? filenameMatch[1] : img;
+          const baseFilename = filename.replace(/-\d+x\d+(\.[a-z0-9]+)$/i, '$1');
+          const search = await payload.find({
+            collection: 'media',
+            where: {
+              or: [
+                { filename: { equals: filename } },
+                { filename: { equals: baseFilename } },
+                { 'sizes.mobile.filename': { equals: filename } },
+                { id: { equals: filename } },
+              ],
+            },
+            depth: 0,
+            limit: 1,
+          });
+          if (search.docs.length > 0) {
+            mediaIds.push(search.docs[0].id);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to resolve media IDs during product creation', e);
+    }
+  }
+
   const doc = await payload.create({
     collection: 'products',
     data: {
       title: data.title,
       sku: data.sku,
       store: storeId,
+      images: mediaIds.length > 0 ? mediaIds : undefined,
       category: data.category || 'General',
       price: Number(data.price),
       comparePrice: data.comparePrice ? Number(data.comparePrice) : undefined,
@@ -249,13 +283,16 @@ export async function updateProductInPayload(
           if (typeof img === 'number') {
             mediaIds.push(img);
           } else if (typeof img === 'string') {
-            const filenameMatch = img.match(/\/api\/uploads\/media\/([^/?#]+)/);
+            const filenameMatch = img.match(/\/api\/uploads\/media\/([^/?#]+)/) || img.match(/\/uploads\/media\/([^/?#]+)/);
             const filename = filenameMatch ? filenameMatch[1] : img;
+            const baseFilename = filename.replace(/-\d+x\d+(\.[a-z0-9]+)$/i, '$1');
             const search = await payload.find({
               collection: 'media',
               where: {
                 or: [
                   { filename: { equals: filename } },
+                  { filename: { equals: baseFilename } },
+                  { 'sizes.mobile.filename': { equals: filename } },
                   { id: { equals: filename } },
                 ],
               },
