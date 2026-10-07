@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getOrders } from '@/lib/db-repository';
+
+export const dynamic = 'force-dynamic';
 import { 
   getOrders as getMockOrders, 
   updateOrderStatus as updateMockOrderStatus, 

@@ -304,7 +304,7 @@ export async function updateProductInPayload(
             }
           }
         }
-        if (mediaIds.length > 0) {
+        if (mediaIds.length > 0 || updates.images.length === 0) {
           updateData.images = mediaIds;
         }
       } catch (mediaErr) {

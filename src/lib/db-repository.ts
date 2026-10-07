@@ -200,6 +200,28 @@ export async function createStore(data: {
       planTier: data.planTier || 'starter',
       trialEndsAt: trialDate,
     }).returning();
+
+    // Also sync to Payload CMS to prevent orphaned products
+    try {
+      const { getPayload } = await import('payload');
+      const configPromise = (await import('@payload-config')).default;
+      const payload = await getPayload({ config: configPromise });
+      await payload.create({
+        collection: 'stores',
+        data: {
+          name: data.name,
+          slug: data.slug,
+          email: data.email,
+          phone: data.phone,
+          plan: data.planTier || 'starter',
+          status: 'active',
+        } as any,
+        overrideAccess: true,
+      });
+    } catch (payloadErr) {
+      console.warn('[DbRepo] Failed to sync store to Payload CMS:', payloadErr);
+    }
+
     return newStore;
   } catch (err) {
     console.error('[DbRepo] Error creating store in DB:', err);
@@ -493,11 +515,12 @@ export async function deleteProduct(productId: string): Promise<boolean> {
 
     if (targetRowId) {
       await db.delete(schema.products).where(eq(schema.products.id, targetRowId));
+      return true;
     }
-    return true;
+    return false; // Not found in Drizzle
   } catch (err) {
-    console.warn('[DbRepo] Error deleting product from DB:', err);
-    return true;
+    console.error('[DbRepo] Error deleting product from DB:', err);
+    throw err; // Actually throw to expose FK constraints or other errors
   }
 }
 
