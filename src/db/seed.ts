@@ -60,55 +60,7 @@ export async function seedDatabase() {
     console.log('[Seed] Admin user already exists: admin@ottavio.ma');
   }
 
-  // 2. Seed Products
-  const existingProducts = await db.query.products.findMany({
-    where: eq(schema.products.storeId, storeId),
-  });
 
-  if (existingProducts.length === 0) {
-    await db.insert(schema.products).values([
-      {
-        storeId,
-        title: 'Sac à Main Cuir Véritable Fès - Finition Fait Main',
-        sku: 'SKU-OTT-01',
-        category: 'Maroquinerie & Sacs',
-        price: 349,
-        comparePrice: 499,
-        costPrice: 110,
-        stock: 24,
-        images: ['https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=800&auto=format&fit=crop'],
-        variants: [{ size: 'Unique', stock: 24 }],
-        status: 'active',
-      },
-      {
-        storeId,
-        title: 'Sacoche Bandoulière Homme Cuir Brun Rustique',
-        sku: 'SKU-OTT-02',
-        category: 'Maroquinerie & Sacs',
-        price: 289,
-        comparePrice: 399,
-        costPrice: 95,
-        stock: 18,
-        images: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=800&auto=format&fit=crop'],
-        variants: [{ size: 'Unique', stock: 18 }],
-        status: 'active',
-      },
-      {
-        storeId,
-        title: 'Ceinture Cuir Pleine Fleur avec Boucle Laiton',
-        sku: 'SKU-OTT-03',
-        category: 'Accessoires',
-        price: 149,
-        comparePrice: 220,
-        costPrice: 45,
-        stock: 40,
-        images: ['https://images.unsplash.com/photo-1624222247344-550fb60583dc?q=80&w=800&auto=format&fit=crop'],
-        variants: [{ size: '110cm', stock: 20 }, { size: '120cm', stock: 20 }],
-        status: 'active',
-      },
-    ]);
-    console.log('[Seed] Inserted 3 flagship Moroccan products.');
-  }
 
   // 3. Seed Orders
   const existingOrders = await db.query.orders.findMany({

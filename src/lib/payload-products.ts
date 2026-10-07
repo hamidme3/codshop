@@ -123,6 +123,56 @@ export async function getProductByIdFromPayload(productId: string): Promise<Prod
   }
 }
 
+export async function getProductBySlugOrSkuFromPayload(slugOrSku: string): Promise<Product | null> {
+  try {
+    const payload = await getPayloadInstance();
+    const clean = slugOrSku.toLowerCase().trim();
+    
+    // Attempt to search by sku or title
+    const search = await payload.find({
+      collection: 'products',
+      where: {
+        or: [
+          { sku: { equals: clean } },
+          { title: { equals: clean } }
+        ]
+      },
+      depth: 1,
+      overrideAccess: true,
+      limit: 1,
+    });
+    
+    if (search.docs.length > 0) {
+      return mapPayloadDocToProduct(search.docs[0]);
+    }
+    
+    // If not found, fall back to getting all and filtering (in case of partial matches or IDs)
+    const all = await payload.find({
+      collection: 'products',
+      depth: 1,
+      overrideAccess: true,
+      limit: 200,
+    });
+    
+    const matched = all.docs.find((p: any) => {
+      const pId = String(p.id).toLowerCase();
+      const pSku = (p.sku || '').toLowerCase();
+      const pTitle = (p.title || '').toLowerCase();
+      const titleSlug = pTitle.replace(/[^a-z0-9]+/g, '-');
+      
+      return pId === clean || pSku === clean || titleSlug === clean;
+    });
+    
+    if (matched) {
+      return mapPayloadDocToProduct(matched);
+    }
+    
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 // ── CREATE ──────────────────────────────────────────────────────
 
 export async function createProductInPayload(data: Omit<Product, 'id'>): Promise<Product> {

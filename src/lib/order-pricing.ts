@@ -61,49 +61,7 @@ export async function resolveCatalogProduct(
     console.warn('[Pricing Engine] Payload catalog resolution unavailable, fallback:', err);
   }
 
-  // 2. Try Postgres DB if connected
-  const db = getDb();
-  if (db) {
-    try {
-      const storeRow = await db.query.stores.findFirst({
-        where: eq(schema.stores.slug, storeSlug),
-      });
-      if (storeRow) {
-        const dbProducts = await db.query.products.findMany({
-          where: eq(schema.products.storeId, storeRow.id),
-        });
-        const matched = dbProducts.find((p) => {
-          const pId = String(p.id ?? '').toLowerCase();
-          const pSku = String(p.sku ?? '').toLowerCase();
-          const pTitle = String(p.title ?? '').toLowerCase();
-          const titleSlug = pTitle.replace(/[^a-z0-9]+/g, '-');
-          if (targetId && (pId === targetId || pSku === targetId)) return true;
-          if (targetSku && (pSku === targetSku || targetSku.startsWith(pSku) || pSku.startsWith(targetSku))) return true;
-          if (targetSlug && (pSku === targetSlug || titleSlug === targetSlug)) return true;
-          if (targetTitle && (pTitle === targetTitle || pTitle.includes(targetTitle) || targetTitle.includes(pTitle))) return true;
-          return false;
-        });
-        if (matched) {
-          const matchedSku = String(matched.sku ?? '').toLowerCase();
-          const mockMatch = MOCK_PRODUCTS.find((p) => String(p.id) === String(matched.id) || String(p.sku || "").toLowerCase() === matchedSku || p.slug.toLowerCase() === matchedSku);
-          let tiers = mockMatch?.quantityTiers;
-          if (!tiers || tiers.length === 0) {
-            const sfProd = convertDbProductToStorefrontProduct(matched);
-            tiers = sfProd.quantityTiers;
-          }
-          return {
-            id: matched.id,
-            title: matched.title,
-            price: Number(matched.price),
-            status: (matched as any).status || 'active',
-            quantityTiers: tiers,
-          };
-        }
-      }
-    } catch (err) {
-      console.warn('[Pricing Engine] DB lookup fallback to catalog:', err);
-    }
-  }
+
 
   // 2. Try MOCK_PRODUCTS (Theme-specific catalog with explicit quantityTiers)
   const mockProduct = MOCK_PRODUCTS.find((p) => {

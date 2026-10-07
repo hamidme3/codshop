@@ -33,35 +33,6 @@ export const stores = pgTable(
   ]
 );
 
-// ── Products ───────────────────────────────────────────────────
-export const products = pgTable(
-  'products',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    storeId: uuid('store_id')
-      .references(() => stores.id, { onDelete: 'cascade' })
-      .notNull(),
-    title: text('title').notNull(),
-    sku: text('sku').notNull(),
-    category: text('category').notNull(),
-    price: integer('price').notNull(), // Selling Price in MAD
-    comparePrice: integer('compare_price'), // Slashed / Promo Price in MAD
-    costPrice: integer('cost_price').notNull(), // Cost of Goods (COGS) for net margin
-    stock: integer('stock').default(0).notNull(),
-    images: jsonb('images').$type<string[]>().default([]).notNull(),
-    variants: jsonb('variants')
-      .$type<{ size?: string; color?: string; stock: number }[]>()
-      .default([])
-      .notNull(),
-    status: text('status').default('active').notNull(), // 'active' | 'draft'
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  },
-  (table) => [
-    index('product_store_idx').on(table.storeId),
-    index('product_sku_idx').on(table.sku),
-  ]
-);
 
 // ── Orders (Moroccan COD Pipeline) ────────────────────────────
 export const orders = pgTable(
@@ -414,7 +385,6 @@ export const pages = pgTable(
 export const storesRelations = relations(stores, ({ many, one }) => ({
   users: many(users),
   memberships: many(storeMemberships),
-  products: many(products),
   orders: many(orders),
   customers: many(customers),
   menus: many(menus),
@@ -469,12 +439,6 @@ export const usersRelations = relations(users, ({ one }) => ({
   }),
 }));
 
-export const productsRelations = relations(products, ({ one }) => ({
-  store: one(stores, {
-    fields: [products.storeId],
-    references: [stores.id],
-  }),
-}));
 
 export const ordersRelations = relations(orders, ({ one }) => ({
   store: one(stores, {

@@ -231,118 +231,21 @@ export async function createStore(data: {
 
 // ── Products Repository ────────────────────────────────────────
 export async function getProducts(storeSlug: string): Promise<Product[]> {
-  let payloadProducts: Product[] = [];
   try {
     const { getProductsFromPayload } = await import('./payload-products');
-    payloadProducts = await getProductsFromPayload(storeSlug);
+    return await getProductsFromPayload(storeSlug);
   } catch (err) {
     console.warn('[DbRepo] Payload product fetch unavailable:', err);
+    return [];
   }
-
-  // Fallback to Drizzle DB (legacy data during migration)
-  const db = getDb();
-  let drizzleProducts: Product[] = [];
-  
-  if (db) {
-    try {
-      const store = await getStoreBySlug(storeSlug);
-      if (store && 'id' in store) {
-        const rows = await db.query.products.findMany({
-          where: eq(schema.products.storeId, store.id),
-          orderBy: [desc(schema.products.createdAt)],
-        });
-
-        drizzleProducts = rows.map((r) => ({
-          id: r.id,
-          storeSlug,
-          title: r.title,
-          sku: r.sku,
-          category: r.category,
-          price: r.price,
-          comparePrice: r.comparePrice || undefined,
-          costPrice: r.costPrice,
-          stock: r.stock,
-          images: r.images,
-          variants: r.variants,
-          status: r.status as 'active' | 'draft',
-        }));
-      }
-    } catch (err) {
-      console.warn('[DbRepo] Error querying DB:', err);
-      if (process.env.NODE_ENV === 'production') throw err;
-    }
-  }
-
-  // Combine products, prioritizing Payload CMS as the single source of truth
-  const combinedMap = new Map<string, Product>();
-  
-  // Add Drizzle products first
-  for (const dp of drizzleProducts) {
-    combinedMap.set(String(dp.sku || dp.id).toLowerCase(), dp);
-  }
-  
-  // Override with Payload products (which are the source of truth)
-  for (const pp of payloadProducts) {
-    combinedMap.set(String(pp.sku || pp.id).toLowerCase(), pp);
-  }
-
-  return Array.from(combinedMap.values()).sort((a, b) => {
-    // Basic sorting: keep newer (or Payload) first by ID length or string comparison
-    return String(b.id).localeCompare(String(a.id));
-  });
 }
 
 export async function createProduct(data: Omit<Product, 'id'>): Promise<Product> {
-  const db = getDb();
-  let drizzleCreated: Product | null = null;
-
-  if (db) {
-    try {
-      const store = await getStoreBySlug(data.storeSlug);
-      if (store && 'id' in store) {
-        const [newProd] = await db.insert(schema.products).values({
-          storeId: store.id,
-          title: data.title,
-          sku: data.sku,
-          category: data.category,
-          price: data.price,
-          comparePrice: data.comparePrice,
-          costPrice: data.costPrice,
-          stock: data.stock,
-          images: data.images,
-          variants: data.variants || [],
-          status: data.status || 'active',
-        }).returning();
-
-        if (newProd) {
-          drizzleCreated = {
-            id: newProd.id,
-            storeSlug: data.storeSlug,
-            title: newProd.title,
-            sku: newProd.sku,
-            category: newProd.category,
-            price: Number(newProd.price),
-            comparePrice: newProd.comparePrice ? Number(newProd.comparePrice) : undefined,
-            costPrice: Number(newProd.costPrice) || 0,
-            stock: Number(newProd.stock),
-            images: Array.isArray(newProd.images) ? newProd.images : [],
-            variants: (newProd.variants as any) || [],
-            status: newProd.status as any,
-          };
-        }
-      }
-    } catch (drizzleErr) {
-      console.warn('[DbRepo] Drizzle product insert warning:', drizzleErr);
-    }
-  }
-
-  // Also sync to Payload CMS
   try {
     const { createProductInPayload } = await import('./payload-products');
     const created = await createProductInPayload(data);
     if (created) {
       addMockProduct(data);
-      // Return Payload created product to ensure UI uses Payload ID, preventing split-brain sync issues
       return created;
     }
   } catch (err) {
@@ -350,244 +253,62 @@ export async function createProduct(data: Omit<Product, 'id'>): Promise<Product>
   }
 
   addMockProduct(data);
-  return drizzleCreated || {
+  return {
     id: `prod_${Date.now()}`,
     ...data,
   };
 }
 
 export async function updateProduct(productId: string, updates: Partial<Product>): Promise<Product | null> {
-  // 1. Update in Payload CMS
-  let payloadUpdated: Product | null = null;
   try {
     const { updateProductInPayload } = await import('./payload-products');
-    payloadUpdated = await updateProductInPayload(productId, updates);
+    const payloadUpdated = await updateProductInPayload(productId, updates);
+    if (payloadUpdated) {
+      updateMockProduct(productId, updates);
+      return payloadUpdated;
+    }
   } catch (err) {
     console.warn('[DbRepo] Payload product update warning:', err);
   }
 
-  // 2. Also update in Drizzle DB for dual-engine consistency
-  const db = getDb();
-  if (!db) {
-    updateMockProduct(productId, updates);
-    return payloadUpdated || updateMockProduct(productId, updates);
-  }
-
-  try {
-    let targetRowId: string | null = null;
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
-    if (isUuid) {
-      targetRowId = productId;
-    } else {
-      const cleanTarget = productId.toLowerCase().trim();
-      const cleanSkuPart = cleanTarget.replace(/^prod_/, '');
-      const searchSku = payloadUpdated?.sku ? payloadUpdated.sku.toLowerCase().trim() : null;
-      
-      const all = await db.query.products.findMany({ limit: 500 });
-      const matched = all.find((p) => {
-        const pSku = String(p.sku || '').toLowerCase();
-        const pId = String(p.id ?? '').toLowerCase();
-        const titleSlug = String(p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        return (
-          (searchSku && pSku === searchSku) ||
-          pId === cleanTarget ||
-          pSku === cleanTarget ||
-          pSku === cleanSkuPart ||
-          cleanTarget.includes(pSku) ||
-          titleSlug === cleanTarget ||
-          titleSlug === cleanSkuPart
-        );
-      });
-      if (matched) {
-        targetRowId = matched.id;
-      }
-    }
-
-    if (targetRowId) {
-      const updateData: any = { updatedAt: new Date() };
-      if (updates.title !== undefined) updateData.title = updates.title;
-      if (updates.price !== undefined) updateData.price = Number(updates.price);
-      if (updates.comparePrice !== undefined) updateData.comparePrice = Number(updates.comparePrice);
-      if (updates.costPrice !== undefined) updateData.costPrice = Number(updates.costPrice);
-      if (updates.stock !== undefined) updateData.stock = Number(updates.stock);
-      if (updates.category !== undefined) updateData.category = updates.category;
-      if (updates.status !== undefined) updateData.status = updates.status;
-      if (updates.images !== undefined) updateData.images = updates.images;
-      if (updates.variants !== undefined) updateData.variants = updates.variants;
-
-      const [updated] = await db
-        .update(schema.products)
-        .set(updateData)
-        .where(eq(schema.products.id, targetRowId))
-        .returning();
-
-      if (updated) {
-        updateMockProduct(productId, updates);
-        return {
-          id: updated.id,
-          storeSlug: updates.storeSlug || '',
-          title: updated.title,
-          sku: updated.sku,
-          category: updated.category,
-          price: Number(updated.price),
-          comparePrice: updated.comparePrice ? Number(updated.comparePrice) : undefined,
-          costPrice: Number(updated.costPrice) || 0,
-          stock: Number(updated.stock),
-          images: Array.isArray(updated.images) ? updated.images : [],
-          variants: (updated.variants as any) || [],
-          status: updated.status as any,
-        };
-      }
-    } else {
-      // Mock product being updated for the first time -> convert to real DB product
-      const store = await getStoreBySlug(updates.storeSlug || 'storet1');
-      if (store && 'id' in store) {
-        const existingMock = PRODUCTS.find(p => p.id === productId) || getMockProducts(updates.storeSlug || 'storet1').find(p => p.id === productId) || MOCK_PRODUCTS.find(p => p.id === productId || p.sku === productId);
-        
-        const [newProd] = await db.insert(schema.products).values({
-          storeId: store.id,
-          title: updates.title || existingMock?.title || 'Produit',
-          sku: updates.sku || existingMock?.sku || `SKU-${Date.now()}`,
-          category: updates.category || (existingMock as any)?.category || 'Général',
-          price: updates.price !== undefined ? Number(updates.price) : Number(existingMock?.price || 0),
-          comparePrice: updates.comparePrice ? Number(updates.comparePrice) : undefined,
-          costPrice: updates.costPrice !== undefined ? Number(updates.costPrice) : Number((existingMock as any)?.costPrice || 0),
-          stock: updates.stock !== undefined ? Number(updates.stock) : Number((existingMock as any)?.stock || (existingMock as any)?.stockLeft || 0),
-          images: updates.images || existingMock?.images || [],
-          variants: updates.variants || (existingMock as any)?.variants || [],
-          status: updates.status || 'active',
-        }).returning();
-
-        if (newProd) {
-          updateMockProduct(productId, updates);
-          return {
-            id: newProd.id,
-            storeSlug: updates.storeSlug || 'storet1',
-            title: newProd.title,
-            sku: newProd.sku,
-            category: newProd.category,
-            price: Number(newProd.price),
-            comparePrice: newProd.comparePrice ? Number(newProd.comparePrice) : undefined,
-            costPrice: Number(newProd.costPrice) || 0,
-            stock: Number(newProd.stock),
-            images: Array.isArray(newProd.images) ? newProd.images : [],
-            variants: (newProd.variants as any) || [],
-            status: newProd.status as any,
-          };
-        }
-      }
-    }
-  } catch (err) {
-    console.warn('[DbRepo] Error updating product in DB:', err);
-  }
-
-  updateMockProduct(productId, updates);
-  return payloadUpdated;
+  return updateMockProduct(productId, updates);
 }
 
 export async function deleteProduct(productId: string): Promise<boolean> {
-  let resolvedSku: string | null = null;
-  // 1. Get SKU before deleting from Payload so we can delete from Drizzle
+  // 1. Delete from Payload CMS
   try {
-    const { getProductByIdFromPayload, deleteProductInPayload } = await import('./payload-products');
-    const prod = await getProductByIdFromPayload(productId);
-    if (prod && prod.sku) {
-      resolvedSku = prod.sku;
-    }
+    const { deleteProductInPayload } = await import('./payload-products');
     await deleteProductInPayload(productId);
   } catch (err) {
     console.warn('[DbRepo] Payload product delete warning:', err);
   }
 
-  // 2. Also delete from Drizzle DB
+  // 2. Also delete from Mock Memory (for backward compatibility if needed)
   deleteMockProduct(productId);
-  const db = getDb();
-  if (!db) return true;
-
-  try {
-    let targetRowId: string | null = null;
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
-    if (isUuid) {
-      targetRowId = productId;
-    } else {
-      const cleanTarget = productId.toLowerCase().trim();
-      const cleanSkuPart = cleanTarget.replace(/^prod_/, '');
-      const searchSku = resolvedSku ? resolvedSku.toLowerCase().trim() : null;
-      
-      const all = await db.query.products.findMany({ limit: 500 });
-      const matched = all.find((p) => {
-        const pSku = String(p.sku || '').toLowerCase();
-        const pId = String(p.id ?? '').toLowerCase();
-        const titleSlug = String(p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        return (
-          (searchSku && pSku === searchSku) ||
-          pId === cleanTarget ||
-          pSku === cleanTarget ||
-          pSku === cleanSkuPart ||
-          cleanTarget.includes(pSku) ||
-          titleSlug === cleanTarget ||
-          titleSlug === cleanSkuPart
-        );
-      });
-      if (matched) {
-        targetRowId = matched.id;
-      }
-    }
-
-    if (targetRowId) {
-      await db.delete(schema.products).where(eq(schema.products.id, targetRowId));
-      return true;
-    }
-    return false; // Not found in Drizzle
-  } catch (err) {
-    console.error('[DbRepo] Error deleting product from DB:', err);
-    throw err; // Actually throw to expose FK constraints or other errors
-  }
+  
+  return true;
 }
 
 export async function getProductBySlugOrSku(slugOrSku: string): Promise<Product | null> {
-  const db = getDb();
   const clean = slugOrSku.toLowerCase().trim();
-  if (!db) {
-    const memMatch = PRODUCTS.find(
-      (p: any) =>
-        String(p.sku || '').toLowerCase() === clean ||
-        String(p.id ?? '').toLowerCase() === clean ||
-        String(p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') === clean
-    );
-    return memMatch || null;
+  
+  // Try to find in Payload first
+  try {
+    const { getProductBySlugOrSkuFromPayload } = await import('./payload-products');
+    const product = await getProductBySlugOrSkuFromPayload(clean);
+    if (product) return product;
+  } catch (err) {
+    console.warn('[DbRepo] Payload product fetch by slug/sku warning:', err);
   }
 
-  try {
-    const all = await db.query.products.findMany({
-      limit: 200,
-    });
-    const found = all.find(
-      (r: any) =>
-        String(r.sku || '').toLowerCase() === clean ||
-        String(r.id ?? '').toLowerCase() === clean ||
-        String(r.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') === clean
-    );
-    if (found) {
-      return {
-        id: found.id,
-        storeSlug: 'storet1',
-        title: found.title,
-        sku: found.sku,
-        category: found.category,
-        price: found.price,
-        comparePrice: found.comparePrice || undefined,
-        costPrice: found.costPrice,
-        stock: found.stock,
-        images: found.images,
-        variants: found.variants,
-        status: found.status as 'active' | 'draft',
-      };
-    }
-    return null;
-  } catch {
-    return null;
-  }
+  // Fallback to mock memory
+  const memMatch = PRODUCTS.find(
+    (p: any) =>
+      String(p.sku || '').toLowerCase() === clean ||
+      String(p.id ?? '').toLowerCase() === clean ||
+      String(p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') === clean
+  );
+  return memMatch || null;
 }
 
 /**
@@ -924,7 +645,7 @@ export async function decrementDbProductStock(
 ) {
   if (!items || items.length === 0) return;
 
-  // 1. Decrement in Payload CMS (single source of truth)
+  // Decrement in Payload CMS (single source of truth)
   try {
     const { decrementPayloadStock } = await import('./payload-products');
     for (const it of items) {
@@ -932,54 +653,6 @@ export async function decrementDbProductStock(
     }
   } catch (payloadStockErr) {
     console.warn('[DbRepo] Non-fatal Payload stock decrement warning:', payloadStockErr);
-  }
-
-  // 2. Decrement in Drizzle Postgres
-  const db = getDb();
-  if (!db) return;
-
-  try {
-    const allStoreProds = await db.query.products.findMany({
-      where: eq(schema.products.storeId, storeId),
-    });
-    for (const it of items) {
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(it.id);
-      const targetSku = (it.sku || it.id || '').trim().toLowerCase();
-      const targetSkuClean = targetSku.replace(/^prod_/, '');
-      const prod = allStoreProds.find(
-        (p) =>
-          (isUuid && p.id === it.id) ||
-          p.sku.toLowerCase() === targetSku ||
-          p.sku.toLowerCase() === targetSkuClean ||
-          targetSku.startsWith(p.sku.toLowerCase()) ||
-          p.sku.toLowerCase().startsWith(targetSku) ||
-          p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSku ||
-          p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSkuClean
-      );
-      if (prod) {
-        let updatedVariants = prod.variants;
-        if (Array.isArray(updatedVariants)) {
-          updatedVariants = updatedVariants.map((v) => {
-            const matchColor = it.color ? v.color?.toLowerCase() === it.color.toLowerCase() : true;
-            const matchSize = it.size ? v.size?.toLowerCase() === it.size.toLowerCase() : true;
-            if (matchColor && matchSize) {
-              return { ...v, stock: Math.max(0, (v.stock || 0) - it.quantity) };
-            }
-            return v;
-          });
-        }
-        await db
-          .update(schema.products)
-          .set({
-            stock: Math.max(0, prod.stock - it.quantity),
-            variants: updatedVariants,
-            updatedAt: new Date(),
-          })
-          .where(eq(schema.products.id, prod.id));
-      }
-    }
-  } catch (invDbErr) {
-    console.warn('[DbRepo] Non-fatal DB stock decrement warning:', invDbErr);
   }
 }
 
@@ -995,55 +668,6 @@ export async function restoreDbProductStock(
     await restorePayloadStock(items);
   } catch (err) {
     console.warn('[DbRepo] Non-fatal Payload stock restore warning:', err);
-  }
-
-  const db = getDb();
-  if (!db) return;
-
-  try {
-    const storeProducts = await db.query.products.findMany({
-      where: eq(schema.products.storeId, storeId),
-    });
-
-    for (const it of items) {
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(it.id);
-      const targetSku = (it.sku || it.id || '').trim().toLowerCase();
-      const targetSkuClean = targetSku.replace(/^prod_/, '');
-      const prod = storeProducts.find(
-        (p) =>
-          (isUuid && p.id === it.id) ||
-          p.sku.toLowerCase() === targetSku ||
-          p.sku.toLowerCase() === targetSkuClean ||
-          targetSku.startsWith(p.sku.toLowerCase()) ||
-          p.sku.toLowerCase().startsWith(targetSku) ||
-          p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSku ||
-          p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === targetSkuClean
-      );
-
-      if (prod) {
-        let updatedVariants = prod.variants;
-        if (Array.isArray(updatedVariants)) {
-          updatedVariants = updatedVariants.map((v) => {
-            const matchColor = it.color ? v.color?.toLowerCase() === it.color.toLowerCase() : true;
-            const matchSize = it.size ? v.size?.toLowerCase() === it.size.toLowerCase() : true;
-            if (matchColor && matchSize) {
-              return { ...v, stock: (v.stock || 0) + it.quantity };
-            }
-            return v;
-          });
-        }
-        await db
-          .update(schema.products)
-          .set({
-            stock: prod.stock + it.quantity,
-            variants: updatedVariants,
-            updatedAt: new Date(),
-          })
-          .where(eq(schema.products.id, prod.id));
-      }
-    }
-  } catch (err) {
-    console.warn('[DbRepo] Non-fatal DB stock restore warning:', err);
   }
 }
 
@@ -2522,14 +2146,9 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
 
     // 8. Products Breakdown (Performance de l'Offre)
     let dbStoreProducts: any[] = [];
-    // Re-fetch store (if db available) for product mapping, or skip if not
     try {
-      const productStore = await getStoreBySlug(storeSlug);
-      if (db && productStore && 'id' in productStore) {
-        dbStoreProducts = await db.query.products.findMany({
-          where: eq(schema.products.storeId, (productStore as any).id),
-        });
-      }
+      const { getProductsFromPayload } = await import('./payload-products');
+      dbStoreProducts = await getProductsFromPayload(storeSlug);
     } catch (prodErr) {
       console.warn('[DbRepo] Non-fatal product fetch warning:', prodErr);
     }
