@@ -231,56 +231,65 @@ export async function createStore(data: {
 
 // ── Products Repository ────────────────────────────────────────
 export async function getProducts(storeSlug: string): Promise<Product[]> {
-  // Try Payload CMS first (single source of truth for products)
+  let payloadProducts: Product[] = [];
   try {
     const { getProductsFromPayload } = await import('./payload-products');
-    const payloadProducts = await getProductsFromPayload(storeSlug);
-    if (payloadProducts.length > 0) {
-      return payloadProducts;
-    }
+    payloadProducts = await getProductsFromPayload(storeSlug);
   } catch (err) {
-    console.warn('[DbRepo] Payload product fetch unavailable, trying Drizzle fallback:', err);
+    console.warn('[DbRepo] Payload product fetch unavailable:', err);
   }
 
   // Fallback to Drizzle DB (legacy data during migration)
   const db = getDb();
-  if (!db) {
-    return [];
+  let drizzleProducts: Product[] = [];
+  
+  if (db) {
+    try {
+      const store = await getStoreBySlug(storeSlug);
+      if (store && 'id' in store) {
+        const rows = await db.query.products.findMany({
+          where: eq(schema.products.storeId, store.id),
+          orderBy: [desc(schema.products.createdAt)],
+        });
+
+        drizzleProducts = rows.map((r) => ({
+          id: r.id,
+          storeSlug,
+          title: r.title,
+          sku: r.sku,
+          category: r.category,
+          price: r.price,
+          comparePrice: r.comparePrice || undefined,
+          costPrice: r.costPrice,
+          stock: r.stock,
+          images: r.images,
+          variants: r.variants,
+          status: r.status as 'active' | 'draft',
+        }));
+      }
+    } catch (err) {
+      console.warn('[DbRepo] Error querying DB:', err);
+      if (process.env.NODE_ENV === 'production') throw err;
+    }
   }
 
-  try {
-    const store = await getStoreBySlug(storeSlug);
-    if (!store || !('id' in store)) {
-      return [];
-    }
-
-    const rows = await db.query.products.findMany({
-      where: eq(schema.products.storeId, store.id),
-      orderBy: [desc(schema.products.createdAt)],
-    });
-
-    if (rows.length === 0) {
-      return [];
-    }
-
-    return rows.map((r) => ({
-      id: r.id,
-      storeSlug,
-      title: r.title,
-      sku: r.sku,
-      category: r.category,
-      price: r.price,
-      comparePrice: r.comparePrice || undefined,
-      costPrice: r.costPrice,
-      stock: r.stock,
-      images: r.images,
-      variants: r.variants,
-      status: r.status as 'active' | 'draft',
-    }));
-  } catch (err) {
-    console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
-    return [];
+  // Combine products, prioritizing Payload CMS as the single source of truth
+  const combinedMap = new Map<string, Product>();
+  
+  // Add Drizzle products first
+  for (const dp of drizzleProducts) {
+    combinedMap.set(String(dp.sku || dp.id).toLowerCase(), dp);
   }
+  
+  // Override with Payload products (which are the source of truth)
+  for (const pp of payloadProducts) {
+    combinedMap.set(String(pp.sku || pp.id).toLowerCase(), pp);
+  }
+
+  return Array.from(combinedMap.values()).sort((a, b) => {
+    // Basic sorting: keep newer (or Payload) first by ID length or string comparison
+    return String(b.id).localeCompare(String(a.id));
+  });
 }
 
 export async function createProduct(data: Omit<Product, 'id'>): Promise<Product> {
@@ -333,7 +342,8 @@ export async function createProduct(data: Omit<Product, 'id'>): Promise<Product>
     const created = await createProductInPayload(data);
     if (created) {
       addMockProduct(data);
-      return drizzleCreated || created;
+      // Return Payload created product to ensure UI uses Payload ID, preventing split-brain sync issues
+      return created;
     }
   } catch (err) {
     console.warn('[DbRepo] Payload product create warning:', err);
@@ -371,12 +381,15 @@ export async function updateProduct(productId: string, updates: Partial<Product>
     } else {
       const cleanTarget = productId.toLowerCase().trim();
       const cleanSkuPart = cleanTarget.replace(/^prod_/, '');
+      const searchSku = payloadUpdated?.sku ? payloadUpdated.sku.toLowerCase().trim() : null;
+      
       const all = await db.query.products.findMany({ limit: 500 });
       const matched = all.find((p) => {
         const pSku = String(p.sku || '').toLowerCase();
         const pId = String(p.id ?? '').toLowerCase();
         const titleSlug = String(p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
         return (
+          (searchSku && pSku === searchSku) ||
           pId === cleanTarget ||
           pSku === cleanTarget ||
           pSku === cleanSkuPart ||
@@ -473,9 +486,14 @@ export async function updateProduct(productId: string, updates: Partial<Product>
 }
 
 export async function deleteProduct(productId: string): Promise<boolean> {
-  // 1. Delete from Payload CMS
+  let resolvedSku: string | null = null;
+  // 1. Get SKU before deleting from Payload so we can delete from Drizzle
   try {
-    const { deleteProductInPayload } = await import('./payload-products');
+    const { getProductByIdFromPayload, deleteProductInPayload } = await import('./payload-products');
+    const prod = await getProductByIdFromPayload(productId);
+    if (prod && prod.sku) {
+      resolvedSku = prod.sku;
+    }
     await deleteProductInPayload(productId);
   } catch (err) {
     console.warn('[DbRepo] Payload product delete warning:', err);
@@ -494,12 +512,15 @@ export async function deleteProduct(productId: string): Promise<boolean> {
     } else {
       const cleanTarget = productId.toLowerCase().trim();
       const cleanSkuPart = cleanTarget.replace(/^prod_/, '');
+      const searchSku = resolvedSku ? resolvedSku.toLowerCase().trim() : null;
+      
       const all = await db.query.products.findMany({ limit: 500 });
       const matched = all.find((p) => {
         const pSku = String(p.sku || '').toLowerCase();
         const pId = String(p.id ?? '').toLowerCase();
         const titleSlug = String(p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
         return (
+          (searchSku && pSku === searchSku) ||
           pId === cleanTarget ||
           pSku === cleanTarget ||
           pSku === cleanSkuPart ||

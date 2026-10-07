@@ -33,7 +33,7 @@ function ProductsContent() {
     fetch(`/api/admin/products?store=${encodeURIComponent(storeSlug)}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+        if (data.success && Array.isArray(data.products)) {
           setProducts(data.products);
         } else {
           setProducts(getProducts(storeSlug));
