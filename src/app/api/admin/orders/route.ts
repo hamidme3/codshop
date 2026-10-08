@@ -7,7 +7,7 @@ import { isValidStoreSlug } from '@/lib/sanitizer';
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const storeSlug = searchParams.get('store') || req.headers.get('x-user-store-slug') || req.headers.get('x-store-slug');
+    const storeSlug = req.headers.get('x-user-store-slug');
 
     if (!storeSlug) {
       return NextResponse.json({ success: false, message: 'Store slug is required' }, { status: 400 });
@@ -68,8 +68,10 @@ export async function GET(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const body = await req.json();
-    let { storeSlug } = body;
-    if (!storeSlug) storeSlug = req.headers.get('x-user-store-slug') || req.headers.get('x-store-slug');
+    const storeSlug = req.headers.get('x-user-store-slug');
+    if (!storeSlug) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    
+    // storeSlug extracted from header
     const { orderId, status, trackingNumber, courier, agentNotes, notes } = body;
     const finalNotes = agentNotes !== undefined ? agentNotes : notes;
 
@@ -104,6 +106,16 @@ export async function PATCH(req: Request) {
       const existingOrder = await db.query.orders.findFirst({
         where: whereClause,
       });
+
+      if (!existingOrder) {
+        return NextResponse.json({ success: false, message: 'Order not found' }, { status: 404 });
+      }
+
+      const { getStoreBySlug } = await import('@/lib/db-repository');
+      const store = await getStoreBySlug(storeSlug);
+      if (!store || existingOrder.storeId !== store.id) {
+        return NextResponse.json({ success: false, message: 'Forbidden: Order does not belong to your store' }, { status: 403 });
+      }
 
       const updatePayload: any = {
         updatedAt: now,
@@ -192,7 +204,7 @@ export async function DELETE(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const orderId = searchParams.get('orderId');
-    const storeSlug = searchParams.get('store') || req.headers.get('x-user-store-slug') || req.headers.get('x-store-slug');
+    const storeSlug = req.headers.get('x-user-store-slug');
 
     if (!storeSlug) {
       return NextResponse.json({ success: false, message: 'Store slug is required' }, { status: 400 });
@@ -220,6 +232,16 @@ export async function DELETE(req: Request) {
       const existingOrder = await db.query.orders.findFirst({
         where: whereClause,
       });
+
+      if (!existingOrder) {
+        return NextResponse.json({ success: false, message: 'Order not found' }, { status: 404 });
+      }
+
+      const { getStoreBySlug } = await import('@/lib/db-repository');
+      const store = await getStoreBySlug(storeSlug);
+      if (!store || existingOrder.storeId !== store.id) {
+        return NextResponse.json({ success: false, message: 'Forbidden: Order does not belong to your store' }, { status: 403 });
+      }
 
       // Restore DB stock ONLY if deleting a previously active order (never for abandoned, canceled, or returned orders)
       if (existingOrder && existingOrder.status !== 'canceled' && existingOrder.status !== 'returned' && existingOrder.status !== 'abandoned') {

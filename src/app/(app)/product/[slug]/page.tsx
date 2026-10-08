@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { notFound, useParams } from 'next/navigation';
-import { Product, getProductBySlug, getProductQuantityTiers, getProductVariantInfo } from '@/lib/mockProducts';
+import { Product, getProductQuantityTiers, getProductVariantInfo } from '@/lib/mockProducts';
 import { getDeliveryDateEstimate } from '@/lib/moroccanCities';
 import { getCountryConfig, getCountryDeliveryEstimate, detectClientVisitorCountry } from '@/lib/geo';
 import { CountdownTimer } from '@/components/CountdownTimer';
@@ -34,9 +34,8 @@ import { THEMES } from '@/lib/themes';
 export default function ProductDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
-  const initialProduct = useMemo(() => getProductBySlug(slug), [slug]);
-  const [product, setProduct] = useState<Product | undefined>(initialProduct);
-  const [loading, setLoading] = useState(!initialProduct);
+  const [product, setProduct] = useState<Product | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!slug) return;

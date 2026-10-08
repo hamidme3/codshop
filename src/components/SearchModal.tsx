@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearch } from '@/context/SearchContext';
 import { useTheme } from '@/context/ThemeContext';
-import { MOCK_PRODUCTS, Product } from '@/lib/mockProducts';
+import { Product } from '@/lib/mockProducts';
 import { THEMES } from '@/lib/themes';
 import { trackSearch } from '@/lib/posthog';
 import {
@@ -79,13 +79,7 @@ export function SearchModal() {
 
   // Combine store products with base catalog
   const catalog = useMemo(() => {
-    if (storeProducts.length === 0) return MOCK_PRODUCTS;
-    const existingSlugs = new Set(storeProducts.map((p) => String(p.slug || '').toLowerCase()));
-    const existingSkus = new Set(storeProducts.map((p) => String(p.sku || p.id).toLowerCase()));
-    const remainder = MOCK_PRODUCTS.filter(
-      (p) => !existingSlugs.has(String(p.slug || '').toLowerCase()) && !existingSkus.has(String(p.sku || p.id).toLowerCase())
-    );
-    return [...storeProducts, ...remainder];
+    return storeProducts;
   }, [storeProducts]);
 
   // Lock body scroll and auto-focus when open

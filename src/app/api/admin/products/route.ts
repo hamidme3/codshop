@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const storeSlug = searchParams.get('store') || req.headers.get('x-user-store-slug') || req.headers.get('x-store-slug');
+    const storeSlug = req.headers.get('x-user-store-slug');
 
     if (!storeSlug || !isValidStoreSlug(storeSlug)) {
       return NextResponse.json({ success: false, message: 'Invalid store slug' }, { status: 400 });
@@ -40,8 +40,10 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    let { storeSlug } = body;
-    if (!storeSlug) storeSlug = req.headers.get('x-user-store-slug') || req.headers.get('x-store-slug');
+    const storeSlug = req.headers.get('x-user-store-slug');
+    if (!storeSlug) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    
+    // storeSlug extracted from header
 
     const {
       title,
@@ -105,12 +107,21 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
+    const storeSlug = req.headers.get('x-user-store-slug');
+    if (!storeSlug) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+
     const body = await req.json();
-    const { productId, id, ...updates } = body;
+    const { productId, id, storeSlug: bodyStoreSlug, ...updates } = body;
     const targetId = productId || id;
 
     if (!targetId) {
       return NextResponse.json({ success: false, message: 'Product ID is required' }, { status: 400 });
+    }
+
+    const products = await getProducts(storeSlug);
+    const ownsProduct = products.some(p => p.id === targetId || p.sku === targetId);
+    if (!ownsProduct) {
+      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
     }
 
     const updated = await updateProduct(targetId, updates);
@@ -131,6 +142,9 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    const storeSlug = req.headers.get('x-user-store-slug');
+    if (!storeSlug) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+
     const { searchParams } = new URL(req.url);
     const idFromQuery = searchParams.get('id');
     let targetId = idFromQuery;
@@ -144,6 +158,12 @@ export async function DELETE(req: Request) {
 
     if (!targetId) {
       return NextResponse.json({ success: false, message: 'Product ID is required' }, { status: 400 });
+    }
+
+    const products = await getProducts(storeSlug);
+    const ownsProduct = products.some(p => p.id === targetId || p.sku === targetId);
+    if (!ownsProduct) {
+      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
     }
 
     await deleteProduct(targetId);
