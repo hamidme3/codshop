@@ -55,10 +55,23 @@ export const normalizeThemeConfig = (config: any) => {
   };
 };
 
-export const getPuckConfig = (rawConfig: any = defaultThemeConfig): Config<Props> => {
+export const getPuckConfig = (rawConfig: any = defaultThemeConfig): Config<Props, any> => {
   const themeConfig = normalizeThemeConfig(rawConfig);
   
   return {
+    root: {
+      render: ({ children }) => {
+        const fontClass = themeConfig.fontFamily === 'serif' ? 'font-serif' : themeConfig.fontFamily === 'monospace' ? 'font-mono' : 'font-sans';
+        return (
+          <div 
+            style={{ backgroundColor: themeConfig.bgPage, color: themeConfig.textPrimary || '#111827', minHeight: "100vh" }}
+            className={fontClass}
+          >
+            {children}
+          </div>
+        );
+      }
+    },
     components: {
       AnnouncementBar: {
         fields: {

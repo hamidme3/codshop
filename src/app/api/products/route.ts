@@ -7,7 +7,20 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const headerStore = req.headers.get('x-store-slug');
-    const storeSlug = searchParams.get('store') || headerStore || 'storet1';
+    let storeSlug = searchParams.get('store') || headerStore;
+    if (!storeSlug) {
+      const host = req.headers.get('host') || '';
+      const cleanHost = host.split(':')[0].toLowerCase();
+      const rootDomain = process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site';
+      if (cleanHost.endsWith(rootDomain) && cleanHost !== rootDomain && cleanHost !== `www.${rootDomain}`) {
+        storeSlug = cleanHost.replace(`.${rootDomain}`, '');
+      } else if (cleanHost.endsWith('.localhost')) {
+        storeSlug = cleanHost.replace('.localhost', '');
+      }
+    }
+    
+    // Final fallback
+    storeSlug = storeSlug || 'ottavio';
     const slugQuery = searchParams.get('slug')?.toLowerCase().trim();
 
     // 1. Fetch products from DB
