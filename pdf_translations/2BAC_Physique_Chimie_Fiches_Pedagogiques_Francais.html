@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Moroccan 2nd Year Baccalaureate Science Curriculum Lesson Plans - Professor AYOUB KHAMMOUR</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@page {
+    size: A4 portrait;
+    margin: 8mm 10mm 10mm 10mm;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #0f172a;
+    background: #ffffff;
+    line-height: 1.35;
+    font-size: 8pt;
+    margin: 0;
+    padding: 0;
+}
+
+.page {
+    page-break-after: always;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.cover-page {
+    page-break-after: always;
+    height: 94vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border: 3px double #0284c7;
+    border-radius: 12px;
+    padding: 30px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
+}
+
+.cover-title {
+    font-size: 26pt;
+    font-weight: 800;
+    color: #0369a1;
+    margin-bottom: 8px;
+}
+
+.cover-subtitle {
+    font-size: 16pt;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 20px;
+}
+
+.cover-badge {
+    display: inline-block;
+    background: #0284c7;
+    color: white;
+    padding: 6px 20px;
+    border-radius: 9999px;
+    font-size: 11pt;
+    font-weight: 600;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+}
+
+.cover-author {
+    font-size: 13pt;
+    font-weight: 500;
+    color: #334155;
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #cbd5e1;
+    width: 60%;
+}
+
+.cover-meta {
+    margin-top: 20px;
+    font-size: 9.5pt;
+    color: #64748b;
+}
+
+/* Official Header */
+.official-header {
+    border: 1px solid #94a3b8;
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 6px;
+    font-size: 8pt;
+}
+
+.official-header td {
+    border: 1px solid #94a3b8;
+    padding: 3px 6px;
+    text-align: center;
+    font-weight: 600;
+    background: #f8fafc;
+}
+
+.official-footer {
+    border-top: 1px solid #94a3b8;
+    display: flex;
+    justify-content: space-between;
+    font-size: 7pt;
+    color: #64748b;
+    padding-top: 3px;
+    margin-top: 4px;
+}
+
+/* Overview Box */
+.overview-box {
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin-bottom: 6px;
+    font-size: 7.5pt;
+}
+
+.overview-title {
+    font-weight: 700;
+    color: #0369a1;
+    margin-bottom: 3px;
+    font-size: 8pt;
+}
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+/* Unit Sheet Block */
+.unit-block {
+    border: 1px solid #94a3b8;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    overflow: hidden;
+}
+
+.unit-banner {
+    background: #0284c7;
+    color: #ffffff;
+    padding: 3px 8px;
+    font-weight: 700;
+    font-size: 8.5pt;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.unit-prereq-problem {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid #cbd5e1;
+    font-size: 7.5pt;
+}
+
+.prereq-col {
+    padding: 4px 6px;
+    border-right: 1px solid #cbd5e1;
+    background: #ffffff;
+}
+
+.problem-col {
+    padding: 4px 6px;
+    background: #f0f9ff;
+}
+
+.block-title {
+    font-weight: 700;
+    color: #0369a1;
+    margin-bottom: 2px;
+}
+
+/* Main Pedagogical Table */
+.pedagogical-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 7.2pt;
+}
+
+.pedagogical-table th {
+    background: #0f172a;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 4px 5px;
+    border: 1px solid #64748b;
+    text-align: left;
+}
+
+.pedagogical-table td {
+    border: 1px solid #cbd5e1;
+    padding: 4px 5px;
+    vertical-align: top;
+}
+
+.pedagogical-table ul {
+    margin: 0;
+    padding-left: 12px;
+}
+
+.pedagogical-table li {
+    margin-bottom: 2px;
+}
+
+.pedagogical-table tr:nth-child(even) td {
+    background: #fafafa;
+}
+</style>
+</head>
+<body>
+
+    <div class="cover-page">
+        <div class="cover-badge">Royaume du Maroc • Enseignement Secondaire Qualifiant</div>
+        <div class="cover-title">Fiches Pédagogiques</div>
+        <div class="cover-subtitle">Physique et Chimie (Deuxième Année du Baccalauréat - Sciences)</div>
+        <div style="font-size: 11pt; color: #475569; max-width: 500px; margin: 0 auto 20px auto;">
+            Filières des Sciences Expérimentales (PC, SVT, Agronomie) & Sciences Mathématiques (A et B)
+        </div>
+        <div class="cover-author">
+            <strong>Conception et Réalisation : Professeur AYOUB KHAMMOUR</strong><br>
+            <span style="font-size: 10pt; color: #64748b;">Registration No / N° SOM : 1503811</span>
+        </div>
+        <div class="cover-meta">Cadre de Référence Officiel : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 et 144</div>
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Physique</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            <div class="overview-box">
+                <div class="overview-title">Introduction & Partie 1 : Les Ondes (15 - 16 Heures)</div>
+                <div class="overview-grid">
+                    <div>
+                        <strong>Questions posées au physicien (1h) :</strong>
+                        Identifier les rôles de la physique dans la société, questions ouvertes, incertitudes de mesure et modèles.
+                    </div>
+                    <div>
+                        <strong>Compétences Visées & Unités :</strong>
+                        Adopter le modèle ondulatoire. Applications des ultrasons. Logiciels de simulation. 1. Ondes mécaniques progressives (5h) • 2. Ondes périodiques (5h) • 3. Propagation d'une onde lumineuse (5-6h)
+                    </div>
+                </div>
+            </div>
+
+            <!-- UNIT 1 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 1 : Les Ondes Mécaniques Progressives</span>
+                    <span>5 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Relation v = d/t, oscilloscope et base de temps, énergie mécanique.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Une perturbation se propage dans un milieu élastique sans transport de matière. Que traduit ce phénomène et comment définir le retard temporel ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Mise en évidence des ondes à 1D, 2D et 3D.</li>
+                                    <li>Ondes transversales et longitudinales.</li>
+                                    <li>Propriétés générales (propagation, superposition).</li>
+                                    <li>Vitesse de propagation v = d / Δt et facteurs d'influence.</li>
+                                    <li>Retard temporel τ = d / v et élongation y_M(t) = y_S(t - τ).</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Exemples d'Ondes</strong> (1. Onde transversale, 2. Onde longitudinale)<br>
+                                <strong>II. Propriétés des Ondes</strong> (1. Définition, 2. Sens de propagation, 3. Vitesse de propagation)<br>
+                                <strong>III. Onde à 1D et Retard Temporel</strong> (1. Retard temporel τ, 2. Relation d'élongation)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Manuel, tableau, simulations TICE</li>
+                                    <li>Corde, ressort, cuve à ondes, diapason</li>
+                                    <li>Cloche à vide, 2 microphones, oscilloscope</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Démonstration du son dans le vide. Mesure de la vitesse du son par 2 microphones sur oscilloscope.<br>
+                                <strong>Évaluation :</strong> Questions orales, calculs de retard et Devoir surveillé 1.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 1</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Physique</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            
+            <!-- UNIT 2 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 2 : Les Ondes Mécaniques Progressives Périodiques</span>
+                    <span>5 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Onde progressive, vitesse, retard temporel, oscilloscope.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        La houle se propage sous forme sinusoïdale. Que caractérise la double périodicité et que se passe-t-il devant une fente étroite ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Double périodicité temporelle T et spatiale λ.</li>
+                                    <li>Relation fondamentale : λ = v · T = v / N.</li>
+                                    <li>Points en phase (d = k·λ) et en opposition de phase.</li>
+                                    <li>Diffraction des ondes mécaniques (a ≤ λ).</li>
+                                    <li>Milieu dispersif : la vitesse dépend de la fréquence.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Onde Périodique</strong> (1. Définition, 2. Vitesse, 3. Stroboscope)<br>
+                                <strong>II. Onde Sinusoïdale</strong> (1. Onde sur corde, 2. Surface de l'eau, 3. Ondes sonores)<br>
+                                <strong>III. Phénomène de Diffraction</strong> (1. Condition a ≤ λ, 2. Caractéristiques de l'onde diffractée)<br>
+                                <strong>IV. Milieu Dispersif</strong>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Cuve à ondes avec vibreur, stroboscope</li>
+                                    <li>Diaphragmes à fente réglable</li>
+                                    <li>Générateur GBF, haut-parleur, 2 micros, oscilloscope</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Immobilité apparente au stroboscope pour mesurer λ. Observation de la diffraction et dispersion sur cuve à ondes.<br>
+                                <strong>Évaluation :</strong> Exercices de déphasage et Devoir surveillé 1.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- UNIT 3 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 3 : Propagation d'une Onde Lumineuse</span>
+                    <span>6 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Diffraction mécanique, indice de réfraction, lois de Descartes.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Le laser permet de mesurer des diamètres de cheveux par diffraction. Comment prouver la nature ondulatoire de la lumière ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Nature ondulatoire de la lumière prouvée par diffraction.</li>
+                                    <li>Écart angulaire de diffraction : θ = λ / a.</li>
+                                    <li>Largeur de tache centrale : L = 2·λ·D / a.</li>
+                                    <li>Lumière monochromatique et polychromatique.</li>
+                                    <li>Invariance de la fréquence ν selon le milieu ; v = c / n.</li>
+                                    <li>Dispersion par le prisme et lois de Descartes.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Diffraction de la Lumière</strong> (1. Modèle ondulatoire, 2. Diffraction par une fente, 3. Formule θ = λ/a = L/(2D))<br>
+                                <strong>II. Dispersion de la Lumière</strong> (1. Indice n(ν), 2. Dispersion par le prisme, 3. Formules du prisme)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Laser rouge (650 nm) et vert</li>
+                                    <li>Fentes étalonnées, fils calibrés, écran</li>
+                                    <li>Prisme en verre, goniomètre, lanterne</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Mesure de la tache centrale L en fonction de a et D ; déduction de la longueur d'onde du laser.<br>
+                                <strong>Évaluation :</strong> Exploitation de droites d'étalonnage et Devoir 1.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 2</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Physique</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            <div class="overview-box">
+                <div class="overview-title">Partie 2 : Les Transformations Nucléaires (10 - 14 Heures)</div>
+            </div>
+
+            <!-- UNIT 1 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 1 : La Décroissance Radioactive</span>
+                    <span>5 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Structure de l'atome, isotopes, numéro Z, neutralité.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        La datation au Carbone 14 permet de dater des fossiles. Qu'est-ce que la décroissance radioactive et quelle loi mathématique la régit ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Symbole ^A_Z X et diagramme de Segrè.</li>
+                                    <li>Lois de conservation de Soddy (A et Z).</li>
+                                    <li>Radioactivités α, β⁻, β⁺ et émission γ.</li>
+                                    <li>Loi de décroissance : N(t) = N₀ · e^(-λt).</li>
+                                    <li>Demi-vie t_(1/2) = ln(2)/λ et activité A(t) en Bq.</li>
+                                    <li>Principe de datation au Carbone 14.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Stabilité Nucléaire</strong> (1. Symbole du nucléide, 2. Isotopes, 3. Diagramme de Segrè)<br>
+                                <strong>II. Radioactivité</strong> (1. Lois de Soddy, 2. Désintégrations α, β⁻, β⁺, 3. Rayonnement γ)<br>
+                                <strong>III. Loi de Décroissance</strong> (1. N(t) = N₀ e^(-λt), 2. Demi-vie t_(1/2), 3. Activité A(t))<br>
+                                <strong>IV. Datation</strong> (1. Carbone 14, 2. Datation géologique)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Compteur Geiger et mesure du bruit de fond</li>
+                                    <li>Diagramme de Segrè mural et logiciel</li>
+                                    <li>Simulation numérique du lancer de dés</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Simulation par le jeu des dés ; tracé de N(t) ; calcul de t_(1/2) et équilibrage par les lois de Soddy.<br>
+                                <strong>Évaluation :</strong> Exercices de datation et Devoir surveillé 2.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- UNIT 2 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 2 : Noyaux, Masse et Énergie</span>
+                    <span>5 - 9 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Radioactivité, lois de conservation, unités d'énergie.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Les réacteurs libèrent une énergie colossale par fission de l'Uranium 235. D'où provient cette énergie et qu'est-ce que la courbe d'Aston ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Équivalence masse-énergie d'Einstein : E = m · c².</li>
+                                    <li>Défaut de masse : Δm = [Z·m_p + (A-Z)·m_n] - m_noyau.</li>
+                                    <li>Énergie de liaison : E_l = Δm · c² et E_l / A.</li>
+                                    <li>Courbe d'Aston ; fission et fusion nucléaires.</li>
+                                    <li>Bilan énergétique : ΔE = [Σm_prod - Σm_reac]·c².</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Équivalence Masse-Énergie</strong> (1. Défaut de masse, 2. Énergie de liaison, 3. Énergie par nucléon, 4. Courbe d'Aston)<br>
+                                <strong>II. Bilan Énergétique</strong> (1. Cas général, 2. Désintégration, 3. Fission et fusion)<br>
+                                <strong>III. Applications & Risques</strong>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Courbe d'Aston officielle, tables de masses atomiques</li>
+                                    <li>Documentaires vidéo sur les réacteurs et ITER</li>
+                                    <li>Calculatrices scientifiques pour calculs de Δm</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Calcul de l'énergie de liaison de l'hélium et du fer 56. Bilan d'énergie libérée lors de la fission et fusion.<br>
+                                <strong>Évaluation :</strong> Exercices de bilans nucléaires et Devoir surveillé 2.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 3</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Physique</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            <div class="overview-box">
+                <div class="overview-title">Partie 3 : Électricité (22 - 38 Heures) • Unité 1 : Le Dipôle RC</div>
+                <div class="overview-grid">
+                    <div>
+                        <strong>Compétences Visées :</strong>
+                        Maîtriser les régimes transitoires, équations différentielles, stockage d'énergie dans les dipôles et résonance.
+                    </div>
+                    <div>
+                        <strong>Unités de la Partie :</strong>
+                        1. Dipôle RC (6-7h) • 
+                        2. Dipôle RL (6-7h) • 
+                        3. Oscillations libres RLC (8h) • 
+                        4. Oscillations forcées (8h - SM) • 
+                        5. Modulation & communication (10h - SM)
+                    </div>
+                </div>
+            </div>
+
+            <!-- UNIT 1 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 1 : Le Dipôle RC</span>
+                    <span>7 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Loi d'Ohm, lois des mailles/nœuds, multimètres, oscilloscope.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Le flash d'un appareil photo résulte de la décharge d'un condensateur. Qu'est-ce qu'un condensateur et que vaut sa constante de temps ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Condensateur, capacité C et relation q = C · u_C (Farads).</li>
+                                    <li>Courant : i(t) = dq/dt = C · du_C/dt.</li>
+                                    <li>Capacité équivalente en parallèle et en série.</li>
+                                    <li>Équation différentielle de charge : u_C + RC·(du_C/dt) = E.</li>
+                                    <li>Constante de temps τ = R·C ; détermination graphique (63%).</li>
+                                    <li>Énergie emmagasinée : E_e = 0,5 · C · u_C² (Joules).</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Le Condensateur</strong> (1. Description, 2. Charge q = C·u_C, 3. Association série et parallèle)<br>
+                                <strong>II. Réponse à un Échelon de Tension</strong> (1. Charge : équation différentielle, 2. Solution analytique, 3. Décharge du condensateur, 4. Constante de temps τ)<br>
+                                <strong>III. Énergie Emmagasinée</strong> (1. Formule E_e = 0,5 C u_C², 2. Décharge dans une lampe)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Boîtes de condensateurs et résistances à décades</li>
+                                    <li>Alimentation continue, générateur GBF</li>
+                                    <li>Oscilloscope numérique à mémoire / carte d'acquisition</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Visualisation de u_C(t) à l'oscilloscope ; mesure de τ par tangente et à 63% ; analyse dimensionnelle de τ.<br>
+                                <strong>Évaluation :</strong> Résolution d'équations différentielles et Devoir surveillé 2.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 4</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Physique</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            
+            <!-- UNIT 2 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 2 : Le Dipôle RL</span>
+                    <span>6 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Loi d'Ohm, circuit RC, champ magnétique, oscilloscope.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Une bobine s'oppose aux variations brutales de courant en créant une surtension. Qu'est-ce que l'inductance L et la constante de temps ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Tension aux bornes de la bobine : u_L = L(di/dt) + r·i.</li>
+                                    <li>Inductance L en Henries (H) et résistance r.</li>
+                                    <li>Équation différentielle d'établissement du courant.</li>
+                                    <li>Constante de temps : τ = L / (R + r).</li>
+                                    <li>Énergie magnétique emmagasinée : E_m = 0,5 · L · i².</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. La Bobine</strong> (1. Description, 2. Tension u_L, 3. Mesure de L et r)<br>
+                                <strong>II. Réponse à un Échelon</strong> (1. Établissement du courant, 2. Équation différentielle, 3. Constante de temps τ, 4. Rupture du courant)<br>
+                                <strong>III. Énergie Magnétique</strong> (1. Formule E_m = 0,5 L i²)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Bobines à noyau de fer doux, boîtes de résistances</li>
+                                    <li>Diode de roue libre</li>
+                                    <li>Générateur GBF, oscilloscope à mémoire</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Visualisation du retard à l'établissement du courant ; mesure de τ et déduction de L.<br>
+                                <strong>Évaluation :</strong> Exercices sur le dipôle RL et Devoir surveillé 2.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- UNIT 3 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 3 : Oscillations Libres dans un Circuit RLC Série</span>
+                    <span>8 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Dipôles RC et RL, équations différentielles, énergie.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Les émetteurs et récepteurs radio utilisent des oscillateurs. Comment le circuit RLC oscille-t-il et comment entretenir ces oscillations ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Régimes pseudopériodique, apériodique et critique.</li>
+                                    <li>Circuit LC idéal : d²u_C/dt² + (1/LC)·u_C = 0.</li>
+                                    <li>Période propre : T₀ = 2π · √(L · C).</li>
+                                    <li>Énergie totale E_T = E_e + E_m et dissipation Joule.</li>
+                                    <li>Entretien des oscillations par résistance négative (AOP).</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Décharge dans une Bobine</strong> (1. Montage RLC, 2. Trois régimes d'amortissement)<br>
+                                <strong>II. Étude Analytique (LC)</strong> (1. Équation différentielle, 2. Solution sinusoïdale, 3. Période propre T₀)<br>
+                                <strong>III. Énergie & Entretien</strong> (1. Échanges d'énergie, 2. Entretien par AOP)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Bobines, boîtes de condensateurs et résistances</li>
+                                    <li>Montage d'entretien à AOP (résistance négative)</li>
+                                    <li>Oscilloscope numérique et logiciel Regressi</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Mesure de la pseudopériode T ; vérification de T₀ ; observation des oscillations entretenues à l'AOP.<br>
+                                <strong>Évaluation :</strong> Exercices de bilan énergétique RLC et Devoir surveillé 3.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 5</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Physique</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            <div class="overview-box">
+                <div class="overview-title">Partie 3 : Électricité • Unités 4 & 5 (Filière Sciences Mathématiques)</div>
+            </div>
+
+            <!-- UNIT 4 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 4 : Oscillations Électriques Forcées dans un Circuit RLC (SM)</span>
+                    <span>8 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Circuit RLC, signaux sinusoïdaux, déphasage.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Accorder un récepteur radio sélectionne une fréquence parmi des milliers. Qu'est-ce que la résonance électrique et l'impédance ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Excitateur (générateur GBF) et résonateur (RLC).</li>
+                                    <li>Impédance : Z = √(R_tot² + (Lω - 1/Cω)²).</li>
+                                    <li>Résonance d'intensité : N₀ = 1/(2π√(LC)).</li>
+                                    <li>Bande passante à -3dB : ΔN = R_tot / (2π·L).</li>
+                                    <li>Facteur de qualité : Q = N₀ / ΔN.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Oscillations Forcées</strong> (1. Excitateur et résonateur, 2. Impédance Z, 3. Déphasage φ)<br>
+                                <strong>II. Résonance d'Intensité</strong> (1. Condition de résonance, 2. Courbe de résonance, 3. Bande passante et facteur Q)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Générateur GBF sinusoïdal réglable</li>
+                                    <li>Bobine d'inductance, condensateur, résistances</li>
+                                    <li>Oscilloscope bicourbe et multimètre efficace</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Tracé de la courbe I(N) ; repérage du pic de résonance N₀ ; calcul de la bande passante et du facteur Q.<br>
+                                <strong>Évaluation :</strong> Exercices d'impédance et calculs de résonance.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- UNIT 5 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 5 : Production d'Ondes Électromagnétiques et Modulation (SM)</span>
+                    <span>10 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Tensions alternatives, résonance, circuit multiplieur.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Les antennes émettent des signaux sur de grandes distances. Pourquoi moduler une onde porteuse et comment démoduler le signal ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Modulation d'amplitude (AM) : porteuse p(t) et signal s(t).</li>
+                                    <li>Tension modulée : u(t) = A[1 + m·cos(2π f_s t)]·cos(2π F_p t).</li>
+                                    <li>Taux de modulation : m = (U_max - U_min)/(U_max + U_min) < 1.</li>
+                                    <li>Méthode du trapèze en mode XY.</li>
+                                    <li>Démodulation : détecteur d'enveloppe (T_p ≪ RC ≪ T_s).</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Nécessité de la Modulation</strong> (1. Dimension des antennes, 2. Multiplexage)<br>
+                                <strong>II. Modulation d'Amplitude</strong> (1. Circuit multiplieur, 2. Taux m, 3. Méthode du trapèze)<br>
+                                <strong>III. Démodulation</strong> (1. Détection d'enveloppe, 2. Filtre passe-haut)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Circuit multiplieur analogique AD633, 2 générateurs GBF</li>
+                                    <li>Diode 1N4148, composants RC de démodulation, haut-parleur</li>
+                                    <li>Oscilloscope bicourbe en mode XY</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Modulation avec AD633 ; affichage du trapèze en XY ; démodulation et écoute sur haut-parleur.<br>
+                                <strong>Évaluation :</strong> Calculs de taux m et Devoir surveillé 3.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 6</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Physique</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            <div class="overview-box">
+                <div class="overview-title">Partie 4 : La Mécanique (35 - 47 Heures) • Unités 1 & 2 : Lois de Newton & Chute Verticale</div>
+                <div class="overview-grid">
+                    <div>
+                        <strong>Compétences Visées :</strong>
+                        Appliquer les lois de Newton pour prédire trajectoires et vitesses. Prévention routière. Méthode numérique d'Euler. Modélisation de systèmes réels.
+                    </div>
+                    <div>
+                        <strong>Unités de la Partie :</strong>
+                        1. Lois de Newton (5-6h) • 
+                        2. Chute verticale (3-5h) • 
+                        3. Mouvements plans (4-5h) • 
+                        4. Satellites et planètes (5h - SM) • 
+                        5. Dynamique de rotation (6h - SM) • 
+                        6. Oscillateurs mécaniques (8-11h) • 
+                        7. Aspects énergétiques (4-5h) • 
+                        8. L'atome et la mécanique (5h - SM)
+                    </div>
+                </div>
+            </div>
+
+            <!-- UNIT 1 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 1 : Les Lois de Newton</span>
+                    <span>6 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Vecteurs, vitesse, accélération, principe d'inertie, repères galiléens.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Isaac Newton relia les forces au mouvement du centre d'inertie. Quelles sont les trois lois de Newton et comment décrivent-elles le mouvement ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Vecteur accélération a = dv/dt = d²r/dt².</li>
+                                    <li>Repère de Frenet : a_t = dv/dt et a_n = v²/ρ.</li>
+                                    <li>Trois lois de Newton (1ère, 2ème ΣF = m·a_G, 3ème F_A/B = -F_B/A).</li>
+                                    <li>Référentiels galiléens.</li>
+                                    <li>Étude sur plan horizontal et plan incliné.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Cinématique</strong> (1. Vecteurs position et vitesse, 2. Vecteur accélération, 3. Repère de Frenet)<br>
+                                <strong>II. Lois de Newton</strong> (1. 1ère loi d'inertie, 2. 2ème loi fondamentale, 3. 3ème loi d'action-réaction)<br>
+                                <strong>III. Applications</strong> (1. Plan horizontal, 2. Plan incliné)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Banc à coussin d'air et fourches optiques</li>
+                                    <li>Mobile autoporteur, masses tractrices, patins</li>
+                                    <li>Ordinateur avec logiciel Avimeca / Regressi</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Vérification de a_G = F/m sur banc d'air et calcul du coefficient de frottement.<br>
+                                <strong>Évaluation :</strong> Exercices de dynamique sur plan incliné et Devoir 4.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- UNIT 2 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 2 : Chute Verticale d'un Corps Solide</span>
+                    <span>4 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Champ de pesanteur, 2ème loi de Newton, intégration.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Le parachutiste accélère puis atteint une vitesse limite. Comment modéliser la chute avec frottement fluide et appliquer la méthode d'Euler ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Chute libre : soumis uniquement au poids (a = g).</li>
+                                    <li>Chute visqueuse : poids P, poussée F_A et frottement fluide f = -k·v^n.</li>
+                                    <li>Équation différentielle : dv/dt = A - B·v.</li>
+                                    <li>Vitesse limite : v_lim = A / B.</li>
+                                    <li>Méthode numérique d'Euler : v_(i+1) = v_i + a_i·Δt.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. La Chute Libre</strong> (1. Définition, 2. Équation a = g, 3. Équations horaires)<br>
+                                <strong>II. Chute avec Frottement Fluide</strong> (1. Bilan des forces, 2. Équation différentielle, 3. Vitesse limite v_lim, 4. Temps caractéristique τ)<br>
+                                <strong>III. Méthode Numérique d'Euler</strong>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Grande éprouvette graduée remplie de glycérol</li>
+                                    <li>Billes d'acier de différents diamètres</li>
+                                    <li>Caméra numérique, logiciel Avimeca et tableur Regressi</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Filmer la chute d'une bille dans le glycérol ; tracé de v(t) ; calcul itératif d'Euler et comparaison.<br>
+                                <strong>Évaluation :</strong> Calculs sur tableau d'Euler et Devoir surveillé 4.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 7</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Physique</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            
+            <!-- UNIT 3 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 3 : Mouvements Plans - Projectiles et Particules Chargées</span>
+                    <span>5 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        2ème loi de Newton, vecteurs, champs électrique et magnétique.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        La vitesse initiale et l'angle de tir déterminent la portée d'un ballon. Quelles équations régissent la parabole et sa flèche ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Équations horaires du projectile.</li>
+                                    <li>Équation de trajectoire y(x).</li>
+                                    <li>Calcul de la flèche et de la portée.</li>
+                                    <li>Particule dans champ magnétique : force de Lorentz et rayon R = m·v / (|q|·B).</li>
+                                    <li>Déviation dans un champ électrostatique.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Mouvement d'un Projectile</strong> (1. Application de la 2ème loi, 2. Équations horaires, 3. Trajectoire, 4. Portée et flèche)<br>
+                                <strong>II. Particule dans un Champ B</strong> (1. Force de Lorentz, 2. Mouvement circulaire uniforme, 3. Déviation magnétique)<br>
+                                <strong>III. Particule dans un Champ E</strong>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Lanceur de projectiles à ressort avec inclinaison</li>
+                                    <li>Tube à déviation d'électrons avec bobines de Helmholtz</li>
+                                    <li>Logiciel de pointage vidéo Avimeca</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Tir de projectile à divers angles et vérification de la portée maximale à 45°. Déviation circulaire du faisceau d'électrons.<br>
+                                <strong>Évaluation :</strong> Exercices de balistique et spectrométrie de masse.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- UNIT 4 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 4 : Les Satellites et les Planètes (Sciences Mathématiques)</span>
+                    <span>5 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Gravitation universelle, mouvement circulaire, repère de Frenet.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        La Lune orbite en 27,3 jours alors que les satellites météo semblent immobiles. Quelles sont les lois de Kepler et la condition géostationnaire ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Trois lois de Kepler (orbites, aires, périodes T²/a³ = Cte).</li>
+                                    <li>Mouvement circulaire dans le repère de Frenet.</li>
+                                    <li>Vitesse orbitale : v = √(G·M / r).</li>
+                                    <li>Période de révolution : T² / r³ = 4π² / (G·M).</li>
+                                    <li>Conditions du satellite géostationnaire (h ≈ 36 000 km).</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Lois de Kepler</strong> (1. Référentiel héliocentrique, 2. 1ère loi des trajectoires, 3. 2ème loi des aires, 4. 3ème loi des périodes)<br>
+                                <strong>II. Mouvement Circulaire</strong> (1. 2ème loi de Newton, 2. Vitesse orbitale, 3. Période T)<br>
+                                <strong>III. Satellites Artificiels</strong> (1. Satellite géostationnaire)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Logiciel de simulation astronomique Stellarium</li>
+                                    <li>Tables astronomiques des planètes du système solaire</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Tracé de T² en fonction de r³ pour les planètes et calcul de l'altitude géostationnaire.<br>
+                                <strong>Évaluation :</strong> Exercices de mécanique spatiale et Devoir surveillé 5.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 8</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Physique</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            
+            <!-- UNIT 5 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 5 : Relation Fondamentale de la Dynamique de Rotation (SM)</span>
+                    <span>6 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Accélération angulaire, moment d'une force, moment d'inertie.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        La roue à aubes accélère sous l'effet du couple moteur de l'eau. Quelle relation relie la somme des moments à l'accélération angulaire ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Accélération angulaire : θ'' = dω/dt = d²θ/dt² (rad/s²).</li>
+                                    <li>Relations a_t = R·θ'' et a_n = R·θ'².</li>
+                                    <li>Relation fondamentale : Σ M_Δ(F_ext) = J_Δ · θ''.</li>
+                                    <li>Moments d'inertie J_Δ des solides usuels.</li>
+                                    <li>Étude de systèmes couplés translation-rotation.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Cinématique Angulaire</strong> (1. Vitesse et accélération angulaires, 2. Rotation uniformément variée)<br>
+                                <strong>II. Relation Fondamentale</strong> (1. Énoncé ΣM = J_Δ·θ'', 2. Moment d'inertie J_Δ, 3. Applications)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Banc de dynamique de rotation avec poulie instrumentée</li>
+                                    <li>Disque homogène, anneau cylindrique, masse motrice</li>
+                                    <li>Chronomètre numérique à barrières infrarouges</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Mesure de θ'' en fonction du couple appliqué ; vérification de la proportionnalité avec J_Δ.<br>
+                                <strong>Évaluation :</strong> Exercices de systèmes couplés et Devoir surveillé 5.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- UNIT 6 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 6 : Les Systèmes Mécaniques Oscillants</span>
+                    <span>8 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        2ème loi de Newton, dynamique de rotation, loi de Hooke.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        En 1657, Huygens créa la première horloge à pendule. Comment caractériser les oscillateurs mécaniques (solide-ressort, torsion, pendule simple) ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Pendule élastique : m·x'' + k·x = 0 ; T₀ = 2π·√(m/k).</li>
+                                    <li>Pendule de torsion : J_Δ·θ'' + C·θ = 0 ; T₀ = 2π·√(J_Δ/C).</li>
+                                    <li>Pendule simple : θ'' + (g/L)·θ = 0 ; T₀ = 2π·√(L/g).</li>
+                                    <li>Pendule pesant : T₀ = 2π·√(J_Δ/(m·g·d)).</li>
+                                    <li>Régimes d'amortissement et résonance mécanique.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Pendule Élastique</strong> (1. Équation différentielle, 2. Solution x(t), 3. Période propre T₀)<br>
+                                <strong>II. Pendule de Torsion</strong> (1. Équation différentielle, 2. Période propre)<br>
+                                <strong>III. Pendules Pesant et Simple</strong> (1. Pendule simple, 2. Pendule pesant)<br>
+                                <strong>IV. Amortissement et Résonance</strong>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Banc à air avec chariot à deux ressorts</li>
+                                    <li>Pendule de torsion avec barre métallique et fil</li>
+                                    <li>Pendule simple avec fil et chronomètre optique</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Mesure de T₀ en fonction de m et L ; déduction de g et vérification des périodes propres.<br>
+                                <strong>Évaluation :</strong> Exercices d'oscillateurs et Devoir surveillé 5.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 9</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Physique</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            
+            <!-- UNIT 7 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 7 : Aspects Énergétiques des Oscillateurs Mécaniques</span>
+                    <span>4 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Énergie cinétique, énergie potentielle, énergie mécanique.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Les acrobates de trapèze échangent continuellement énergie cinétique et potentielle. Comment exprimer l'énergie potentielle élastique ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Énergie potentielle élastique : E_pe = 0,5 · k · x² + Cte.</li>
+                                    <li>Énergie potentielle de torsion : E_pt = 0,5 · C · θ².</li>
+                                    <li>Énergie mécanique : E_m = E_c + E_pe = Cte.</li>
+                                    <li>Dérivation de l'équation différentielle par dE_m/dt = 0.</li>
+                                    <li>Diagrammes d'énergie E_c(x), E_p(x) et puits de potentiel.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Énergie du Pendule Élastique</strong> (1. Travail de tension, 2. Énergie potentielle élastique, 3. Conservation de E_m)<br>
+                                <strong>II. Pendule de Torsion et Pesant</strong> (1. Énergie de torsion, 2. Énergie de pesanteur)<br>
+                                <strong>III. Diagrammes d'Énergie</strong>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Chariot à ressort avec capteurs de position et force</li>
+                                    <li>Interface d'acquisition PC et logiciel Regressi</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Tracé des courbes d'énergie ; vérification de la conservation et de l'amortissement.<br>
+                                <strong>Évaluation :</strong> Exploitation de diagrammes d'énergie et Devoir 6.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- UNIT 8 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 8 : L'Atome et la Mécanique de Newton (Sciences Mathématiques)</span>
+                    <span>5 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Mouvement planétaire, loi de Coulomb, photon, spectres.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Selon la physique classique, l'électron devrait s'écraser sur le noyau. Comment les postulats de Bohr introduisent-ils la quantification ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Limites de la mécanique newtonienne à l'échelle atomique.</li>
+                                    <li>Photon et quantum d'énergie : E = h·ν = h·c/λ.</li>
+                                    <li>Niveaux d'énergie quantifiés : E_n = -13,6 / n² (eV).</li>
+                                    <li>Condition de Bohr : ΔE = |E_p - E_n| = h · ν.</li>
+                                    <li>Spectres de raies de l'hydrogène (Lyman, Balmer).</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Limites de la Physique Classique</strong> (1. Instabilité du modèle planétaire, 2. Continuité vs quantification)<br>
+                                <strong>II. Quantification de l'Énergie</strong> (1. Le photon, 2. Postulats de Bohr, 3. Niveaux de l'hydrogène)<br>
+                                <strong>III. Spectres de Raies</strong> (1. Émission et absorption, 2. Série de Balmer)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Tube spectral à hydrogène, alimentation haute tension</li>
+                                    <li>Spectroscope à réseau de diffraction</li>
+                                    <li>Poster des raies de Fraunhofer et logiciel de simulation</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Observation des raies de l'hydrogène au spectroscope et calcul des longueurs d'onde de transition.<br>
+                                <strong>Évaluation :</strong> Calculs de transitions atomiques et Devoir surveillé 6.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 10</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Chimie</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            <div class="overview-box">
+                <div class="overview-title">Introduction & Partie 1 : Transformations Lentes et Rapides • Cinétique Chimique (8 - 11 Heures)</div>
+                <div class="overview-grid">
+                    <div>
+                        <strong>Questions posées au chimiste (1h) :</strong>
+                        Comprendre le contrôle chimique, la synthèse, le suivi des réactions et la sécurité.
+                    </div>
+                    <div>
+                        <strong>Unités de la Partie :</strong>
+                        1. Transformations lentes et rapides (3h) • 
+                        2. Suivi temporel d'une réaction - Vitesse de réaction (5-8h)
+                    </div>
+                </div>
+            </div>
+
+            <!-- UNIT 1 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 1 : Transformations Lentes et Rapides</span>
+                    <span>3 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Oxydoréduction, couples Ox/Red, transferts d'électrons.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Le papier jaunit lentement au fil des ans alors que l'essence explose instantanément. Qu'est-ce qui distingue ces réactions ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Transformations rapides : instantanées.</li>
+                                    <li>Transformations lentes : mesurables dans le temps.</li>
+                                    <li>Facteurs cinétiques : température (trempe / accélération).</li>
+                                    <li>Influence des concentrations initiales.</li>
+                                    <li>Rôle des catalyseurs.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Rappels Redox</strong> (1. Couples Ox/Red, 2. Demi-équations)<br>
+                                <strong>II. Transformations Rapides et Lentes</strong> (1. Précipitations rapides, 2. Oxydation lente de I⁻ par H₂O₂)<br>
+                                <strong>III. Facteurs Cinétiques</strong> (1. Effet de la température, 2. Effet des concentrations, 3. Catalyseurs)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Solutions : KI, H₂O₂, Na₂S₂O₃, empois d'amidon, glace</li>
+                                    <li>Tubes à essais, béchers, bain-marie thermostaté</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Mélange I⁻ + H₂O₂ à diverses températures ; mise en évidence de la trempe thermique.<br>
+                                <strong>Évaluation :</strong> Équilibrage de réactions et Devoir surveillé 1.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- UNIT 2 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 2 : Suivi Temporel d'une Réaction - Vitesse de Réaction</span>
+                    <span>6 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Tableau d'avancement, conductimétrie, gaz parfaits, titrage.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Les feuilles perdent graduellement leur couleur en automne. Comment suivre l'avancement x(t) et déterminer le temps de demi-réaction ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Méthodes de suivi : titrage, conductimétrie, pressiométrie, spectrophotométrie.</li>
+                                    <li>Vitesse volumique : v(t) = (1/V) · (dx/dt).</li>
+                                    <li>Détermination graphique par la pente de la tangente.</li>
+                                    <li>Diminution de la vitesse au cours du temps.</li>
+                                    <li>Temps de demi-réaction t_(1/2) : x(t_(1/2)) = x_f / 2.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Méthodes de Suivi</strong> (1. Dosage avec trempe, 2. Méthodes physiques (σ, P))<br>
+                                <strong>II. Vitesse Volumique</strong> (1. Définition v = (1/V) dx/dt, 2. Méthode des tangentes, 3. Évolution temporelle)<br>
+                                <strong>III. Temps de Demi-Réaction</strong> (1. Définition x(t_1/2) = x_f/2, 2. Détermination graphique)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Conductimètre, fiole étanche avec manomètre</li>
+                                    <li>Burettes, pipettes, chronomètre, glace</li>
+                                    <li>Solutions : HCl, ruban de Mg, KI, H₂O₂, thiosulfate</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Suivi pressiométrique de Mg + HCl ; tracé de x(t) ; tracé des tangentes et lecture de t_(1/2).<br>
+                                <strong>Évaluation :</strong> Calculs de pentes et Devoir surveillé 1.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 11</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Chimie</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            <div class="overview-box">
+                <div class="overview-title">Partie 2 : Transformations Non Totales d'un Système Chimique (13 - 17 Heures)</div>
+            </div>
+
+            <!-- UNIT 1 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 1 : Transformations Chimiques S'Effectuant dans les Deux Sens</span>
+                    <span>3 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Tableau d'avancement, réactif limitant, théorie de Brønsted.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        La formation des grottes dissout le calcaire tandis que les concrétions le reforment. Que caractérise une réaction équilibrée réversible ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Mesure du pH : pH = -log[H₃O⁺] ⇔ [H₃O⁺] = 10^(-pH).</li>
+                                    <li>Avancement final x_f vs avancement maximal x_max.</li>
+                                    <li>Taux d'avancement final : τ = x_f / x_max.</li>
+                                    <li>Réaction totale (τ = 1) et limitée (τ < 1).</li>
+                                    <li>État d'équilibre chimique dynamique.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Acide-Base et pH</strong> (1. Couples de Brønsted, 2. Définition et mesure du pH)<br>
+                                <strong>II. Avancement</strong> (1. Avancement maximal x_max, 2. Avancement final x_f, 3. Taux d'avancement final τ)<br>
+                                <strong>III. État d'Équilibre</strong> (1. Définition de l'équilibre, 2. Interprétation microscopique)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>pH-mètre numérique étalonné avec tampons</li>
+                                    <li>Solutions : Acide éthanoïque et acide chlorhydrique</li>
+                                    <li>Agitateur magnétique, béchers, pipettes jaugées</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Mesure de pH de HCl (τ = 1) et CH₃COOH (τ ≈ 4%) pour distinguer réaction totale et limitée.<br>
+                                <strong>Évaluation :</strong> Calculs de x_f, x_max et τ à partir du pH.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- UNIT 2 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 2 : État d'Équilibre d'un Système Chimique</span>
+                    <span>5 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Taux d'avancement τ, conductivité des solutions.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        L'acide salicylique est en équilibre avec l'eau. Qu'est-ce que la constante d'équilibre K et de quoi dépend-elle ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Quotient de réaction : Q_r = Π [Produits] / Π [Réactifs].</li>
+                                    <li>Les solides et l'eau solvant valent 1 dans Q_r.</li>
+                                    <li>Constante d'équilibre : K = Q_r,eq (dépend de T).</li>
+                                    <li>Indépendance de K vis-à-vis des concentrations initiales.</li>
+                                    <li>La dilution augmente le taux d'avancement final τ.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Quotient de Réaction Q_r</strong> (1. Définition, 2. Espèces dissoutes et solides, 3. Q_r,eq à l'équilibre)<br>
+                                <strong>II. Constante d'Équilibre K</strong> (1. Définition K = Q_r,eq, 2. Réaction quasi-totale K > 10⁴, 3. Sens inverse K' = 1/K)<br>
+                                <strong>III. Facteurs Influençant τ</strong> (1. Effet de l'état initial, 2. Effet de la valeur de K)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Conductimètre avec cellule étalonnée, thermomètre</li>
+                                    <li>Solutions d'acide éthanoïque à diverses concentrations</li>
+                                    <li>Solutions d'acide méthanoïque, agitateur</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Mesure de conductivité pour 3 dilutions ; vérification de K constant et augmentation de τ avec la dilution.<br>
+                                <strong>Évaluation :</strong> Calculs de Q_r et K et Devoir surveillé 2.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 12</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Chimie</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            <div class="overview-box">
+                <div class="overview-title">Partie 2 : Chimie • Unité 3 : Réactions Acide-Base en Solution Aqueuse (8 Heures)</div>
+            </div>
+
+            <!-- UNIT 3 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 3 : Les Transformations Acide-Base en Solution Aqueuse</span>
+                    <span>8 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        pH, constante d'équilibre K, théorie de Brønsted.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Le contrôle des médicaments exige des titrages acido-basiques. Qu'est-ce que la constante d'acidité K_a et comment choisir l'indicateur coloré ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Autoprotolyse de l'eau : K_e = [H₃O⁺]·[HO⁻] = 10^(-14) à 25°C.</li>
+                                    <li>Constante d'acidité K_a et pK_a = -log(K_a).</li>
+                                    <li>Relation fondamentale : pH = pK_a + log([A⁻] / [HA]).</li>
+                                    <li>Diagrammes de prédominance et de distribution.</li>
+                                    <li>Courbe de titrage pH = f(V_b) et méthode des tangentes.</li>
+                                    <li>Choix de l'indicateur coloré adapté (zone de virage contenant pH_E).</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Produit Ionique de l'Eau</strong> (1. Autoprotolyse K_e, 2. Solutions neutre, acide, basique)<br>
+                                <strong>II. Constante d'Acidité K_a</strong> (1. Définition, 2. Formule du pH, 3. Constante de réaction K = K_a1/K_a2)<br>
+                                <strong>III. Diagrammes de Prédominance</strong> (1. Couples HA/A⁻, 2. Indicateurs colorés)<br>
+                                <strong>IV. Dosages pH-métriques</strong> (1. Courbes de titrage, 2. Point d'équivalence E, 3. Méthode des tangentes et dérivée, 4. Choix de l'indicateur)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>pH-mètre étalonné avec solutions tampons (4,00 et 7,00)</li>
+                                    <li>Burette graduée de précision, pipette jaugée, agitateur</li>
+                                    <li>Solutions : Acide éthanoïque, acide chlorhydrique, soude NaOH</li>
+                                    <li>Indicateurs : BBT, phénolphtaléine, hélianthine</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Titrage pH-métrique de CH₃COOH par NaOH ; tracé de pH = f(V_b) ; repérage de l'équivalence par tangentes et dérivée.<br>
+                                <strong>Évaluation :</strong> Exploitation de courbes de titrage et Devoir surveillé 3.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 13</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Chimie</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            <div class="overview-box">
+                <div class="overview-title">Partie 3 : Sens d'Évolution d'un Système Chimique (8 - 18 Heures)</div>
+            </div>
+
+            <!-- UNIT 1 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 1 : Évolution Spontanée d'un Système Chimique</span>
+                    <span>3 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Quotient de réaction Q_r, constante d'équilibre K.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Le corail se forme ou se dissout selon les concentrations marines. Comment prévoir dans quel sens évolue un système chimique ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Calcul du quotient initial Q_r,i.</li>
+                                    <li>Critère d'évolution spontanée : comparaison de Q_r,i et K.</li>
+                                    <li>Si Q_r,i < K : évolution dans le sens direct (1).</li>
+                                    <li>Si Q_r,i > K : évolution dans le sens inverse (2).</li>
+                                    <li>Si Q_r,i = K : le système est à l'équilibre.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Rappels sur Q_r et K</strong> (1. Quotient initial, 2. Constante d'équilibre)<br>
+                                <strong>II. Critère d'Évolution</strong> (1. Sens direct (Q_r,i < K), 2. Sens inverse (Q_r,i > K))<br>
+                                <strong>III. Applications</strong> (1. Systèmes acide-base, 2. Systèmes redox)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Solutions : I₂, KI, FeSO₄, Fe₂(SO₄)₃, AgNO₃</li>
+                                    <li>Béchers, tubes à essais, fil de cuivre, spectrophotomètre</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Mélanges préparés avec Q_r,i < K et Q_r,i > K ; constatation expérimentale du sens de déplacement.<br>
+                                <strong>Évaluation :</strong> Calculs de prévision du sens et Devoir surveillé 3.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- UNIT 2 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 2 : Les Piles Électrochimiques et Récupération d'Énergie</span>
+                    <span>5 - 7 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Réactions redox, courant électrique, constante de Faraday.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Les piles alimentent nos appareils nomades. Quel est le principe de conversion de l'énergie chimique en électricité ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Transfert d'électrons direct vs indirect par fil.</li>
+                                    <li>Constitution d'une pile : demi-piles et pont salin.</li>
+                                    <li>Anode (-) : Oxydation. Cathode (+) : Réduction.</li>
+                                    <li>Capacité électrique : Q_max = I · Δt = n(e⁻) · F.</li>
+                                    <li>Constante de Faraday : F = N_A · e ≈ 96 500 C/mol.</li>
+                                    <li>Variation de masse des électrodes en fonction de I et Δt.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Transfert d'Électrons</strong> (1. Transfert direct, 2. Transfert indirect)<br>
+                                <strong>II. La Pile Électrochimique</strong> (1. Description et rôle du pont salin, 2. Demi-équations aux électrodes, 3. Schéma conventionnel)<br>
+                                <strong>III. Capacité et Bilan de Matière</strong> (1. Formule Q = I·Δt = n(e⁻)·F, 2. Variation de masse des électrodes)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Lames de cuivre et zinc, pont salin (KNO₃ gélifié)</li>
+                                    <li>Solutions de CuSO₄ et ZnSO₄ à 1 mol/L</li>
+                                    <li>Milliampermètre, voltmètre, conducteur ohmique</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Réalisation de la pile Daniell ; mesure de la f.é.m. ; constatation du sens du courant et calcul de la masse de zinc consommée.<br>
+                                <strong>Évaluation :</strong> Calculs de capacité de pile et Devoir surveillé 3.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 14</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Chimie</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            <div class="overview-box">
+                <div class="overview-title">Partie 3 : Chimie • Unité 3 : Transformations Forcées - L'Électrolyse (8 Heures)</div>
+            </div>
+
+            <!-- UNIT 3 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 3 : Exemples de Transformations Forcées - L'Électrolyse</span>
+                    <span>8 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Oxydoréduction, courant électrique, piles.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Le cuivre pur est raffiné par électrolyse. Comment un générateur force-t-il une réaction chimique dans le sens inverse de son sens spontané ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Définition de l'électrolyse : transformation forcée.</li>
+                                    <li>Le générateur impose le sens inverse du sens spontané.</li>
+                                    <li>Anode (+) : Oxydation (reliée au pôle positif).</li>
+                                    <li>Cathode (-) : Réduction (reliée au pôle négatif).</li>
+                                    <li>Bilan quantitatif : m = (I · Δt · M) / (n · F).</li>
+                                    <li>Applications industrielles : galvanoplastie, affinage.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Principe de l'Électrolyse</strong> (1. Transformations spontanées et forcées, 2. Montage de l'électrolyseur, 3. Réactions aux électrodes)<br>
+                                <strong>II. Étude Quantitative</strong> (1. Charge électrique Q, 2. Masse déposée, 3. Volume de gaz dégagé)<br>
+                                <strong>III. Applications Industrielles</strong> (1. Recharge du accumulateur au plomb, 2. Dépôt métallique protecteur)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Tube en U d'électrolyse, électrodes de graphite et cuivre</li>
+                                    <li>Solution de chlorure de cuivre(II) CuCl₂</li>
+                                    <li>Alimentation continue réglable (0-12V), ampèremètre</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Électrolyse de CuCl₂ ; observation du dégagement de dichlore et dépôt de cuivre ; vérification de la loi de Faraday.<br>
+                                <strong>Évaluation :</strong> Calculs de masse et volume en électrolyse et Devoir 3.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 15</span>
+        </div>
+        
+    </div>
+    
+    <div class="page">
+        <div>
+            
+        <table class="official-header">
+            <tr>
+                <td style="width: 28%;">Niveau : 2BAC Sciences</td>
+                <td style="width: 44%;">Matière : Physique-Chimie • Composante Chimie</td>
+                <td style="width: 28%;">Fiches Pédagogiques</td>
+            </tr>
+        </table>
+        
+            <div class="overview-box">
+                <div class="overview-title">Partie 4 : Contrôle de l'Évolution des Systèmes Chimiques (9 - 12 Heures)</div>
+            </div>
+
+            <!-- UNIT 1 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 1 : Les Réactions d'Estérification et d'Hydrolyse</span>
+                    <span>5 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Alcools, acides carboxyliques, équilibre chimique.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        La cire d'abeille et les parfums contiennent des esters. Comment synthétiser un ester et comment augmenter le rendement limité ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Groupe ester -COO- et nomenclature officielle.</li>
+                                    <li>Équation : R-COOH + R'-OH ⇌ R-COO-R' + H₂O.</li>
+                                    <li>Caractéristiques : lente, réversible, athermique, limitée.</li>
+                                    <li>Hydrolyse d'un ester (réaction inverse).</li>
+                                    <li>Rendement : r = n_exp / n_th = x_f / x_max.</li>
+                                    <li>Amélioration du rendement : excès de réactif ou élimination d'un produit.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Familles Oxygénées</strong> (1. Alcools, 2. Acides carboxyliques, 3. Anhydrides d'acide, 4. Esters et nomenclature)<br>
+                                <strong>II. Estérification & Hydrolyse</strong> (1. Étude expérimentale, 2. Cinétique et constante K ≈ 4, 3. Rendement r)<br>
+                                <strong>III. Contrôle du Système</strong> (1. Catalyseur et température, 2. Déplacement de l'équilibre)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Montages à reflux avec chauffe-ballons et réfrigérants</li>
+                                    <li>Éthanol, acide éthanoïque, acide sulfurique</li>
+                                    <li>Burettes, soude pour titrage, phénolphtaléine</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Synthèse de l'acétate d'éthyle à reflux ; dosage de l'acide restant au cours du temps ; calcul du rendement r (67%).<br>
+                                <strong>Évaluation :</strong> Exercices de rendement et Devoir surveillé 4.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- UNIT 2 -->
+            <div class="unit-block">
+                <div class="unit-banner">
+                    <span>Unité 2 : Contrôle des Transformations Chimiques - La Saponification</span>
+                    <span>4 Heures</span>
+                </div>
+                <div class="unit-prereq-problem">
+                    <div class="prereq-col">
+                        <div class="block-title">Prérequis :</div>
+                        Esters, anhydrides d'acide, solutions basiques, rendement.
+                    </div>
+                    <div class="problem-col">
+                        <div class="block-title">Situation-Problème :</div>
+                        Le savon est fabriqué par saponification des corps gras. Comment synthétiser le savon avec un rendement de 100% et comment nettoie-t-il les graisses ?
+                    </div>
+                </div>
+                <table class="pedagogical-table">
+                    <thead><tr><th style="width:25%;">Objectifs</th><th style="width:25%;">Contenus</th><th style="width:25%;">Matériel Didactique</th><th style="width:25%;">Activités & Évaluation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li>Synthèse totale d'ester par anhydride d'acide (rapide et totale).</li>
+                                    <li>Hydrolyse basique (saponification) : réaction totale.</li>
+                                    <li>Saponification des triglycérides (huile + 3 NaOH → glycérol + 3 savons).</li>
+                                    <li>Relargage du savon dans la saumure saturée.</li>
+                                    <li>Structure amphiphile du savon (queue lipophile et tête hydrophile).</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>I. Synthèse par Anhydride</strong> (1. Réactivité des anhydrides, 2. Caractère total et rapide)<br>
+                                <strong>II. La Saponification</strong> (1. Équation de saponification, 2. Corps gras et triglycérides, 3. Propriétés totales)<br>
+                                <strong>III. Propriétés du Savon</strong> (1. Relargage dans l'eau salée, 2. Structure tensioactive, 3. Mécanisme de nettoyage)
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Huile d'olive, éthanol, soude concentrée NaOH (10 M)</li>
+                                    <li>Saumure saturée de NaCl, filtre Büchner et fiole à vide</li>
+                                    <li>Chauffe-ballon, ballon, pierre ponce, verres de montre</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <strong>Activités :</strong> Synthèse du savon à reflux ; relargage dans la saumure glacée ; filtration sur Büchner et test du pouvoir moussant.<br>
+                                <strong>Évaluation :</strong> Calculs de rendement de saponification et Examen National du Baccalauréat.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="official-footer">
+            <span>Professeur : <strong>AYOUB KHAMMOUR</strong> (N° SOM : 1503811)</span>
+            <span>Références : Manuels Agréés – Orientations Pédagogiques – Notes Ministérielles N° 09-142 & 144</span>
+            <span>Page 16</span>
+        </div>
+        
+    </div>
+    
+</body>
+</html>

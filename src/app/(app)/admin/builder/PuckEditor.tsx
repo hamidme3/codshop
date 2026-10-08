@@ -16,8 +16,8 @@ export function PuckEditor({ initialData, storeSlug }: { initialData: any, store
       .then(data => {
         if (data.themeConfig && Object.keys(data.themeConfig).length > 0) {
           setThemeConfig(data.themeConfig);
-        } else if (data.theme) {
-          setThemeConfig(data.theme);
+        } else if (data.activeTheme) {
+          setThemeConfig(data.activeTheme);
         }
       })
       .catch(console.error);
@@ -46,7 +46,7 @@ export function PuckEditor({ initialData, storeSlug }: { initialData: any, store
     if (confirm("This will replace your current layout with the default template for your active theme. Are you sure?")) {
       const themeTemplate = {
         content: [
-          { type: "AnnouncementBar", props: { id: "ann-1", text: "Free Fast Delivery over 400 MAD", bgColor: themeConfig.accentColor || "#c59b27" } },
+          { type: "AnnouncementBar", props: { id: "ann-1", text: "Free Fast Delivery over 400 MAD", bgColor: "" } },
           { type: "HeroBanner", props: { id: "hero-1", headline: "Welcome to our store", subheadline: "Check out our best offers", ctaText: "Shop Now", badgeText: "New" } },
           { type: "FeaturesGrid", props: { id: "feat-1" } },
           { type: "ProductGrid", props: { id: "prod-1", title: "Trending Products", category: "" } },

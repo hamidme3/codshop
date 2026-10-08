@@ -67,7 +67,7 @@ export const getPuckConfig = (rawConfig: any = defaultThemeConfig): Config<Props
         },
         defaultProps: {
           text: "Free Fast Delivery over 400 MAD • Cash on Delivery",
-          bgColor: themeConfig.accentColor || "#c59b27"
+          bgColor: ""
         },
         render: ({ text, bgColor }) => (
           <AnnouncementBarSection settings={{ text, bgColor }} themeConfig={themeConfig} />
