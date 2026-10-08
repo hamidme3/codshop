@@ -33,7 +33,7 @@ export default function CatalogPage() {
   const [sortBy, setSortBy] = useState<SortOption>('featured');
   const [inStockOnly, setInStockOnly] = useState(false);
   const [isSubdomain, setIsSubdomain] = useState(false);
-  const [currentStoreSlug, setCurrentStoreSlug] = useState<string>('ottavio');
+  const [currentStoreSlug, setCurrentStoreSlug] = useState<string>('');
   const [storeProducts, setStoreProducts] = useState<any[]>([]);
   const [mounted, setMounted] = useState(false);
 

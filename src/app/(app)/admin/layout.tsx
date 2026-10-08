@@ -54,7 +54,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
     const queryStore = searchParams.get('store');
     if (queryStore) {
       localStorage.setItem('codshop_active_store', queryStore);
-    } else if (pathname && storeSlug !== 'ottavio' || (!queryStore && storeSlug)) {
+    } else if (pathname && !queryStore && storeSlug) {
       // If no query parameter exists, but we know the storeSlug (from localStorage or default), redirect to include it.
       const params = new URLSearchParams(searchParams.toString());
       params.set('store', storeSlug);

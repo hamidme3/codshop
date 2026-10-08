@@ -42,7 +42,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [themeId, setThemeIdState] = useState<ThemeId>('luxury');
   const [lang, setLangState] = useState<'fr' | 'ar'>('fr');
   const [countryCode, setCountryCodeState] = useState<string>('MA');
-  const [storeSlug, setStoreSlug] = useState<string>('ottavio');
+  const [storeSlug, setStoreSlug] = useState<string>('');
   const [shippingSettings, setShippingSettings] = useState<StoreShippingSettings>({
     freeShippingThreshold: 400,
     casaFee: 20,
@@ -51,7 +51,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     deliveryTimeframe: '24h à 48h',
     checkoutEmailMode: 'hidden',
   });
-  const [menus, setMenus] = useState<StoreMenu[]>(() => getDefaultStoreMenus('ottavio'));
+  const [menus, setMenus] = useState<StoreMenu[]>(() => getDefaultStoreMenus(''));
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const openMobileMenu = () => setIsMobileMenuOpen(true);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);

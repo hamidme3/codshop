@@ -39,7 +39,7 @@ export function SearchModal() {
   const { theme, formatPrice, countryCode } = useTheme();
   const [query, setQuery] = useState('');
   const [storeProducts, setStoreProducts] = useState<Product[]>([]);
-  const [currentStoreSlug, setCurrentStoreSlug] = useState<string>('ottavio');
+  const [currentStoreSlug, setCurrentStoreSlug] = useState<string>('');
   const [isSubdomain, setIsSubdomain] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
 

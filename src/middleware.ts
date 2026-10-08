@@ -176,7 +176,7 @@ export async function middleware(request: NextRequest) {
     if (url.pathname === '/admin/login') {
       // If already logged in, redirect directly to admin overview
       if (isValidSession) {
-        const targetStore = sessionUser?.storeSlug || 'ottavio';
+        const targetStore = sessionUser?.storeSlug || '';
         const redirectRes = NextResponse.redirect(new URL(`/admin?store=${targetStore}`, request.url));
         redirectRes.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
         return redirectRes;
