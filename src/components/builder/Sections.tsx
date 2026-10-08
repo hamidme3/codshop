@@ -824,8 +824,20 @@ export function ProductGridSection({
     // We assume the storeSlug is in the URL or we just fetch for 'ottavio' if missing.
     // In a real app we'd pass it down via context or props.
     // Here we'll try to extract it from the searchParams if in the browser.
-    const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-    const storeSlug = urlParams?.get('store') || 'ottavio';
+    let storeSlug = 'ottavio';
+    if (typeof window !== 'undefined') {
+      const host = window.location.hostname.toLowerCase();
+      const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
+      const hasSub = (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
+                     (host.endsWith('.localhost') && host !== 'localhost');
+      
+      if (hasSub) {
+        storeSlug = host.replace(`.${rootDomain}`, '').replace('.localhost', '');
+      } else {
+        const urlParams = new URLSearchParams(window.location.search);
+        storeSlug = urlParams.get('store') || 'ottavio';
+      }
+    }
 
     fetch(`/api/products?store=${storeSlug}`)
       .then(res => res.json())
