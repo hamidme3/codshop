@@ -45,7 +45,7 @@ export default function ProductDetailPage() {
     const host = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
     const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
     const sub = host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}` ? host.replace(`.${rootDomain}`, '') : '';
-    const storeQuery = storeFromUrl || sub || 'storet1';
+    const storeQuery = storeFromUrl || sub || '';
 
     fetch(`/api/products?slug=${encodeURIComponent(slug)}&store=${encodeURIComponent(storeQuery)}`)
       .then((res) => res.json())
@@ -83,19 +83,19 @@ export default function ProductDetailPage() {
   }, [visitorCountry, shippingSettings, countryConfig]);
 
   const currentStoreSlug = useMemo(() => {
-    if (typeof window === 'undefined') return 'storet1';
+    if (typeof window === 'undefined') return '';
     const params = new URLSearchParams(window.location.search);
     const storeFromUrl = params.get('store') || '';
     const host = window.location.hostname.toLowerCase();
     const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
     const sub = host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}` ? host.replace(`.${rootDomain}`, '') : '';
-    return (product as any)?.storeSlug || storeFromUrl || sub || 'storet1';
+    return (product as any)?.storeSlug || storeFromUrl || sub || '';
   }, [product]);
 
   // Initialize and track ViewContent across ad platforms and PostHog
   useEffect(() => {
     if (product) {
-      const activeStore = (product as any)?.storeSlug || currentStoreSlug || 'storet1';
+      const activeStore = (product as any)?.storeSlug || currentStoreSlug || '';
       trackProductView(activeStore, {
         id: product.id,
         title: product.title,

@@ -25,8 +25,6 @@ export async function POST(request: Request) {
 
     const db = getDb();
     let account = null;
-    let storeId = '78331488-f44c-4bca-8083-11d55950db18';
-    let storeSlug = 'ottavio';
 
     if (db) {
       // Find existing account by phone
@@ -35,18 +33,18 @@ export async function POST(request: Request) {
       });
 
       if (!account) {
-        // Fallback: check if admin account matches
-        account = await db.query.accounts.findFirst({
-          where: eq(schema.accounts.email, 'admin@ottavio.ma'),
-        });
+        return NextResponse.json({ error: 'Aucun compte associé à ce numéro' }, { status: 404 });
       }
+    } else {
+      return NextResponse.json({ error: 'Erreur de connexion à la base de données' }, { status: 500 });
     }
 
-    const accountId = account?.id || 'f022b329-342a-4f59-997d-e79259f832be';
-    const email = account?.email || 'admin@ottavio.ma';
-    const name = account ? `${account.firstName} ${account.lastName}` : 'Marchand SMS';
+    const accountId = account.id;
+    const email = account.email;
+    const name = account.firstName ? `${account.firstName} ${account.lastName}` : 'Marchand';
 
-    // Get account stores
+    let storeId = '';
+    let storeSlug = '';
     const accountStores = await getAccountStores(accountId);
     if (accountStores.data.length > 0) {
       storeId = accountStores.data[0].id;

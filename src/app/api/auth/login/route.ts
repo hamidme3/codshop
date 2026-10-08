@@ -35,8 +35,8 @@ export async function POST(request: Request) {
     // Check account stores
     const accountStores = await getAccountStores(user.id);
     const primaryStore = accountStores.data[0] || {
-      id: user.storeId,
-      slug: user.store?.slug || 'ottavio',
+      id: user.storeId || '',
+      slug: user.store?.slug || '',
     };
 
     const storeSlug = primaryStore.slug;

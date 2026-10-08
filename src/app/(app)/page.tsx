@@ -19,7 +19,7 @@ function StorefrontHome({ storeSlug }: { storeSlug?: string }) {
   const [puckData, setPuckData] = useState<any>(null);
 
   useEffect(() => {
-    const slug = storeSlug || 'storet1';
+    const slug = storeSlug || '';
     trackStorePageView(slug, '/');
     
     // Fetch Products
