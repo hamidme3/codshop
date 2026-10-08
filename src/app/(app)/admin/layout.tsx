@@ -252,7 +252,7 @@ function AdminNav({ children }: { children: React.ReactNode }) {
         { label: t.nav.products, href: `/admin/products?store=${storeSlug}`, icon: Package },
         { label: t.nav.pages, href: `/admin/pages?store=${storeSlug}`, icon: FileText },
         { label: t.nav.menus, href: `/admin/menus?store=${storeSlug}`, icon: Menu },
-        { label: t.nav.builder, href: `/admin/builder/puck?store=${storeSlug}`, icon: Layers },
+        { label: t.nav.builder, href: `/admin/builder?store=${storeSlug}`, icon: Layers },
         { label: t.nav.themes, href: `/admin/themes?store=${storeSlug}`, icon: Palette },
       ],
     },

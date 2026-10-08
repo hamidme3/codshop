@@ -51,7 +51,7 @@ function BillingContent() {
         {/* Navigation */}
         <div className="flex items-center justify-between">
           <Link
-            href={`/admin/builder/puck?store=${storeSlug}`}
+            href={`/admin/builder?store=${storeSlug}`}
             className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Retour au Page Builder ({storeSlug})
@@ -118,7 +118,7 @@ function BillingContent() {
               Votre formule <strong>{selectedPlan.toUpperCase()}</strong> a été enregistrée. Votre boutique reste active avec le Page Builder complet et l&apos;expédition automatique.
             </p>
             <Link
-              href={`/admin/builder/puck?store=${storeSlug}`}
+              href={`/admin/builder?store=${storeSlug}`}
               className="inline-flex items-center gap-2 bg-emerald-600 dark:bg-emerald-500 text-white dark:text-slate-950 font-bold px-6 py-3 rounded-xl text-sm hover:bg-emerald-500 dark:hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20 cursor-pointer"
             >
               Retourner à ma boutique <ArrowRight className="w-4 h-4" />

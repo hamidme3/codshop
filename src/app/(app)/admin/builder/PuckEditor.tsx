@@ -14,8 +14,10 @@ export function PuckEditor({ initialData, storeSlug }: { initialData: any, store
     fetch(`/api/stores/${storeSlug}/theme`)
       .then(res => res.json())
       .then(data => {
-        if (data.themeConfig) {
+        if (data.themeConfig && Object.keys(data.themeConfig).length > 0) {
           setThemeConfig(data.themeConfig);
+        } else if (data.theme) {
+          setThemeConfig(data.theme);
         }
       })
       .catch(console.error);
