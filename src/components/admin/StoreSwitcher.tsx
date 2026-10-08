@@ -151,11 +151,7 @@ export default function StoreSwitcher({ currentSlug }: { currentSlug: string }) 
             <button
               type="button"
               onClick={() => {
-                const name = prompt('Nom de votre nouvelle boutique :');
-                if (name) {
-                  const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-                  window.location.href = `/onboarding?store=${slug}`;
-                }
+                window.location.href = '/register-store';
               }}
               className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold text-[11px] transition-colors border border-emerald-500/30 cursor-pointer"
             >
