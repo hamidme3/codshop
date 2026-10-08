@@ -82,7 +82,7 @@ interface OperationsAnalyticsData {
 function AnalyticsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || 'ottavio';
+  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || "";
   const urlTab = searchParams.get('tab') === 'operations' ? 'operations' : 'storefront';
 
   const [activeTab, setActiveTab] = useState<'storefront' | 'operations'>(() => urlTab);

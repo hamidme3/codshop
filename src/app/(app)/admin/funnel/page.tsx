@@ -30,7 +30,7 @@ interface FunnelData {
 
 function FunnelContent() {
   const searchParams = useSearchParams();
-  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || 'ottavio';
+  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || "";
 
   const [funnel, setFunnel] = useState<FunnelData | null>(null);
   const [loading, setLoading] = useState(true);

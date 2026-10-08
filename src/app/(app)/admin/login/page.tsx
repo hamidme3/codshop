@@ -51,7 +51,7 @@ function LoginContent() {
       // Successful login - redirect to admin or returnUrl
       const destination = returnUrl.includes('/admin') 
         ? returnUrl 
-        : `/admin?store=${data.user.storeSlug || 'ottavio'}`;
+        : `/admin?store=${data.user.storeSlug}`;
       
       window.location.href = destination;
     } catch (err) {

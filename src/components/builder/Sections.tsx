@@ -258,7 +258,7 @@ export function CodCheckoutSection({
     if (!fullName || !phone) return;
     setSubmitting(true);
 
-    let effectiveStoreSlug = 'ottavio';
+    let effectiveStoreSlug = '';
     if (typeof window !== 'undefined') {
       const sp = new URLSearchParams(window.location.search);
       const urlStore = sp.get('store');
@@ -824,7 +824,7 @@ export function ProductGridSection({
     // We assume the storeSlug is in the URL or we just fetch for 'ottavio' if missing.
     // In a real app we'd pass it down via context or props.
     // Here we'll try to extract it from the searchParams if in the browser.
-    let storeSlug = 'ottavio';
+    let storeSlug = '';
     if (typeof window !== 'undefined') {
       const host = window.location.hostname.toLowerCase();
       const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
@@ -835,9 +835,11 @@ export function ProductGridSection({
         storeSlug = host.replace(`.${rootDomain}`, '').replace('.localhost', '');
       } else {
         const urlParams = new URLSearchParams(window.location.search);
-        storeSlug = urlParams.get('store') || 'ottavio';
+        storeSlug = urlParams.get('store') || '';
       }
     }
+    
+    if (!storeSlug) return; // Wait for storeSlug to be resolved
 
     fetch(`/api/products?store=${storeSlug}`)
       .then(res => res.json())

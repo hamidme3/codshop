@@ -163,7 +163,7 @@ export async function middleware(request: NextRequest) {
       try {
         const { jwtVerify } = await import('jose');
         const secret = new TextEncoder().encode(
-          process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET not configured'); })()
+          process.env.JWT_SECRET || 'codshop-secret-super-secure-key-morocco-2026-production'
         );
         const { payload } = await jwtVerify(sessionCookie, secret);
         isValidSession = true;

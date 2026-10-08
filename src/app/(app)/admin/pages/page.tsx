@@ -28,7 +28,7 @@ import type { StorePage, PolicyType } from '@/lib/types';
 function PagesManagementContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || 'ottavio';
+  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || "";
 
   const [pages, setPages] = useState<StorePage[]>([]);
   const [loading, setLoading] = useState(true);

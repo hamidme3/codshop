@@ -117,7 +117,7 @@ function MiniThemeMockup({ theme }: { theme: ThemeConfig }) {
 function ThemeGalleryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || 'ottavio';
+  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || "";
   const storefrontUrl = getStorefrontUrl(storeSlug);
   const { language } = useLanguage();
 

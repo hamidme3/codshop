@@ -15,7 +15,7 @@ import MilestoneWidget from '@/components/admin/MilestoneWidget';
 
 function OverviewContent() {
   const searchParams = useSearchParams();
-  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || 'ottavio';
+  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || "";
   const [orders, setOrders] = useState<Order[]>([]);
   const [analytics, setAnalytics] = useState<any>({
     totalOrders: 0,

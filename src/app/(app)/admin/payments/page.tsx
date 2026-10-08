@@ -10,7 +10,7 @@ import { getPaymentGateways, togglePaymentGateway, PaymentGateway } from '@/lib/
 
 function PaymentsContent() {
   const searchParams = useSearchParams();
-  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || 'ottavio';
+  const storeSlug = searchParams.get('store') || (typeof window !== 'undefined' ? localStorage.getItem('codshop_active_store') : null) || "";
 
   const [gateways, setGateways] = useState<PaymentGateway[]>(getPaymentGateways());
   const [editingGw, setEditingGw] = useState<PaymentGateway | null>(null);

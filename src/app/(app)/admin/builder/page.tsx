@@ -6,7 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 
 export default async function PuckBuilderPage({ searchParams }: { searchParams: Promise<{ store?: string }> }) {
   const resolvedParams = await searchParams;
-  const storeSlug = resolvedParams.store || 'ottavio';
+  const storeSlug = resolvedParams.store || "";
   
   // 1. Get store ID
   const db = getDb();

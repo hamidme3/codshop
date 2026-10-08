@@ -2269,7 +2269,7 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
 // ── Store Navigation Menus Repository ─────────────────────────
 
 export async function getStoreMenus(storeSlug: string): Promise<StoreMenu[]> {
-  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const cleanSlug = (storeSlug).toLowerCase().trim();
   const db = getDb();
   if (db) {
     try {
@@ -2300,7 +2300,7 @@ export async function getStoreMenuByPlacement(
   storeSlug: string,
   placement: MenuPlacement
 ): Promise<StoreMenu> {
-  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const cleanSlug = (storeSlug).toLowerCase().trim();
   const db = getDb();
   if (db) {
     try {
@@ -2333,7 +2333,7 @@ export async function updateStoreMenu(
   items: MenuItem[],
   title?: string
 ): Promise<StoreMenu> {
-  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const cleanSlug = (storeSlug).toLowerCase().trim();
   const db = getDb();
   if (db) {
     try {
@@ -2371,7 +2371,7 @@ export async function resetStoreMenu(
   storeSlug: string,
   placement: MenuPlacement
 ): Promise<StoreMenu> {
-  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const cleanSlug = (storeSlug).toLowerCase().trim();
   const defaultMenu = resetStoreMenuMock(cleanSlug, placement);
   const db = getDb();
   if (db) {
@@ -2408,7 +2408,7 @@ export async function resetStoreMenu(
 
 // ── Store Custom Pages & Policies Repository ───────────────────
 export async function getStorePages(storeSlug: string, onlyPublished: boolean = false): Promise<StorePage[]> {
-  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const cleanSlug = (storeSlug).toLowerCase().trim();
   const db = getDb();
   if (db) {
     try {
@@ -2450,7 +2450,7 @@ export async function getStorePages(storeSlug: string, onlyPublished: boolean = 
 }
 
 export async function getStorePageBySlug(storeSlug: string, slug: string): Promise<StorePage | null> {
-  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const cleanSlug = (storeSlug).toLowerCase().trim();
   const cleanPageSlug = (slug || '').toLowerCase().trim();
 
   const db = getDb();
@@ -2492,7 +2492,7 @@ export async function createOrUpdateStorePage(
   storeSlug: string,
   pageData: Partial<StorePage> & { title: string; slug: string; content: string }
 ): Promise<StorePage> {
-  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const cleanSlug = (storeSlug).toLowerCase().trim();
   const normalizedSlug = pageData.slug.toLowerCase().trim().replace(/[^a-z0-9_-]/g, '-');
 
   const db = getDb();
@@ -2582,7 +2582,7 @@ export async function createOrUpdateStorePage(
 }
 
 export async function deleteStorePage(storeSlug: string, idOrSlug: string): Promise<boolean> {
-  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const cleanSlug = (storeSlug).toLowerCase().trim();
   const db = getDb();
   if (db) {
     try {
@@ -2608,7 +2608,7 @@ export async function deleteStorePage(storeSlug: string, idOrSlug: string): Prom
 }
 
 export async function generateStandardStorePolicies(storeSlug: string): Promise<StorePage[]> {
-  const cleanSlug = (storeSlug || 'ottavio').toLowerCase().trim();
+  const cleanSlug = (storeSlug).toLowerCase().trim();
   const mockResult = generateStandardStorePoliciesMock(cleanSlug);
 
   const db = getDb();
