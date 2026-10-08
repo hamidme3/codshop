@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getCustomers, updateCustomerNotes } from '@/lib/db-repository';
-import { getCustomers as getMockCustomers, updateCustomerNotes as updateMockCustomerNotes } from '@/lib/mocks';
 import { isValidStoreSlug } from '@/lib/sanitizer';
 
 export async function GET(req: Request) {
@@ -19,8 +18,9 @@ export async function GET(req: Request) {
     let customers: any[] = [];
     try {
       customers = await getCustomers(storeSlug);
-    } catch {
-      customers = getMockCustomers(storeSlug);
+    } catch (dbErr: any) {
+      console.error('[API Admin Customers] DB fetch error:', dbErr);
+      return NextResponse.json({ success: false, message: 'Database error fetching customers' }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -48,10 +48,12 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ success: false, message: 'Phone is required' }, { status: 400 });
     }
 
-    updateMockCustomerNotes(phone, notes, storeSlug);
     try {
       await updateCustomerNotes(phone, notes, storeSlug);
-    } catch {}
+    } catch (dbErr: any) {
+      console.error('[API Admin Customers] DB update error:', dbErr);
+      return NextResponse.json({ success: false, message: 'Database error updating customer' }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, message: 'Customer notes saved successfully' });
   } catch (error: any) {

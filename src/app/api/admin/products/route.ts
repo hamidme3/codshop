@@ -17,8 +17,9 @@ export async function GET(req: Request) {
     let dbProducts: any[] = [];
     try {
       dbProducts = await getProducts(storeSlug);
-    } catch (err) {
+    } catch (err: any) {
       console.error('[API Admin Products] DB fetch error:', err);
+      return NextResponse.json({ success: false, message: 'Database error fetching products' }, { status: 500 });
     }
 
     return NextResponse.json({

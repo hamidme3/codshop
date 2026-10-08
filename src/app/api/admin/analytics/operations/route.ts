@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getOrders, getProducts } from '@/lib/db-repository';
-import { getOrders as getMockOrders, ORDERS } from '@/lib/mocks';
 import { isValidStoreSlug } from '@/lib/sanitizer';
 
 export async function GET(req: Request) {
@@ -20,19 +19,9 @@ export async function GET(req: Request) {
     let dbOrders: any[] = [];
     try {
       dbOrders = await getOrders(storeSlug);
-    } catch {
-      dbOrders = [];
-    }
-
-    // 2. Fetch in-memory orders
-    const memOrders = ORDERS.filter((o) => o.storeSlug === storeSlug);
-    const existingNumbers = new Set(dbOrders.map((o) => o.orderNumber));
-    const combined = [...dbOrders];
-    for (const mo of memOrders) {
-      if (!existingNumbers.has(mo.orderNumber)) {
-        combined.push(mo);
-        existingNumbers.add(mo.orderNumber);
-      }
+    } catch (dbErr: any) {
+      console.error('[API Admin Analytics Operations] DB fetch error:', dbErr);
+      return NextResponse.json({ success: false, message: 'Database error fetching orders' }, { status: 500 });
     }
 
     // Rolling 14-day date generator helper
@@ -48,8 +37,8 @@ export async function GET(req: Request) {
       };
     });
 
-    // 3. If no orders and not ottavio, return authentic zero state
-    if (combined.length === 0 && storeSlug !== 'ottavio') {
+    // 2. If no orders, return authentic zero state
+    if (dbOrders.length === 0) {
       return NextResponse.json({
         success: true,
         store: storeSlug,
@@ -76,8 +65,8 @@ export async function GET(req: Request) {
       });
     }
 
-    // 4. Calculate real operational metrics
-    const storeOrders = combined.length > 0 ? combined : (storeSlug === 'ottavio' ? getMockOrders('ottavio') : []);
+    // 3. Calculate real operational metrics
+    const storeOrders = dbOrders;
     const totalOrders = storeOrders.length;
     const deliveredOrders = storeOrders.filter((o) => o.status === 'delivered');
     const returnedOrders = storeOrders.filter((o) => o.status === 'returned');
@@ -318,7 +307,7 @@ export async function GET(req: Request) {
       dailyCashflow,
       pipelineStages,
       topProducts,
-      source: combined.length > 0 ? 'database_tenant' : 'demo_fallback',
+      source: dbOrders.length > 0 ? 'database_tenant' : 'database_tenant_empty',
     });
   } catch (error: any) {
     console.error('[Operations Analytics API] Error:', error);
