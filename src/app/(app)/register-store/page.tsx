@@ -51,7 +51,7 @@ export default function RegisterStorePage() {
       }
 
       // Redirect directly to the visual page builder for their new store
-      router.push(`/admin/builder?store=${data.store.slug}&new=1`);
+      router.push(`/admin/builder/puck?store=${data.store.slug}&new=1`);
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue');
       setLoading(false);

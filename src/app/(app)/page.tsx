@@ -8,15 +8,21 @@ import { ProductCard } from '@/components/ProductCard';
 import { Award, Sparkles, Zap, ArrowRight, Star, ShieldCheck, Truck, PackageCheck } from 'lucide-react';
 import { UniversalLandingPage } from '@/components/landing/UniversalLandingPage';
 import { trackStorePageView } from '@/lib/posthog';
+import { Render } from '@measured/puck';
+import { getPuckConfig } from '@/lib/puck-config';
+import '@measured/puck/puck.css';
 
 function StorefrontHome({ storeSlug }: { storeSlug?: string }) {
   const { theme, lang, countryCode } = useTheme();
   const countryConfig = useMemo(() => getCountryConfig(countryCode), [countryCode]);
   const [storeProducts, setStoreProducts] = useState<any[]>([]);
+  const [puckData, setPuckData] = useState<any>(null);
 
   useEffect(() => {
     const slug = storeSlug || 'storet1';
     trackStorePageView(slug, '/');
+    
+    // Fetch Products
     fetch(`/api/products?store=${encodeURIComponent(slug)}`)
       .then((res) => res.json())
       .then((data) => {
@@ -25,7 +31,22 @@ function StorefrontHome({ storeSlug }: { storeSlug?: string }) {
         }
       })
       .catch(() => {});
+      
+    // Fetch Puck Layout
+    fetch(`/api/stores/${encodeURIComponent(slug)}/puck`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setPuckData(data.data);
+        }
+      })
+      .catch(() => {});
   }, [storeSlug]);
+
+  // If merchant published a Puck layout, render it instead of the hardcoded template!
+  if (puckData) {
+    return <Render config={getPuckConfig(theme)} data={puckData} />;
+  }
 
   // Use only real store products (no placeholders)
   const products = storeProducts;

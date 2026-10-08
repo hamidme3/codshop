@@ -250,7 +250,7 @@ function ThemeGalleryContent() {
 
         <div className="flex items-center gap-3">
           <Link
-            href={`/admin/builder?store=${storeSlug}`}
+            href={`/admin/builder/puck?store=${storeSlug}`}
             className="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-medium flex items-center gap-2 border border-slate-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-300 dark:hover:text-white dark:border-zinc-800 transition shadow-xs"
           >
             <Sliders className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -356,7 +356,7 @@ function ThemeGalleryContent() {
 
           <div className="flex items-center gap-3 shrink-0">
             <Link
-              href={`/admin/builder?store=${storeSlug}`}
+              href={`/admin/builder/puck?store=${storeSlug}`}
               className="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-medium flex items-center gap-2 border border-slate-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-800 transition"
             >
               <Sliders className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />

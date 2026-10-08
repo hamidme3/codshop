@@ -808,3 +808,66 @@ export function DynamicSectionRenderer({
   }
 }
 
+
+// 10. PRODUCT GRID SECTION
+export function ProductGridSection({
+  settings,
+  themeConfig
+}: {
+  settings: any;
+  themeConfig: any;
+}) {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // We assume the storeSlug is in the URL or we just fetch for 'ottavio' if missing.
+    // In a real app we'd pass it down via context or props.
+    // Here we'll try to extract it from the searchParams if in the browser.
+    const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const storeSlug = urlParams?.get('store') || 'ottavio';
+
+    fetch(`/api/products?store=${storeSlug}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.products)) {
+          // If a category was provided, we could filter here.
+          let filtered = data.products;
+          if (settings.category && settings.category.trim() !== '') {
+             filtered = filtered.filter((p: any) => p.category?.toLowerCase() === settings.category.toLowerCase());
+          }
+          setProducts(filtered);
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [settings.category]);
+
+  const { ProductCard } = require('@/components/ProductCard'); // Dynamic require to avoid circular deps if any
+
+  return (
+    <div style={{ backgroundColor: themeConfig.bgPage }} className={`py-12 ${getFontFamilyClass(themeConfig.fontFamily)}`}>
+      <div className="max-w-6xl mx-auto px-4">
+        <h2 className="text-3xl font-bold mb-8 text-center" style={{ color: themeConfig.primaryColor }}>
+          {settings.title}
+        </h2>
+        
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="w-8 h-8 border-4 border-slate-200 rounded-full animate-spin" style={{ borderTopColor: themeConfig.primaryColor }}></div>
+          </div>
+        ) : products.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-slate-500 py-12 bg-slate-50 rounded-xl">
+            No products found.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

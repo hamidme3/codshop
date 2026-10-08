@@ -83,7 +83,7 @@ export async function POST(req: Request) {
       store: newStore,
       message: 'Boutique créée avec succès ! Votre essai gratuit de 14 jours a commencé.',
       previewUrl: getStorefrontUrl(newStore.slug),
-      adminUrl: `/admin/builder?store=${newStore.slug}`,
+      adminUrl: `/admin/builder/puck?store=${newStore.slug}`,
     });
 
     if (sessionToken) {

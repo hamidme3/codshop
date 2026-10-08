@@ -1,0 +1,180 @@
+import { Config } from "@measured/puck";
+import React from "react";
+import { 
+  AnnouncementBarSection, 
+  HeroSection, 
+  FeaturesGridSection, 
+  UrgencyTimerSection, 
+  CodCheckoutSection, 
+  ReviewsSection, 
+  VideoShowcaseSection, 
+  FaqSection, 
+  WhatsAppBarSection,
+  ProductGridSection
+} from "@/components/builder/Sections";
+
+export type Props = {
+  AnnouncementBar: { text: string; bgColor: string };
+  HeroBanner: { headline: string; subheadline: string; ctaText: string; badgeText: string };
+  FeaturesGrid: { title?: string };
+  UrgencyTimer: { title: string; stockRemaining: number };
+  CodCheckout: { productTitle: string; price: number; comparePrice: number; packDuoDiscount: number; packTrioDiscount: number };
+  Testimonials: { title: string; subtitle: string; reviewsSummary: string };
+  VideoShowcase: { title: string; subtitle: string; badgeText: string; thumbnailUrl: string };
+  Faq: { title?: string };
+  WhatsAppBar: { phone: string; message: string; buttonText: string };
+  ProductGrid: { title: string; category: string };
+};
+
+// We create a mock theme config to pass to the components for preview if none is provided
+export const defaultThemeConfig = {
+  primaryColor: '#09090b',
+  accentColor: '#c59b27',
+  bgPage: '#ffffff',
+  buttonRadius: 'rounded',
+  fontFamily: 'sans'
+};
+
+export const getPuckConfig = (themeConfig: any = defaultThemeConfig): Config<Props> => ({
+  components: {
+    AnnouncementBar: {
+      fields: {
+        text: { type: "text" },
+        bgColor: { type: "text" }
+      },
+      defaultProps: {
+        text: "Free Fast Delivery over 400 MAD • Cash on Delivery",
+        bgColor: themeConfig.accentColor || "#c59b27"
+      },
+      render: ({ text, bgColor }) => (
+        <AnnouncementBarSection settings={{ text, bgColor }} themeConfig={themeConfig} />
+      )
+    },
+    HeroBanner: {
+      fields: {
+        badgeText: { type: "text" },
+        headline: { type: "text" },
+        subheadline: { type: "textarea" },
+        ctaText: { type: "text" }
+      },
+      defaultProps: {
+        headline: "New Exceptional Offer",
+        subheadline: "Enjoy our exclusive discount today with cash on delivery.",
+        ctaText: "Order Now",
+        badgeText: "Special Offer"
+      },
+      render: (props) => (
+        <HeroSection settings={props} themeConfig={themeConfig} />
+      )
+    },
+    FeaturesGrid: {
+      fields: {},
+      defaultProps: {},
+      render: (props) => (
+        <FeaturesGridSection settings={props} themeConfig={themeConfig} />
+      )
+    },
+    UrgencyTimer: {
+      fields: {
+        title: { type: "text" },
+        stockRemaining: { type: "number" }
+      },
+      defaultProps: {
+        title: "Limited Flash Sale",
+        stockRemaining: 12
+      },
+      render: (props) => (
+        <UrgencyTimerSection settings={props} themeConfig={themeConfig} />
+      )
+    },
+    CodCheckout: {
+      fields: {
+        productTitle: { type: "text" },
+        price: { type: "number" },
+        comparePrice: { type: "number" },
+        packDuoDiscount: { type: "number" },
+        packTrioDiscount: { type: "number" }
+      },
+      defaultProps: {
+        productTitle: "Featured Item - Special Edition",
+        price: 349,
+        comparePrice: 590,
+        packDuoDiscount: 100,
+        packTrioDiscount: 200
+      },
+      render: (props) => (
+        <CodCheckoutSection settings={props} themeConfig={themeConfig} />
+      )
+    },
+    VideoShowcase: {
+      fields: {
+        badgeText: { type: "text" },
+        title: { type: "text" },
+        subtitle: { type: "text" },
+        thumbnailUrl: { type: "text" }
+      },
+      defaultProps: {
+        title: "Discover the Product in Action",
+        subtitle: "Watch the real demonstration before ordering.",
+        badgeText: "Video Demonstration",
+        thumbnailUrl: ""
+      },
+      render: (props) => (
+        <VideoShowcaseSection settings={props} themeConfig={themeConfig} />
+      )
+    },
+    Testimonials: {
+      fields: {
+        reviewsSummary: { type: "text" },
+        title: { type: "text" },
+        subtitle: { type: "text" }
+      },
+      defaultProps: {
+        title: "What Our Customers Across Morocco Say",
+        subtitle: "Verified reviews after inspection and cash on delivery.",
+        reviewsSummary: "Verified reviews after receipt"
+      },
+      render: (props) => (
+        <ReviewsSection settings={props} themeConfig={themeConfig} />
+      )
+    },
+    Faq: {
+      fields: {},
+      defaultProps: {},
+      render: (props) => (
+        <FaqSection settings={props} themeConfig={themeConfig} />
+      )
+    },
+    ProductGrid: {
+      fields: {
+        title: { type: "text" },
+        category: { type: "text" }
+      },
+      defaultProps: {
+        title: "Our Products",
+        category: ""
+      },
+      render: (props) => (
+        <ProductGridSection settings={props} themeConfig={themeConfig} />
+      )
+    },
+    WhatsAppBar: {
+      fields: {
+        phone: { type: "text" },
+        message: { type: "textarea" },
+        buttonText: { type: "text" }
+      },
+      defaultProps: {
+        phone: "+212661000000",
+        message: "Salam, I want to ask about this item and order",
+        buttonText: "Order via WhatsApp"
+      },
+      render: (props) => (
+        <WhatsAppBarSection settings={props} themeConfig={themeConfig} />
+      )
+    }
+  }
+});
+
+// For backward compatibility if any file still imports puckConfig
+export const puckConfig = getPuckConfig(defaultThemeConfig);

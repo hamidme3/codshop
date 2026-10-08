@@ -13,6 +13,7 @@
     "seed:superadmin": "tsx scripts/seed-superadmin.ts"
   },
   "dependencies": {
+    "@measured/puck": "^0.20.2",
     "@payloadcms/db-postgres": "^3.86.0",
     "@payloadcms/next": "^3.86.0",
     "@payloadcms/richtext-lexical": "^3.86.0",
