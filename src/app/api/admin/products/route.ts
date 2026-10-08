@@ -7,9 +7,9 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const storeSlug = searchParams.get('store') || 'ottavio';
+    const storeSlug = searchParams.get('store') || req.headers.get('x-user-store-slug') || req.headers.get('x-store-slug');
 
-    if (!isValidStoreSlug(storeSlug)) {
+    if (!storeSlug || !isValidStoreSlug(storeSlug)) {
       return NextResponse.json({ success: false, message: 'Invalid store slug' }, { status: 400 });
     }
 
@@ -39,8 +39,10 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    let { storeSlug } = body;
+    if (!storeSlug) storeSlug = req.headers.get('x-user-store-slug') || req.headers.get('x-store-slug');
+
     const {
-      storeSlug = 'ottavio',
       title,
       sku,
       category,

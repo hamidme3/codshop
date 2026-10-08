@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, notFound } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 import {
   ShieldCheck,
@@ -33,7 +33,10 @@ export default function StorefrontCustomPage() {
     setLoading(true);
     setError(null);
 
-    const activeSlug = storeSlug || 'ottavio';
+    if (!storeSlug) {
+      return notFound();
+    }
+    const activeSlug = storeSlug;
     fetch(`/api/stores/${encodeURIComponent(activeSlug)}/pages/${encodeURIComponent(pageSlug)}`)
       .then(async (res) => {
         if (!res.ok) {

@@ -11,7 +11,7 @@ export async function GET(
 ) {
   try {
     const { slug, pageSlug } = await params;
-    const storeSlug = (slug || 'ottavio').toLowerCase().trim();
+    const storeSlug = (slug ).toLowerCase().trim();
     const cleanPageSlug = (pageSlug || '').toLowerCase().trim();
 
     const page = await getStorePageBySlug(storeSlug, cleanPageSlug);
@@ -43,7 +43,7 @@ export async function PUT(
 ) {
   try {
     const { slug, pageSlug } = await params;
-    const storeSlug = (slug || 'ottavio').toLowerCase().trim();
+    const storeSlug = (slug ).toLowerCase().trim();
     const cleanPageSlug = (pageSlug || '').toLowerCase().trim();
 
     const body = await req.json();
@@ -96,7 +96,7 @@ export async function DELETE(
 ) {
   try {
     const { slug, pageSlug } = await params;
-    const storeSlug = (slug || 'ottavio').toLowerCase().trim();
+    const storeSlug = (slug ).toLowerCase().trim();
     const cleanPageSlug = (pageSlug || '').toLowerCase().trim();
 
     const deleted = await deleteStorePage(storeSlug, cleanPageSlug);

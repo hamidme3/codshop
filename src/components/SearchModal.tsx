@@ -64,7 +64,7 @@ export function SearchModal() {
         detected = urlParams.get('store') || '';
       }
 
-      const fetchSlug = detected || 'ottavio';
+      const fetchSlug = detected;
       setCurrentStoreSlug(fetchSlug);
       fetch(`/api/products?store=${encodeURIComponent(fetchSlug)}`)
         .then((r) => r.json())

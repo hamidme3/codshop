@@ -54,7 +54,7 @@ export default function CatalogPage() {
         detected = urlParams.get('store') || '';
       }
 
-      const fetchSlug = detected || 'ottavio';
+      const fetchSlug = detected;
       setCurrentStoreSlug(fetchSlug);
 
       const urlParams = new URLSearchParams(window.location.search);

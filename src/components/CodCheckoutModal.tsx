@@ -135,7 +135,7 @@ export function CodCheckoutModal({
         return host.replace('.localhost', '');
       }
     }
-    return (product as any)?.storeSlug || 'ottavio';
+    return (product as any)?.storeSlug || '';
   }, [storeSlug, product]);
 
   const productPrefix = useMemo(() => {

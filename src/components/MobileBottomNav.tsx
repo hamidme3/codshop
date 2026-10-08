@@ -149,7 +149,7 @@ export function MobileBottomNav() {
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => {
-            let storeSlug = 'ottavio';
+            let storeSlug = '';
             if (typeof window !== 'undefined') {
               const host = window.location.hostname.toLowerCase();
               const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
@@ -158,7 +158,7 @@ export function MobileBottomNav() {
               if (hasSub) {
                 storeSlug = host.replace(`.${rootDomain}`, '').replace('.localhost', '');
               } else {
-                storeSlug = new URLSearchParams(window.location.search).get('store') || 'ottavio';
+                storeSlug = new URLSearchParams(window.location.search).get('store') || '';
               }
             }
             trackWhatsAppRescue(storeSlug, { reason: 'mobile_bottom_nav_click' });

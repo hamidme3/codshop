@@ -11,7 +11,7 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const storeSlug = (slug || 'ottavio').toLowerCase().trim();
+    const storeSlug = (slug ).toLowerCase().trim();
     const { searchParams } = new URL(req.url);
     const onlyPublished = searchParams.get('published_only') === 'true';
 
@@ -38,7 +38,7 @@ export async function POST(
 ) {
   try {
     const { slug } = await params;
-    const storeSlug = (slug || 'ottavio').toLowerCase().trim();
+    const storeSlug = (slug ).toLowerCase().trim();
     const body = await req.json();
 
     if (!body || typeof body !== 'object') {

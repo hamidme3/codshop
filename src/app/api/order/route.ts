@@ -84,7 +84,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const rawStoreSlug = detectedStoreSlug || 'ottavio';
+    const rawStoreSlug = detectedStoreSlug;
     if (!isValidStoreSlug(rawStoreSlug)) {
       return NextResponse.json(
         { success: false, message: 'Invalid store identifier' },

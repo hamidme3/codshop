@@ -14,7 +14,11 @@ import { isValidStoreSlug } from '@/lib/sanitizer';
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const storeSlug = searchParams.get('store') || 'ottavio';
+    const storeSlug = searchParams.get('store') || req.headers.get('x-user-store-slug') || req.headers.get('x-store-slug');
+
+    if (!storeSlug) {
+      return NextResponse.json({ success: false, message: 'Store slug is required' }, { status: 400 });
+    }
 
     if (!isValidStoreSlug(storeSlug)) {
       return NextResponse.json({ success: false, message: 'Invalid store slug' }, { status: 400 });
@@ -82,7 +86,9 @@ export async function GET(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const body = await req.json();
-    const { storeSlug = 'ottavio', orderId, status, trackingNumber, courier, agentNotes, notes } = body;
+    let { storeSlug } = body;
+    if (!storeSlug) storeSlug = req.headers.get('x-user-store-slug') || req.headers.get('x-store-slug');
+    const { orderId, status, trackingNumber, courier, agentNotes, notes } = body;
     const finalNotes = agentNotes !== undefined ? agentNotes : notes;
 
     if (!orderId) {
@@ -209,7 +215,11 @@ export async function DELETE(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const orderId = searchParams.get('orderId');
-    const storeSlug = searchParams.get('store') || 'ottavio';
+    const storeSlug = searchParams.get('store') || req.headers.get('x-user-store-slug') || req.headers.get('x-store-slug');
+
+    if (!storeSlug) {
+      return NextResponse.json({ success: false, message: 'Store slug is required' }, { status: 400 });
+    }
 
     if (!orderId) {
       return NextResponse.json(

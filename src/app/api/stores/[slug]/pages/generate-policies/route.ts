@@ -9,7 +9,7 @@ export async function POST(
 ) {
   try {
     const { slug } = await params;
-    const storeSlug = (slug || 'ottavio').toLowerCase().trim();
+    const storeSlug = (slug ).toLowerCase().trim();
 
     const pages = await generateStandardStorePolicies(storeSlug);
 

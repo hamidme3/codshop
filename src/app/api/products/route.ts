@@ -19,8 +19,9 @@ export async function GET(req: Request) {
       }
     }
     
-    // Final fallback
-    storeSlug = storeSlug || 'ottavio';
+    if (!storeSlug) {
+      return NextResponse.json({ success: false, message: 'Store slug is required' }, { status: 400 });
+    }
     const slugQuery = searchParams.get('slug')?.toLowerCase().trim();
 
     // 1. Fetch products from DB
@@ -64,21 +65,7 @@ export async function GET(req: Request) {
           String(p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') === slugQuery
       );
 
-      // 2. If not found in current store, check DB directly by slug/sku across all stores
-      if (!match) {
-        try {
-          const dbProd = await getProductBySlugOrSku(slugQuery);
-          if (dbProd) {
-            if (dbProd.status === 'draft' && !isPreview) {
-              return NextResponse.json(
-                { success: false, message: 'Ce produit est actuellement en cours de préparation', isDraft: true },
-                { status: 404 }
-              );
-            }
-            match = convertDbProductToStorefrontProduct(dbProd);
-          }
-        } catch {}
-      }
+
 
       if (match) {
         return NextResponse.json({ success: true, product: match, isPreview: isPreview && draftMatch?.status === 'draft' });

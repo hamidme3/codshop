@@ -200,6 +200,15 @@ export async function middleware(request: NextRequest) {
         requestHeaders.set('x-user-id', String(sessionUser.userId || ''));
         requestHeaders.set('x-user-email', String(sessionUser.email || ''));
         requestHeaders.set('x-user-store-slug', String(sessionUser.storeSlug || ''));
+        
+        // Force ?store= param for client components if missing
+        if (!isAdminApi && !url.searchParams.has('store') && sessionUser.storeSlug) {
+          const redirectUrl = new URL(url.toString());
+          redirectUrl.searchParams.set('store', sessionUser.storeSlug);
+          const redirectRes = NextResponse.redirect(redirectUrl);
+          redirectRes.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+          return redirectRes;
+        }
       }
     }
   }

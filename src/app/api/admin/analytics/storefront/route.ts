@@ -22,7 +22,11 @@ interface SearchTermStats {
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const storeSlug = searchParams.get('store') || 'ottavio';
+    const storeSlug = searchParams.get('store') || req.headers.get('x-user-store-slug') || req.headers.get('x-store-slug');
+
+    if (!storeSlug) {
+      return NextResponse.json({ success: false, message: 'Store slug is required' }, { status: 400 });
+    }
 
     if (!isValidStoreSlug(storeSlug)) {
       return NextResponse.json({ success: false, message: 'Invalid store identifier' }, { status: 400 });
