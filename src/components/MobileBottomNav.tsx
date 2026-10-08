@@ -149,7 +149,18 @@ export function MobileBottomNav() {
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => {
-            const storeSlug = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('store') || 'ottavio' : 'ottavio';
+            let storeSlug = 'ottavio';
+            if (typeof window !== 'undefined') {
+              const host = window.location.hostname.toLowerCase();
+              const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
+              const hasSub = (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
+                             (host.endsWith('.localhost') && host !== 'localhost');
+              if (hasSub) {
+                storeSlug = host.replace(`.${rootDomain}`, '').replace('.localhost', '');
+              } else {
+                storeSlug = new URLSearchParams(window.location.search).get('store') || 'ottavio';
+              }
+            }
             trackWhatsAppRescue(storeSlug, { reason: 'mobile_bottom_nav_click' });
           }}
           className="flex flex-col items-center justify-center h-full min-h-[48px] py-1 text-emerald-600 hover:text-emerald-700 transition-colors"
