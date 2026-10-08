@@ -40,3 +40,9 @@ test-results/
 .telegram_images/
 # uploads
 /public/uploads/
+
+# Temporary Files
+.telegram_files/
+pdf_translations/
+fix.py
+fix_braces.js
