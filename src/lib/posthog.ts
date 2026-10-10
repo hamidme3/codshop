@@ -158,19 +158,31 @@ export function trackCatalogView(storeSlug: string, properties?: { category?: st
 }
 
 /**
- * Track user search queries and exact words searched
+ * Track user search queries and exact words searched (with 10-minute deduplication)
  */
 export function trackSearch(storeSlug: string, query: string, resultsCount: number) {
   if (typeof window === 'undefined' || !query.trim()) return;
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const dedupKey = `cod_search_${storeSlug}_${normalizedQuery}`;
+  const lastTracked = sessionStorage.getItem(dedupKey);
+  const now = Date.now();
+  
+  // Deduplicate identical searches within 10 minutes
+  if (lastTracked && (now - parseInt(lastTracked, 10)) < 10 * 60 * 1000) {
+    return;
+  }
+  sessionStorage.setItem(dedupKey, now.toString());
+
   initPostHog();
   dispatchServerEvent(storeSlug, 'search_performed', {
-    search_query: query.trim().toLowerCase(),
+    search_query: normalizedQuery,
     results_count: resultsCount,
     is_zero_result: resultsCount === 0,
   });
   safeCapture('search_performed', {
     store_slug: storeSlug,
-    search_query: query.trim().toLowerCase(),
+    search_query: normalizedQuery,
     results_count: resultsCount,
     is_zero_result: resultsCount === 0,
   });
