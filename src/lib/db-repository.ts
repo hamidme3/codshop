@@ -1937,8 +1937,8 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
         const ePath = String(props.path || '').toLowerCase();
 
         const matches = (
-          (eId && (eId === pId || eId === pSku || eId.includes(pSkuClean) || pId.includes(eId))) ||
-          (pSku && (eSku === pSku || eId === pSku || ePath.includes(pSku) || eSlug.includes(pSkuClean))) ||
+          (eId && (eId === pId || (pSku && eId === pSku) || (pSkuClean && eId.includes(pSkuClean)) || (eId.length > 3 && pId.includes(eId)))) ||
+          (pSku && (eSku === pSku || eId === pSku || ePath.includes(pSku) || (pSkuClean && eSlug.includes(pSkuClean)))) ||
           (pSlug && (eSlug === pSlug || ePath.includes(pSlug))) ||
           (pTitle && eTitle === pTitle)
         );
@@ -1958,7 +1958,7 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
           const itTitle = String(it.title || '').toLowerCase();
 
           return (
-            (itId && (itId === pId || itId === pSku || itId.includes(pSkuClean))) ||
+            (itId && (itId === pId || (pSku && itId === pSku) || (pSkuClean && itId.includes(pSkuClean)))) ||
             (pSku && (itSku === pSku || itId === pSku)) ||
             (pTitle && itTitle === pTitle)
           );
