@@ -186,7 +186,8 @@ export async function GET(req: Request) {
     const confirmedOnlyOrders = storeOrders.filter((o) => o.status === 'confirmed');
     const inTransitOrders = storeOrders.filter((o) => ['shipped', 'shipping'].includes(o.status));
     const deliveredOnlyOrders = storeOrders.filter((o) => o.status === 'delivered');
-    const returnedOnlyOrders = storeOrders.filter((o) => ['returned', 'canceled'].includes(o.status));
+    const returnedOnlyOrders = storeOrders.filter((o) => o.status === 'returned');
+    const canceledOnlyOrders = storeOrders.filter((o) => o.status === 'canceled');
 
     const pipelineStages = [
       {
@@ -219,10 +220,17 @@ export async function GET(req: Request) {
       },
       {
         key: 'returned',
-        name: '5. Retours / Refus',
+        name: '5. Retours (Refus après expédition)',
         count: returnedOnlyOrders.length,
         value: Math.round(returnedOnlyOrders.reduce((s, o) => s + (Number(o.total) || 0), 0)),
         color: '#f43f5e',
+      },
+      {
+        key: 'canceled',
+        name: '6. Annulées / Spam',
+        count: canceledOnlyOrders.length,
+        value: Math.round(canceledOnlyOrders.reduce((s, o) => s + (Number(o.total) || 0), 0)),
+        color: '#71717a', // zinc-500
       },
     ];
 
@@ -235,12 +243,14 @@ export async function GET(req: Request) {
       deliveredRevenue: number;
       deliveredCount: number;
       returnedCount: number;
+      canceledCount: number;
     }>();
 
     for (const order of storeOrders) {
       const items = order.items || [];
       const isDelivered = order.status === 'delivered';
-      const isReturned = ['returned', 'canceled'].includes(order.status);
+      const isReturned = order.status === 'returned';
+      const isCanceled = order.status === 'canceled';
 
       for (const item of items) {
         const title = item.title || 'Produit sans titre';
@@ -253,6 +263,7 @@ export async function GET(req: Request) {
           deliveredRevenue: 0,
           deliveredCount: 0,
           returnedCount: 0,
+          canceledCount: 0,
         };
 
         const qty = Number(item.quantity) || 1;
@@ -267,6 +278,9 @@ export async function GET(req: Request) {
         }
         if (isReturned) {
           existing.returnedCount += 1;
+        }
+        if (isCanceled) {
+          existing.canceledCount += 1;
         }
 
         productStatsMap.set(key, existing);
