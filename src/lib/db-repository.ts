@@ -1942,18 +1942,13 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
         const eSku = eSkuRaw && eSkuRaw !== 'undefined' ? String(eSkuRaw).toLowerCase() : '';
         const eSlugRaw = props.slug;
         const eSlug = eSlugRaw && eSlugRaw !== 'undefined' ? String(eSlugRaw).toLowerCase() : '';
-        const eTitleRaw = props.title || props.product_title;
-        const eTitle = eTitleRaw && eTitleRaw !== 'undefined' ? String(eTitleRaw).toLowerCase() : '';
         const ePath = String(props.path || '').toLowerCase();
 
         const matches = (
           (eId && pId && eId === pId) ||
           (pSku && eSku && eSku === pSku) ||
-          (pSku && eId === pSku) ||
           (pSlug && eSlug && eSlug === pSlug) ||
-          (pTitle && eTitle && eTitle === pTitle) ||
-          (pSlug && ePath && (ePath === `/${pSlug}` || ePath.endsWith(`/${pSlug}`))) ||
-          (pSku && ePath && ePath.endsWith(`/${pSkuClean}`))
+          (pSlug && ePath && (ePath === `/${pSlug}` || ePath.endsWith(`/${pSlug}`)))
         );
 
         return matches && ['product_viewed', 'initiated_checkout', 'checkout_step_2', 'cod_checkout_abandoned', 'order_completed'].includes(e.eventName);
@@ -1970,14 +1965,10 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
           const itId = itIdRaw && itIdRaw !== 'undefined' ? String(itIdRaw).toLowerCase() : '';
           const itSkuRaw = it.sku;
           const itSku = itSkuRaw && itSkuRaw !== 'undefined' ? String(itSkuRaw).toLowerCase() : '';
-          const itTitleRaw = it.title;
-          const itTitle = itTitleRaw && itTitleRaw !== 'undefined' ? String(itTitleRaw).toLowerCase() : '';
 
           return (
             (itId && pId && itId === pId) ||
-            (pSku && itSku && itSku === pSku) ||
-            (pSku && itId === pSku) ||
-            (pTitle && itTitle && itTitle === pTitle)
+            (pSku && itSku && itSku === pSku)
           );
         });
       });
