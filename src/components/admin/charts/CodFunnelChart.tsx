@@ -24,7 +24,7 @@ interface CodFunnelChartProps {
 }
 
 const DEFAULT_STAGES: FunnelStage[] = [
-  { id: 'visits', name: 'Visiteurs Ads', count: 12450, rate: 100, stepRate: 100, color: '#64748b', iconName: 'Users' },
+  { id: 'visits', name: 'Visiteurs Uniques', count: 12450, rate: 100, stepRate: 100, color: '#64748b', iconName: 'Users' },
   { id: 'checkout', name: 'Formulaire Rempli', count: 560, rate: 4.5, stepRate: 4.5, color: '#3b82f6', iconName: 'Filter' },
   { id: 'confirmed', name: 'Confirmées Tél.', count: 485, rate: 3.9, stepRate: 86.6, color: '#06b6d4', iconName: 'PhoneCall' },
   { id: 'shipped', name: 'Expédiées Transporteur', count: 470, rate: 3.8, stepRate: 96.9, color: '#f59e0b', iconName: 'Truck' },

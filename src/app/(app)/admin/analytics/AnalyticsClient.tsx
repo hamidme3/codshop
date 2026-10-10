@@ -686,7 +686,7 @@ function AnalyticsContent() {
             return (
               <CodFunnelChart 
                 stages={[
-                  { id: 'visits', name: 'Visiteurs Ads', count: visitors, rate: visitRate, stepRate: 100, color: '#64748b', iconName: 'Users' },
+                  { id: 'visits', name: 'Visiteurs Uniques', count: visitors, rate: visitRate, stepRate: 100, color: '#64748b', iconName: 'Users' },
                   { id: 'checkout', name: 'Formulaire Rempli', count: checkout, rate: checkoutRate, stepRate: stepCheckout, color: '#3b82f6', iconName: 'Filter' },
                   { id: 'confirmed', name: 'Confirmées Tél.', count: confirmed, rate: confirmedRate, stepRate: stepConfirmed, color: '#06b6d4', iconName: 'PhoneCall' },
                   { id: 'shipped', name: 'Expédiées Transporteur', count: shipped, rate: shippedRate, stepRate: stepShipped, color: '#f59e0b', iconName: 'Truck' },
