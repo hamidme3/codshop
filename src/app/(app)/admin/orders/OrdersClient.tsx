@@ -128,7 +128,8 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
     confirmed: ['confirmed'],
     shipped: ['shipped', 'shipping'],
     delivered: ['delivered'],
-    returned: ['returned', 'canceled'],
+    returned: ['returned'],
+    canceled: ['canceled'],
     abandoned: ['abandoned'],
   };
 
@@ -149,7 +150,8 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
   const confirmedCount = useMemo(() => orders.filter((o) => o.status === 'confirmed').length, [orders]);
   const shippedCount = useMemo(() => orders.filter((o) => ['shipped', 'shipping'].includes(o.status)).length, [orders]);
   const deliveredCount = useMemo(() => orders.filter((o) => o.status === 'delivered').length, [orders]);
-  const returnedCount = useMemo(() => orders.filter((o) => ['returned', 'canceled'].includes(o.status)).length, [orders]);
+  const returnedCount = useMemo(() => orders.filter((o) => o.status === 'returned').length, [orders]);
+  const canceledCount = useMemo(() => orders.filter((o) => o.status === 'canceled').length, [orders]);
   const newCount = useMemo(() => orders.filter((o) => ['new', 'to_confirm'].includes(o.status)).length, [orders]);
   const abandonedCount = useMemo(() => orders.filter((o) => o.status === 'abandoned').length, [orders]);
 
@@ -190,10 +192,18 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
     {
       id: 'returned',
       title: '5. Retours / Refus',
-      statuses: ['returned', 'canceled'] as OrderStatus[],
+      statuses: ['returned'] as OrderStatus[],
       dot: 'bg-rose-400',
       pillClass: 'stage-pill-returned',
-      totalMad: orders.filter((o) => ['returned', 'canceled'].includes(o.status)).reduce((acc, o) => acc + (Number(o.total) || 0), 0),
+      totalMad: orders.filter((o) => o.status === 'returned').reduce((acc, o) => acc + (Number(o.total) || 0), 0),
+    },
+    {
+      id: 'canceled',
+      title: '6. Annulées / Spam',
+      statuses: ['canceled'] as OrderStatus[],
+      dot: 'bg-zinc-400',
+      pillClass: 'bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300',
+      totalMad: orders.filter((o) => o.status === 'canceled').reduce((acc, o) => acc + (Number(o.total) || 0), 0),
     },
   ], [orders]);
 
@@ -326,7 +336,7 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
 
   // Universal Standard Orders CSV Export
   const handleExportCsv = (
-    type: 'all' | 'confirmed' | 'shipped' | 'delivered' | 'returned' | 'current' | 'selected'
+    type: 'all' | 'confirmed' | 'shipped' | 'delivered' | 'returned' | 'canceled' | 'current' | 'selected'
   ) => {
     let ordersToExport: Order[] = [];
     let label = '';
@@ -349,9 +359,13 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
       label = 'Commandes Livrées';
       prefix = 'commandes_livrees';
     } else if (type === 'returned') {
-      ordersToExport = orders.filter((o) => ['returned', 'canceled'].includes(o.status));
+      ordersToExport = orders.filter((o) => o.status === 'returned');
       label = 'Commandes Retournées';
       prefix = 'commandes_retournees';
+    } else if (type === 'canceled') {
+      ordersToExport = orders.filter((o) => o.status === 'canceled');
+      label = 'Commandes Annulées';
+      prefix = 'commandes_annulees';
     } else if (type === 'selected') {
       ordersToExport = orders.filter((o) => selectedOrderIds.includes(o.id));
       label = `Sélection (${ordersToExport.length} commandes)`;
@@ -523,6 +537,16 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
                     <Download className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                   </button>
                   <button
+                    onClick={() => handleExportCsv('canceled')}
+                    className="w-full text-left px-3 py-2 rounded-xl bg-zinc-50 hover:bg-zinc-100 text-zinc-800 dark:bg-zinc-900/40 dark:hover:bg-zinc-800/60 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800/40 font-bold flex items-center justify-between transition-colors cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-zinc-500"></span>
+                      <span>Annulées ({canceledCount})</span>
+                    </span>
+                    <Download className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-400" />
+                  </button>
+                  <button
                     onClick={() => handleExportCsv('current')}
                     className="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-between cursor-pointer"
                   >
@@ -550,7 +574,7 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
       </div>
 
       {/* Top Executive Bento Stage Strip (Option 2 x 3 Fusion) */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {kanbanColumns.map((col) => (
           <div
             key={`bento-${col.id}`}
@@ -587,6 +611,7 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
             { id: 'shipped', label: `En Transit (${shippedCount})` },
             { id: 'delivered', label: `Livrées (${deliveredCount})` },
             { id: 'returned', label: `Retours (${returnedCount})` },
+            { id: 'canceled', label: `Annulées (${canceledCount})` },
             { id: 'abandoned', label: `Paniers Abandonnés (${abandonedCount})` },
           ].map((tab) => {
             const isTabActive = tab.id === 'all'
