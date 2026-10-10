@@ -23,8 +23,8 @@ import { trackCatalogView, trackSearch, trackStorePageView } from '@/lib/posthog
 
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'rating';
 
-export default function CatalogClient({ initialProducts }: { initialProducts: StorefrontProduct[] }) {
-  const { theme, formatPrice, countryCode } = useTheme();
+export default function CatalogClient({ initialProducts, isPlatform = false }: { initialProducts: StorefrontProduct[], isPlatform?: boolean }) {
+  const { theme, storeSlug, formatPrice, countryCode } = useTheme();
   const countryConfig = useMemo(() => getCountryConfig(countryCode || 'MA'), [countryCode]);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,29 +32,11 @@ export default function CatalogClient({ initialProducts }: { initialProducts: St
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortOption>('featured');
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [isSubdomain, setIsSubdomain] = useState(false);
-  const [currentStoreSlug, setCurrentStoreSlug] = useState<string>('');
-  const [mounted, setMounted] = useState(false);
+      const [mounted, setMounted] = useState(false);
 
   React.useEffect(() => {
     setMounted(true);
     if (typeof window !== 'undefined') {
-      const host = window.location.hostname.toLowerCase();
-      const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
-      const hasSub = (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
-                     (host.endsWith('.localhost') && host !== 'localhost');
-      setIsSubdomain(hasSub);
-
-      let detected = '';
-      if (hasSub) {
-        detected = host.replace(`.${rootDomain}`, '').replace('.localhost', '');
-      } else {
-        const urlParams = new URLSearchParams(window.location.search);
-        detected = urlParams.get('store') || '';
-      }
-
-      const fetchSlug = detected;
-      setCurrentStoreSlug(fetchSlug);
 
       const urlParams = new URLSearchParams(window.location.search);
       const catParam = urlParams.get('category');
@@ -69,7 +51,6 @@ export default function CatalogClient({ initialProducts }: { initialProducts: St
       if (sortParam && ['featured', 'price-asc', 'price-desc', 'rating'].includes(sortParam)) {
         setSortBy(sortParam);
       }
-
 
     }
   }, []);
@@ -174,23 +155,23 @@ export default function CatalogClient({ initialProducts }: { initialProducts: St
 
   // Track Catalog View
   React.useEffect(() => {
-    trackCatalogView(currentStoreSlug, {
+    trackCatalogView(storeSlug, {
       category: selectedCategory,
       sort: sortBy,
       resultsCount: filteredProducts.length,
     });
-    trackStorePageView(currentStoreSlug, '/catalog');
-  }, [selectedCategory, sortBy, filteredProducts.length, currentStoreSlug]);
+    trackStorePageView(storeSlug, '/catalog');
+  }, [selectedCategory, sortBy, filteredProducts.length, storeSlug]);
 
   // Track Searches with 600ms debounce
   React.useEffect(() => {
     const trimmed = searchQuery.trim();
     if (!trimmed || trimmed.length < 2) return;
     const timer = setTimeout(() => {
-      trackSearch(currentStoreSlug, trimmed, filteredProducts.length);
+      trackSearch(storeSlug, trimmed, filteredProducts.length);
     }, 600);
     return () => clearTimeout(timer);
-  }, [searchQuery, filteredProducts.length, currentStoreSlug]);
+  }, [searchQuery, filteredProducts.length, storeSlug]);
 
   const resetFilters = () => {
     setSearchQuery('');
@@ -212,7 +193,7 @@ export default function CatalogClient({ initialProducts }: { initialProducts: St
       >
         <div className="max-w-7xl mx-auto space-y-3">
           {/* SaaS Platform Demo Catalog Banner (when visited on root domain) */}
-          {mounted && !isSubdomain && (
+          {mounted && isPlatform && (
             <div className="p-3.5 sm:p-4 rounded-2xl bg-zinc-900/90 border border-emerald-500/30 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs mb-3">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold shrink-0">
@@ -320,7 +301,7 @@ export default function CatalogClient({ initialProducts }: { initialProducts: St
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && searchQuery.trim()) {
-                    trackSearch(currentStoreSlug, searchQuery.trim(), filteredProducts.length);
+                    trackSearch(storeSlug, searchQuery.trim(), filteredProducts.length);
                   }
                 }}
                 className="w-full pl-10 pr-10 py-2.5 text-xs rounded-xl border transition focus:outline-none focus:ring-2 bg-white text-zinc-900 placeholder:text-zinc-400"

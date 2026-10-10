@@ -524,10 +524,10 @@ export async function resolvePayloadCatalogProduct(
       const pTitle = (p.title || '').toLowerCase();
       const titleSlug = pTitle.replace(/[^a-z0-9]+/g, '-');
 
-      if (targetId && (pId === targetId || pSku === targetId)) return true;
-      if (targetSku && (pSku === targetSku || targetSku.startsWith(pSku) || pSku.startsWith(targetSku))) return true;
-      if (targetSlug && (pSku === targetSlug || titleSlug === targetSlug)) return true;
-      if (targetTitle && (pTitle === targetTitle || pTitle.includes(targetTitle) || targetTitle.includes(pTitle))) return true;
+      if (targetId && (pId === targetId || (pSku && pSku === targetId))) return true;
+      if (targetSku && (pSku === targetSku || (pSku && targetSku.startsWith(pSku)) || (pSku && pSku.startsWith(targetSku)))) return true;
+      if (targetSlug && ((pSku && pSku === targetSlug) || (titleSlug && titleSlug === targetSlug))) return true;
+      if (targetTitle && (pTitle === targetTitle || (pTitle && pTitle.includes(targetTitle)) || (pTitle && targetTitle.includes(pTitle)))) return true;
       return false;
     });
 

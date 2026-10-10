@@ -38,11 +38,11 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ children, initialStoreSlug }: { children: React.ReactNode, initialStoreSlug?: string }) {
   const [themeId, setThemeIdState] = useState<ThemeId>('luxury');
   const [lang, setLangState] = useState<'fr' | 'ar'>('fr');
   const [countryCode, setCountryCodeState] = useState<string>('MA');
-  const [storeSlug, setStoreSlug] = useState<string>('');
+  const [storeSlug, setStoreSlug] = useState<string>(initialStoreSlug || '');
   const [shippingSettings, setShippingSettings] = useState<StoreShippingSettings>({
     freeShippingThreshold: 400,
     casaFee: 20,
@@ -131,18 +131,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
-      let resolvedSlug = params.get('store');
-      if (!resolvedSlug && typeof window !== 'undefined') {
-        const host = window.location.hostname.toLowerCase();
-        const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
-        if (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) {
-          resolvedSlug = host.replace(`.${rootDomain}`, '');
-        } else if (host.endsWith('.localhost') && host !== 'localhost') {
-          resolvedSlug = host.replace('.localhost', '');
-        }
-      }
+      let resolvedSlug = initialStoreSlug || params.get('store');
       if (!resolvedSlug) return;
-      setStoreSlug(resolvedSlug);
+      if (resolvedSlug !== storeSlug) {
+        setStoreSlug(resolvedSlug);
+      }
 
       const ctrl = new AbortController();
       if (!params.get('theme')) {

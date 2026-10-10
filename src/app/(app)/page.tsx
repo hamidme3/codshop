@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const headersList = await headers();
   const storeSlug = headersList.get('x-store-slug') || headersList.get('x-user-store-slug') || '';
+  console.log("HomePage RSC render: storeSlug=", storeSlug);
   
   let storefrontProducts: any[] = [];
   let puckData = null;

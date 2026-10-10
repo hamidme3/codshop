@@ -1309,6 +1309,8 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
                                 <span>4. Retournée</span>
                               </button>
 
+                              <span className="text-slate-300 dark:text-zinc-700 text-[10px] font-bold mx-0.5">|</span>
+
                               {/* Switch 5: Annulée / Spam */}
                               <button
                                 onClick={() => handleQuickTransition(order.id, order.status === 'canceled' ? 'new' : 'canceled')}
@@ -1320,11 +1322,11 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
                                 title={
                                   order.status === 'canceled'
                                     ? 'Commande Annulée / Spam (Cliquer pour réactiver)'
-                                    : 'Marquer comme Annulée / Spam'
+                                    : 'Basculer vers : 5. Annulée / Spam'
                                 }
                               >
                                 <XCircle className="w-3 h-3 text-slate-600 dark:text-zinc-400" />
-                                <span>Annulée / Spam</span>
+                                <span>5. Annulée</span>
                               </button>
                             </div>
 
@@ -1409,10 +1411,10 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
                 >
                   <div className="flex items-center gap-2">
                     <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                      STATUS_OPTIONS.find((o) => o.value === (selectedOrder.status === 'shipping' ? 'shipped' : selectedOrder.status === 'canceled' ? 'returned' : selectedOrder.status))?.dotColor || 'bg-slate-400'
+                      STATUS_OPTIONS.find((o) => o.value === (selectedOrder.status === 'shipping' ? 'shipped' : selectedOrder.status))?.dotColor || 'bg-slate-400'
                     }`} />
                     <span className="font-semibold text-slate-900 dark:text-white">
-                      {STATUS_OPTIONS.find((o) => o.value === (selectedOrder.status === 'shipping' ? 'shipped' : selectedOrder.status === 'canceled' ? 'returned' : selectedOrder.status))?.label || selectedOrder.status}
+                      {STATUS_OPTIONS.find((o) => o.value === (selectedOrder.status === 'shipping' ? 'shipped' : selectedOrder.status))?.label || selectedOrder.status}
                     </span>
                   </div>
                   <ChevronDown className={`w-4 h-4 text-slate-500 dark:text-slate-400 transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
@@ -1427,7 +1429,7 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
                     />
                     <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white dark:bg-[#12161f] border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden py-1 divide-y divide-slate-100 dark:divide-slate-800/60 animate-in fade-in zoom-in-95 duration-100">
                       {STATUS_OPTIONS.map((opt) => {
-                        const isCurrent = (selectedOrder.status === 'shipping' ? 'shipped' : selectedOrder.status === 'canceled' ? 'returned' : selectedOrder.status) === opt.value;
+                        const isCurrent = (selectedOrder.status === 'shipping' ? 'shipped' : selectedOrder.status) === opt.value;
                         return (
                           <button
                             key={opt.value}

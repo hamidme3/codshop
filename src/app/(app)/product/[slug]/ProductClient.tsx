@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { notFound, useParams } from 'next/navigation';
+import { notFound, useParams, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { getProductQuantityTiers, getProductVariantInfo } from '@/lib/product-utils';
 import { StorefrontProduct as Product } from '@/lib/types';
 import { getDeliveryDateEstimate } from '@/lib/moroccanCities';
@@ -33,6 +34,7 @@ import { trackProductView, trackStorePageView, trackWhatsAppRescue } from '@/lib
 import { THEMES } from '@/lib/themes';
 
 export default function ProductClient({ initialProduct, initialStoreSlug }: { initialProduct: Product, initialStoreSlug: string }) {
+  const searchParams = useSearchParams();
   const product = initialProduct;
   const storeSlug = initialStoreSlug;
   const slug = product.slug;
@@ -61,20 +63,12 @@ export default function ProductClient({ initialProduct, initialStoreSlug }: { in
       : countryConfig.freeShippingThreshold;
   }, [visitorCountry, shippingSettings, countryConfig]);
 
-  const currentStoreSlug = useMemo(() => {
-    if (typeof window === 'undefined') return '';
-    const params = new URLSearchParams(window.location.search);
-    const storeFromUrl = params.get('store') || '';
-    const host = window.location.hostname.toLowerCase();
-    const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
-    const sub = host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}` ? host.replace(`.${rootDomain}`, '') : '';
-    return (product as any)?.storeSlug || storeFromUrl || sub || '';
-  }, [product]);
+  const effectiveStoreSlug = (product as any)?.storeSlug || storeSlug;
 
   // Initialize and track ViewContent across ad platforms and PostHog
   useEffect(() => {
     if (product) {
-      const activeStore = (product as any)?.storeSlug || currentStoreSlug || '';
+      const activeStore = (product as any)?.storeSlug || storeSlug || '';
       trackProductView(activeStore, {
         id: product.id,
         title: product.title,
@@ -92,7 +86,7 @@ export default function ProductClient({ initialProduct, initialStoreSlug }: { in
         });
       });
     }
-  }, [product, slug, currentStoreSlug]);
+  }, [product, slug, storeSlug]);
 
   const [activeImage, setActiveImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(
@@ -147,29 +141,18 @@ export default function ProductClient({ initialProduct, initialStoreSlug }: { in
       <div className="max-w-xl mx-auto py-24 px-4 text-center space-y-4">
         <h1 className="text-2xl font-bold text-zinc-900">Produit introuvable</h1>
         <p className="text-xs text-zinc-500">Ce produit n’est plus disponible ou a été déplacé.</p>
-        <a href="/" className="inline-block px-4 py-2 bg-zinc-900 text-white rounded-xl text-xs font-bold">
+        <Link href="/" className="inline-block px-4 py-2 bg-zinc-900 text-white rounded-xl text-xs font-bold">
           Retour à la boutique
-        </a>
+        </Link>
       </div>
     );
   }
 
   const getNavUrl = (targetPath: string) => {
-    if (typeof window !== 'undefined') {
-      const host = window.location.hostname.toLowerCase();
-      const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
-      const hasSub =
-        (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
-        (host.endsWith('.localhost') && host !== 'localhost');
-
-      if (!hasSub) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const store = urlParams.get('store');
-        if (store) {
-          const sep = targetPath.includes('?') ? '&' : '?';
-          return `${targetPath}${sep}store=${encodeURIComponent(store)}`;
-        }
-      }
+    const store = searchParams.get('store');
+    if (store) {
+      const sep = targetPath.includes('?') ? '&' : '?';
+      return `${targetPath}${sep}store=${encodeURIComponent(store)}`;
     }
     return targetPath;
   };
@@ -201,32 +184,32 @@ export default function ProductClient({ initialProduct, initialStoreSlug }: { in
       <nav aria-label="Fil d'Ariane" className="flex items-center justify-between gap-3 text-xs">
         <ol className="flex items-center flex-wrap gap-1.5 min-w-0 text-zinc-500 font-medium">
           <li className="flex items-center gap-1.5 shrink-0">
-            <a
+            <Link
               href={getNavUrl('/')}
               className="inline-flex items-center gap-1 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition py-0.5"
             >
               <Home className="w-3.5 h-3.5" />
               <span>Accueil</span>
-            </a>
+            </Link>
             <ChevronRight className="w-3 h-3 text-zinc-400 shrink-0" aria-hidden="true" />
           </li>
           <li className="flex items-center gap-1.5 shrink-0">
-            <a
+            <Link
               href={getNavUrl('/catalog')}
               className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition py-0.5"
             >
               Catalogue
-            </a>
+            </Link>
             <ChevronRight className="w-3 h-3 text-zinc-400 shrink-0" aria-hidden="true" />
           </li>
           {product.theme && (
             <li className="flex items-center gap-1.5 shrink-0">
-              <a
+            <Link
                 href={getNavUrl(`/catalog?category=${encodeURIComponent(product.theme)}`)}
                 className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition py-0.5"
               >
                 {THEMES[product.theme as keyof typeof THEMES]?.name || product.theme}
-              </a>
+              </Link>
               <ChevronRight className="w-3 h-3 text-zinc-400 shrink-0" aria-hidden="true" />
             </li>
           )}
@@ -737,7 +720,7 @@ export default function ProductClient({ initialProduct, initialStoreSlug }: { in
               rel="noopener noreferrer"
               onClick={() => {
                 if (product) {
-                  trackWhatsAppRescue(currentStoreSlug, {
+                  trackWhatsAppRescue(storeSlug, {
                     productId: product.id,
                     total: activeTier?.totalPrice ?? product?.price ?? 0,
                     reason: 'direct_pdp_click',

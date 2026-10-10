@@ -58,18 +58,23 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
-export default function RootLayout({
+import { headers } from "next/headers";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const storeSlug = headersList.get("x-store-slug") || undefined;
+
   return (
     <html lang="fr" suppressHydrationWarning className={`${inter.variable} ${playfair.variable} ${jetbrains.variable} ${cairo.variable}`}>
       <body className="antialiased" suppressHydrationWarning>
-        <ThemeProvider>
+        <ThemeProvider initialStoreSlug={storeSlug}>
           <CartProvider>
             <SearchProvider>
-              <StorefrontShell>{children}</StorefrontShell>
+              <StorefrontShell initialStoreSlug={storeSlug}>{children}</StorefrontShell>
             </SearchProvider>
           </CartProvider>
         </ThemeProvider>

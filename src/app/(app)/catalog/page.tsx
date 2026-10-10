@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 export default async function CatalogPage() {
   const headersList = await headers();
   const storeSlug = headersList.get('x-store-slug') || headersList.get('x-user-store-slug') || '';
+  const isPlatform = headersList.get('x-tenant-type') === 'platform';
   
   if (!storeSlug) notFound();
 
@@ -23,5 +24,5 @@ export default async function CatalogPage() {
     
   const serializedProducts = JSON.parse(JSON.stringify(storefrontProducts));
 
-  return <CatalogClient initialProducts={serializedProducts} />;
+  return <CatalogClient initialProducts={serializedProducts} isPlatform={isPlatform} />;
 }

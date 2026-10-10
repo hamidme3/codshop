@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import React, { useMemo } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { getCountryConfig } from '@/lib/geo';
@@ -8,7 +9,15 @@ import { useCart } from '@/context/CartContext';
 import { useSearch } from '@/context/SearchContext';
 
 export function Navbar() {
-  const { theme, countryCode, shippingSettings, getMenu, openMobileMenu } = useTheme();
+  const resolveUrl = (url: string) => {
+    if (!url) return url;
+    if (url.startsWith('http') || url.startsWith('mailto:') || url.startsWith('tel:')) return url;
+    if (!storeSlug) return url;
+    const hasQuery = url.includes('?');
+    return `${url}${hasQuery ? '&' : '?'}store=${storeSlug}`;
+  };
+
+  const { theme, storeSlug, countryCode, shippingSettings, getMenu, openMobileMenu } = useTheme();
   const { totalCount, openCart } = useCart();
   const { openSearch } = useSearch();
   const countryConfig = useMemo(() => getCountryConfig(countryCode || 'MA'), [countryCode]);
@@ -55,8 +64,8 @@ export function Navbar() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4 min-w-0">
         {/* Logo / Store Name */}
-        <a
-          href="/"
+        <Link
+          href={resolveUrl("/")}
           className="flex items-center gap-2 group min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-primary)] focus-visible:ring-offset-2 rounded-lg"
         >
           <div
@@ -79,7 +88,7 @@ export function Navbar() {
               {theme.tagline}
             </div>
           </div>
-        </a>
+        </Link>
 
         {/* Central Storefront Navigation Links (Dynamic Header Menu) */}
         <nav className="hidden md:flex items-center gap-1 font-bold text-xs" aria-label="Navigation principale">
@@ -89,8 +98,8 @@ export function Navbar() {
             if (hasChildren) {
               return (
                 <div key={item.id} className="relative group">
-                  <a
-                    href={item.url}
+                  <Link
+                    href={resolveUrl(item.url)}
                     target={item.isOpenNewTab ? '_blank' : undefined}
                     rel={item.isOpenNewTab ? 'noopener noreferrer' : undefined}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition hover:bg-black/5 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-primary)]"
@@ -116,7 +125,7 @@ export function Navbar() {
                       </span>
                     )}
                     <ChevronDown className="w-3 h-3 opacity-60 group-hover:rotate-180 transition-transform duration-150" />
-                  </a>
+                  </Link>
 
                   {/* Level 2 Dropdown Panel */}
                   <div
@@ -133,8 +142,8 @@ export function Navbar() {
                       if (hasSubChildren) {
                         return (
                           <div key={sub.id} className="relative group/sub">
-                            <a
-                              href={sub.url}
+                            <Link
+                              href={resolveUrl(sub.url)}
                               target={sub.isOpenNewTab ? '_blank' : undefined}
                               rel={sub.isOpenNewTab ? 'noopener noreferrer' : undefined}
                               className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition hover:bg-black/5 dark:hover:bg-white/5"
@@ -155,7 +164,7 @@ export function Navbar() {
                                 )}
                               </div>
                               <ChevronRight className="w-3 h-3 opacity-60" />
-                            </a>
+                            </Link>
 
                             {/* Level 3 Flyout Panel */}
                             <div
@@ -167,16 +176,16 @@ export function Navbar() {
                               }}
                             >
                               {sub.children!.map((nested) => (
-                                <a
+                                <Link
                                   key={nested.id}
-                                  href={nested.url}
+                                  href={resolveUrl(nested.url)}
                                   target={nested.isOpenNewTab ? '_blank' : undefined}
                                   rel={nested.isOpenNewTab ? 'noopener noreferrer' : undefined}
                                   className="block px-3 py-1.5 rounded-lg text-xs font-medium transition hover:bg-black/5 dark:hover:bg-white/5 truncate"
                                   style={{ color: 'var(--theme-text-secondary)' }}
                                 >
                                   {nested.label}
-                                </a>
+                                </Link>
                               ))}
                             </div>
                           </div>
@@ -184,9 +193,9 @@ export function Navbar() {
                       }
 
                       return (
-                        <a
+                        <Link
                           key={sub.id}
-                          href={sub.url}
+                          href={resolveUrl(sub.url)}
                           target={sub.isOpenNewTab ? '_blank' : undefined}
                           rel={sub.isOpenNewTab ? 'noopener noreferrer' : undefined}
                           className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition hover:bg-black/5 dark:hover:bg-white/5"
@@ -204,7 +213,7 @@ export function Navbar() {
                               {sub.badgeText}
                             </span>
                           )}
-                        </a>
+                        </Link>
                       );
                     })}
                   </div>
@@ -213,9 +222,9 @@ export function Navbar() {
             }
 
             return (
-              <a
+              <Link
                 key={item.id}
-                href={item.url}
+                href={resolveUrl(item.url)}
                 target={item.isOpenNewTab ? '_blank' : undefined}
                 rel={item.isOpenNewTab ? 'noopener noreferrer' : undefined}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition hover:bg-black/5 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-primary)]"
@@ -241,7 +250,7 @@ export function Navbar() {
                   </span>
                 )}
                 {item.isOpenNewTab && <ExternalLink className="w-3 h-3 opacity-50 shrink-0" />}
-              </a>
+              </Link>
             );
           })}
         </nav>
@@ -284,7 +293,7 @@ export function Navbar() {
             <Search className="w-4 h-4" />
           </button>
 
-          <a
+          <Link
             href="https://wa.me/212661000000?text=Salam,%20j'ai%20une%20question%20sur%20vos%20produits"
             target="_blank"
             rel="noopener noreferrer"
@@ -292,7 +301,7 @@ export function Navbar() {
           >
             <MessageCircle className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
             <span>Assistance WhatsApp</span>
-          </a>
+          </Link>
 
           {/* Mobile Hamburger Menu Drawer Toggle */}
           <button

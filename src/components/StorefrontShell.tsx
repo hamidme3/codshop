@@ -14,30 +14,21 @@ import { MobileMenuDrawer } from '@/components/MobileMenuDrawer';
 import { useTheme } from '@/context/ThemeContext';
 import { fetchAndInitPixels } from '@/lib/pixel-tracker';
 
-function ShellContent({ children }: { children: React.ReactNode }) {
+function ShellContent({ children, initialStoreSlug }: { children: React.ReactNode, initialStoreSlug?: string }) {
   const pathname = usePathname() || '';
   const searchParams = useSearchParams();
   const storeParam = searchParams.get('store');
-  const [isSubdomain, setIsSubdomain] = useState(false);
+  const detectedStoreSlug = initialStoreSlug || storeParam;
   const { storeSlug } = useTheme();
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const host = window.location.hostname.toLowerCase();
-      const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
-      const hasSub = (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
-                     (host.endsWith('.localhost') && host !== 'localhost');
-      setIsSubdomain(hasSub);
-    }
-  }, []);
 
   const isBackoffice =
     pathname.startsWith('/admin') ||
     pathname.startsWith('/register-store') ||
     pathname.startsWith('/sso') ||
     pathname.startsWith('/cms');
+    
   // Root domain homepage without a store parameter is the Universal SaaS Landing Page (which has its own header & footer)
-  const isPlatformHome = pathname === '/' && !storeParam && !isSubdomain;
+  const isPlatformHome = pathname === '/' && !detectedStoreSlug;
 
   // Initialize ad pixels and fire PageView for the active store across the storefront
   useEffect(() => {
@@ -70,10 +61,10 @@ function ShellContent({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function StorefrontShell({ children }: { children: React.ReactNode }) {
+export function StorefrontShell({ children, initialStoreSlug }: { children: React.ReactNode, initialStoreSlug?: string }) {
   return (
     <Suspense fallback={<>{children}</>}>
-      <ShellContent>{children}</ShellContent>
+      <ShellContent initialStoreSlug={initialStoreSlug}>{children}</ShellContent>
     </Suspense>
   );
 }

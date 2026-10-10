@@ -92,7 +92,7 @@ export function CodCheckoutModal({
   cartSubtotal,
 }: CodCheckoutModalProps) {
   const router = useRouter();
-  const { theme, formatMAD, lang, shippingSettings } = useTheme();
+  const { theme, formatMAD, lang, shippingSettings, storeSlug: contextStoreSlug } = useTheme();
   const formRef = React.useRef<HTMLFormElement>(null);
 
   // Multi-country configuration & dynamic visitor detection
@@ -122,22 +122,7 @@ export function CodCheckoutModal({
   };
 
   // Detect active store slug from prop, search param, or subdomain
-  const effectiveStoreSlug = React.useMemo(() => {
-    if (storeSlug) return storeSlug;
-    if (typeof window !== 'undefined') {
-      const sp = new URLSearchParams(window.location.search).get('store');
-      if (sp) return sp;
-      const host = window.location.hostname.toLowerCase();
-      const rootDomain = 'codshop.vipone.site';
-      if (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) {
-        return host.replace(`.${rootDomain}`, '');
-      }
-      if (host.endsWith('.localhost')) {
-        return host.replace('.localhost', '');
-      }
-    }
-    return (product as any)?.storeSlug || '';
-  }, [storeSlug, product]);
+  const effectiveStoreSlug = React.useMemo(() => storeSlug || contextStoreSlug || (product as any)?.storeSlug || '', [storeSlug, contextStoreSlug, product]);
 
   const productPrefix = useMemo(() => {
     const raw = product?.id != null ? String(product.id) : (product?.sku != null ? String(product.sku) : 'PROD');

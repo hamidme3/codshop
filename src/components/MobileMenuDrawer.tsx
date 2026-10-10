@@ -8,6 +8,14 @@ import { X, ChevronDown, ChevronRight, Search, Compass, ExternalLink } from 'luc
 import type { MenuItem } from '@/lib/types';
 
 export function MobileMenuDrawer() {
+  const resolveUrl = (url: string) => {
+    if (!url) return url;
+    if (url.startsWith('http') || url.startsWith('mailto:') || url.startsWith('tel:')) return url;
+    if (!storeSlug) return url;
+    const hasQuery = url.includes('?');
+    return `${url}${hasQuery ? '&' : '?'}store=${storeSlug}`;
+  };
+
   const { theme, storeSlug, getMenu, isMobileMenuOpen, closeMobileMenu, lang } = useTheme();
   const { openSearch } = useSearch();
 
@@ -163,8 +171,8 @@ export function MobileMenuDrawer() {
                     color: 'var(--theme-text-primary)',
                   }}
                 >
-                  <a
-                    href={item.url}
+                  <Link
+                    href={resolveUrl(item.url)}
                     onClick={handleLinkClick}
                     target={item.isOpenNewTab ? '_blank' : undefined}
                     rel={item.isOpenNewTab ? 'noopener noreferrer' : undefined}
@@ -190,7 +198,7 @@ export function MobileMenuDrawer() {
                       </span>
                     )}
                     {item.isOpenNewTab && <ExternalLink className="w-3 h-3 opacity-50 shrink-0" />}
-                  </a>
+                  </Link>
 
                   {hasChildren && (
                     <button
@@ -230,8 +238,8 @@ export function MobileMenuDrawer() {
                               color: 'var(--theme-text-primary)',
                             }}
                           >
-                            <a
-                              href={sub.url}
+                            <Link
+                              href={resolveUrl(sub.url)}
                               onClick={handleLinkClick}
                               target={sub.isOpenNewTab ? '_blank' : undefined}
                               rel={sub.isOpenNewTab ? 'noopener noreferrer' : undefined}
@@ -249,7 +257,7 @@ export function MobileMenuDrawer() {
                                   {sub.badgeText}
                                 </span>
                               )}
-                            </a>
+                            </Link>
 
                             {hasSubChildren && (
                               <button
@@ -274,9 +282,9 @@ export function MobileMenuDrawer() {
                               style={{ borderColor: 'var(--theme-border)' }}
                             >
                               {sub.children!.map((nested) => (
-                                <a
+                                <Link
                                   key={nested.id}
-                                  href={nested.url}
+                                  href={resolveUrl(nested.url)}
                                   onClick={handleLinkClick}
                                   target={nested.isOpenNewTab ? '_blank' : undefined}
                                   rel={nested.isOpenNewTab ? 'noopener noreferrer' : undefined}
@@ -284,7 +292,7 @@ export function MobileMenuDrawer() {
                                   style={{ color: 'var(--theme-text-secondary)' }}
                                 >
                                   {nested.label}
-                                </a>
+                                </Link>
                               ))}
                             </div>
                           )}

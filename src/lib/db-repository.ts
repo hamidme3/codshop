@@ -1859,22 +1859,24 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
 
     // 6. Searches
     const searchEvents = events.filter((e) => e.eventName === 'search_performed');
-    const searchMap = new Map<string, { count: number; resultsCount: number; isZeroResult: boolean }>();
+    const searchMap = new Map<string, { distinctIds: Set<string>; resultsCount: number; isZeroResult: boolean }>();
     searchEvents.forEach((se) => {
       const q = ((se.properties as any)?.search_query || (se.properties as any)?.query || '').trim().toLowerCase();
       if (!q) return;
       const existing = searchMap.get(q) || {
-        count: 0,
+        distinctIds: new Set<string>(),
         resultsCount: (se.properties as any)?.results_count ?? (se.properties as any)?.resultsCount ?? 0,
         isZeroResult: (se.properties as any)?.is_zero_result ?? (se.properties as any)?.isZeroResult ?? false,
       };
-      existing.count += 1;
+      if (se.distinctId) {
+        existing.distinctIds.add(se.distinctId);
+      }
       searchMap.set(q, existing);
     });
     const searches = Array.from(searchMap.entries())
       .map(([query, data]) => ({
         query,
-        count: data.count,
+        count: Math.max(1, data.distinctIds.size),
         resultsCount: data.resultsCount,
         isZeroResult: data.isZeroResult,
       }))
@@ -1921,46 +1923,61 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
     const storeProducts = Array.from(combinedProductsMap.values());
 
     const products = storeProducts.map((p) => {
-      const pId = String(p.id).toLowerCase();
-      const pSku = p.sku ? String(p.sku).toLowerCase() : '';
-      const pSlug = (p.slug || p.sku || p.id || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      const pTitle = p.title ? String(p.title).toLowerCase() : '';
+      const pIdRaw = p.id;
+      const pId = pIdRaw && pIdRaw !== 'undefined' ? String(pIdRaw).toLowerCase() : '';
+      const pSkuRaw = p.sku;
+      const pSku = pSkuRaw && pSkuRaw !== 'undefined' ? String(pSkuRaw).toLowerCase() : '';
+      const pSlugRaw = p.slug || p.sku || p.id;
+      const pSlug = pSlugRaw && pSlugRaw !== 'undefined' ? String(pSlugRaw).toLowerCase().replace(/[^a-z0-9]+/g, '-') : '';
+      const pTitleRaw = p.title;
+      const pTitle = pTitleRaw && pTitleRaw !== 'undefined' ? String(pTitleRaw).toLowerCase() : '';
       const pSkuClean = pSku.replace(/[^a-z0-9]/g, '');
 
       // Match events for this product (views, initiates, checkout steps, abandonments, orders)
       const matchingEvents = events.filter((e) => {
         const props = (e.properties || {}) as any;
-        const eId = String(props.productId || props.product_id || props.id || '').toLowerCase();
-        const eSku = String(props.sku || '').toLowerCase();
-        const eSlug = String(props.slug || '').toLowerCase();
-        const eTitle = String(props.title || props.product_title || '').toLowerCase();
+        const eIdRaw = props.productId || props.product_id || props.id;
+        const eId = eIdRaw && eIdRaw !== 'undefined' ? String(eIdRaw).toLowerCase() : '';
+        const eSkuRaw = props.sku;
+        const eSku = eSkuRaw && eSkuRaw !== 'undefined' ? String(eSkuRaw).toLowerCase() : '';
+        const eSlugRaw = props.slug;
+        const eSlug = eSlugRaw && eSlugRaw !== 'undefined' ? String(eSlugRaw).toLowerCase() : '';
+        const eTitleRaw = props.title || props.product_title;
+        const eTitle = eTitleRaw && eTitleRaw !== 'undefined' ? String(eTitleRaw).toLowerCase() : '';
         const ePath = String(props.path || '').toLowerCase();
 
         const matches = (
-          (eId && (eId === pId || (pSku && eId === pSku) || (pSkuClean && eId.includes(pSkuClean)) || (eId.length > 3 && pId.includes(eId)))) ||
-          (pSku && (eSku === pSku || eId === pSku || ePath.includes(pSku) || (pSkuClean && eSlug.includes(pSkuClean)))) ||
-          (pSlug && (eSlug === pSlug || ePath.includes(pSlug))) ||
-          (pTitle && eTitle === pTitle)
+          (eId && pId && eId === pId) ||
+          (pSku && eSku && eSku === pSku) ||
+          (pSku && eId === pSku) ||
+          (pSlug && eSlug && eSlug === pSlug) ||
+          (pTitle && eTitle && eTitle === pTitle) ||
+          (pSlug && ePath && (ePath === `/${pSlug}` || ePath.endsWith(`/${pSlug}`))) ||
+          (pSku && ePath && ePath.endsWith(`/${pSkuClean}`))
         );
 
         return matches && ['product_viewed', 'initiated_checkout', 'checkout_step_2', 'cod_checkout_abandoned', 'order_completed'].includes(e.eventName);
       });
 
       const uniqueVisitors = new Set(matchingEvents.map((e) => e.distinctId)).size;
-      const totalViews = matchingEvents.filter((e) => e.eventName === 'product_viewed').length || matchingEvents.length;
+      const totalViews = matchingEvents.filter((e) => e.eventName === 'product_viewed').length;
 
       // Match orders containing this product (strictly active, non-abandoned orders)
       const matchingOrders = activeOrders.filter((ord) => {
         const items = (ord.items || []) as any[];
         return items.some((it) => {
-          const itId = String(it.id || it.productId || '').toLowerCase();
-          const itSku = String(it.sku || '').toLowerCase();
-          const itTitle = String(it.title || '').toLowerCase();
+          const itIdRaw = it.id || it.productId;
+          const itId = itIdRaw && itIdRaw !== 'undefined' ? String(itIdRaw).toLowerCase() : '';
+          const itSkuRaw = it.sku;
+          const itSku = itSkuRaw && itSkuRaw !== 'undefined' ? String(itSkuRaw).toLowerCase() : '';
+          const itTitleRaw = it.title;
+          const itTitle = itTitleRaw && itTitleRaw !== 'undefined' ? String(itTitleRaw).toLowerCase() : '';
 
           return (
-            (itId && (itId === pId || (pSku && itId === pSku) || (pSkuClean && itId.includes(pSkuClean)))) ||
-            (pSku && (itSku === pSku || itId === pSku)) ||
-            (pTitle && itTitle === pTitle)
+            (itId && pId && itId === pId) ||
+            (pSku && itSku && itSku === pSku) ||
+            (pSku && itId === pSku) ||
+            (pTitle && itTitle && itTitle === pTitle)
           );
         });
       });

@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { useSearch } from '@/context/SearchContext';
 import { useTheme } from '@/context/ThemeContext';
 import { StorefrontProduct } from '@/lib/types';
@@ -35,38 +37,22 @@ const CATEGORY_SHORTCUTS = [
 ];
 
 export function SearchModal() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { isOpen, closeSearch } = useSearch();
-  const { theme, formatPrice, countryCode } = useTheme();
+  const { theme, formatPrice, countryCode, storeSlug } = useTheme();
   const [query, setQuery] = useState('');
   const [storeProducts, setStoreProducts] = useState<StorefrontProduct[]>([]);
-  const [currentStoreSlug, setCurrentStoreSlug] = useState<string>('');
-  const [isSubdomain, setIsSubdomain] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsContainerRef = useRef<HTMLDivElement>(null);
 
-  // Detect subdomain / store query on mount
+  // Fetch products for autocomplete when modal opens
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const host = window.location.hostname.toLowerCase();
-      const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
-      const hasSub =
-        (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
-        (host.endsWith('.localhost') && host !== 'localhost');
-      setIsSubdomain(hasSub);
-
-      let detected = '';
-      if (hasSub) {
-        detected = host.replace(`.${rootDomain}`, '').replace('.localhost', '');
-      } else {
-        const urlParams = new URLSearchParams(window.location.search);
-        detected = urlParams.get('store') || '';
-      }
-
-      const fetchSlug = detected;
-      setCurrentStoreSlug(fetchSlug);
-      fetch(`/api/products?store=${encodeURIComponent(fetchSlug)}`)
+    if (isOpen && storeSlug) {
+      const ctrl = new AbortController();
+      fetch(`/api/products?store=${encodeURIComponent(storeSlug)}`, { signal: ctrl.signal })
         .then((r) => r.json())
         .then((data) => {
           if (data.success && Array.isArray(data.products) && data.products.length > 0) {
@@ -74,8 +60,9 @@ export function SearchModal() {
           }
         })
         .catch(() => {});
+      return () => ctrl.abort();
     }
-  }, []);
+  }, [isOpen, storeSlug]);
 
   // Combine store products with base catalog
   const catalog = useMemo(() => {
@@ -133,20 +120,17 @@ export function SearchModal() {
     const trimmed = query.trim();
     if (!trimmed || trimmed.length < 2) return;
     const timer = setTimeout(() => {
-      trackSearch(currentStoreSlug, trimmed, filteredResults.length);
+      trackSearch(storeSlug, trimmed, filteredResults.length);
     }, 700);
     return () => clearTimeout(timer);
-  }, [query, filteredResults.length, currentStoreSlug]);
+  }, [query, filteredResults.length, storeSlug]);
 
   // Build link preserving store parameter when not on subdomain
   const getProductHref = (slug: string) => {
     let url = `/product/${encodeURIComponent(slug)}`;
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const store = urlParams.get('store');
-      if (store && !isSubdomain) {
-        url += `?store=${encodeURIComponent(store)}`;
-      }
+    const store = searchParams.get('store');
+    if (store) {
+      url += `?store=${encodeURIComponent(store)}`;
     }
     return url;
   };
@@ -155,12 +139,9 @@ export function SearchModal() {
     const params = new URLSearchParams();
     if (catId && catId !== 'all') params.set('category', catId);
     if (searchQuery) params.set('q', searchQuery);
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const store = urlParams.get('store');
-      if (store && !isSubdomain) {
-        params.set('store', store);
-      }
+    const store = searchParams.get('store');
+    if (store) {
+      params.set('store', store);
     }
     const qs = params.toString();
     return `/catalog${qs ? `?${qs}` : ''}`;
@@ -177,15 +158,15 @@ export function SearchModal() {
     } else if (e.key === 'Enter') {
       e.preventDefault();
       if (query.trim()) {
-        trackSearch(currentStoreSlug, query.trim(), filteredResults.length);
+        trackSearch(storeSlug, query.trim(), filteredResults.length);
       }
       if (selectedIndex >= 0 && selectedIndex < filteredResults.length) {
         const item = filteredResults[selectedIndex];
         closeSearch();
-        window.location.href = getProductHref(item.slug);
+        router.push(getProductHref(item.slug));
       } else if (query.trim()) {
         closeSearch();
-        window.location.href = getCatalogHref(undefined, query.trim());
+        router.push(getCatalogHref(undefined, query.trim()));
       }
     }
   };
@@ -262,7 +243,7 @@ export function SearchModal() {
                           const q = item.toLowerCase();
                           return (p.title?.toLowerCase() || '').includes(q) || (p.tagline?.toLowerCase() || '').includes(q);
                         }).length;
-                        trackSearch(currentStoreSlug, item, matchCount);
+                        trackSearch(storeSlug, item, matchCount);
                         inputRef.current?.focus();
                       }}
                       className="px-3 py-1.5 text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 rounded-xl transition cursor-pointer"
@@ -280,7 +261,7 @@ export function SearchModal() {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {CATEGORY_SHORTCUTS.map((cat) => (
-                    <a
+                    <Link
                       key={cat.id}
                       href={getCatalogHref(cat.id)}
                       onClick={() => closeSearch()}
@@ -290,7 +271,7 @@ export function SearchModal() {
                         {cat.label}
                       </span>
                       <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition group-hover:translate-x-0.5 shrink-0 ml-1" />
-                    </a>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -312,7 +293,7 @@ export function SearchModal() {
 
                   return (
                     <li key={product.id || product.slug} role="option" aria-selected={isSelected}>
-                      <a
+                    <Link
                         href={getProductHref(product.slug)}
                         onClick={() => closeSearch()}
                         onMouseEnter={() => setSelectedIndex(idx)}
@@ -365,7 +346,7 @@ export function SearchModal() {
                             </div>
                           )}
                         </div>
-                      </a>
+                      </Link>
                     </li>
                   );
                 })}
@@ -383,14 +364,14 @@ export function SearchModal() {
               <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
                 Vérifiez l’orthographe ou explorez l’ensemble de notre catalogue pour découvrir nos meilleures offres.
               </p>
-              <a
+                    <Link
                 href={getCatalogHref()}
                 onClick={() => closeSearch()}
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-xs font-bold rounded-xl transition hover:opacity-90"
               >
                 <span>Voir tout le catalogue</span>
                 <ArrowRight className="w-3.5 h-3.5" />
-              </a>
+              </Link>
             </div>
           )}
         </div>
@@ -401,11 +382,11 @@ export function SearchModal() {
             <span className="text-zinc-500 text-[11px]">
               {filteredResults.length} résultat{filteredResults.length > 1 ? 's' : ''} prévisualisé{filteredResults.length > 1 ? 's' : ''}
             </span>
-            <a
+                    <Link
               href={getCatalogHref(undefined, query.trim())}
               onClick={() => {
                 if (query.trim()) {
-                  trackSearch(currentStoreSlug, query.trim(), filteredResults.length);
+                  trackSearch(storeSlug, query.trim(), filteredResults.length);
                 }
                 closeSearch();
               }}
@@ -413,7 +394,7 @@ export function SearchModal() {
             >
               <span>Voir tous les résultats dans le catalogue</span>
               <ArrowRight className="w-3.5 h-3.5" />
-            </a>
+            </Link>
           </div>
         )}
       </div>

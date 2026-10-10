@@ -220,6 +220,8 @@ export async function middleware(request: NextRequest) {
     subdomain = currentHost.replace(`.${rootDomain}`, '');
   } else if (currentHost.endsWith('localhost') && currentHost !== 'localhost') {
     subdomain = currentHost.replace('.localhost', '');
+  } else if (url.searchParams.has('store')) {
+    subdomain = url.searchParams.get('store');
   }
 
   // Enrich headers if subdomain present

@@ -271,15 +271,27 @@ function StorefrontHome({ storeSlug, storeProducts, puckData }: { storeSlug?: st
 
 function HomeContent({ initialProducts, initialPuckData, initialStoreSlug }: { initialProducts: any[], initialPuckData: any, initialStoreSlug: string }) {
   const searchParams = useSearchParams();
+  const { storeSlug: contextStoreSlug } = useTheme();
   const storeParam = searchParams.get('store');
-  const detectedStoreSlug = initialStoreSlug || storeParam;
+  const detectedStoreSlug = contextStoreSlug || initialStoreSlug || storeParam;
+  
+  const [isPlatform, setIsPlatform] = React.useState(false);
+  
+  React.useEffect(() => {
+    const host = window.location.hostname.toLowerCase();
+    const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
+    const hasSub = (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
+                   (host.endsWith('.localhost') && host !== 'localhost');
+    if (!hasSub && !storeParam && !detectedStoreSlug) {
+      setIsPlatform(true);
+    }
+  }, [storeParam, detectedStoreSlug]);
 
   if (detectedStoreSlug) {
     return <StorefrontHome storeSlug={detectedStoreSlug} storeProducts={initialProducts} puckData={initialPuckData} />;
   }
 
-  // Otherwise, on the root domain, render the Universal Global Cash-on-Delivery SaaS Platform Landing Page
-  return <UniversalLandingPage />;
+  return isPlatform ? <UniversalLandingPage /> : <div className="min-h-screen bg-[var(--theme-bg-page)]" />;
 }
 
 export default function HomeClient({ initialProducts, initialPuckData, storeSlug }: { initialProducts: any[], initialPuckData: any, storeSlug: string }) {

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { useSearch } from '@/context/SearchContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -17,9 +18,10 @@ import { trackWhatsAppRescue } from '@/lib/posthog';
 
 export function MobileBottomNav() {
   const pathname = usePathname() || '';
+  const searchParams = useSearchParams();
   const { totalCount, openCart } = useCart();
   const { isOpen: isSearchOpen, openSearch } = useSearch();
-  const { theme, countryCode } = useTheme();
+  const { theme, countryCode, storeSlug } = useTheme();
 
   const countryConfig = useMemo(() => getCountryConfig(countryCode || 'MA'), [countryCode]);
 
@@ -39,21 +41,10 @@ export function MobileBottomNav() {
 
   // Preserve store query parameter if present on non-subdomain setup
   const getNavHref = (targetPath: string) => {
-    if (typeof window !== 'undefined') {
-      const host = window.location.hostname.toLowerCase();
-      const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
-      const hasSub =
-        (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
-        (host.endsWith('.localhost') && host !== 'localhost');
-
-      if (!hasSub) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const store = urlParams.get('store');
-        if (store) {
-          const sep = targetPath.includes('?') ? '&' : '?';
-          return `${targetPath}${sep}store=${encodeURIComponent(store)}`;
-        }
-      }
+    const store = searchParams.get('store');
+    if (store) {
+      const sep = targetPath.includes('?') ? '&' : '?';
+      return `${targetPath}${sep}store=${encodeURIComponent(store)}`;
     }
     return targetPath;
   };
@@ -79,7 +70,7 @@ export function MobileBottomNav() {
     >
       <div className="grid grid-cols-5 items-center h-16 max-w-md mx-auto px-1">
         {/* 1. Accueil / Home */}
-        <a
+        <Link
           href={getNavHref('/')}
           className={`flex flex-col items-center justify-center h-full min-h-[48px] py-1 transition-colors ${
             isHome ? 'font-black' : 'font-medium opacity-70 hover:opacity-100'
@@ -91,10 +82,10 @@ export function MobileBottomNav() {
         >
           <Home className="w-5 h-5 mb-1" strokeWidth={isHome ? 2.5 : 2} />
           <span className="text-[10px] tracking-tight truncate max-w-[64px]">Accueil</span>
-        </a>
+        </Link>
 
         {/* 2. Catalogue */}
-        <a
+        <Link
           href={getNavHref('/catalog')}
           className={`flex flex-col items-center justify-center h-full min-h-[48px] py-1 transition-colors ${
             isCatalog ? 'font-black' : 'font-medium opacity-70 hover:opacity-100'
@@ -106,7 +97,7 @@ export function MobileBottomNav() {
         >
           <Compass className="w-5 h-5 mb-1" strokeWidth={isCatalog ? 2.5 : 2} />
           <span className="text-[10px] tracking-tight truncate max-w-[64px]">Catalogue</span>
-        </a>
+        </Link>
 
         {/* 3. Recherche / Search Modal Trigger */}
         <button
@@ -148,21 +139,7 @@ export function MobileBottomNav() {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => {
-            let storeSlug = '';
-            if (typeof window !== 'undefined') {
-              const host = window.location.hostname.toLowerCase();
-              const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
-              const hasSub = (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
-                             (host.endsWith('.localhost') && host !== 'localhost');
-              if (hasSub) {
-                storeSlug = host.replace(`.${rootDomain}`, '').replace('.localhost', '');
-              } else {
-                storeSlug = new URLSearchParams(window.location.search).get('store') || '';
-              }
-            }
-            trackWhatsAppRescue(storeSlug, { reason: 'mobile_bottom_nav_click' });
-          }}
+          onClick={() => trackWhatsAppRescue(storeSlug, { reason: 'mobile_bottom_nav_click' })}
           className="flex flex-col items-center justify-center h-full min-h-[48px] py-1 text-emerald-600 hover:text-emerald-700 transition-colors"
           aria-label="Assistance WhatsApp"
         >
