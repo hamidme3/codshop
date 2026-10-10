@@ -1816,14 +1816,14 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
     const rawDistinctVisitors = new Set(events.map((e) => e.distinctId)).size;
     const ordersCompleted = activeOrders.length || events.filter((e) => e.eventName === 'order_completed').length;
     const allVisitors = Math.max(rawDistinctVisitors, ordersCompleted);
-    const catalogViews = events.filter((e) => e.eventName === 'catalog_viewed').length;
-    const productViews = events.filter((e) => e.eventName === 'product_viewed').length;
-    const initiatedCheckout = events.filter(
+    const catalogViews = new Set(events.filter((e) => e.eventName === 'catalog_viewed').map((e) => e.distinctId)).size;
+    const productViews = new Set(events.filter((e) => e.eventName === 'product_viewed').map((e) => e.distinctId)).size;
+    const initiatedCheckout = new Set(events.filter(
       (e) => e.eventName === 'initiated_checkout' || e.eventName === 'cod_step_1_started'
-    ).length;
-    const checkoutStep2 = events.filter(
+    ).map((e) => e.distinctId)).size;
+    const checkoutStep2 = new Set(events.filter(
       (e) => e.eventName === 'checkout_step_2' || e.eventName === 'cod_step_2_started'
-    ).length;
+    ).map((e) => e.distinctId)).size;
     const overallConversionRate = allVisitors > 0 ? Math.min(100, Number(((ordersCompleted / allVisitors) * 100).toFixed(1))) : 0;
 
     // 5. Abandonment & Recoverable Leads
@@ -1835,8 +1835,8 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
     );
 
     const abandonedEvents = events.filter((e) => e.eventName === 'cod_checkout_abandoned');
-    const step1Abandoned = abandonedEvents.filter((e) => (e.properties as any)?.abandoned_at_step === 1 || (e.properties as any)?.step === 1).length;
-    const step2Abandoned = abandonedEvents.filter((e) => (e.properties as any)?.abandoned_at_step === 2 || (e.properties as any)?.step === 2).length;
+    const step1Abandoned = new Set(abandonedEvents.filter((e) => (e.properties as any)?.abandoned_at_step === 1 || (e.properties as any)?.step === 1).map((e) => e.distinctId)).size;
+    const step2Abandoned = new Set(abandonedEvents.filter((e) => (e.properties as any)?.abandoned_at_step === 2 || (e.properties as any)?.step === 2).map((e) => e.distinctId)).size;
 
     // Filter out abandoned events for visitors who subsequently completed an order
     const unconvertedAbandonedEvents = abandonedEvents.filter((e) => {
@@ -1846,13 +1846,13 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
       return true;
     });
 
-    const eventRecoverableLeads = unconvertedAbandonedEvents.filter(
+    const eventRecoverableLeads = new Set(unconvertedAbandonedEvents.filter(
       (e) => (e.properties as any)?.has_phone === true || (e.properties as any)?.hasPhone === true
-    ).length;
+    ).map((e) => e.distinctId)).size;
 
     const totalAbandoned = Math.max(
       abandonedOrdersList.length,
-      unconvertedAbandonedEvents.length || Math.max(0, initiatedCheckout - ordersCompleted)
+      new Set(unconvertedAbandonedEvents.map((e) => e.distinctId)).size || Math.max(0, initiatedCheckout - ordersCompleted)
     );
     const recoverableLeads = abandonedOrdersList.length > 0 ? abandonedOrdersList.length : eventRecoverableLeads;
     const recoveryRate = totalAbandoned > 0 ? Math.min(100, Number(((recoverableLeads / totalAbandoned) * 100).toFixed(1))) : 0;

@@ -70,6 +70,7 @@ export async function GET(req: Request) {
     const totalOrders = storeOrders.length;
     const deliveredOrders = storeOrders.filter((o) => o.status === 'delivered');
     const returnedOrders = storeOrders.filter((o) => o.status === 'returned');
+    const canceledOrders = storeOrders.filter((o) => o.status === 'canceled');
     const confirmedOrders = storeOrders.filter((o) =>
       ['confirmed', 'shipped', 'shipping', 'delivered'].includes(o.status)
     );
@@ -113,15 +114,16 @@ export async function GET(req: Request) {
     }
 
     const totalShippingPaid = deliveredOrders.length * 25 + returnedOrders.length * 15;
-    const netProfit = Math.max(0, totalRevenueDelivered - totalCostOfGoods - totalShippingPaid);
+    const netProfit = totalRevenueDelivered - totalCostOfGoods - totalShippingPaid;
 
     // City distribution with authentic city-level delivery rates
     const cityMap = new Map<string, { orders: number; revenue: number; delivered: number; returned: number }>();
     storeOrders.forEach((o) => {
-      const c = o.city ?? 'Autre';
+      const rawCity = (o.city || 'Autre').trim();
+      const c = rawCity.charAt(0).toUpperCase() + rawCity.slice(1).toLowerCase();
       const existing = cityMap.get(c) ?? { orders: 0, revenue: 0, delivered: 0, returned: 0 };
       const isDelivered = o.status === 'delivered';
-      const isReturned = ['returned', 'canceled'].includes(o.status);
+      const isReturned = o.status === 'returned';
       cityMap.set(c, {
         orders: existing.orders + 1,
         revenue: existing.revenue + (Number(o.total) || 0),
@@ -168,7 +170,7 @@ export async function GET(req: Request) {
         .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
 
       const returnedLoss = dayOrders
-        .filter((o) => ['returned', 'canceled'].includes(o.status))
+        .filter((o) => o.status === 'returned')
         .reduce((sum, o) => sum + 15, 0);
 
       return {
