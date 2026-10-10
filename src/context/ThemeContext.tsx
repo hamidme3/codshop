@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useTransition } from 'react';
 import { ThemeId, THEMES, ThemeConfig } from '@/lib/themes';
 import { detectClientVisitorCountry, formatCountryPrice } from '@/lib/geo';
-import { getDefaultStoreMenus } from '@/lib/mocks';
+
 import type { StoreMenu, MenuPlacement } from '@/lib/types';
 
 export interface StoreShippingSettings {
@@ -51,18 +51,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     deliveryTimeframe: '24h à 48h',
     checkoutEmailMode: 'hidden',
   });
-  const [menus, setMenus] = useState<StoreMenu[]>(() => getDefaultStoreMenus(''));
+  const [menus, setMenus] = useState<StoreMenu[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const openMobileMenu = () => setIsMobileMenuOpen(true);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   const getMenu = React.useCallback(
     (placement: MenuPlacement): StoreMenu | undefined => {
-      const found = menus.find((m) => m.placement === placement);
-      if (found) return found;
-      return getDefaultStoreMenus(storeSlug).find((m) => m.placement === placement);
+      return menus.find((m) => m.placement === placement);
     },
-    [menus, storeSlug]
+    [menus]
   );
 
   const [mounted, setMounted] = useState(false);

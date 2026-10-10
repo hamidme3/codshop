@@ -68,3 +68,9 @@ export function isValidStoreSlug(slug: unknown): boolean {
   if (s.length < 2 || s.length > 64) return false;
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s);
 }
+export function normalizeCustomerPhone(phone: string): string {
+  const cleaned = phone.replace(/\D/g, '');
+  if (cleaned.startsWith('212')) return '0' + cleaned.substring(3);
+  if (cleaned.startsWith('00212')) return '0' + cleaned.substring(5);
+  return cleaned;
+}

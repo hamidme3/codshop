@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getProducts, createProduct, updateProduct, deleteProduct } from '@/lib/db-repository';
 import { isValidStoreSlug } from '@/lib/sanitizer';
+import { deriveCategoriesFromProducts } from '@/lib/product-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,7 @@ export async function GET(req: Request) {
     return NextResponse.json({
       success: true,
       products: dbProducts,
+      categories: deriveCategoriesFromProducts(dbProducts),
       count: dbProducts.length,
       store: storeSlug,
     });

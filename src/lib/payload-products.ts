@@ -8,12 +8,7 @@
 
 import type { Product } from './types';
 
-// Lazy-load Payload to avoid circular import issues at module evaluation time
-async function getPayloadInstance() {
-  const { getPayload } = await import('payload');
-  const configPromise = (await import('@payload-config')).default;
-  return getPayload({ config: configPromise });
-}
+import { getPayloadInstance } from './payload';
 
 /**
  * Extract image URLs from Payload media relationship field.

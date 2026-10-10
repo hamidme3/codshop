@@ -3,6 +3,7 @@ import { getDb, schema } from '@/db';
 import { eq } from 'drizzle-orm';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { getProducts } from '@/lib/db-repository';
 
 export default async function PuckBuilderPage({ searchParams }: { searchParams: Promise<{ store?: string }> }) {
   const resolvedParams = await searchParams;
@@ -33,6 +34,9 @@ export default async function PuckBuilderPage({ searchParams }: { searchParams: 
     puckData = rawSections as any;
   }
 
+  // 3. Fetch live products for Data Binding
+  const products = await getProducts(storeSlug);
+
   return (
     <div className="h-screen w-full flex flex-col bg-white">
       <div className="bg-zinc-950 text-white p-3 flex justify-between items-center text-sm">
@@ -48,7 +52,7 @@ export default async function PuckBuilderPage({ searchParams }: { searchParams: 
         </div>
       </div>
       <div className="flex-1 relative">
-        <PuckEditor initialData={puckData} storeSlug={storeSlug} />
+        <PuckEditor initialData={puckData} storeSlug={storeSlug} initialProducts={products as any[]} />
       </div>
     </div>
   );

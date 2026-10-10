@@ -1,3 +1,4 @@
+import { getProductQuantityTiers } from "@/lib/product-utils";
 /**
  * Server-Side Order Pricing & Integrity Engine for Moroccan COD
  * Prevents client-side price tampering (subtotal, total, shippingFee)
@@ -6,9 +7,9 @@
 
 import { getDb, schema } from '@/db';
 import { eq } from 'drizzle-orm';
-import { MOCK_PRODUCTS, QuantityTier, getProductQuantityTiers } from './mockProducts';
+import { QuantityTier } from './types';
 import { convertDbProductToStorefrontProduct } from './db-repository';
-import { PRODUCTS } from './mocks';
+
 import { getStoreBySlug as getMockStoreBySlug } from './stores';
 import { MOROCCAN_CITIES, getCityShipping, FREE_SHIPPING_THRESHOLD } from './moroccanCities';
 import { getCountryCityShipping } from './geo';
@@ -34,20 +35,15 @@ export async function resolveCatalogProduct(
   const targetTitle = (identifier.title || '').trim().toLowerCase();
   const targetSku = (identifier.sku || '').trim().toLowerCase();
 
-  // 1. Try Payload CMS first (single source of truth for products)
+  // 1. Strictly rely on Payload CMS (single source of truth for products)
   try {
     const { resolvePayloadCatalogProduct } = await import('./payload-products');
     const payloadProd = await resolvePayloadCatalogProduct(identifier, storeSlug);
     if (payloadProd) {
+      // If product doesn't have custom quantity tiers configured, generate default fallback tiers
       let tiers = payloadProd.quantityTiers;
       if (!tiers || tiers.length === 0) {
-        const mockMatch = MOCK_PRODUCTS.find(
-          (p) =>
-            p.id === payloadProd.id ||
-            String(p.sku || "").toLowerCase() === (identifier.sku || '').toLowerCase() ||
-            p.slug.toLowerCase() === targetSlug
-        );
-        tiers = mockMatch?.quantityTiers;
+        tiers = getProductQuantityTiers(payloadProd);
       }
       return {
         id: payloadProd.id,
@@ -58,112 +54,10 @@ export async function resolveCatalogProduct(
       };
     }
   } catch (err) {
-    console.warn('[Pricing Engine] Payload catalog resolution unavailable, fallback:', err);
+    console.warn('[Pricing Engine] Payload catalog resolution unavailable:', err);
   }
 
-
-
-  // 2. Try MOCK_PRODUCTS (Theme-specific catalog with explicit quantityTiers)
-  const mockProduct = MOCK_PRODUCTS.find((p) => {
-    const pId = String(p.id).toLowerCase();
-    const pSlug = p.slug.toLowerCase();
-    const pSku = String(p.sku || "").toLowerCase();
-    const pTitle = p.title.toLowerCase();
-    const titleSlug = pTitle.replace(/[^a-z0-9]+/g, '-');
-    if (targetId && (pId === targetId || pSlug === targetId || pSku === targetId)) return true;
-    if (targetSku && (pSku === targetSku || targetSku.startsWith(pSku) || pSku.startsWith(targetSku))) return true;
-    if (targetSlug && (pSlug === targetSlug || titleSlug === targetSlug || pSku === targetSlug)) return true;
-    if (targetTitle && (pTitle === targetTitle || (p.titleAr && p.titleAr === identifier.title))) return true;
-    return false;
-  });
-  if (mockProduct) {
-    return {
-      id: mockProduct.id,
-      title: mockProduct.title,
-      price: mockProduct.price,
-      status: (mockProduct as any).status || 'active',
-      quantityTiers: mockProduct.quantityTiers,
-    };
-  }
-
-  // 3. Try PRODUCTS (Store-specific inventory)
-  const idAliases: Record<string, string> = {
-    'it_1': 'prod_1',
-    'it_2': 'prod_2',
-    'it_3': 'prod_3',
-    'it_4': 'prod_4',
-  };
-  const resolvedId = idAliases[targetId] || targetId;
-
-  const repoProduct = PRODUCTS.find((p) => {
-    const pId = String(p.id ?? '').toLowerCase();
-    const pSku = String(p.sku ?? '').toLowerCase();
-    const pTitle = String(p.title ?? '').toLowerCase();
-    if (resolvedId && (pId === resolvedId || pSku === resolvedId)) return true;
-    if (targetSku && (pSku === targetSku || targetSku.startsWith(pSku) || pSku.startsWith(targetSku))) return true;
-    if (targetTitle && (pTitle === targetTitle || pTitle.includes(targetTitle) || targetTitle.includes(pTitle))) return true;
-    return false;
-  });
-  if (repoProduct) {
-    const mockMatch = MOCK_PRODUCTS.find((p) => String(p.id) === String(repoProduct.id) || p.sku === repoProduct.sku || p.slug === repoProduct.sku);
-    let tiers = mockMatch?.quantityTiers;
-    if (!tiers || tiers.length === 0) {
-      const sfProd = convertDbProductToStorefrontProduct(repoProduct);
-      tiers = sfProd.quantityTiers;
-    }
-    return {
-      id: String(repoProduct.id),
-      title: repoProduct.title,
-      price: repoProduct.price,
-      status: repoProduct.status || 'active',
-      quantityTiers: tiers,
-    };
-  }
-
-  // 4. Try Store Builder cod_checkout section
-  const mockStore = getMockStoreBySlug(storeSlug);
-  const codSection = mockStore?.pages?.[0]?.sections?.find((s) => s.type === 'cod_checkout');
-  if (codSection?.settings) {
-    const secTitle = (codSection.settings.productTitle || '').toLowerCase();
-    const secPrice = Number(codSection.settings.price) || 349;
-    if (
-      (targetTitle && (
-        targetTitle.includes('boutique') || 
-        targetTitle.includes('produit') || 
-        (secTitle && (secTitle.includes(targetTitle) || targetTitle.includes(secTitle)))
-      )) ||
-      targetId === 'sec_cod_prod' ||
-      targetId === '1'
-    ) {
-      return {
-        id: 'sec_cod_prod',
-        title: codSection.settings.productTitle || 'Article Premium',
-        price: secPrice,
-      };
-    }
-  }
-
-  // 5. Default store product fallback if target is empty, '1', or generic 'Produit'
-  if ((!targetId || targetId === '1') && (!targetTitle || targetTitle === 'produit')) {
-    const storeProducts = PRODUCTS.filter((p) => p.storeSlug === storeSlug);
-    if (storeProducts.length > 0) {
-      return {
-        id: storeProducts[0].id,
-        title: storeProducts[0].title,
-        price: storeProducts[0].price,
-      };
-    }
-  }
-
-  // 6. Generic Sandbox Fallback for Visual Builder temporary products
-  if (targetId.startsWith('temp-') || targetId.startsWith('temp_')) {
-    return {
-      id: identifier.id || identifier.productId || 'sandbox_prod',
-      title: identifier.title || 'Produit de Test',
-      price: (identifier as any).price !== undefined ? Number((identifier as any).price) : 215,
-    };
-  }
-
+  // If the product doesn't exist in Payload, we reject it. No mock fallbacks allowed.
   return null;
 }
 
@@ -496,3 +390,4 @@ export async function verifyAndRecalculateOrder(
     tamperingDetected,
   };
 }
+

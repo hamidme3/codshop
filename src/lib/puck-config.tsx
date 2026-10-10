@@ -10,7 +10,9 @@ import {
   VideoShowcaseSection, 
   FaqSection, 
   WhatsAppBarSection,
-  ProductGridSection
+  ProductGridSection,
+  TrustBadgesSection,
+  StickyBuyBarSection
 } from "@/components/builder/Sections";
 
 export type Props = {
@@ -18,12 +20,14 @@ export type Props = {
   HeroBanner: { headline: string; subheadline: string; ctaText: string; badgeText: string };
   FeaturesGrid: { title?: string };
   UrgencyTimer: { title: string; stockRemaining: number };
-  CodCheckout: { productTitle: string; price: number; comparePrice: number; packDuoDiscount: number; packTrioDiscount: number };
+  CodCheckout: { productId: string; productTitle: string; price: number; comparePrice: number; packDuoDiscount: number; packTrioDiscount: number };
   Testimonials: { title: string; subtitle: string; reviewsSummary: string };
   VideoShowcase: { title: string; subtitle: string; badgeText: string; thumbnailUrl: string };
   Faq: { title?: string };
   WhatsAppBar: { phone: string; message: string; buttonText: string };
-  ProductGrid: { title: string; category: string };
+  ProductGrid: { title: string; category: string; selectedProducts?: string[] };
+  TrustBadges: { title: string; align: 'left' | 'center' };
+  StickyBuyBar: { productId: string; buttonText: string; price: number };
 };
 
 // We create a mock theme config to pass to the components for preview if none is provided
@@ -55,8 +59,14 @@ export const normalizeThemeConfig = (config: any) => {
   };
 };
 
-export const getPuckConfig = (rawConfig: any = defaultThemeConfig): Config<Props, any> => {
+export const getPuckConfig = (rawConfig: any = defaultThemeConfig, initialProducts: any[] = []): Config<Props, any> => {
   const themeConfig = normalizeThemeConfig(rawConfig);
+  
+  const productOptions = initialProducts.map((p: any) => ({
+    label: p.title || 'Untitled Product',
+    value: p.id
+  }));
+  productOptions.unshift({ label: 'Select a product...', value: '' });
   
   return {
     root: {
@@ -64,7 +74,14 @@ export const getPuckConfig = (rawConfig: any = defaultThemeConfig): Config<Props
         const fontClass = themeConfig.fontFamily === 'serif' ? 'font-serif' : themeConfig.fontFamily === 'monospace' ? 'font-mono' : 'font-sans';
         return (
           <div 
-            style={{ backgroundColor: themeConfig.bgPage, color: themeConfig.textPrimary || '#111827', minHeight: "100vh" }}
+            style={{ 
+              backgroundColor: themeConfig.bgPage, 
+              color: themeConfig.textPrimary || '#111827', 
+              minHeight: "100vh",
+              // Inject CSS variables for deep theming support
+              '--theme-primary': themeConfig.primaryColor,
+              '--theme-accent': themeConfig.accentColor,
+            } as React.CSSProperties}
             className={fontClass}
           >
             {children}
@@ -123,8 +140,31 @@ export const getPuckConfig = (rawConfig: any = defaultThemeConfig): Config<Props
           <UrgencyTimerSection settings={props} themeConfig={themeConfig} />
         )
       },
+      TrustBadges: {
+        fields: {
+          title: { type: "text" },
+          align: { 
+            type: "radio", 
+            options: [
+              { label: "Center", value: "center" },
+              { label: "Left", value: "left" }
+            ] 
+          }
+        },
+        defaultProps: {
+          title: "Guaranteed Satisfaction",
+          align: "center"
+        },
+        render: (props) => (
+          <TrustBadgesSection settings={props} themeConfig={themeConfig} />
+        )
+      },
       CodCheckout: {
         fields: {
+          productId: { 
+            type: "select", 
+            options: productOptions 
+          },
           productTitle: { type: "text" },
           price: { type: "number" },
           comparePrice: { type: "number" },
@@ -132,6 +172,7 @@ export const getPuckConfig = (rawConfig: any = defaultThemeConfig): Config<Props
           packTrioDiscount: { type: "number" }
         },
         defaultProps: {
+          productId: "",
           productTitle: "Featured Item - Special Edition",
           price: 349,
           comparePrice: 590,
@@ -139,7 +180,25 @@ export const getPuckConfig = (rawConfig: any = defaultThemeConfig): Config<Props
           packTrioDiscount: 200
         },
         render: (props) => (
-          <CodCheckoutSection settings={props} themeConfig={themeConfig} />
+          <CodCheckoutSection settings={props} themeConfig={themeConfig} products={initialProducts} />
+        )
+      },
+      StickyBuyBar: {
+        fields: {
+          productId: { 
+            type: "select", 
+            options: productOptions 
+          },
+          buttonText: { type: "text" },
+          price: { type: "number" }
+        },
+        defaultProps: {
+          productId: "",
+          buttonText: "Commander Maintenant",
+          price: 349
+        },
+        render: (props) => (
+          <StickyBuyBarSection settings={props} themeConfig={themeConfig} products={initialProducts} />
         )
       },
       VideoShowcase: {
@@ -184,14 +243,15 @@ export const getPuckConfig = (rawConfig: any = defaultThemeConfig): Config<Props
       ProductGrid: {
         fields: {
           title: { type: "text" },
-          category: { type: "text" }
+          category: { type: "text" },
         },
         defaultProps: {
           title: "Our Products",
-          category: ""
+          category: "",
+          selectedProducts: []
         },
         render: (props) => (
-          <ProductGridSection settings={props} themeConfig={themeConfig} />
+          <ProductGridSection settings={props} themeConfig={themeConfig} products={initialProducts} />
         )
       },
       WhatsAppBar: {
@@ -213,4 +273,4 @@ export const getPuckConfig = (rawConfig: any = defaultThemeConfig): Config<Props
   };
 };
 
-export const puckConfig = getPuckConfig(defaultThemeConfig);
+export const puckConfig = getPuckConfig(defaultThemeConfig, []);

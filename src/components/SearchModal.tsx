@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearch } from '@/context/SearchContext';
 import { useTheme } from '@/context/ThemeContext';
-import { Product } from '@/lib/mockProducts';
+import { StorefrontProduct } from '@/lib/types';
 import { THEMES } from '@/lib/themes';
 import { trackSearch } from '@/lib/posthog';
 import {
@@ -38,7 +38,7 @@ export function SearchModal() {
   const { isOpen, closeSearch } = useSearch();
   const { theme, formatPrice, countryCode } = useTheme();
   const [query, setQuery] = useState('');
-  const [storeProducts, setStoreProducts] = useState<Product[]>([]);
+  const [storeProducts, setStoreProducts] = useState<StorefrontProduct[]>([]);
   const [currentStoreSlug, setCurrentStoreSlug] = useState<string>('');
   const [isSubdomain, setIsSubdomain] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
@@ -111,7 +111,7 @@ export function SearchModal() {
         const titleAr = p.titleAr || '';
         const tagline = p.tagline?.toLowerCase() || '';
         const sku = p.sku?.toLowerCase() || '';
-        const categoryName = THEMES[p.theme]?.name?.toLowerCase() || '';
+        const categoryName = THEMES[p.theme as keyof typeof THEMES]?.name?.toLowerCase() || '';
         const categoryId = p.theme?.toLowerCase() || '';
         const desc = p.description?.toLowerCase() || '';
 
@@ -307,7 +307,7 @@ export function SearchModal() {
               <ul className="divide-y divide-zinc-100 dark:divide-zinc-800" role="listbox">
                 {filteredResults.map((product, idx) => {
                   const isSelected = selectedIndex === idx;
-                  const themeConfig = THEMES[product.theme];
+                  const themeConfig = THEMES[product.theme as keyof typeof THEMES];
                   const categoryName = themeConfig?.name || product.theme;
 
                   return (

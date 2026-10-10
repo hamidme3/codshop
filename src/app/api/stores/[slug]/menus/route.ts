@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getStoreMenus, getStoreMenuByPlacement, updateStoreMenu } from '@/lib/db-repository';
-import { validateMenuNesting } from '@/lib/mocks';
+
 import { sanitizeText } from '@/lib/sanitizer';
 import type { MenuItem, MenuPlacement } from '@/lib/types';
 
@@ -86,7 +86,18 @@ export async function PUT(
     }
 
     // Enforce max 2-level nesting rule (Parent -> Submenu -> Nested Sub-item)
-    if (!validateMenuNesting(items)) {
+    
+    const checkNesting = (list: any[], depth = 0): boolean => {
+      if (depth > 2) return false;
+      for (const item of list) {
+        if (item.children && item.children.length > 0) {
+          if (!checkNesting(item.children, depth + 1)) return false;
+        }
+      }
+      return true;
+    };
+    if (!checkNesting(items)) {
+
       return NextResponse.json(
         {
           success: false,

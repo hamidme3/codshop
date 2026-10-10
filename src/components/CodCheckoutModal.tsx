@@ -2,7 +2,8 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Product, QuantityTier, getProductQuantityTiers } from '@/lib/mockProducts';
+import { StorefrontProduct, QuantityTier } from '@/lib/types';
+import { getProductQuantityTiers } from '@/lib/product-utils';
 import {
   MOROCCAN_CITIES,
   POPULAR_CITIES,
@@ -50,7 +51,7 @@ import {
 } from '@/lib/posthog';
 
 interface CodCheckoutModalProps {
-  product: Product;
+  product: StorefrontProduct;
   isOpen: boolean;
   onClose: () => void;
   storeSlug?: string;

@@ -198,3 +198,82 @@ export interface StorePage {
   updatedAt: string;
 }
 
+
+export interface QuantityTier {
+  quantity: number;
+  label: string;
+  labelAr?: string;
+  unitPrice: number;
+  totalPrice: number;
+  savingsBadge?: string;
+  isPopular?: boolean;
+  freeDelivery?: boolean;
+  freeGift?: string;
+  badge?: string;
+  badgeAr?: string;
+}
+
+export interface ProductVariant {
+  id: string;
+  name: string; // e.g. "41", "42", "50ml", "Noir"
+  inStock: boolean;
+  sku?: string;
+  stock?: number;
+  image?: string;
+  color?: string;
+  size?: string;
+  price?: number;
+}
+
+export interface ProductColorOption {
+  id: string;
+  name: string;
+  hex?: string;
+  image?: string;
+  inStock?: boolean;
+}
+
+export interface ProductSizeOption {
+  id: string;
+  name: string;
+  inStock?: boolean;
+}
+
+export interface VariantMatrixItem {
+  id: string;
+  sku: string;
+  color?: string;
+  size?: string;
+  stock: number;
+  inStock: boolean;
+  image?: string;
+  price?: number;
+}
+
+export interface StorefrontProduct {
+  id: string;
+  slug: string;
+  sku: string;
+  theme: any;
+  title: string;
+  titleAr?: string;
+  tagline: string;
+  price: number;
+  originalPrice: number;
+  rating: number;
+  reviewCount: number;
+  stockLeft: number;
+  images: string[];
+  description: string;
+  features: string[];
+  colors?: ProductColorOption[];
+  sizes?: ProductSizeOption[];
+  variantMatrix?: VariantMatrixItem[];
+  variants?: {
+    type: 'size' | 'color' | 'volume' | 'multi';
+    label: string;
+    options: ProductVariant[];
+  };
+  quantityTiers: QuantityTier[];
+  whatsAppDirectNumber: string; // "+212600000000"
+}

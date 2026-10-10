@@ -2,13 +2,13 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Product } from '@/lib/mockProducts';
+import { StorefrontProduct } from '@/lib/types';
 import { useTheme } from '@/context/ThemeContext';
 import { useCart } from '@/context/CartContext';
 import { Star, ShieldCheck, ShoppingCart, Plus } from 'lucide-react';
 import { CodCheckoutModal } from './CodCheckoutModal';
 
-export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
+export function ProductCard({ product, priority = false }: { product: StorefrontProduct; priority?: boolean }) {
   const { theme, formatMAD } = useTheme();
   const { addItem } = useCart();
   const [showModal, setShowModal] = useState(false);

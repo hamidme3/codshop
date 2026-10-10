@@ -6,7 +6,7 @@ import { getPuckConfig, defaultThemeConfig } from "@/lib/puck-config";
 import { useState, useEffect } from "react";
 import { ArrowDownToLine } from "lucide-react";
 
-export function PuckEditor({ initialData, storeSlug }: { initialData: any, storeSlug: string }) {
+export function PuckEditor({ initialData, storeSlug, initialProducts = [] }: { initialData: any, storeSlug: string, initialProducts?: any[] }) {
   const [themeConfig, setThemeConfig] = useState(defaultThemeConfig);
   const [puckData, setPuckData] = useState(initialData);
 
@@ -60,7 +60,7 @@ export function PuckEditor({ initialData, storeSlug }: { initialData: any, store
     }
   };
 
-  const config = getPuckConfig(themeConfig);
+  const config = getPuckConfig(themeConfig, initialProducts);
 
   return (
     <div className="h-full flex flex-col">

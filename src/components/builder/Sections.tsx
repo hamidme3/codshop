@@ -5,7 +5,7 @@ import {
   ShieldCheck, Truck, Award, Clock, Flame, 
   Star, ChevronDown, MessageCircle, Check, ArrowRight,
   PackageCheck, Play, Sparkles, AlertCircle, ShoppingBag,
-  RotateCcw, ThumbsUp, MapPin
+  RotateCcw, ThumbsUp, MapPin, CheckCircle2
 } from 'lucide-react';
 import { MOROCCAN_CITIES, getCityShipping, FREE_SHIPPING_THRESHOLD } from '@/lib/moroccanCities';
 
@@ -220,10 +220,12 @@ export function UrgencyTimerSection({
 // 4. 1-STEP MOROCCAN COD CHECKOUT BLOCK
 export function CodCheckoutSection({ 
   settings, 
-  themeConfig 
+  themeConfig,
+  products
 }: { 
   settings: any; 
   themeConfig?: any; 
+  products?: any[];
 }) {
   const accentColor = themeConfig?.accentColor || '#c59b27';
   const radiusClass = getButtonRadiusClass(themeConfig?.buttonRadius);
@@ -236,10 +238,14 @@ export function CodCheckoutSection({
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const basePrice = settings.price || 349;
-  const comparePrice = settings.comparePrice || basePrice * 1.5;
-  const duoDiscount = settings.packDuoDiscount || 100;
-  const trioDiscount = settings.packTrioDiscount || 200;
+  // Dynamic Data Binding
+  const selectedProduct = products?.find(p => p.id === settings.productId);
+  
+  const productTitle = selectedProduct ? selectedProduct.title : settings.productTitle || 'Featured Item';
+  const basePrice = selectedProduct ? Number(selectedProduct.price) : settings.price || 349;
+  const comparePrice = selectedProduct && selectedProduct.compareAtPrice ? Number(selectedProduct.compareAtPrice) : settings.comparePrice || basePrice * 1.5;
+  const duoDiscount = selectedProduct && selectedProduct.packDuoPrice ? (basePrice * 2) - Number(selectedProduct.packDuoPrice) : settings.packDuoDiscount || 100;
+  const trioDiscount = selectedProduct && selectedProduct.packTrioPrice ? (basePrice * 3) - Number(selectedProduct.packTrioPrice) : settings.packTrioDiscount || 200;
 
   const getPackTotal = () => {
     if (selectedPack === 'single') return basePrice;
@@ -280,7 +286,7 @@ export function CodCheckoutSection({
         body: JSON.stringify({
           storeSlug: effectiveStoreSlug,
           customer: { fullName, phone, city, address },
-          product: { title: settings.productTitle || 'Article Boutique', freeDelivery: isFreeShipping },
+          product: { title: productTitle, freeDelivery: isFreeShipping },
           quantity: selectedPack === 'single' ? 1 : selectedPack === 'duo' ? 2 : 3,
           unitPrice: basePrice,
           subtotal: packSubtotal,
@@ -340,7 +346,7 @@ export function CodCheckoutSection({
             Formulaire de Commande Express 🇲🇦
           </span>
           <h2 className="text-2xl font-black text-white mt-3">
-            {settings.productTitle || 'Commandez Votre Article'}
+            {productTitle}
           </h2>
           <p className="text-xs text-slate-400 mt-1">
             Paiement Cash à la livraison après ouverture et vérification de votre colis.
@@ -812,50 +818,23 @@ export function DynamicSectionRenderer({
 // 10. PRODUCT GRID SECTION
 export function ProductGridSection({
   settings,
-  themeConfig
+  themeConfig,
+  products = []
 }: {
   settings: any;
   themeConfig: any;
+  products?: any[];
 }) {
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  let displayProducts = products;
+  
+  if (settings.category && settings.category.trim() !== '') {
+    displayProducts = displayProducts.filter((p: any) => p.category?.toLowerCase() === settings.category.toLowerCase());
+  }
 
-  useEffect(() => {
-    // We assume the storeSlug is in the URL or we just fetch for 'ottavio' if missing.
-    // In a real app we'd pass it down via context or props.
-    // Here we'll try to extract it from the searchParams if in the browser.
-    let storeSlug = '';
-    if (typeof window !== 'undefined') {
-      const host = window.location.hostname.toLowerCase();
-      const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
-      const hasSub = (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
-                     (host.endsWith('.localhost') && host !== 'localhost');
-      
-      if (hasSub) {
-        storeSlug = host.replace(`.${rootDomain}`, '').replace('.localhost', '');
-      } else {
-        const urlParams = new URLSearchParams(window.location.search);
-        storeSlug = urlParams.get('store') || '';
-      }
-    }
-    
-    if (!storeSlug) return; // Wait for storeSlug to be resolved
-
-    fetch(`/api/products?store=${storeSlug}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && Array.isArray(data.products)) {
-          // If a category was provided, we could filter here.
-          let filtered = data.products;
-          if (settings.category && settings.category.trim() !== '') {
-             filtered = filtered.filter((p: any) => p.category?.toLowerCase() === settings.category.toLowerCase());
-          }
-          setProducts(filtered);
-        }
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [settings.category]);
+  // If specific products are selected
+  if (settings.selectedProducts && Array.isArray(settings.selectedProducts) && settings.selectedProducts.length > 0) {
+    displayProducts = displayProducts.filter((p: any) => settings.selectedProducts.includes(p.id));
+  }
 
   const { ProductCard } = require('@/components/ProductCard'); // Dynamic require to avoid circular deps if any
 
@@ -866,13 +845,9 @@ export function ProductGridSection({
           {settings.title}
         </h2>
         
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="w-8 h-8 border-4 border-slate-200 rounded-full animate-spin" style={{ borderTopColor: themeConfig.primaryColor }}></div>
-          </div>
-        ) : products.length > 0 ? (
+        {displayProducts.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {products.map((product) => (
+            {displayProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -885,3 +860,59 @@ export function ProductGridSection({
     </div>
   );
 }
+
+export function TrustBadgesSection({ settings, themeConfig }: { settings: any; themeConfig?: any }) {
+  const align = settings.align || 'center';
+  const alignClass = align === 'left' ? 'justify-start text-left' : 'justify-center text-center';
+  
+  return (
+    <section className="py-6 px-4 bg-slate-50 dark:bg-[#090d16]">
+      <div className="max-w-2xl mx-auto">
+        {settings.title && (
+          <h3 className={`text-sm font-bold text-slate-500 dark:text-zinc-400 mb-4 uppercase tracking-wider flex ${alignClass}`}>
+            {settings.title}
+          </h3>
+        )}
+        <div className={`flex flex-wrap gap-4 ${alignClass}`}>
+          <div className="flex items-center gap-2 bg-white dark:bg-[#121826] px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-800">
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+            <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200">Vérifiez avant de payer</span>
+          </div>
+          <div className="flex items-center gap-2 bg-white dark:bg-[#121826] px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-800">
+            <ShieldCheck className="w-5 h-5 text-blue-500" />
+            <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200">Garantie Satisfait</span>
+          </div>
+          <div className="flex items-center gap-2 bg-white dark:bg-[#121826] px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-800">
+            <Truck className="w-5 h-5 text-amber-500" />
+            <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200">Livraison Gratuite (Duo)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function StickyBuyBarSection({ settings, themeConfig, products }: { settings: any; themeConfig?: any; products?: any[] }) {
+  const accentColor = themeConfig?.accentColor || '#c59b27';
+  const radiusClass = getButtonRadiusClass(themeConfig?.buttonRadius);
+  const selectedProduct = products?.find(p => p.id === settings.productId);
+  const price = selectedProduct ? Number(selectedProduct.price) : settings.price || 349;
+  
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#090d16]/95 backdrop-blur-md border-t border-slate-200 dark:border-zinc-800 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] flex items-center justify-between shadow-2xl lg:hidden">
+      <div className="flex flex-col">
+        <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-medium uppercase">Total</span>
+        <span className="text-lg font-black text-slate-900 dark:text-white tabular-nums">{price} DH</span>
+      </div>
+      <button 
+        onClick={() => { window.scrollTo({ top: document.getElementById('checkout-form')?.offsetTop || 0, behavior: 'smooth' }) }}
+        className={`${radiusClass} px-6 py-3 text-white font-bold text-sm flex items-center gap-2 transition-transform active:scale-95 shadow-lg shadow-black/10`}
+        style={{ backgroundColor: accentColor }}
+      >
+        <ShoppingBag className="w-4 h-4" />
+        {settings.buttonText || "Commander Maintenant"}
+      </button>
+    </div>
+  );
+}
+

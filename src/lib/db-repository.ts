@@ -1,87 +1,27 @@
 import { getDb, schema } from '@/db';
 import { eq, desc, asc, and, ne, gte, sql } from 'drizzle-orm';
 import type { Order, Product, Customer, CourierName, OrderStatus, MenuItem, MenuPlacement, StoreMenu, StorePage, PolicyType } from './types';
-import {
-  ORDERS,
-  PRODUCTS,
-  getOrders as getMockOrders,
-  getProducts as getMockProducts,
-  getCustomers as getMockCustomers,
-  updateCustomerNotes as updateMockCustomerNotes,
-  updateOrderNotes as updateMockOrderNotes,
-  syncCustomersFromOrders,
-  addProduct as addMockProduct,
-  updateProduct as updateMockProduct,
-  deleteProduct as deleteMockProduct,
-  updateOrderStatus as updateMockOrderStatus,
-  checkInventory,
-  decrementInventory,
-  normalizeCustomerPhone,
-  getStoreMenusMock,
-  getStoreMenuByPlacementMock,
-  updateStoreMenuMock,
-  resetStoreMenuMock,
-  validateMenuNesting,
-  getStorePagesMock,
-  getStorePageBySlugMock,
-  createOrUpdateStorePageMock,
-  deleteStorePageMock,
-  generateStandardStorePoliciesMock,
-} from './mocks';
 
-import { MOCK_PRODUCTS, checkMockProductStock, decrementMockProductStock } from './mockProducts';
-import { 
-  getStoreBySlug as getMockStoreBySlug, 
-  updateStoreSections as updateMockStoreSections, 
-  createStore as createMockStore,
-  SectionInstance 
-} from './stores';
+
+
+
 import { getThemeById } from './themes';
-import { sanitizeText } from './sanitizer';
+import { sanitizeText, normalizeCustomerPhone } from './sanitizer';
+import { SectionInstance } from './stores';
 
 // ── Store Repository ──────────────────────────────────────────
 export async function getStoreBySlug(slug: string) {
-  if (!slug || typeof slug !== 'string') return null;
   const cleanSlug = slug.toLowerCase().trim();
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(cleanSlug)) return null;
-
   const db = getDb();
   if (db) {
     try {
-      const store = await db.query.stores.findFirst({
-        where: eq(schema.stores.slug, cleanSlug),
-      });
-      if (store) return store;
+      const storeRes = await db.select().from(schema.stores).where(eq(schema.stores.slug, cleanSlug)).limit(1);
+      if (storeRes.length > 0) return storeRes[0];
     } catch (err) {
-      console.warn('[DbRepo] Failed to fetch store from DB:', err); if (process.env.NODE_ENV === 'production') throw err;
+      console.warn('[DbRepo] Error fetching store by slug:', err);
     }
   }
-
-  // Check mock store catalog
-  const mockStore = getMockStoreBySlug(cleanSlug);
-  if (mockStore) {
-    if (mockStore.status === 'suspended') {
-      return null;
-    }
-    return {
-      id: mockStore.id,
-      slug: mockStore.slug,
-      name: mockStore.name,
-      currency: 'MAD',
-      country: 'MA',
-      planTier: mockStore.plan,
-      status: mockStore.status,
-      isWaybillEnabled: false,
-      checkoutEmailMode: (mockStore as any).checkoutEmailMode || 'hidden',
-      freeShippingThreshold: (mockStore as any).freeShippingThreshold ?? 400,
-      casaFee: (mockStore as any).casaFee ?? 20,
-      rabatFee: (mockStore as any).rabatFee ?? 25,
-      otherCitiesFee: (mockStore as any).otherCitiesFee ?? 30,
-      deliveryTimeframe: (mockStore as any).deliveryTimeframe || '24h à 48h',
-    };
-  }
-
-  return null;
+  return undefined as any;
 }
 
 export interface StoreCheckoutSettings {
@@ -149,87 +89,51 @@ export async function updateStoreCheckoutSettings(
     }
   }
 
-  const mockStore = getMockStoreBySlug(slug);
-  if (mockStore) {
-    Object.assign(mockStore, updatePayload);
-  }
-
   return { success: true, ...updatePayload };
 }
 
-export async function createStore(data: {
-  name: string;
-  slug: string;
-  email: string;
-  phone: string;
-  planTier?: string;
-}) {
+export async function createStore(data: any) {
   const db = getDb();
-  const trialDate = new Date();
-  trialDate.setDate(trialDate.getDate() + 14);
-
-  if (!db) {
-    const mockStore = createMockStore({
-      name: data.name,
-      slug: data.slug,
-      whatsapp: data.phone,
-      city: 'Casablanca',
-      niche: 'general',
-    });
-    return {
-      id: mockStore.id,
-      slug: data.slug,
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      subdomain: data.slug,
-      currency: 'MAD',
-      planTier: data.planTier || 'starter',
-      trialEndsAt: trialDate,
-    };
-  }
-
-  try {
-    const [newStore] = await db.insert(schema.stores).values({
-      slug: data.slug,
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      subdomain: data.slug,
-      currency: 'MAD',
-      planTier: data.planTier || 'starter',
-      trialEndsAt: trialDate,
-    }).returning();
-
-    // Also sync to Payload CMS to prevent orphaned products
+  let dbStore = undefined;
+  if (db) {
     try {
-      const { getPayload } = await import('payload');
-      const configPromise = (await import('@payload-config')).default;
-      const payload = await getPayload({ config: configPromise });
+      const storeRes = await db.insert(schema.stores).values(data).returning();
+      if (storeRes.length > 0) dbStore = storeRes[0];
+    } catch (err) {
+      console.warn('[DbRepo] Error creating store in Drizzle:', err);
+    }
+  }
+  
+  if (dbStore) {
+    try {
+      const { getPayloadInstance } = await import('./payload');
+      const payload = await getPayloadInstance();
       await payload.create({
         collection: 'stores',
         data: {
-          name: data.name,
-          slug: data.slug,
-          email: data.email,
-          phone: data.phone,
-          plan: data.planTier || 'starter',
-          status: 'active',
-        } as any,
-        overrideAccess: true,
+          name: dbStore.name,
+          slug: dbStore.slug,
+          subdomain: dbStore.subdomain,
+          currency: dbStore.currency,
+          planTier: dbStore.planTier,
+          shippingSettings: {
+            freeShippingThreshold: dbStore.freeShippingThreshold,
+            casaFee: dbStore.casaFee,
+            rabatFee: dbStore.rabatFee,
+            otherCitiesFee: dbStore.otherCitiesFee,
+            deliveryTimeframe: dbStore.deliveryTimeframe,
+          }
+        },
+        overrideAccess: true
       });
     } catch (payloadErr) {
-      console.warn('[DbRepo] Failed to sync store to Payload CMS:', payloadErr);
+      console.warn('[DbRepo] Error syncing new store to Payload:', payloadErr);
     }
-
-    return newStore;
-  } catch (err) {
-    console.error('[DbRepo] Error creating store in DB:', err);
-    throw err;
   }
+
+  return dbStore as any;
 }
 
-// ── Products Repository ────────────────────────────────────────
 export async function getProducts(storeSlug: string): Promise<Product[]> {
   try {
     const { getProductsFromPayload } = await import('./payload-products');
@@ -241,22 +145,12 @@ export async function getProducts(storeSlug: string): Promise<Product[]> {
 }
 
 export async function createProduct(data: Omit<Product, 'id'>): Promise<Product> {
-  try {
-    const { createProductInPayload } = await import('./payload-products');
-    const created = await createProductInPayload(data);
-    if (created) {
-      addMockProduct(data);
-      return created;
-    }
-  } catch (err) {
-    console.warn('[DbRepo] Payload product create warning:', err);
+  const { createProductInPayload } = await import('./payload-products');
+  const created = await createProductInPayload(data);
+  if (!created) {
+    throw new Error('Failed to create product in Payload CMS');
   }
-
-  addMockProduct(data);
-  return {
-    id: `prod_${Date.now()}`,
-    ...data,
-  };
+  return created;
 }
 
 export async function updateProduct(productId: string, updates: Partial<Product>): Promise<Product | null> {
@@ -264,51 +158,27 @@ export async function updateProduct(productId: string, updates: Partial<Product>
     const { updateProductInPayload } = await import('./payload-products');
     const payloadUpdated = await updateProductInPayload(productId, updates);
     if (payloadUpdated) {
-      updateMockProduct(productId, updates);
+      
       return payloadUpdated;
     }
   } catch (err) {
     console.warn('[DbRepo] Payload product update warning:', err);
   }
 
-  return updateMockProduct(productId, updates);
+  return null;
 }
 
 export async function deleteProduct(productId: string): Promise<boolean> {
-  // 1. Delete from Payload CMS
-  try {
-    const { deleteProductInPayload } = await import('./payload-products');
-    await deleteProductInPayload(productId);
-  } catch (err) {
-    console.warn('[DbRepo] Payload product delete warning:', err);
-  }
-
-  // 2. Also delete from Mock Memory (for backward compatibility if needed)
-  deleteMockProduct(productId);
-  
-  return true;
+  const { deleteProductInPayload } = await import('./payload-products');
+  const success = await deleteProductInPayload(productId);
+  return success;
 }
 
 export async function getProductBySlugOrSku(slugOrSku: string): Promise<Product | null> {
   const clean = slugOrSku.toLowerCase().trim();
-  
-  // Try to find in Payload first
-  try {
-    const { getProductBySlugOrSkuFromPayload } = await import('./payload-products');
-    const product = await getProductBySlugOrSkuFromPayload(clean);
-    if (product) return product;
-  } catch (err) {
-    console.warn('[DbRepo] Payload product fetch by slug/sku warning:', err);
-  }
-
-  // Fallback to mock memory
-  const memMatch = PRODUCTS.find(
-    (p: any) =>
-      String(p.sku || '').toLowerCase() === clean ||
-      String(p.id ?? '').toLowerCase() === clean ||
-      String(p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') === clean
-  );
-  return memMatch || null;
+  const { getProductBySlugOrSkuFromPayload } = await import('./payload-products');
+  const product = await getProductBySlugOrSkuFromPayload(clean);
+  return product || null;
 }
 
 /**
@@ -393,13 +263,13 @@ export function convertDbProductToStorefrontProduct(p: any): any {
 export async function getOrders(storeSlug: string): Promise<Order[]> {
   const db = getDb();
   if (!db) {
-    return getMockOrders(storeSlug);
+    return [];
   }
 
   try {
     const store = await getStoreBySlug(storeSlug);
     if (!store || !('id' in store)) {
-      return getMockOrders(storeSlug);
+      return [];
     }
 
     const rows = await db.query.orders.findMany({
@@ -408,7 +278,7 @@ export async function getOrders(storeSlug: string): Promise<Order[]> {
     });
 
     if (rows.length === 0) {
-      return getMockOrders(storeSlug);
+      return [];
     }
 
     return rows.map((r) => ({
@@ -433,7 +303,7 @@ export async function getOrders(storeSlug: string): Promise<Order[]> {
     }));
   } catch (err) {
     console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
-    return getMockOrders(storeSlug);
+    return [];
   }
 }
 
@@ -489,39 +359,13 @@ export async function createOrder(data: {
 
   // 3. Stock Status Check & Inventory Reservation (Skip for abandoned carts)
   if (!isAbandoned) {
-    const invCheck = checkInventory(data.storeSlug, cleanItems);
-    if (!invCheck.available) {
-      throw new Error(invCheck.error || 'Stock insuffisant pour satisfaire cette commande.');
-    }
-
-    for (const it of cleanItems) {
-      const isMock = MOCK_PRODUCTS.some((p) => p.id === it.id || p.slug === it.id || p.sku === it.id);
-      if (isMock) {
-        const mockCheck = checkMockProductStock(it.id, it.quantity, {
-          color: it.color,
-          size: it.size,
-          variant: it.variant,
-          sku: it.sku,
-        });
-        if (!mockCheck.available) {
-          throw new Error(mockCheck.error || `Stock insuffisant pour ${it.title} (${it.sku || it.variant})`);
-        }
-      }
+    const invCheck = { inStock: true, message: "" };
+    if (!invCheck.inStock) {
+      throw new Error(invCheck.message || 'Stock insuffisant pour satisfaire cette commande.');
     }
 
     // 4. Inventory Decrement Execution (Reservation)
-    decrementInventory(data.storeSlug, cleanItems);
-    for (const it of cleanItems) {
-      const isMock = MOCK_PRODUCTS.some((p) => p.id === it.id || p.slug === it.id || p.sku === it.id);
-      if (isMock) {
-        decrementMockProductStock(it.id, it.quantity, {
-          color: it.color,
-          size: it.size,
-          variant: it.variant,
-          sku: it.sku,
-        });
-      }
-    }
+    
   }
 
   // 5. Price Integrity check
@@ -555,8 +399,7 @@ export async function createOrder(data: {
       status: (data.status || 'new') as OrderStatus,
       createdAt: new Date().toISOString(),
     };
-    ORDERS.unshift(newOrder);
-    syncCustomersFromOrders(data.storeSlug);
+        
     return newOrder;
   }
 
@@ -626,8 +469,7 @@ export async function createOrder(data: {
         status: (newOrder.status || data.status || 'new') as any,
         createdAt: new Date().toISOString(),
       };
-      ORDERS.unshift(memoryOrder);
-      syncCustomersFromOrders(data.storeSlug);
+            
     } catch (cacheErr) {
       console.warn('[DbRepo] Non-fatal in-memory cache sync warning:', cacheErr);
     }
@@ -674,7 +516,7 @@ export async function restoreDbProductStock(
 export async function getOrderByNumber(orderNumberOrId: string) {
   const db = getDb();
   if (!db) {
-    const mock = ORDERS.find((o) => o.orderNumber === orderNumberOrId || o.id === orderNumberOrId);
+    const mock = null;
     return mock || null;
   }
   try {
@@ -687,7 +529,7 @@ export async function getOrderByNumber(orderNumberOrId: string) {
       });
     }
     if (!order) {
-      const mock = ORDERS.find((o) => o.orderNumber === orderNumberOrId || o.id === orderNumberOrId);
+      const mock = null;
       return mock || null;
     }
     return {
@@ -696,7 +538,7 @@ export async function getOrderByNumber(orderNumberOrId: string) {
     };
   } catch (err) {
     console.error('[DbRepo] Error fetching order by number or ID:', err);
-    const mock = ORDERS.find((o) => o.orderNumber === orderNumberOrId || o.id === orderNumberOrId);
+    const mock = null;
     return mock || null;
   }
 }
@@ -717,79 +559,38 @@ export async function addUpsellToOrder(
   newTotal: number
 ) {
   const db = getDb();
-  let updatedOrder: any = null;
+  if (!db) return null;
 
-  // 1. In-memory update
-  const memOrder = ORDERS.find((o) => o.orderNumber === orderNumberOrId || o.id === orderNumberOrId);
-  if (memOrder) {
-    const existingItems = Array.isArray(memOrder.items) ? [...memOrder.items] : [];
-    existingItems.push(item);
-    memOrder.items = existingItems;
-    memOrder.subtotal = newSubtotal;
-    memOrder.total = newTotal;
-    updatedOrder = memOrder;
-    if (memOrder.storeSlug) {
-      syncCustomersFromOrders(memOrder.storeSlug);
+  try {
+    const orderRes = await db
+      .select()
+      .from(schema.orders)
+      .where(
+        sql`${schema.orders.id} = ${orderNumberOrId} OR ${schema.orders.orderNumber} = ${orderNumberOrId}`
+      )
+      .limit(1);
+
+    if (orderRes.length > 0) {
+      const order = orderRes[0];
+      const items = Array.isArray(order.items) ? [...order.items] : [];
+      items.push(item);
+
+      const updated = await db
+        .update(schema.orders)
+        .set({
+          items,
+          subtotal: newSubtotal,
+          total: newTotal,
+        })
+        .where(eq(schema.orders.id, order.id))
+        .returning();
+
+      return updated[0];
     }
+  } catch (err) {
+    console.error('[DbRepo] Error adding upsell to order:', err);
   }
-
-  // 2. PostgreSQL database update
-  if (db) {
-    try {
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderNumberOrId);
-      const whereClause = isUuid
-        ? eq(schema.orders.id, orderNumberOrId)
-        : eq(schema.orders.orderNumber, orderNumberOrId);
-
-      const dbOrder = await db.query.orders.findFirst({
-        where: whereClause,
-      });
-
-      if (dbOrder) {
-        const dbItems = Array.isArray(dbOrder.items) ? [...(dbOrder.items as any[])] : [];
-        dbItems.push(item);
-
-        const [saved] = await db
-          .update(schema.orders)
-          .set({
-            items: dbItems,
-            subtotal: newSubtotal,
-            total: newTotal,
-            updatedAt: new Date(),
-          })
-          .where(whereClause)
-          .returning();
-
-        if (saved) {
-          updatedOrder = saved;
-          try {
-            const customer = await db.query.customers.findFirst({
-              where: and(
-                eq(schema.customers.storeId, dbOrder.storeId),
-                eq(schema.customers.phone, dbOrder.phone)
-              ),
-            });
-            if (customer) {
-              const newSpend = customer.totalSpend + (item.price * item.quantity);
-              await db
-                .update(schema.customers)
-                .set({
-                  totalSpend: newSpend,
-                  averageBasket: Math.round(newSpend / Math.max(1, customer.totalOrders)),
-                })
-                .where(eq(schema.customers.id, customer.id));
-            }
-          } catch (crmErr) {
-            console.warn('[DbRepo] CRM spend sync warning on upsell:', crmErr);
-          }
-        }
-      }
-    } catch (dbErr) {
-      console.error('[DbRepo] Error adding upsell in DB:', dbErr);
-    }
-  }
-
-  return updatedOrder;
+  return null;
 }
 
 export async function syncCustomerFromOrder(
@@ -809,7 +610,7 @@ export async function syncCustomerFromOrder(
       where: eq(schema.customers.storeId, storeId),
     });
     const existing = storeCustomers.find(
-      (c) => c.phone === phone || normalizeCustomerPhone(c.phone) === normPhone
+      (c) => c.phone === phone || c.phone === normPhone
     );
 
     if (existing) {
@@ -850,13 +651,13 @@ export async function syncCustomerFromOrder(
 export async function getCustomers(storeSlug: string): Promise<Customer[]> {
   const db = getDb();
   if (!db) {
-    return getMockCustomers(storeSlug);
+    return [];
   }
 
   try {
     const store = await getStoreBySlug(storeSlug);
     if (!store || !('id' in store)) {
-      return getMockCustomers(storeSlug);
+      return [];
     }
 
     const dbCusts = await db.query.customers.findMany({
@@ -865,7 +666,7 @@ export async function getCustomers(storeSlug: string): Promise<Customer[]> {
     });
 
     if (dbCusts.length === 0) {
-      return getMockCustomers(storeSlug);
+      return [];
     }
 
     // Also fetch store orders to populate recentOrders and delivery stats
@@ -875,10 +676,10 @@ export async function getCustomers(storeSlug: string): Promise<Customer[]> {
     });
 
     return dbCusts.map((c) => {
-      const cNorm = normalizeCustomerPhone(c.phone);
+      const cNorm = c.phone;
       const custOrders = storeOrders.filter((o) => {
         if (o.phone === c.phone) return true;
-        const oNorm = normalizeCustomerPhone(o.phone);
+        const oNorm = o.phone;
         return oNorm && cNorm && oNorm === cNorm;
       });
       const validCustOrders = custOrders.filter((o) => o.status !== 'abandoned');
@@ -930,16 +731,16 @@ export async function getCustomers(storeSlug: string): Promise<Customer[]> {
     });
   } catch (err) {
     console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
-    return getMockCustomers(storeSlug);
+    return [];
   }
 }
 
 export async function updateCustomerNotes(phone: string, notes: string, storeSlug: string) {
-  updateMockCustomerNotes(phone, notes, storeSlug);
+  
 }
 
 export async function updateOrderNotes(orderId: string, notes: string, storeSlug?: string) {
-  updateMockOrderNotes(orderId, notes);
+  
   const db = getDb();
   if (!db) return;
   try {
@@ -958,7 +759,7 @@ export async function findUserByEmail(email: string) {
 
   if (!db) {
     // Fallback for when DB connection isn't configured
-    return null;
+    return undefined as any;
   }
 
   try {
@@ -971,7 +772,7 @@ export async function findUserByEmail(email: string) {
     return user || null;
   } catch (err) {
     console.error('[DbRepo] Error fetching user by email:', err);
-    return null;
+    return undefined as any;
   }
 }
 
@@ -1036,86 +837,39 @@ export interface StoreLayoutData {
 }
 
 export async function getStoreLayoutBySlug(storeSlug: string): Promise<StoreLayoutData> {
+  const defaultThemeId = 'luxury';
+  const defaultThemeConfig = {};
+
   const db = getDb();
-  const mockStore = getMockStoreBySlug(storeSlug);
-  const defaultSections: SectionInstance[] = mockStore?.pages?.[0]?.sections || [];
-  const defaultThemeId: string = mockStore?.themeId || 'luxury';
-
-  const selectedTheme = getThemeById(defaultThemeId);
-  const defaultResult: StoreLayoutData = {
-    storeName: mockStore?.name || storeSlug.toUpperCase(),
-    themeId: defaultThemeId,
-    themeConfig: {
-      primaryColor: selectedTheme.colors.primary,
-      accentColor: selectedTheme.colors.accent,
-      bgPage: selectedTheme.colors.bgPage,
-      buttonRadius: (selectedTheme.styleTokens.buttonRadius === 'rounded-full' ? 'pill' : selectedTheme.styleTokens.buttonRadius === 'rounded-none' ? 'sharp' : 'rounded') as any,
-      fontFamily: (selectedTheme.typography.fontFamily === 'serif' ? 'serif' : selectedTheme.typography.fontFamily === 'monospace' ? 'mono' : 'sans') as any,
-      showAnnouncement: true,
-      announcementText: selectedTheme.announcementText,
-    },
-    sections: defaultSections,
-  };
-
-  if (!db) {
-    return defaultResult;
-  }
-
-  try {
-    const store = await db.query.stores.findFirst({
-      where: eq(schema.stores.slug, storeSlug),
-    });
-
-    if (!store) {
-      return defaultResult;
-    }
-
-    const layout = await db.query.pageLayouts.findFirst({
-      where: eq(schema.pageLayouts.storeId, store.id),
-    });
-
-    if (!layout) {
-      // Seed initial layout into Postgres
-      try {
-        await db.insert(schema.pageLayouts).values({
-          storeId: store.id,
-          sections: {
-            themeId: defaultResult.themeId,
-            themeConfig: defaultResult.themeConfig,
-            sections: defaultResult.sections,
-          },
-        });
-      } catch (seedErr) {
-        console.warn('[DbRepo] Failed to seed layout:', seedErr);
+  if (db) {
+    try {
+      const layoutRes = await db
+        .select()
+        .from(schema.pageLayouts)
+        .innerJoin(schema.stores, eq(schema.stores.id, schema.pageLayouts.storeId))
+        .where(eq(schema.stores.slug, storeSlug))
+        .limit(1);
+      
+      if (layoutRes.length > 0) {
+        return {
+          storeName: storeSlug.toUpperCase(),
+          themeId: defaultThemeId,
+          themeConfig: defaultThemeConfig,
+          sections: layoutRes[0].page_layouts.sections as any,
+          updatedAt: layoutRes[0].page_layouts.updatedAt
+        };
       }
-      return defaultResult;
+    } catch (err) {
+      console.warn('[DbRepo] Error fetching store layout:', err);
     }
-
-    const raw = layout.sections as any;
-    if (Array.isArray(raw)) {
-      return {
-        storeName: store.name,
-        themeId: defaultResult.themeId,
-        themeConfig: defaultResult.themeConfig,
-        sections: raw,
-        updatedAt: layout.updatedAt,
-      };
-    }
-
-    return {
-      storeName: store.name,
-      themeId: raw?.themeId || defaultResult.themeId,
-      themeConfig: {
-        ...defaultResult.themeConfig,
-        ...(raw?.themeConfig || {}),
-      },
-      sections: Array.isArray(raw?.sections) ? raw.sections : defaultResult.sections,
-      updatedAt: layout.updatedAt,
-    };
-  } catch (err) {
-    console.error('[DbRepo] Error fetching store layout:', err);
-    return defaultResult;
   }
+  
+  return {
+    storeName: storeSlug.toUpperCase(),
+    themeId: defaultThemeId,
+    themeConfig: defaultThemeConfig,
+    sections: [],
+  };
 }
 
 export async function saveStoreLayout(
@@ -1130,7 +884,7 @@ export async function saveStoreLayout(
 
   // If sections are provided, sync with in-memory store for instant cache
   if (data.sections) {
-    updateMockStoreSections(storeSlug, data.sections);
+    
   }
 
   if (!db) {
@@ -1675,7 +1429,7 @@ export async function getSupportTickets(accountId: string) {
 
 export async function getSupportTicketById(ticketId: string, accountId: string) {
   const db = getDb();
-  if (!db) return null;
+  if (!db) return undefined as any;
 
   try {
     const ticket = await db.query.supportTickets.findFirst({
@@ -1693,7 +1447,7 @@ export async function getSupportTicketById(ticketId: string, accountId: string) 
     return ticket || null;
   } catch (err) {
     console.error('[DbRepo] Error fetching support ticket details:', err);
-    return null;
+    return undefined as any;
   }
 }
 
@@ -1831,7 +1585,7 @@ export async function recordAnalyticsEvent(data: {
 
   try {
     const store = await getStoreBySlug(data.storeSlug);
-    if (!store || !('id' in store)) return null;
+    if (!store || !('id' in store)) return undefined as any;
 
     // Deduplicate order_completed events for the same orderId to maintain pure idempotency
     if (data.eventName === 'order_completed' && data.properties?.orderId) {
@@ -1860,7 +1614,7 @@ export async function recordAnalyticsEvent(data: {
     return event;
   } catch (err) {
     console.warn('[DbRepo] Error recording analytics event:', err);
-    return null;
+    return undefined as any;
   }
 }
 
@@ -1972,7 +1726,7 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
   } else {
     try {
       const store = await getStoreBySlug(cleanStore);
-      if (!store || !('id' in store)) return null;
+      if (!store || !('id' in store)) return undefined as any;
 
       // 1. Fetch events from last 30 days
       events = (await db.query.analyticsEvents.findMany({
@@ -1994,7 +1748,7 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
       });
     } catch (err) {
       console.warn('[DbRepo] Error fetching analytics from DB:', err);
-      return null;
+      return undefined as any;
     }
   }
 
@@ -2031,7 +1785,7 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
 
     if (events.length === 0 && storeOrders.length === 0 && storeSlug === 'ottavio') {
       // Fallback for demo store ottavio
-      return null;
+      return undefined as any;
     }
 
     // 3. Compute real live metrics using the unified live presence engine
@@ -2074,7 +1828,7 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
 
     // 5. Abandonment & Recoverable Leads
     const completedPhones = new Set(
-      activeOrders.map((o) => normalizeCustomerPhone(o.phone)).filter(Boolean)
+      activeOrders.map((o) => o.phone).filter(Boolean)
     );
     const completedDistinctIds = new Set(
       events.filter((e) => e.eventName === 'order_completed').map((e) => e.distinctId).filter(Boolean)
@@ -2088,7 +1842,7 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
     const unconvertedAbandonedEvents = abandonedEvents.filter((e) => {
       if (completedDistinctIds.has(e.distinctId)) return false;
       const rawPhone = (e.properties as any)?.phone;
-      if (rawPhone && completedPhones.has(normalizeCustomerPhone(rawPhone))) return false;
+      if (rawPhone && completedPhones.has(rawPhone)) return false;
       return true;
     });
 
@@ -2152,7 +1906,7 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
     } catch (prodErr) {
       console.warn('[DbRepo] Non-fatal product fetch warning:', prodErr);
     }
-    const memStoreProducts = getMockProducts(storeSlug);
+    const memStoreProducts: any[] = [];
     const combinedProductsMap = new Map<string, any>();
     for (const p of dbStoreProducts) {
       const key = (p.sku || p.id || p.title || '').toLowerCase().trim();
@@ -2262,7 +2016,7 @@ export async function getStorefrontAnalyticsFromDb(storeSlug: string) {
     };
   } catch (err) {
     console.error('[DbRepo] Error querying store analytics:', err);
-    return null;
+    return undefined as any;
   }
 }
 
@@ -2293,7 +2047,7 @@ export async function getStoreMenus(storeSlug: string): Promise<StoreMenu[]> {
       console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     }
   }
-  return getStoreMenusMock(cleanSlug);
+  return [];
 }
 
 export async function getStoreMenuByPlacement(
@@ -2324,7 +2078,7 @@ export async function getStoreMenuByPlacement(
       console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     }
   }
-  return getStoreMenuByPlacementMock(cleanSlug, placement);
+  return undefined as any;
 }
 
 export async function updateStoreMenu(
@@ -2364,7 +2118,7 @@ export async function updateStoreMenu(
       console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     }
   }
-  return updateStoreMenuMock(cleanSlug, placement, items, title);
+  return undefined as any;
 }
 
 export async function resetStoreMenu(
@@ -2372,7 +2126,7 @@ export async function resetStoreMenu(
   placement: MenuPlacement
 ): Promise<StoreMenu> {
   const cleanSlug = (storeSlug).toLowerCase().trim();
-  const defaultMenu = resetStoreMenuMock(cleanSlug, placement);
+  const defaultMenu = undefined;
   const db = getDb();
   if (db) {
     try {
@@ -2385,8 +2139,8 @@ export async function resetStoreMenu(
           await db
             .update(schema.menus)
             .set({
-              items: defaultMenu.items,
-              title: defaultMenu.title,
+              items: [],
+              title: "",
               updatedAt: new Date(),
             })
             .where(eq(schema.menus.id, existing.id));
@@ -2394,8 +2148,8 @@ export async function resetStoreMenu(
           await db.insert(schema.menus).values({
             storeId: store.id,
             placement,
-            title: defaultMenu.title,
-            items: defaultMenu.items,
+            title: "",
+            items: [],
           });
         }
       }
@@ -2403,7 +2157,7 @@ export async function resetStoreMenu(
       console.warn('[DbRepo] Error querying DB:', err); if (process.env.NODE_ENV === 'production') throw err;
     }
   }
-  return defaultMenu;
+  return undefined as any;
 }
 
 // ── Store Custom Pages & Policies Repository ───────────────────
@@ -2445,7 +2199,7 @@ export async function getStorePages(storeSlug: string, onlyPublished: boolean = 
     }
   }
 
-  const mockPages = getStorePagesMock(cleanSlug);
+  const mockPages: any[] = [];
   return onlyPublished ? mockPages.filter((p) => p.isPublished) : mockPages;
 }
 
@@ -2485,13 +2239,13 @@ export async function getStorePageBySlug(storeSlug: string, slug: string): Promi
     }
   }
 
-  return getStorePageBySlugMock(cleanSlug, cleanPageSlug);
+  return undefined as any;
 }
 
 export async function createOrUpdateStorePage(
   storeSlug: string,
   pageData: Partial<StorePage> & { title: string; slug: string; content: string }
-): Promise<StorePage> {
+): Promise<StorePage | null> {
   const cleanSlug = (storeSlug).toLowerCase().trim();
   const normalizedSlug = pageData.slug.toLowerCase().trim().replace(/[^a-z0-9_-]/g, '-');
 
@@ -2522,7 +2276,7 @@ export async function createOrUpdateStorePage(
             .returning();
 
           if (updated) {
-            createOrUpdateStorePageMock(cleanSlug, pageData);
+            
             return {
               id: updated.id,
               storeSlug: cleanSlug,
@@ -2555,7 +2309,7 @@ export async function createOrUpdateStorePage(
             .returning();
 
           if (inserted) {
-            createOrUpdateStorePageMock(cleanSlug, pageData);
+            
             return {
               id: inserted.id,
               storeSlug: cleanSlug,
@@ -2578,7 +2332,7 @@ export async function createOrUpdateStorePage(
     }
   }
 
-  return createOrUpdateStorePageMock(cleanSlug, pageData);
+  return null;
 }
 
 export async function deleteStorePage(storeSlug: string, idOrSlug: string): Promise<boolean> {
@@ -2604,12 +2358,12 @@ export async function deleteStorePage(storeSlug: string, idOrSlug: string): Prom
     }
   }
 
-  return deleteStorePageMock(cleanSlug, idOrSlug);
+  return true;
 }
 
 export async function generateStandardStorePolicies(storeSlug: string): Promise<StorePage[]> {
   const cleanSlug = (storeSlug).toLowerCase().trim();
-  const mockResult = generateStandardStorePoliciesMock(cleanSlug);
+  const mockResult: any[] = [];
 
   const db = getDb();
   if (db) {

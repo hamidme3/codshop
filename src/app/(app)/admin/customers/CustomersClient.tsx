@@ -1,0 +1,1176 @@
+'use client';
+
+import React, { useState, useMemo, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { 
+  Users, Search, Phone, Mail, MapPin, 
+  ShoppingBag, MessageCircle, Heart, UserPlus, 
+  Sparkles, ArrowUpRight, CheckCircle2, Truck, DollarSign,
+  AlertTriangle, ChevronRight, X, Clock, RefreshCw, Package,
+  Save, Copy, Check, ShieldCheck, ArrowRight, CornerDownRight,
+  Crown, Repeat, ExternalLink, Edit3
+} from 'lucide-react';
+import { Customer, OrderStatus } from '@/lib/backoffice';
+import { normalizeMoroccanPhone } from '@/lib/whatsapp-templates';
+import { normalizePhoneForWhatsApp, COUNTRIES } from '@/lib/geo';
+import CustomerRiskBadge, { deriveCustomerSegment } from '@/components/admin/crm/CustomerRiskBadge';
+import CustomerRetentionChart from '@/components/admin/charts/CustomerRetentionChart';
+
+function getContextualWhatsAppUrl(customer: Customer, storeSlug: string): string {
+  const countryCode = ((customer.recentOrders?.[0] as any)?.countryCode || (customer as any)?.country || 'MA').toUpperCase();
+  const waPhone = countryCode === 'MA' ? normalizeMoroccanPhone(customer.phone) : normalizePhoneForWhatsApp(customer.phone, countryCode);
+
+  const storeName = storeSlug.toUpperCase();
+  const orderNum = customer.lastOrderNumber || 'votre commande';
+  const totalVal = customer.recentOrders?.[0]?.total || customer.totalSpend || 0;
+  const status = customer.lastOrderStatus;
+  const curr = customer.recentOrders?.[0]?.currency || (COUNTRIES[countryCode] || COUNTRIES.MA).currency.symbol;
+
+  let message = '';
+
+  if (countryCode === 'SA' || countryCode === 'AE') {
+    if (status === 'confirmed') {
+      message = `السلام عليكم ورحمة الله وبركاته يا ${customer.name} 👋، معك متجر ${storeName}. تم تأكيد طلبكم ${orderNum} بقيمة ${totalVal} ${curr} بنجاح! نقوم حالياً بتجهيز الشحنة لإرسالها إليكم في ${customer.city}.`;
+    } else if (status === 'shipped' || status === 'shipping') {
+      message = `السلام عليكم يا ${customer.name} 👋، تم شحن طلبكم ${orderNum} وهو في الطريق إليكم. سيتواصل معكم المندوب قريباً. يرجى تجهيز ${totalVal} ${curr} نقداً عند الاستلام.`;
+    } else if (status === 'delivered') {
+      message = `السلام عليكم يا ${customer.name} 👋، شكراً لثقتكم بنا! تم تسليم طلبكم ${orderNum} بنجاح. يسعدنا تقديم خصم 15% على طلبكم القادم بكود: VIP15!`;
+    } else if (status === 'returned' || status === 'canceled') {
+      message = `السلام عليكم يا ${customer.name} 👋، تعذر على المندوب تسليم طلبكم ${orderNum} في ${customer.city}. هل ترغبون بإعادة جدولة موعد التسليم في وقت مناسب؟`;
+    } else {
+      message = `السلام عليكم يا ${customer.name} 👋، معك متجر ${storeName}. تلقينا طلبكم ${orderNum} بقيمة ${totalVal} ${curr}. هل تؤكدون شحن الطلب إلى عنوانكم في ${customer.city}؟`;
+    }
+  } else if (countryCode === 'EG') {
+    if (status === 'confirmed') {
+      message = `أهلاً بحضرتك يا ${customer.name} 👋، معاك متجر ${storeName}. أوردرك ${orderNum} بقيمة ${totalVal} ${curr} تم تأكيده بنجاح! وجاري تجهيزه للشحن إلى ${customer.city}.`;
+    } else if (status === 'shipped' || status === 'shipping') {
+      message = `أهلاً بحضرتك يا ${customer.name} 👋، أوردرك ${orderNum} خرج للتوصيل وهو في الطريق لحضرتك. المندوب هيتصل بحضرتك قريباً. يرجى تجهيز ${totalVal} ${curr} كاش عند الاستلام.`;
+    } else if (status === 'delivered') {
+      message = `أهلاً بحضرتك يا ${customer.name} 👋، شكراً لثقتك فينا! أوردرك ${orderNum} وصل بسلامة. هدية لحضرتك خصم 15% على الأوردر القادم بكود: VIP15!`;
+    } else if (status === 'returned' || status === 'canceled') {
+      message = `أهلاً بحضرتك يا ${customer.name} 👋، المندوب لم يتمكن من تسليم أوردرك ${orderNum} في ${customer.city}. تحب نحدد معاد تاني مناسب لحضرتك؟`;
+    } else {
+      message = `أهلاً بحضرتك يا ${customer.name} 👋، معاك متجر ${storeName}. استلمنا أوردرك ${orderNum} بقيمة ${totalVal} ${curr}. تحب نؤكد الشحن لعنوانك في ${customer.city}؟`;
+    }
+  } else if (countryCode === 'FR' || countryCode === 'SN' || countryCode === 'CI') {
+    if (status === 'confirmed') {
+      message = `Bonjour ${customer.name} 👋, de la part de la boutique ${storeName}. Votre commande ${orderNum} d'un montant de ${totalVal} ${curr} est bien confirmée ! Notre équipe prépare votre colis pour expédition à ${customer.city}.`;
+    } else if (status === 'shipped' || status === 'shipping') {
+      message = `Bonjour ${customer.name} 👋, votre commande ${orderNum} est expédiée et en cours de livraison à ${customer.city}. Notre livreur va vous contacter très prochainement. Merci de préparer ${totalVal} ${curr} à la livraison.`;
+    } else if (status === 'delivered') {
+      message = `Bonjour ${customer.name} 👋, merci pour votre confiance ! Votre commande ${orderNum} a bien été livrée. Profitez de -15% sur votre prochain achat avec le code : VIP15 !`;
+    } else if (status === 'returned' || status === 'canceled') {
+      message = `Bonjour ${customer.name} 👋, nous avons constaté que votre commande ${orderNum} n'a pas pu vous être remise à ${customer.city}. Souhaitez-vous reprogrammer votre livraison ?`;
+    } else {
+      message = `Bonjour ${customer.name} 👋, de la part de la boutique ${storeName}. Nous avons bien reçu votre commande ${orderNum} d'un montant de ${totalVal} ${curr}. Confirmez-vous l'envoi à votre adresse à ${customer.city} ?`;
+    }
+  } else {
+    // Morocco / Algeria / Default Darija
+    if (status === 'confirmed') {
+      message = `Salam ${customer.name}, m3ak la boutique ${storeName}. Votre commande ${orderNum} de ${totalVal} ${curr} est bien confirmée ! Notre équipe prépare actuellement votre colis pour expédition rapide à ${customer.city}.`;
+    } else if (status === 'shipped' || status === 'shipping') {
+      message = `Salam ${customer.name}, m3ak la boutique ${storeName}. Votre commande ${orderNum} de ${totalVal} ${curr} est expédiée et en cours d'acheminement vers ${customer.city}. Notre livreur va vous contacter par téléphone avant son passage. Merci de préparer ${totalVal} ${curr} en espèces à la livraison.`;
+    } else if (status === 'delivered') {
+      message = `Salam ${customer.name}, choukran bzaf 3la ti9a dialek fi ${storeName} ! Votre commande ${orderNum} a bien été livrée. Bghina nhediw lik remise de 15% 3la votre prochain achat m3ana avec le code promo : VIP15 !`;
+    } else if (status === 'returned' || status === 'canceled') {
+      message = `Salam ${customer.name}, chejna bli la commande ${orderNum} matsalmatch lik fi ${customer.city}. Wach bghiti n3awdou nseftouha lik fi wa9t akhor li ynassbek ?`;
+    } else {
+      message = `Salam ${customer.name}, m3ak la boutique ${storeName}. Nous avons bien reçu votre commande ${orderNum} de ${totalVal} ${curr}. Wach kat2akdou l'envoi dialha à votre adresse fi ${customer.city} ?`;
+    }
+  }
+
+  return `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`;
+}
+
+function CustomersContent({ initialCustomers, storeSlug }: { initialCustomers: Customer[]; storeSlug: string }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  // Using storeSlug from props instead
+
+  const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
+  const [activeTab, setActiveTab] = useState<'all' | 'confirmed' | 'shipped' | 'delivered' | 'returning' | 'risk'>('all');
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || '');
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (val.trim()) {
+      newParams.set('q', val.trim());
+    } else {
+      newParams.delete('q');
+    }
+    router.replace(`/admin/customers?${newParams.toString()}`, { scroll: false });
+  };
+  const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
+  const [orderNotes, setOrderNotes] = useState<Record<string, string>>({});
+  const [customerNotes, setCustomerNotes] = useState<Record<string, string>>({});
+  const [notesSaved, setNotesSaved] = useState(false);
+
+  // Sync selected customer's active order & notes when drawer opens
+  React.useEffect(() => {
+    if (selectedCustomer) {
+      const firstOrderId = selectedCustomer.recentOrders?.[0]?.id || null;
+      setActiveOrderId(firstOrderId);
+      if (typeof window !== 'undefined') {
+        const localSaved = localStorage.getItem(`cod_customer_notes_${selectedCustomer.phone}`);
+        if (localSaved !== null) {
+          setCustomerNotes((prev) => ({ ...prev, [selectedCustomer.id]: localSaved }));
+        } else if (selectedCustomer.addressNotes) {
+          setCustomerNotes((prev) => ({ ...prev, [selectedCustomer.id]: selectedCustomer.addressNotes || '' }));
+        }
+
+        // Cache order-specific notes from localStorage or recentOrders
+        if (selectedCustomer.recentOrders) {
+          const notesMap: Record<string, string> = {};
+          for (const ord of selectedCustomer.recentOrders) {
+            const savedOrderNote = 
+              localStorage.getItem(`cod_order_notes_${ord.id}`) ||
+              localStorage.getItem(`cod_order_notes_${ord.orderNumber}`) ||
+              ord.agentNotes;
+            if (savedOrderNote) {
+              notesMap[ord.id] = savedOrderNote;
+            }
+          }
+          if (Object.keys(notesMap).length > 0) {
+            setOrderNotes((prev) => ({ ...prev, ...notesMap }));
+          }
+        }
+      }
+    }
+  }, [selectedCustomer]);
+
+  const fetchLiveCustomers = React.useCallback(async () => {
+    try {
+      const res = await fetch(`/api/admin/customers?store=${encodeURIComponent(storeSlug)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.customers)) {
+          setCustomers(data.customers);
+        }
+      }
+    } catch (err) {
+      console.warn('[Admin Customers] Could not fetch live customers, using fallback:', err);
+    }
+  }, [storeSlug]);
+
+
+
+  const handleSaveOrderNotes = (targetOrder: any) => {
+    if (!targetOrder) return;
+    const orderId = targetOrder.id;
+    const notesToSave = orderNotes[orderId] !== undefined ? orderNotes[orderId] : (targetOrder.agentNotes || '');
+
+    // 1. Persist locally keyed by order ID and orderNumber
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`cod_order_notes_${orderId}`, notesToSave);
+      if (targetOrder.orderNumber) {
+        localStorage.setItem(`cod_order_notes_${targetOrder.orderNumber}`, notesToSave);
+      }
+    }
+
+    // 2. Persist to orders database via PATCH /api/admin/orders
+    fetch('/api/admin/orders', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        orderId: targetOrder.id, 
+        agentNotes: notesToSave, 
+        storeSlug 
+      }),
+    }).catch((err) => console.warn('[Admin Customers] Save order notes error:', err));
+
+    // 3. Update in-memory mock and order reference
+    targetOrder.agentNotes = notesToSave;
+    if (selectedCustomer?.recentOrders) {
+      const found = selectedCustomer.recentOrders.find((o) => o.id === targetOrder.id);
+      if (found) found.agentNotes = notesToSave;
+    }
+
+    setOrderNotes((prev) => ({ ...prev, [orderId]: notesToSave }));
+    setNotesSaved(true);
+    setTimeout(() => setNotesSaved(false), 2500);
+  };
+
+  const refreshCustomers = () => {
+    fetchLiveCustomers();
+  };
+
+  // Real-time synchronization with order pipeline updates
+  React.useEffect(() => {
+    const handleSync = () => {
+      fetchLiveCustomers();
+    };
+    window.addEventListener('cod_orders_updated', handleSync);
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel('cod_pipeline_sync');
+      bc.onmessage = () => handleSync();
+    } catch (_) {}
+
+    return () => {
+      window.removeEventListener('cod_orders_updated', handleSync);
+      if (bc) bc.close();
+    };
+  }, [storeSlug, fetchLiveCustomers]);
+
+  // ── Dynamic KPIs calculated directly from synchronized store customers ──
+  const totalCustomersCount = customers.length;
+  const confirmedPipelineCount = customers.filter((c) => c.lastOrderStatus === 'confirmed' || (c.confirmedOrders || 0) > 0).length;
+  const shippedPipelineCount = customers.filter((c) => ['shipped', 'shipping'].includes(c.lastOrderStatus || '') || (c.shippedOrders || 0) > 0).length;
+  const deliveredPipelineCount = customers.filter((c) => c.lastOrderStatus === 'delivered' || (c.deliveredOrders || 0) > 0).length;
+  const totalDeliveredRevenue = customers.reduce((sum, c) => sum + (c.totalSpend || 0), 0);
+  const vipCustomersCount = customers.filter((c) => c.status === 'returning' || (c.deliveredOrders || 0) >= 2).length;
+  const riskCustomersCount = customers.filter((c) => c.status === 'risk' || (c.returnedOrders || 0) > 0).length;
+
+  const filteredCustomers = useMemo(() => {
+    return customers.filter((c) => {
+      let matchesTab = true;
+      if (activeTab === 'confirmed') {
+        matchesTab = c.lastOrderStatus === 'confirmed' || (c.confirmedOrders || 0) > 0;
+      } else if (activeTab === 'shipped') {
+        matchesTab = c.lastOrderStatus === 'shipped' || c.lastOrderStatus === 'shipping' || (c.shippedOrders || 0) > 0;
+      } else if (activeTab === 'delivered') {
+        matchesTab = c.lastOrderStatus === 'delivered' || (c.deliveredOrders || 0) > 0;
+      } else if (activeTab === 'returning') {
+        matchesTab = c.status === 'returning' || (c.deliveredOrders || 0) >= 2;
+      } else if (activeTab === 'risk') {
+        matchesTab = c.status === 'risk' || (c.returnedOrders || 0) > 0;
+      }
+
+      const q = searchQuery.toLowerCase();
+      const matchesQuery = 
+        c.name.toLowerCase().includes(q) ||
+        c.phone.includes(q) ||
+        c.city.toLowerCase().includes(q) ||
+        (c.lastOrderNumber && c.lastOrderNumber.toLowerCase().includes(q)) ||
+        (c.lastTrackingNumber && c.lastTrackingNumber.toLowerCase().includes(q)) ||
+        c.email.toLowerCase().includes(q);
+
+      return matchesTab && matchesQuery;
+    });
+  }, [customers, activeTab, searchQuery]);
+
+  const retentionCohortData = React.useMemo(() => {
+    if (!customers || customers.length === 0) {
+      return [
+        { period: 'Jour 1', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+        { period: '15 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+        { period: '30 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+        { period: '45 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+        { period: '60 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+        { period: '90 Jours', repeatPurchaseRate: 0, cumulativeLtv: 0, organicReorders: 0 },
+      ];
+    }
+
+    const totalCust = customers.length;
+    const returningCust = customers.filter((c) => (c.totalOrders || 0) > 1 || c.status === 'returning');
+    const totalReorders = returningCust.reduce((acc, c) => acc + Math.max(0, (c.totalOrders || 1) - 1), 0);
+    const overallRepeatRate = Number(((returningCust.length / totalCust) * 100).toFixed(1));
+    const averageInitialBasket = Math.round(
+      customers.reduce((acc, c) => acc + (c.averageBasket || (c.totalSpend / Math.max(1, c.totalOrders))), 0) / totalCust
+    );
+    const averageTotalSpend = Math.round(
+      customers.reduce((acc, c) => acc + (c.totalSpend || 0), 0) / totalCust
+    );
+
+    return [
+      {
+        period: 'Jour 1',
+        repeatPurchaseRate: 0,
+        cumulativeLtv: averageInitialBasket,
+        organicReorders: 0,
+      },
+      {
+        period: '15 Jours',
+        repeatPurchaseRate: Number((overallRepeatRate * 0.22).toFixed(1)),
+        cumulativeLtv: Math.round(averageInitialBasket + (averageTotalSpend - averageInitialBasket) * 0.2),
+        organicReorders: Math.round(totalReorders * 0.2),
+      },
+      {
+        period: '30 Jours',
+        repeatPurchaseRate: Number((overallRepeatRate * 0.45).toFixed(1)),
+        cumulativeLtv: Math.round(averageInitialBasket + (averageTotalSpend - averageInitialBasket) * 0.45),
+        organicReorders: Math.round(totalReorders * 0.45),
+      },
+      {
+        period: '45 Jours',
+        repeatPurchaseRate: Number((overallRepeatRate * 0.68).toFixed(1)),
+        cumulativeLtv: Math.round(averageInitialBasket + (averageTotalSpend - averageInitialBasket) * 0.68),
+        organicReorders: Math.round(totalReorders * 0.68),
+      },
+      {
+        period: '60 Jours',
+        repeatPurchaseRate: Number((overallRepeatRate * 0.85).toFixed(1)),
+        cumulativeLtv: Math.round(averageInitialBasket + (averageTotalSpend - averageInitialBasket) * 0.85),
+        organicReorders: Math.round(totalReorders * 0.85),
+      },
+      {
+        period: '90 Jours',
+        repeatPurchaseRate: overallRepeatRate,
+        cumulativeLtv: averageTotalSpend,
+        organicReorders: totalReorders,
+      },
+    ];
+  }, [customers]);
+
+  return (
+    <div className="p-4 sm:p-6 md:p-10 space-y-6 max-w-7xl mx-auto font-sans">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-zinc-800/80">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Relation Client & CRM</span>
+            <span className="text-zinc-600">•</span>
+            <span className="text-[11px] text-zinc-400 font-mono tabular-nums">{totalCustomersCount} profils acheteurs</span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
+            <Users className="w-6 h-6 text-slate-700 dark:text-zinc-200" /> CRM & Profils Acheteurs
+          </h1>
+          <p className="text-slate-500 dark:text-zinc-400 text-xs mt-1">
+            Synchronisé avec vos 4 étapes : <span className="text-cyan-600 dark:text-cyan-300 font-mono text-[11px]">1. Confirmée</span>, <span className="text-sky-600 dark:text-sky-300 font-mono text-[11px]">2. Expédiée</span>, <span className="text-emerald-600 dark:text-emerald-300 font-mono text-[11px]">3. Livrée</span>, <span className="text-rose-600 dark:text-rose-300 font-mono text-[11px]">4. Retournée</span>.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={refreshCustomers}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 dark:bg-zinc-900 dark:border-zinc-800 dark:hover:border-zinc-700 dark:text-zinc-300 dark:hover:text-white text-xs font-medium transition-colors shadow-2xs cursor-pointer"
+            title="Rafraîchir les données CRM"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Actualiser</span>
+          </button>
+          <div className="text-xs font-mono text-slate-600 dark:text-zinc-400 bg-white dark:bg-[#13171c] px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800/80 shadow-xs">
+            Base active: <strong className="text-slate-900 dark:text-zinc-200 tabular-nums">{totalCustomersCount}</strong>
+          </div>
+        </div>
+      </div>
+
+      {/* 4 Synchronized KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {/* Total Base */}
+        <div className="p-4 rounded-xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 bento-card space-y-1.5 shadow-xs">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
+            <span>Total Clients CRM</span>
+            <Users className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" />
+          </div>
+          <div className="text-2xl font-mono tabular-nums font-bold text-slate-900 dark:text-white tracking-tight">{totalCustomersCount}</div>
+          <div className="text-[11px] text-slate-500 dark:text-zinc-500">Identifiés par téléphone normalisé</div>
+        </div>
+
+        {/* 1. Confirmer (Cyan) */}
+        <div className="p-4 rounded-xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 bento-card space-y-1.5 shadow-xs">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
+              Étape 1 : Confirmées
+            </span>
+            <CheckCircle2 className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+          </div>
+          <div className="text-2xl font-mono tabular-nums font-bold text-slate-900 dark:text-white tracking-tight">{confirmedPipelineCount}</div>
+          <div className="text-[11px] text-slate-500 dark:text-zinc-500">En cours de préparation / emballage</div>
+        </div>
+
+        {/* 2. Expédier (Sky Blue) */}
+        <div className="p-4 rounded-xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 bento-card space-y-1.5 shadow-xs">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-sky-500"></span>
+              Étape 2 : En Expédition
+            </span>
+            <Truck className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+          </div>
+          <div className="text-2xl font-mono tabular-nums font-bold text-slate-900 dark:text-white tracking-tight">{shippedPipelineCount}</div>
+          <div className="text-[11px] text-slate-500 dark:text-zinc-500">En cours d&apos;acheminement transporteur</div>
+        </div>
+
+        {/* 3. Livrée & Cash Encaissé (Emerald) */}
+        <div className="p-4 rounded-xl bg-white dark:bg-[#13171c] border border-slate-200 dark:border-slate-800/70 bento-card space-y-1.5 shadow-xs">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              Étape 3 : Cash Encaissé
+            </span>
+            <DollarSign className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <div className="text-2xl font-mono tabular-nums font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">{totalDeliveredRevenue.toLocaleString()} MAD</div>
+          <div className="text-[11px] text-slate-500 dark:text-zinc-500">{deliveredPipelineCount} client(s) ayant réglé le COD</div>
+        </div>
+      </div>
+
+      {/* Recharts Customer Retention & LTV Cohort Curve */}
+      <CustomerRetentionChart data={retentionCohortData} currency="MAD" />
+
+      {/* Tabs & Search */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-1 p-1 bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 rounded-lg overflow-x-auto admin-scrollbar no-scrollbar text-xs shadow-xs">
+          {[
+            { id: 'all', label: `Tous (${totalCustomersCount})` },
+            { id: 'confirmed', label: `1. Confirmés (${confirmedPipelineCount})` },
+            { id: 'shipped', label: `2. En Expédition (${shippedPipelineCount})` },
+            { id: 'delivered', label: `3. Livrés (${deliveredPipelineCount})` },
+            { id: 'returning', label: `Fidèles VIP (${vipCustomersCount})` },
+            { id: 'risk', label: `Retours (${riskCustomersCount})` },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`shrink-0 px-3 py-1.5 rounded-md font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                activeTab === tab.id
+                  ? 'admin-tab-active bg-slate-900 text-white dark:bg-zinc-800 dark:text-white font-semibold shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/40'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Nom, téléphone, N° commande, suivi..."
+            className="w-full bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 rounded-lg pl-9 pr-8 py-1.5 text-xs text-slate-900 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500 dark:focus:border-zinc-600 transition-colors shadow-xs"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => handleSearchChange('')}
+              aria-label="Effacer la recherche"
+              className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition p-0.5"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Synchronized Customers Table Container */}
+      <div className="bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 rounded-xl overflow-hidden shadow-xs">
+        {/* Mobile Customer Cards Stream (screens < md) */}
+        <div className="block md:hidden divide-y divide-slate-100 dark:divide-zinc-800/60 p-2 sm:p-3 space-y-3">
+          {filteredCustomers.length === 0 ? (
+            <div className="text-center py-10 text-slate-400 dark:text-zinc-500 text-xs">
+              Aucun client trouvé pour ce filtre.
+            </div>
+          ) : (
+            filteredCustomers.map((c) => {
+              const waUrl = getContextualWhatsAppUrl(c, storeSlug);
+              const deliveryRate = c.deliverySuccessRate ?? 100;
+
+              return (
+                <div
+                  key={`mobile-cust-${c.id}`}
+                  className="p-3 rounded-xl bg-white dark:bg-[#0d0d10] border border-slate-200 dark:border-zinc-800/80 space-y-3 cursor-pointer hover:border-slate-300 dark:hover:border-zinc-700/80 transition-colors shadow-xs"
+                  onClick={() => setSelectedCustomer(c)}
+                >
+                  {/* Top row: Avatar + Name + VIP/Risk Badge + Total Spend */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 flex items-center justify-center font-mono font-medium text-slate-700 dark:text-zinc-200 text-xs shrink-0">
+                        {c.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-slate-900 dark:text-white text-xs truncate">{c.name}</div>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <CustomerRiskBadge customer={c} />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <div className="font-mono font-bold text-sm text-slate-900 dark:text-white tabular-nums">
+                        {c.totalSpend} <span className="text-[10px] font-sans text-slate-500 dark:text-zinc-400">MAD</span>
+                      </div>
+                      <div className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
+                        {c.totalOrders} cmd{c.totalOrders > 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Middle row: Coordinates + Pipeline Status */}
+                  <div className="grid grid-cols-2 gap-2 p-2 rounded-lg bg-slate-50 dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 text-xs">
+                    <div>
+                      <div className="text-[10px] text-slate-400 dark:text-zinc-500">Ville & Tél</div>
+                      <div className="text-slate-800 dark:text-zinc-200 font-medium truncate">{c.city}</div>
+                      <a
+                        href={`tel:${c.phone}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-[11px] font-mono text-slate-500 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-white underline tabular-nums"
+                      >
+                        {c.phone}
+                      </a>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-slate-400 dark:text-zinc-500">Dernier Statut</div>
+                      <div className="mt-0.5">
+                        {c.lastOrderStatus === 'confirmed' ? (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold stage-pill-confirmed font-mono">
+                            <CheckCircle2 className="w-2.5 h-2.5" /> Confirmée
+                          </span>
+                        ) : c.lastOrderStatus === 'shipped' || c.lastOrderStatus === 'shipping' ? (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold stage-pill-shipped font-mono">
+                            <Truck className="w-2.5 h-2.5" /> Expédiée
+                          </span>
+                        ) : c.lastOrderStatus === 'delivered' ? (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold stage-pill-delivered font-mono">
+                            <DollarSign className="w-2.5 h-2.5" /> Livrée
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold stage-pill-to_confirm font-mono">
+                            <Clock className="w-2.5 h-2.5" /> À Confirmer
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-slate-400 dark:text-zinc-400 font-mono mt-0.5">{deliveryRate}% livré</div>
+                    </div>
+                  </div>
+
+                  {/* Actions row: WhatsApp Darija + Open Timeline */}
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-zinc-800/60" onClick={(e) => e.stopPropagation()}>
+                    <a
+                      href={waUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="touch-target flex-1 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:hover:bg-emerald-900 dark:text-emerald-300 dark:border-emerald-800/50 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                      <span>
+                        {c.lastOrderStatus === 'confirmed' ? 'Notifier Préparation' :
+                         c.lastOrderStatus === 'shipped' ? 'Envoyer Suivi' :
+                         c.lastOrderStatus === 'delivered' ? 'Offre VIP' :
+                         'Relancer WhatsApp'}
+                      </span>
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCustomer(c)}
+                      className="touch-target px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 dark:border-zinc-700 text-xs font-semibold flex items-center gap-1 transition-colors shrink-0"
+                    >
+                      <span>Historique</span>
+                      <ChevronRight className="w-3 h-3 text-slate-400 dark:text-zinc-400" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Desktop Table (screens >= md) */}
+        <div className="hidden md:block overflow-x-auto admin-scrollbar">
+          <table className="w-full text-left text-xs admin-table">
+            <thead>
+              <tr className="border-b border-slate-200 dark:border-zinc-800/90 text-slate-500 dark:text-zinc-400 bg-slate-50 dark:bg-[#0d0d10] font-semibold">
+                <th className="py-2.5 px-3">Client</th>
+                <th className="py-2.5 px-3">Dernière Commande & Étape</th>
+                <th className="py-2.5 px-3">Coordonnées</th>
+                <th className="py-2.5 px-3">Ville</th>
+                <th className="py-2.5 px-3">Commandes & Taux Livré</th>
+                <th className="py-2.5 px-3">Total Dépensé</th>
+                <th className="py-2.5 px-3 text-right">Relance WhatsApp</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/50">
+              {filteredCustomers.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-10 text-center text-slate-500 dark:text-zinc-500">
+                    Aucun client trouvé pour ce filtre.
+                  </td>
+                </tr>
+              ) : (
+                filteredCustomers.map((c) => {
+                  const waUrl = getContextualWhatsAppUrl(c, storeSlug);
+                  const deliveryRate = c.deliverySuccessRate ?? 100;
+
+                  return (
+                    <tr 
+                      key={c.id} 
+                      onClick={() => setSelectedCustomer(c)}
+                      className="hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors cursor-pointer"
+                    >
+                      {/* Client info */}
+                      <td className="py-2.5 px-3 flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 flex items-center justify-center font-mono font-medium text-slate-700 dark:text-zinc-200 text-xs shrink-0">
+                          {c.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="font-medium text-slate-900 dark:text-zinc-100 text-xs">{c.name}</div>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <CustomerRiskBadge customer={c} />
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* 4-Stage Pipeline Switch Status Badge */}
+                      <td className="py-2.5 px-3">
+                        {c.lastOrderStatus === 'confirmed' ? (
+                          <div className="space-y-0.5">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30">
+                              <CheckCircle2 className="w-3 h-3" /> 1. Confirmée
+                            </span>
+                            <div className="font-mono text-[11px] text-slate-600 dark:text-zinc-300">{c.lastOrderNumber}</div>
+                          </div>
+                        ) : c.lastOrderStatus === 'shipped' || c.lastOrderStatus === 'shipping' ? (
+                          <div className="space-y-0.5">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/30">
+                              <Truck className="w-3 h-3" /> 2. Expédiée
+                            </span>
+                            <div className="font-mono text-[10px] text-slate-500 dark:text-zinc-400">{c.lastOrderNumber}</div>
+                          </div>
+                        ) : c.lastOrderStatus === 'delivered' ? (
+                          <div className="space-y-0.5">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                              <DollarSign className="w-3 h-3" /> 3. Livrée (Payée)
+                            </span>
+                            <div className="font-mono text-[11px] text-slate-500 dark:text-zinc-400">{c.lastOrderNumber}</div>
+                          </div>
+                        ) : c.lastOrderStatus === 'returned' || c.lastOrderStatus === 'canceled' ? (
+                          <div className="space-y-0.5">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30">
+                              <AlertTriangle className="w-3 h-3" /> 4. Retournée
+                            </span>
+                            <div className="font-mono text-[11px] text-slate-500 dark:text-zinc-400">{c.lastOrderNumber}</div>
+                          </div>
+                        ) : (
+                          <div className="space-y-0.5">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-300 dark:border-zinc-700">
+                              <Clock className="w-3 h-3" /> À Confirmer
+                            </span>
+                            <div className="font-mono text-[11px] text-slate-600 dark:text-zinc-300">{c.lastOrderNumber}</div>
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Phone & email */}
+                      <td className="py-2.5 px-3 text-slate-600 dark:text-zinc-300">
+                        <div className="font-mono tabular-nums text-xs text-slate-900 dark:text-zinc-200">{c.phone}</div>
+                        <div className="text-[11px] text-slate-500 dark:text-zinc-500 truncate max-w-[150px]">{c.email}</div>
+                      </td>
+
+                      {/* City */}
+                      <td className="py-2.5 px-3 font-medium text-slate-800 dark:text-zinc-200">
+                        <div>{c.city}</div>
+                        {c.address && (
+                          <div className="text-[10px] text-slate-500 dark:text-zinc-500 truncate max-w-[130px]">{c.address}</div>
+                        )}
+                      </td>
+
+                      {/* Orders & Delivery Rate */}
+                      <td className="py-2.5 px-3">
+                        <div className="font-mono tabular-nums text-slate-800 dark:text-zinc-200 font-medium">
+                          {c.totalOrders} commande(s)
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className={`px-1.5 py-0.2 rounded text-[10px] font-mono tabular-nums font-medium ${
+                            deliveryRate >= 80 ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40' : deliveryRate >= 50 ? 'text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/40' : 'text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40'
+                          }`}>
+                            {deliveryRate}% Livré
+                          </span>
+                          <span className="text-[10px] text-slate-400 dark:text-zinc-500">• {c.lastOrderDate}</span>
+                        </div>
+                      </td>
+
+                      {/* Total Spend */}
+                      <td className="py-2.5 px-3">
+                        <div className="font-mono tabular-nums font-semibold text-slate-900 dark:text-zinc-100 text-xs">
+                          {c.totalSpend} MAD
+                        </div>
+                        <div className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono tabular-nums">Panier : {c.averageBasket} MAD</div>
+                      </td>
+
+                      {/* Contextual WhatsApp Button */}
+                      <td className="py-2.5 px-3 text-right" onClick={(e) => e.stopPropagation()}>
+                        <a
+                          href={waUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 dark:text-emerald-300 dark:border-emerald-800/50 font-medium text-[11px] transition-colors"
+                          title="Envoyer un message WhatsApp contextuel basé sur l'étape de commande"
+                        >
+                          <MessageCircle className="w-3 h-3 fill-current" />
+                          <span>
+                            {c.lastOrderStatus === 'confirmed' ? 'Notifier Préparation' :
+                             c.lastOrderStatus === 'shipped' ? 'Envoyer Suivi' :
+                             c.lastOrderStatus === 'delivered' ? 'Offre VIP' :
+                             'Relancer'}
+                          </span>
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Customer Detail Drawer (Order History & 4-Stage Tracking) */}
+      {selectedCustomer && (
+        <div 
+          className="fixed inset-0 z-50 flex justify-end bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+          onClick={() => setSelectedCustomer(null)}
+        >
+          <div 
+            className="w-full max-w-lg bg-white dark:bg-[#121215] border-l border-slate-200 dark:border-zinc-800 p-4 sm:p-6 flex flex-col justify-between overflow-y-auto shadow-2xl admin-scrollbar cursor-default min-h-[100dvh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-5">
+              {/* Top Drawer Header */}
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800/80 pb-3.5">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 flex items-center justify-center font-mono font-medium text-sm text-slate-700 dark:text-zinc-200">
+                    {selectedCustomer.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-base font-semibold text-slate-900 dark:text-white">{selectedCustomer.name}</h2>
+                      <CustomerRiskBadge customer={selectedCustomer} showDescription />
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-zinc-400 font-mono mt-0.5">{selectedCustomer.phone} • {selectedCustomer.city}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedCustomer(null)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Customer Metrics Grid */}
+              <div className="grid grid-cols-3 gap-2.5">
+                <div className="p-3 bg-slate-50 dark:bg-[#0d0d10] rounded-lg border border-slate-200 dark:border-zinc-800/80 text-center">
+                  <div className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase font-mono tracking-wider">Commandes</div>
+                  <div className="text-base font-mono tabular-nums font-bold text-slate-900 dark:text-white mt-0.5">{selectedCustomer.totalOrders}</div>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-[#0d0d10] rounded-lg border border-slate-200 dark:border-zinc-800/80 text-center">
+                  <div className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase font-mono tracking-wider">Encaissé</div>
+                  <div className="text-base font-mono tabular-nums font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{selectedCustomer.totalSpend} MAD</div>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-[#0d0d10] rounded-lg border border-slate-200 dark:border-zinc-800/80 text-center">
+                  <div className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase font-mono tracking-wider">Taux Livré</div>
+                  <div className="text-base font-mono tabular-nums font-bold text-slate-800 dark:text-zinc-100 mt-0.5" title="Taux de succès sur les livraisons traitées">
+                    {selectedCustomer.deliverySuccessRate !== undefined
+                      ? `${selectedCustomer.deliverySuccessRate}%`
+                      : ((selectedCustomer.deliveredOrders || 0) + (selectedCustomer.returnedOrders || 0)) === 0
+                      ? 'En cours'
+                      : '—'}
+                  </div>
+                  <div className="text-[9px] text-zinc-500 font-mono mt-0.5">
+                    {((selectedCustomer.deliveredOrders || 0) + (selectedCustomer.returnedOrders || 0)) > 0
+                      ? `${selectedCustomer.deliveredOrders || 0}/${(selectedCustomer.deliveredOrders || 0) + (selectedCustomer.returnedOrders || 0)} traitées`
+                      : `${selectedCustomer.totalOrders} commande${selectedCustomer.totalOrders > 1 ? 's' : ''} en cours`}
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Selection & Historical Delivery Timeline */}
+              {(() => {
+                const customerOrders = (selectedCustomer.recentOrders && selectedCustomer.recentOrders.length > 0)
+                  ? selectedCustomer.recentOrders
+                  : [{
+                      id: `ord_${selectedCustomer.id}`,
+                      orderNumber: selectedCustomer.lastOrderNumber || 'CMD-84925',
+                      createdAt: new Date().toISOString(),
+                      status: selectedCustomer.lastOrderStatus || 'delivered',
+                      total: selectedCustomer.totalSpend || 349,
+                      itemsSummary: 'Sac Cuir Artisanal Marrakech (Marron Vintage) x1',
+                    }];
+                const activeOrder = 
+                  customerOrders.find((o) => o.id === activeOrderId) || 
+                  customerOrders[0];
+                const currentNotes = 
+                  activeOrder
+                    ? (orderNotes[activeOrder.id] !== undefined
+                        ? orderNotes[activeOrder.id]
+                        : (activeOrder.agentNotes || 
+                           (typeof window !== 'undefined' 
+                             ? localStorage.getItem(`cod_order_notes_${activeOrder.id}`) || 
+                               localStorage.getItem(`cod_order_notes_${activeOrder.orderNumber}`) || '' 
+                             : '')))
+                    : '';
+
+                return (
+                  <div className="space-y-4">
+                    {/* Header with order switcher */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center gap-2">
+                          <Clock className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
+                          <span>Chronologie Logistique & Livraison</span>
+                        </h3>
+                        {activeOrder && (
+                          <span className="font-mono text-[11px] text-slate-500 dark:text-zinc-400">
+                            {customerOrders.length > 1
+                              ? `${activeOrder.orderNumber} (${customerOrders.findIndex((o) => o.id === activeOrder.id) + 1}/${customerOrders.length})`
+                              : activeOrder.orderNumber}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Multi-Order Tabs */}
+                      {customerOrders.length > 1 && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-zinc-400">
+                            <span>Historique ({customerOrders.length}{selectedCustomer.totalOrders > customerOrders.length ? ` sur ${selectedCustomer.totalOrders} totales` : ' commandes'})</span>
+                            {selectedCustomer.totalOrders > customerOrders.length && (
+                              <span className="text-[10px] text-slate-400 dark:text-zinc-500">Affichage des plus récentes</span>
+                            )}
+                          </div>
+
+                          {/* Mobile Dropdown Switcher for ergonomic 1-tap navigation */}
+                          {customerOrders.length > 3 && (
+                            <div className="sm:hidden">
+                              <select
+                                value={activeOrder?.id || ''}
+                                onChange={(e) => setActiveOrderId(e.target.value)}
+                                className="w-full bg-slate-50 dark:bg-[#0d0d10] border border-slate-200 dark:border-zinc-800 text-xs text-slate-900 dark:text-white rounded-lg px-2.5 py-2 font-mono focus:outline-none focus:border-sky-500 shadow-xs"
+                              >
+                                {customerOrders.map((ord, idx) => (
+                                  <option key={ord.id} value={ord.id}>
+                                    {ord.orderNumber} • {ord.total} MAD • {
+                                      ord.status === 'confirmed' ? 'Confirmée' :
+                                      ['shipped', 'shipping'].includes(ord.status) ? 'Expédiée' :
+                                      ord.status === 'delivered' ? 'Livrée' :
+                                      ['returned', 'canceled'].includes(ord.status) ? 'Retournée' : 'À Confirmer'
+                                    } ({idx + 1}/{customerOrders.length})
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+
+                          {/* Horizontal scrollable pills with shrink-0 to prevent squishing */}
+                          <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 admin-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+                            {customerOrders.map((ord) => {
+                              const isSelected = activeOrder?.id === ord.id;
+                              const statusDot = 
+                                ord.status === 'confirmed' ? 'bg-cyan-500 dark:bg-cyan-400' :
+                                ['shipped', 'shipping'].includes(ord.status) ? 'bg-sky-500 dark:bg-sky-400' :
+                                ord.status === 'delivered' ? 'bg-emerald-500 dark:bg-emerald-400' :
+                                ['returned', 'canceled'].includes(ord.status) ? 'bg-rose-500 dark:bg-rose-400' :
+                                'bg-slate-400 dark:bg-zinc-500';
+
+                              return (
+                                <button
+                                  key={ord.id}
+                                  type="button"
+                                  onClick={() => setActiveOrderId(ord.id)}
+                                  className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono whitespace-nowrap transition-all border cursor-pointer ${
+                                    isSelected
+                                      ? 'bg-sky-500/10 dark:bg-sky-500/20 border-sky-500/40 dark:border-sky-500/50 text-sky-700 dark:text-sky-300 font-bold shadow-xs'
+                                      : 'bg-slate-50 dark:bg-[#0d0d10] border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:border-slate-300 dark:hover:border-zinc-700'
+                                  }`}
+                                >
+                                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot}`} />
+                                  <span>{ord.orderNumber}</span>
+                                  <span className="text-slate-400 dark:text-zinc-500 font-normal">({ord.total} MAD)</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Historical Timeline Steps */}
+                    {activeOrder ? (
+                      <div className="p-4 bg-slate-50 dark:bg-[#0d0d10] rounded-xl border border-slate-200 dark:border-zinc-800/80 space-y-4">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-zinc-800/60">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs font-bold text-slate-900 dark:text-white">{activeOrder.orderNumber}</span>
+                            <span className="text-slate-400 dark:text-zinc-500">•</span>
+                            <span className="text-xs font-mono tabular-nums text-slate-700 dark:text-zinc-300 font-semibold">{activeOrder.total} MAD</span>
+                          </div>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                            activeOrder.status === 'confirmed' ? 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30' :
+                            activeOrder.status === 'shipped' || activeOrder.status === 'shipping' ? 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/30' :
+                            activeOrder.status === 'delivered' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30' :
+                            activeOrder.status === 'returned' ? 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30' :
+                            'bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'
+                          }`}>
+                            {activeOrder.status === 'confirmed' ? '1. Confirmée' :
+                             activeOrder.status === 'shipped' || activeOrder.status === 'shipping' ? '2. Expédiée' :
+                             activeOrder.status === 'delivered' ? '3. Livrée' :
+                             activeOrder.status === 'returned' ? '4. Retournée' :
+                             'À Confirmer'}
+                          </span>
+                        </div>
+
+                        {/* Visual Step Timeline Rail */}
+                        {(() => {
+                          const isConfirmed = activeOrder.status !== 'new' && activeOrder.status !== 'to_confirm';
+                          const isShipped = ['shipped', 'shipping', 'delivered', 'returned'].includes(activeOrder.status);
+                          const isDelivered = activeOrder.status === 'delivered';
+                          const isReturned = activeOrder.status === 'returned' || activeOrder.status === 'canceled';
+
+                          return (
+                            <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-200 dark:before:bg-zinc-800">
+                              {/* Step 1: Storefront Order */}
+                              <div className="relative space-y-1">
+                                <div className="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-emerald-500/15 dark:bg-emerald-500/20 border border-emerald-500 flex items-center justify-center">
+                                  <Check className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" />
+                                </div>
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-semibold text-slate-900 dark:text-zinc-200">1. Commande Enregistrée (COD)</span>
+                                  <span className="text-[10px] font-mono text-slate-500 dark:text-zinc-500">{activeOrder.createdAt ? new Date(activeOrder.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : 'Storefront'}</span>
+                                </div>
+                                <p className="text-[11px] text-slate-600 dark:text-zinc-400 line-clamp-1">
+                                  {activeOrder.itemsSummary || 'Articles enregistrés avec paiement à la livraison.'}
+                                </p>
+                              </div>
+
+                              {/* Step 2: Phone Confirmation */}
+                              <div className="relative space-y-1">
+                                <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
+                                  isConfirmed
+                                    ? 'bg-emerald-500/15 dark:bg-emerald-500/20 border border-emerald-500'
+                                    : 'bg-sky-500/15 dark:bg-sky-500/20 border border-sky-500 animate-pulse'
+                                }`}>
+                                  {isConfirmed ? (
+                                    <Check className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" />
+                                  ) : (
+                                    <Clock className="w-2.5 h-2.5 text-sky-600 dark:text-sky-400" />
+                                  )}
+                                </div>
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-semibold text-slate-900 dark:text-zinc-200">2. Confirmation & Qualification</span>
+                                  <span className={`text-[10px] font-mono ${
+                                    isConfirmed ? 'text-emerald-600 dark:text-emerald-400' : 'text-sky-600 dark:text-sky-400'
+                                  }`}>
+                                    {isConfirmed ? 'Validée ✓' : 'En attente ⏳'}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-slate-600 dark:text-zinc-400">
+                                  {isConfirmed
+                                    ? `Confirmation validée pour l'adresse à ${selectedCustomer.city}.`
+                                    : `Appel téléphonique en Darija pour valider l'adresse à ${selectedCustomer.city}.`}
+                                </p>
+                              </div>
+
+                              {/* Step 3: Dispatch & In-Transit Routing */}
+                              <div className="relative space-y-1.5">
+                                <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
+                                  isShipped
+                                    ? 'bg-emerald-500/15 dark:bg-emerald-500/20 border border-emerald-500'
+                                    : isConfirmed
+                                    ? 'bg-sky-500/15 dark:bg-sky-500/20 border border-sky-500 animate-pulse'
+                                    : 'bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700'
+                                }`}>
+                                  {isShipped ? (
+                                    <Check className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" />
+                                  ) : (
+                                    <Truck className={`w-2.5 h-2.5 ${isConfirmed ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400 dark:text-zinc-500'}`} />
+                                  )}
+                                </div>
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-semibold text-slate-900 dark:text-zinc-200">3. Expédition & Acheminement</span>
+                                  <span className={`text-[10px] font-mono uppercase ${
+                                    isShipped ? 'text-emerald-600 dark:text-emerald-400' : isConfirmed ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400 dark:text-zinc-500'
+                                  }`}>
+                                    {isShipped ? 'Expédiée ✓' : isConfirmed ? 'En préparation ⏳' : 'En attente'}
+                                  </span>
+                                </div>
+                                {isShipped ? (
+                                  <div className="pt-0.5 space-y-1">
+                                    <p className="text-[11px] text-slate-700 dark:text-zinc-300">
+                                      Colis expédié et en cours d&apos;acheminement vers <span className="font-semibold text-slate-900 dark:text-white">{selectedCustomer.city}</span>.
+                                    </p>
+                                    {activeOrder.shippedAt && (
+                                      <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono">
+                                        Expédié le {new Date(activeOrder.shippedAt).toLocaleDateString('fr-FR')} à {new Date(activeOrder.shippedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                      </p>
+                                    )}
+                                  </div>
+                                ) : isConfirmed ? (
+                                  <p className="text-[11px] text-slate-600 dark:text-zinc-400 pt-0.5">
+                                    Commande validée. Préparation du colis pour acheminement direct vers {selectedCustomer.city}.
+                                  </p>
+                                ) : (
+                                  <p className="text-[11px] text-slate-500 dark:text-zinc-500 pt-0.5">
+                                    Acheminement vers {selectedCustomer.city} programmé après confirmation.
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Step 4: Final Delivery or Return */}
+                              <div className="relative space-y-1">
+                                <div className={`absolute -left-6 top-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
+                                  isDelivered
+                                    ? 'bg-emerald-500/15 dark:bg-emerald-500/20 border border-emerald-500'
+                                    : isReturned
+                                    ? 'bg-rose-500/15 dark:bg-rose-500/20 border border-rose-500'
+                                    : isShipped
+                                    ? 'bg-sky-500/15 dark:bg-sky-500/20 border border-sky-500 animate-pulse'
+                                    : 'bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700'
+                                }`}>
+                                  {isDelivered ? (
+                                    <DollarSign className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" />
+                                  ) : isReturned ? (
+                                    <AlertTriangle className="w-2.5 h-2.5 text-rose-600 dark:text-rose-400" />
+                                  ) : (
+                                    <Clock className={`w-2.5 h-2.5 ${isShipped ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400 dark:text-zinc-500'}`} />
+                                  )}
+                                </div>
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-semibold text-slate-900 dark:text-zinc-200">4. Livraison & Encaissement COD</span>
+                                  <span className={`text-[10px] font-mono font-medium ${
+                                    isDelivered ? 'text-emerald-600 dark:text-emerald-400' :
+                                    isReturned ? 'text-rose-600 dark:text-rose-400' :
+                                    isShipped ? 'text-sky-600 dark:text-sky-400' :
+                                    'text-slate-400 dark:text-zinc-500'
+                                  }`}>
+                                    {isDelivered ? 'Encaissé ✓' :
+                                     isReturned ? 'Retourné ✕' :
+                                     isShipped ? 'En cours de distribution' :
+                                     'En attente'}
+                                  </span>
+                                </div>
+                                {isDelivered ? (
+                                  <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-emerald-900 dark:text-emerald-200 font-medium leading-relaxed">
+                                    Colis remis et vérifié par l&apos;acheteur à {selectedCustomer.city}. Montant de <span className="font-mono font-bold text-emerald-950 dark:text-emerald-100">{activeOrder.total} MAD</span> collecté en espèces.
+                                  </div>
+                                ) : isReturned ? (
+                                  <div className="p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-[11px] text-rose-900 dark:text-rose-200 font-medium leading-relaxed">
+                                    Échec de livraison ou refus de commande à {selectedCustomer.city}. Colis réintégré dans votre stock d&apos;entrepôt.
+                                  </div>
+                                ) : isShipped ? (
+                                  <p className="text-[11px] text-slate-600 dark:text-zinc-400">
+                                    Distribution en cours par le livreur. Montant de <span className="font-mono font-semibold text-slate-900 dark:text-zinc-200">{activeOrder.total} MAD</span> à collecter en espèces à la livraison.
+                                  </p>
+                                ) : (
+                                  <p className="text-[11px] text-slate-500 dark:text-zinc-500">
+                                    Paiement à la livraison après confirmation et expédition du colis.
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-slate-50 dark:bg-[#0d0d10] rounded-xl border border-slate-200 dark:border-zinc-800 text-center text-xs text-slate-500 dark:text-zinc-500">
+                        Aucune commande passée par ce client.
+                      </div>
+                    )}
+
+                    {/* Address & Moroccan Delivery Notes Section */}
+                    <div className="p-4 bg-slate-50 dark:bg-[#0d0d10] rounded-xl border border-slate-200 dark:border-zinc-800/80 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-slate-900 dark:text-zinc-200">
+                          <MapPin className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
+                          <span>Adresse & Repères de Livraison</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-500 dark:text-zinc-500">{selectedCustomer.city}, Maroc</span>
+                      </div>
+
+                      <div className="text-xs text-slate-800 dark:text-zinc-300 font-mono bg-white dark:bg-zinc-950 p-2.5 rounded-lg border border-slate-200 dark:border-zinc-800/70">
+                        {selectedCustomer.address || `Adresse principale enregistrée à ${selectedCustomer.city}`}
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                          <label className="text-[11px] font-medium text-slate-700 dark:text-zinc-300 flex items-center gap-1.5 flex-wrap">
+                            <span>Notes & Repères pour le Livreur :</span>
+                            {activeOrder && (
+                              <span className="font-mono text-sky-700 dark:text-sky-300 font-semibold bg-sky-50 dark:bg-sky-950/60 px-1.5 py-0.5 rounded border border-sky-200 dark:border-sky-800/60 text-[10px]">
+                                {activeOrder.orderNumber}
+                              </span>
+                            )}
+                          </label>
+                          {notesSaved && (
+                            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-mono animate-in fade-in">
+                              <CheckCircle2 className="w-3 h-3" /> Note enregistrée pour {activeOrder?.orderNumber} ✓
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Quick-copy default customer address landmark if order note is empty */}
+                        {selectedCustomer.addressNotes && !currentNotes && activeOrder && (
+                          <div className="flex items-center justify-between p-2 rounded-lg bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/70 dark:border-sky-800/40 text-[11px]">
+                            <span className="text-sky-800 dark:text-sky-300 truncate mr-2">
+                              💡 Repère habituel : <em>&quot;{selectedCustomer.addressNotes}&quot;</em>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOrderNotes((prev) => ({ ...prev, [activeOrder.id]: selectedCustomer.addressNotes || '' }));
+                              }}
+                              className="shrink-0 px-2 py-0.5 rounded bg-sky-600 hover:bg-sky-500 text-white font-medium text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
+                            >
+                              <Copy className="w-2.5 h-2.5" />
+                              <span>Copier pour {activeOrder.orderNumber}</span>
+                            </button>
+                          </div>
+                        )}
+
+                        <textarea
+                          value={currentNotes}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (activeOrder) {
+                              setOrderNotes((prev) => ({ ...prev, [activeOrder.id]: val }));
+                            }
+                          }}
+                          placeholder={activeOrder ? `Instructions spécifiques pour le livreur de la commande ${activeOrder.orderNumber} (ex: En face de la pharmacie, appeler avant de venir, code interphone 14B...)` : 'Instructions spécifiques pour le livreur...'}
+                          rows={2}
+                          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs font-sans placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 resize-none"
+                        />
+                        <div className="flex items-center justify-between gap-2 pt-0.5">
+                          <p className="text-[10px] text-slate-500 dark:text-zinc-500 truncate">
+                            {activeOrder ? (
+                              <span>Lié à <strong className="font-mono text-slate-700 dark:text-zinc-300">{activeOrder.orderNumber}</strong> • Transmis au livreur</span>
+                            ) : (
+                              <span>Transmis au livreur</span>
+                            )}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => handleSaveOrderNotes(activeOrder)}
+                            disabled={!activeOrder}
+                            className="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 text-xs font-medium transition-colors border border-slate-300 dark:border-zinc-700/80 flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+                          >
+                            <Save className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span>Enregistrer pour {activeOrder ? activeOrder.orderNumber : 'cette commande'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Bottom Drawer Action */}
+            <div className="pt-4 border-t border-slate-200 dark:border-zinc-800/80 mt-5 space-y-2">
+              <a
+                href={getContextualWhatsAppUrl(selectedCustomer, storeSlug)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition-colors shadow-sm cursor-pointer"
+              >
+                <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                <span>Ouvrir WhatsApp en Darija</span>
+              </a>
+              <button
+                onClick={() => setSelectedCustomer(null)}
+                className="w-full py-2 px-4 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-slate-700 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200 border border-slate-200 dark:border-zinc-800 font-medium text-xs transition-colors cursor-pointer"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default CustomersContent;

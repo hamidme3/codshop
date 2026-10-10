@@ -39,6 +39,34 @@ export async function seedDatabase() {
     console.log(`[Seed] Store already exists: ${existingStore.name}`);
   }
 
+
+  // 1.5 Seed Payload Store for Ottavio
+  try {
+    const { getPayloadInstance } = await import('@/lib/payload');
+    const payload = await getPayloadInstance();
+    const existingPayload = await payload.find({
+      collection: 'stores',
+      where: { slug: { equals: 'ottavio' } },
+      depth: 0
+    });
+    if (existingPayload.docs.length === 0) {
+      await payload.create({
+        collection: 'stores',
+        data: {
+          name: 'Ottavio Cuir Artisanal Marocain',
+          slug: 'ottavio',
+          subdomain: 'ottavio',
+          currency: 'MAD',
+          planTier: 'pro'
+        },
+        overrideAccess: true
+      });
+      console.log('[Seed] Created Payload store: ottavio');
+    }
+  } catch (e) {
+    console.error('[Seed] Error creating payload store:', e);
+  }
+
   // 1b. Seed Admin User for Ottavio
   const existingUser = await db.query.users.findFirst({
     where: eq(schema.users.email, 'admin@ottavio.ma'),
