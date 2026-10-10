@@ -6,7 +6,7 @@ import {
   ShoppingBag, Search, Phone, MessageCircle, Truck, 
   CheckCircle2, Clock, Download, Check, X, DollarSign,
   RotateCcw, FileSpreadsheet, ChevronDown, ChevronUp, AlertCircle, Trash2, Copy,
-  Columns, Layers, Printer, Save, FileText
+  Columns, Layers, Printer, Save, FileText, XCircle
 } from 'lucide-react';
 import { Order, OrderStatus } from '@/lib/backoffice';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -24,7 +24,8 @@ const STATUS_OPTIONS: { value: OrderStatus; label: string; dotColor: string }[] 
   { value: 'confirmed', label: 'Confirmée', dotColor: 'bg-cyan-500' },
   { value: 'shipped', label: 'Expédiée (En Livraison)', dotColor: 'bg-sky-500' },
   { value: 'delivered', label: 'Livrée & Encaissée', dotColor: 'bg-emerald-500' },
-  { value: 'returned', label: 'Retournée (Refus / Annulation)', dotColor: 'bg-rose-500' },
+  { value: 'returned', label: 'Retournée (Refus après expédition)', dotColor: 'bg-rose-500' },
+  { value: 'canceled', label: 'Annulée / Spam', dotColor: 'bg-zinc-500' },
 ];
 
 function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; storeSlug: string }) {
@@ -233,7 +234,7 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
       shipped: 'Expédiée 🚚',
       delivered: 'Livrée & Encaissée 💰',
       returned: 'Retournée (Refus / Retour) ↩',
-      canceled: 'Retournée (Refus / Retour) ↩',
+      canceled: 'Annulée / Spam ❌',
     };
     showToast(`Commande ${orderId} passée à "${statusLabels[newStatus] || newStatus}"`);
   };
@@ -397,8 +398,9 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
         return <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-delivered font-mono">3. Livrée</span>;
       case 'abandoned':
         return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-mono">Panier Abandonné</span>;
-      case 'returned':
       case 'canceled':
+        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-800 dark:bg-zinc-800 dark:text-zinc-300 font-mono">Annulée / Spam</span>;
+      case 'returned':
       default:
         return <span className="px-2 py-0.5 rounded text-[10px] font-bold stage-pill-returned font-mono">4. Retournée</span>;
     }
@@ -1264,22 +1266,40 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
 
                               <span className="text-slate-300 dark:text-zinc-700 text-[10px] font-bold mx-0.5">|</span>
 
-                              {/* Switch 4: Retournée (Replaces both Annuler & Retour) */}
+                              {/* Switch 4: Retournée */}
                               <button
-                                onClick={() => handleQuickTransition(order.id, order.status === 'returned' || order.status === 'canceled' ? 'new' : 'returned')}
+                                onClick={() => handleQuickTransition(order.id, order.status === 'returned' ? 'new' : 'returned')}
                                 className={`px-2 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all cursor-pointer ${
-                                  order.status === 'returned' || order.status === 'canceled'
+                                  order.status === 'returned'
                                     ? 'bg-rose-50 text-rose-800 border border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/50 shadow-sm shadow-rose-500/20 font-black'
                                     : 'bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-800 border border-slate-200 dark:bg-[#18181b] dark:hover:bg-rose-950/40 dark:text-zinc-400 dark:hover:text-rose-300 dark:border-zinc-800'
                                 }`}
                                 title={
-                                  order.status === 'returned' || order.status === 'canceled'
+                                  order.status === 'returned'
                                     ? 'Colis Retourné / Refusé (Cliquer pour réactiver)'
-                                    : 'Basculer vers : 4. Retournée (Refus / Annulation)'
+                                    : 'Basculer vers : 4. Retournée (Expédiée mais refusée)'
                                 }
                               >
                                 <RotateCcw className="w-3 h-3 text-rose-600 dark:text-rose-400" />
                                 <span>4. Retournée</span>
+                              </button>
+
+                              {/* Switch 5: Annulée / Spam */}
+                              <button
+                                onClick={() => handleQuickTransition(order.id, order.status === 'canceled' ? 'new' : 'canceled')}
+                                className={`px-2 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all cursor-pointer ${
+                                  order.status === 'canceled'
+                                    ? 'bg-slate-100 text-slate-800 border border-slate-400 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-600 shadow-sm font-black'
+                                    : 'bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-800 border border-slate-200 dark:bg-[#18181b] dark:hover:bg-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-300 dark:border-zinc-800'
+                                }`}
+                                title={
+                                  order.status === 'canceled'
+                                    ? 'Commande Annulée / Spam (Cliquer pour réactiver)'
+                                    : 'Marquer comme Annulée / Spam'
+                                }
+                              >
+                                <XCircle className="w-3 h-3 text-slate-600 dark:text-zinc-400" />
+                                <span>Annulée / Spam</span>
                               </button>
                             </div>
 
@@ -1411,12 +1431,12 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
                   </>
                 )}
 
-                {/* Quick 4-Stage Transition Switches */}
-                <div className="grid grid-cols-4 gap-1.5 mt-2">
+                {/* Quick 5-Stage Transition Switches */}
+                <div className="flex flex-wrap gap-1.5 mt-2">
                   <button
                     type="button"
                     onClick={() => handleQuickTransition(selectedOrder.id, 'confirmed')}
-                    className={`py-1.5 px-1 rounded-md text-[10px] font-medium transition-colors text-center cursor-pointer ${
+                    className={`flex-1 min-w-[90px] py-1.5 px-1 rounded-md text-[10px] font-medium transition-colors text-center cursor-pointer ${
                       selectedOrder.status === 'confirmed'
                         ? 'bg-cyan-50 text-cyan-700 border border-cyan-300 dark:bg-cyan-500/20 dark:text-cyan-300 dark:border-cyan-500/50 font-bold'
                         : 'bg-slate-100 text-slate-600 hover:text-cyan-700 hover:bg-cyan-50 dark:bg-zinc-900/80 dark:text-zinc-400 dark:hover:text-cyan-300 dark:hover:bg-cyan-950/40 border border-slate-200 dark:border-zinc-800'
@@ -1427,7 +1447,7 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
                   <button
                     type="button"
                     onClick={() => handleQuickShip(selectedOrder.id)}
-                    className={`py-1.5 px-1 rounded-md text-[10px] font-medium transition-colors text-center cursor-pointer ${
+                    className={`flex-1 min-w-[90px] py-1.5 px-1 rounded-md text-[10px] font-medium transition-colors text-center cursor-pointer ${
                       ['shipped', 'shipping'].includes(selectedOrder.status)
                         ? 'bg-sky-50 text-sky-700 border border-sky-300 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/50 font-bold'
                         : 'bg-slate-100 text-slate-600 hover:text-sky-700 hover:bg-sky-50 dark:bg-zinc-900/80 dark:text-zinc-400 dark:hover:text-sky-300 dark:hover:bg-sky-950/40 border border-slate-200 dark:border-zinc-800'
@@ -1438,7 +1458,7 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
                   <button
                     type="button"
                     onClick={() => handleQuickTransition(selectedOrder.id, 'delivered')}
-                    className={`py-1.5 px-1 rounded-md text-[10px] font-medium transition-colors text-center cursor-pointer ${
+                    className={`flex-1 min-w-[90px] py-1.5 px-1 rounded-md text-[10px] font-medium transition-colors text-center cursor-pointer ${
                       selectedOrder.status === 'delivered'
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/50 font-bold'
                         : 'bg-slate-100 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 dark:bg-zinc-900/80 dark:text-zinc-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-950/40 border border-slate-200 dark:border-zinc-800'
@@ -1448,14 +1468,25 @@ function OrdersContent({ initialOrders, storeSlug }: { initialOrders: Order[]; s
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleQuickTransition(selectedOrder.id, selectedOrder.status === 'returned' || selectedOrder.status === 'canceled' ? 'new' : 'returned')}
-                    className={`py-1.5 px-1 rounded-md text-[10px] font-medium transition-colors text-center cursor-pointer ${
-                      selectedOrder.status === 'returned' || selectedOrder.status === 'canceled'
+                    onClick={() => handleQuickTransition(selectedOrder.id, selectedOrder.status === 'returned' ? 'new' : 'returned')}
+                    className={`flex-1 min-w-[90px] py-1.5 px-1 rounded-md text-[10px] font-medium transition-colors text-center cursor-pointer ${
+                      selectedOrder.status === 'returned'
                         ? 'bg-rose-50 text-rose-700 border border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/50 font-bold'
                         : 'bg-slate-100 text-slate-600 hover:text-rose-700 hover:bg-rose-50 dark:bg-zinc-900/80 dark:text-zinc-400 dark:hover:text-rose-300 dark:hover:bg-rose-950/40 border border-slate-200 dark:border-zinc-800'
                     }`}
                   >
                     ↩ 4. Retournée
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickTransition(selectedOrder.id, selectedOrder.status === 'canceled' ? 'new' : 'canceled')}
+                    className={`flex-1 min-w-[90px] py-1.5 px-1 rounded-md text-[10px] font-medium transition-colors text-center cursor-pointer ${
+                      selectedOrder.status === 'canceled'
+                        ? 'bg-slate-200 text-slate-800 border border-slate-400 dark:bg-zinc-700/50 dark:text-zinc-200 dark:border-zinc-500 font-bold'
+                        : 'bg-slate-100 text-slate-600 hover:text-slate-800 hover:bg-slate-200 dark:bg-zinc-900/80 dark:text-zinc-400 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/80 border border-slate-200 dark:border-zinc-800'
+                    }`}
+                  >
+                    ❌ Annulée
                   </button>
                 </div>
               </div>
