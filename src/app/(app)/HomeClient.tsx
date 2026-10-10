@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useEffect, Suspense } from 'react';
+import React, { useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 import { getCountryConfig } from '@/lib/geo';
@@ -269,33 +269,13 @@ function StorefrontHome({ storeSlug, storeProducts, puckData }: { storeSlug?: st
   );
 }
 
-function HomeContent({ initialProducts, initialPuckData }: { initialProducts: any[], initialPuckData: any }) {
+function HomeContent({ initialProducts, initialPuckData, initialStoreSlug }: { initialProducts: any[], initialPuckData: any, initialStoreSlug: string }) {
   const searchParams = useSearchParams();
   const storeParam = searchParams.get('store');
-  const [isSubdomain, setIsSubdomain] = useState<boolean>(false);
-  const [detectedStoreSlug, setDetectedStoreSlug] = useState<string>(storeParam || '');
+  const detectedStoreSlug = initialStoreSlug || storeParam;
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const host = window.location.hostname.toLowerCase();
-      const rootDomain = (process.env.NEXT_PUBLIC_WILDCARD_DOMAIN || 'codshop.vipone.site').toLowerCase();
-      const hasSub = (host.endsWith(rootDomain) && host !== rootDomain && host !== `www.${rootDomain}`) ||
-                     (host.endsWith('.localhost') && host !== 'localhost');
-      setIsSubdomain(hasSub);
-      if (hasSub) {
-        const sub = host.replace(`.${rootDomain}`, '').replace('.localhost', '');
-        setDetectedStoreSlug(sub);
-      } else if (storeParam) {
-        setDetectedStoreSlug(storeParam);
-      }
-    }
-  }, [storeParam]);
-
-  // If a merchant store is explicitly loaded via ?store= or via tenant subdomain, render their storefront
-  const isMerchantStore = Boolean(storeParam) || isSubdomain;
-
-  if (isMerchantStore) {
-    return <StorefrontHome storeSlug={detectedStoreSlug || storeParam || undefined} storeProducts={initialProducts} puckData={initialPuckData} />;
+  if (detectedStoreSlug) {
+    return <StorefrontHome storeSlug={detectedStoreSlug} storeProducts={initialProducts} puckData={initialPuckData} />;
   }
 
   // Otherwise, on the root domain, render the Universal Global Cash-on-Delivery SaaS Platform Landing Page
@@ -305,7 +285,7 @@ function HomeContent({ initialProducts, initialPuckData }: { initialProducts: an
 export default function HomeClient({ initialProducts, initialPuckData, storeSlug }: { initialProducts: any[], initialPuckData: any, storeSlug: string }) {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#09090b]" />}>
-      <HomeContent initialProducts={initialProducts} initialPuckData={initialPuckData} />
+      <HomeContent initialProducts={initialProducts} initialPuckData={initialPuckData} initialStoreSlug={storeSlug} />
     </Suspense>
   );
 }
